@@ -39,15 +39,27 @@ public final class SQLIdentificationStrategy extends
   private static final String PASSWORD_UPDATE = "UPDATE " + PASSWORD_TABLE
       + " SET " + PASSWORD_COLUMN + "='";
 
+  /** The table where the passwords are stored */
+  protected static final String LOCK_TABLE = "login_lock";
+
+  /** The table column that contains password */
+  protected static final String LOCK_COLUMN = "is_logged";
+
+  /** Request that verifies lock */
+  private static final String LOCK_TEST = "SELECT count(" + LOCK_COLUMN
+      + ") FROM " + LOCK_TABLE + " WHERE " + LOCK_COLUMN + " = 1 ;";
+
+  /** Request that takes the lock */
+  private static final String LOCK_REQUEST = "INSERT INTO " + LOCK_TABLE
+      + " VALUES(1) ;";
+
+  /** Request that releases the lock */
+  private static final String LOCK_RELEASE = "DELETE FROM " + LOCK_TABLE
+      + " WHERE " + LOCK_COLUMN + "= 1;";
+
   // ----------------------------------------------------------------------------
-  // Private members and constructors
+  // Constructors
   // ---------------------------------------------------------------------------
-
-  /** Login status */
-  private boolean loggedIn;
-
-  /** SQL Connection */
-  private Connection con;
 
   /**
    * Default constructor, creates an <code>SQLIdentificationStrategy</code>
@@ -69,6 +81,16 @@ public final class SQLIdentificationStrategy extends
   public SQLIdentificationStrategy(Connection con) {
     this.con = con;
   }
+
+  // ----------------------------------------------------------------------------
+  // Private members
+  // ---------------------------------------------------------------------------
+
+  /** Login status */
+  private boolean loggedIn;
+
+  /** SQL Connection */
+  private Connection con;
 
   /**
    * Test whether a password is valid or not
@@ -96,6 +118,50 @@ public final class SQLIdentificationStrategy extends
     return false;
   }
 
+  /**
+   * Tries to get the login lock
+   * 
+   * @return <code>true</code> if succeded or <code>false</code> if someone
+   *         else has got the lock
+   * @throws IdentificationException
+   *           If there's an SQLException
+   */
+  private final boolean getLock() throws IdentificationException {
+    try {
+      Statement stmt = con.createStatement();
+      ResultSet rs = stmt.executeQuery(LOCK_TEST);
+      rs.next();
+      int count = rs.getInt(1);
+      if (count == 0) {
+        stmt.executeUpdate(LOCK_REQUEST);
+        return true;
+      } else
+        return false;
+    } catch (SQLException e) {
+      throw new IdentificationException("Unable to get login lock : "
+          + e.getSQLState(), e);
+    }
+  }
+
+  /**
+   * Release the login lock. If not logged in, method does nothing.
+   * 
+   * @throws IdentificationException
+   *           If there's an SQLException
+   */
+  private final void releaseLock() throws IdentificationException {
+    try {
+      if (loggedIn) {
+        Statement stmt = con.createStatement();
+        stmt.executeUpdate(LOCK_RELEASE);
+      }
+    } catch (SQLException e) {
+      throw new IdentificationException(
+          "Unable to release login lock(database needs to be updated manually) : "
+              + e.getSQLState(), e);
+    }
+  }
+
   // ----------------------------------------------------------------------------
   // IdentificationStrategy implementation
   // ---------------------------------------------------------------------------
@@ -103,7 +169,7 @@ public final class SQLIdentificationStrategy extends
   public void identify(String password) throws IdentificationException {
     if (!isValidPassword(password))
       throw new IdentificationException("Invalid password");
-    loggedIn = true;
+    loggedIn = getLock();
     fireStateChanged();
   }
 
@@ -119,7 +185,8 @@ public final class SQLIdentificationStrategy extends
     return loggedIn;
   }
 
-  public void logout() {
+  public void logout() throws IdentificationException {
+    releaseLock();
     loggedIn = false;
     fireStateChanged();
   }

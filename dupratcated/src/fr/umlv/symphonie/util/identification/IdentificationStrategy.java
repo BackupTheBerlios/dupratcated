@@ -56,8 +56,11 @@ public interface IdentificationStrategy {
   /**
    * Logs the user out. <br>
    * Must prevent all listener of the unidentification
+   * 
+   * @throws IdentificationException
+   *           If there's any problem
    */
-  public void logout();
+  public void logout() throws IdentificationException;
 
   /**
    * Sets a new password for the user. <br>
