@@ -31,6 +31,7 @@ public class SymphonieConstants {
   public static final String PWD_MENU_ITEM = "pwd";
   public static final String ENGLISH_MENU_ITEM = "english";
   public static final String FRENCH_MENU_ITEM = "french";
+  public static final String SPANISH_MENU_ITEM = "spanish";
   public static final String ADMIN_JOPTIONPANE_TITLE = "admin.joptionpane.title";
   public static final String ADMIN_JOPTIONPANE_CONTENT = "admin.joptionpane.content";
   public static final String ADMIN_JOPTIONPANE_BCANCEL = "admin.joptionpane.BCancel";

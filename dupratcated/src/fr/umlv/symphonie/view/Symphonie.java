@@ -59,6 +59,7 @@ public class Symphonie {
   private static ComponentBuilder builder;
   private static HashMap<String, String> english;
   private static HashMap<String, String> french;
+  private static HashMap<String, String> spanish;
   private static JFrame frame;
   private static JTabbedPane tab;
 
@@ -69,6 +70,8 @@ public class Symphonie {
           "english"), FILE_CHARSET);
       french = TextualResourcesLoader.getResourceMap(FILE_PATTERN, new Locale(
           "french"), FILE_CHARSET);
+      spanish = TextualResourcesLoader.getResourceMap(FILE_PATTERN, new Locale(
+      "spanish"), FILE_CHARSET);
     } catch (IOException e) {
       throw new AssertionError("Bim ! -> " + e.getMessage());
     }
@@ -152,6 +155,8 @@ public class Symphonie {
         builder);
     Action inFrench = SymphonieActionFactory.getLanguageChangeAction(french,
         builder);
+    Action inSpanish = SymphonieActionFactory.getLanguageChangeAction(spanish,
+        builder);
 
     // Items
 
@@ -163,13 +168,19 @@ public class Symphonie {
     JCheckBoxMenuItem engBox = (JCheckBoxMenuItem) builder.buildButton(
         inEnglish, SymphonieConstants.ENGLISH_MENU_ITEM,
         ComponentBuilder.ButtonType.CHECK_BOX_MENU_ITEM);
+    
+    JCheckBoxMenuItem spBox = (JCheckBoxMenuItem) builder.buildButton(
+        inSpanish, SymphonieConstants.SPANISH_MENU_ITEM,
+        ComponentBuilder.ButtonType.CHECK_BOX_MENU_ITEM);
 
     ButtonGroup g = new ButtonGroup();
     g.add(engBox);
     g.add(frBox);
+    g.add(spBox);
 
     lang.add(engBox);
     lang.add(frBox);
+    lang.add(spBox);
 
     lang.setIcon(new ImageIcon(Symphonie.class.getResource("icons/lang.png")));
 
