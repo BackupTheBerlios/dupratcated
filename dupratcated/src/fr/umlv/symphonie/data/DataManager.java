@@ -10,10 +10,10 @@ import fr.umlv.symphonie.util.Pair;
 
 public interface DataManager
 {    
-	public Map<Integer, Student> getStudents();
-	public Map<Integer, Course> getCourses();
-	public Map<Integer, Mark> getMarks();
-  public List<StudentMark> getStudentMarks();
+	public Map<Integer, Student> getStudents()throws DataManagerException;
+	public Map<Integer, Course> getCourses()throws DataManagerException;
+	public Map<Integer, Mark> getMarks()throws DataManagerException;
+  public List<StudentMark> getStudentMarks()throws DataManagerException;
 	public Map<Integer, Mark> getMarksByCourse(Course c)throws DataManagerException;
 	
   /* methodes servant a la vue etudiant */
@@ -39,16 +39,18 @@ public interface DataManager
 	public void addCourses(List<String> listTitle, List<Float> listCoeff) throws SQLException, DataManagerException;
 	public void removeCourse(Course c) throws SQLException;
 
-  public int addTitle(String desc) throws SQLException;
+  public int addTitle(String desc) throws DataManagerException;
   
-	public void addMark(String desc, float coeff, Course c) throws SQLException;
+	public void addMark(String desc, float coeff, Course c) throws DataManagerException;
 	public void removeMark(Mark m) throws SQLException;
   
   
   /* methodes d'edition */
-  public void changeStudentMarkValue(StudentMark studentMark, float newValue) throws SQLException;
+  public void changeStudentComment(Student s, String newComment)throws DataManagerException;
   
-  public void changeMarkCoeff(Mark mark, float newCoeff) throws SQLException;
-  public void changeMarkDescription(Mark mark, String newDescription) throws SQLException;
+  public void changeStudentMarkValue(StudentMark studentMark, float newValue) throws DataManagerException;
+  
+  public void changeMarkCoeff(Mark mark, float newCoeff) throws DataManagerException;
+  public void changeMarkDescription(Mark mark, String newDescription) throws DataManagerException;
   
 }

@@ -175,7 +175,13 @@ public class StudentModel extends AbstractTableModel {
     DataManager dataManager = new SQLDataManager();
     StudentModel model = new StudentModel(dataManager);
     
-    Map<Integer, Student> studentMap = dataManager.getStudents();
+    Map<Integer, Student> studentMap = null;
+    try {
+      studentMap = dataManager.getStudents();
+    } catch (DataManagerException e) {
+      e.printStackTrace();
+      return;
+    }
     
     Student student = studentMap.get(0);
     

@@ -4,9 +4,16 @@
  */
 package fr.umlv.symphonie.model;
 
+import java.awt.Font;
 import java.util.*;
 
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import fr.umlv.symphonie.data.*;
 import fr.umlv.symphonie.data.formula.Formula;
@@ -49,6 +56,8 @@ public class JuryModel extends AbstractTableModel {
     }
     
     columnList.addAll(allData.getFirst().values());
+    studentList.addAll(allData.getSecond().keySet());
+    dataMap.putAll(allData.getSecond());
     
     /*
      * ici ajouter les formules de la vue jury
@@ -140,7 +149,7 @@ public class JuryModel extends AbstractTableModel {
       float result = 0;
       
       for (int i = 0; i < columnList.size() ; i++){
-        if (columnList.get(i) instanceof Mark)
+        if (columnList.get(i) instanceof Course)
           result += ((Course)columnList.get(i)).getCoeff() * (Float)getValueAt(rowIndex, i + 1);
       }
       return result;
@@ -160,6 +169,11 @@ public class JuryModel extends AbstractTableModel {
     }
     
     Course c = (Course)o;
+    
+    if(rowIndex == 0)
+      return c;
+    if(rowIndex == 1)
+      return c.getCoeff();
     
     return getAverage(dataMap.get(studentList.get(rowIndex - 3)).get(c).values());
   }
@@ -183,13 +197,57 @@ public class JuryModel extends AbstractTableModel {
     return false;
   }
 
+  
+  public void setValueAt(Object aValue,int rowIndex,int columnIndex){
+    Student s = studentList.get(rowIndex - 3);
+    
+    try {
+      manager.changeStudentComment(s, (String)aValue);
+    } catch (DataManagerException e) {
+      e.getMessage();
+      e.printStackTrace();
+    }
+  }
+  
+  
 
   /**
    * @param args
    */
   public static void main(String[] args) {
-    // TODO Auto-generated method stub
+    JFrame frame = new JFrame ("test TeacherModel");
+    frame.setSize(800,600);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    
+    DataManager dataManager = new SQLDataManager();
 
+    JuryModel model = new JuryModel(dataManager);
+    
+    JTable table = new JTable(model);
+    table.setTableHeader(null);
+    
+    table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer(){
+      
+      public java.awt.Component getTableCellRendererComponent(JTable table,Object value,
+          boolean isSelected,boolean hasFocus,int row,int column){
+        JLabel label = (JLabel)super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        
+          label.setHorizontalAlignment(SwingConstants.CENTER);
+          
+          if (column == 0 || row == 0 || column == table.getModel().getColumnCount() - 2)
+            label.setFont(getFont().deriveFont(Font.BOLD));
+          
+          return label;
+      }
+    });
+    
+    
+    JScrollPane scroll = new JScrollPane(table);
+    
+    frame.setContentPane(scroll);
+    
+    frame.setVisible(true);
+    
   }
 
 }

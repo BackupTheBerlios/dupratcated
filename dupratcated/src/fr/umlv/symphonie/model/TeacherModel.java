@@ -105,7 +105,7 @@ public class TeacherModel extends AbstractTableModel {
     try {
       studentAndMarkMapPair = manager.getAllMarksByCourse(course);
     } catch (DataManagerException e) {
-      // TODO Auto-generated catch block
+      System.out.println("error getting data from database for Teacher View.");
       e.printStackTrace();
     }
     
@@ -325,6 +325,7 @@ public class TeacherModel extends AbstractTableModel {
 
     Object o = columnList.get(columnIndex - 1);
     
+    
     /*
      * cas des intitules :
      */
@@ -336,16 +337,18 @@ public class TeacherModel extends AbstractTableModel {
       
       try {
         manager.changeMarkDescription((Mark)o, (String)aValue);
-      } catch (SQLException e) {
+      } catch (DataManagerException e) {
         System.out.println("Error while attempting to modify the mark name to " + aValue);
         e.printStackTrace();
       }
+      return;
     }
     
     /*
      * cas des coeffs
      */
     else if (rowIndex == 1){
+      
       if (o instanceof Formula)
         return; // changer ca
       
@@ -357,14 +360,14 @@ public class TeacherModel extends AbstractTableModel {
       }catch (NumberFormatException e){
         return;
       }
-      
       try {
         manager.changeMarkCoeff((Mark)o, newCoeff);
-      }catch (SQLException e){
-        // TODO Auto-generated catch block
+      }catch (DataManagerException e){
+        System.out.println(e.getMessage());
         e.printStackTrace();
       }
-      fireTableRowsUpdated(3, rowCount - 1);
+      fireTableRowsUpdated(1, rowCount - 1);
+      return;
     }
     
     /*
@@ -385,8 +388,8 @@ public class TeacherModel extends AbstractTableModel {
     
     try {
       manager.changeStudentMarkValue(studentMarkMap.get(studentList.get(rowIndex - 3)).get(m.getId()), newValue);
-    } catch (SQLException e) {
-      // TODO Auto-generated catch block
+    } catch (DataManagerException e) {
+      System.out.println(e.getMessage());
       e.printStackTrace();
     }
     
@@ -404,46 +407,46 @@ public class TeacherModel extends AbstractTableModel {
     /*
      * test des etudiants
      */
-    Map<Integer, Student> studentMap = dataManager.getStudents();
-    System.out.println(studentMap.size() + " etudiants.");
-    for (Student s : studentMap.values())
-      System.out.println(s);
-    System.out.println("\n\n");
-    /*******************************/
-    
-    
-    /*
-     * test des matieres
-     */
-    Map<Integer, Course> courseMap = dataManager.getCourses();
-    System.out.println(courseMap.size() + " matieres");
-    for (Course c : courseMap.values())
-      System.out.println(c + " " + c.getCoeff());
-    System.out.println("\n\n");
-    /***************************/
-    
-    /*
-     * test des epreuves
-     */
-    Map<Integer, Mark> markMap = dataManager.getMarks();
-    System.out.println(markMap.size() + " epreuves");
-    for (Mark m : markMap.values())
-      System.out.println(m + " pour " + m.getCourse());
-    System.out.println("\n\n");
-    /******************************/
-    
-    /*
-     * test des notes
-     */
-    List<StudentMark> list = dataManager.getStudentMarks();
-    System.out.println(list.size() + " notes.");
-    
-    for (StudentMark sm : list){
-      sm.printData();
-    }
-    
-    System.out.println("\n\n");
-    /******************************/
+//    Map<Integer, Student> studentMap = dataManager.getStudents();
+//    System.out.println(studentMap.size() + " etudiants.");
+//    for (Student s : studentMap.values())
+//      System.out.println(s);
+//    System.out.println("\n\n");
+//    /*******************************/
+//    
+//    
+//    /*
+//     * test des matieres
+//     */
+//    Map<Integer, Course> courseMap = dataManager.getCourses();
+//    System.out.println(courseMap.size() + " matieres");
+//    for (Course c : courseMap.values())
+//      System.out.println(c + " " + c.getCoeff());
+//    System.out.println("\n\n");
+//    /***************************/
+//    
+//    /*
+//     * test des epreuves
+//     */
+//    Map<Integer, Mark> markMap = dataManager.getMarks();
+//    System.out.println(markMap.size() + " epreuves");
+//    for (Mark m : markMap.values())
+//      System.out.println(m + " pour " + m.getCourse());
+//    System.out.println("\n\n");
+//    /******************************/
+//    
+//    /*
+//     * test des notes
+//     */
+//    List<StudentMark> list = dataManager.getStudentMarks();
+//    System.out.println(list.size() + " notes.");
+//    
+//    for (StudentMark sm : list){
+//      sm.printData();
+//    }
+//    
+//    System.out.println("\n\n");
+//    /******************************/
     
     TeacherModel model = new TeacherModel(dataManager);
     

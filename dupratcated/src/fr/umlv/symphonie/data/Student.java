@@ -43,6 +43,11 @@ public class Student {
 		return comment;	
 	}
   
+  public void setComment(String comment) {
+    this.comment = comment;
+  }
+  
+
   public void update(Student s){
     name = s.getName();
     lastName = s.getLastName();
