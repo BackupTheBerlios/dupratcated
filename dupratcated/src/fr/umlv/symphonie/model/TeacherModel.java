@@ -1,6 +1,6 @@
 /*
  * This file is part of Symphonie
- * Created : 20-févr.-2005 16:13:25
+ * Created : 20-fï¿½vr.-2005 16:13:25
  */
 package fr.umlv.symphonie.model;
 
@@ -60,7 +60,7 @@ public class TeacherModel extends AbstractTableModel {
     
     matrix = new Object[rowCount][columnCount];
     
-    matrix[0][0] = "Intitulé";
+    matrix[0][0] = "Intitulï¿½";
     matrix[1][0] = "Coeff";
     /*Mark[] markTab = new Mark[1];
     markMap.keySet().toArray(markTab);*/
@@ -89,7 +89,7 @@ public class TeacherModel extends AbstractTableModel {
     
     
     /*
-     * On remplit le reste des données
+     * On remplit le reste des donnï¿½es
      * concernant les etudiants
      */
     for (Student s : studentAndMarkMap.keySet()){
@@ -127,7 +127,7 @@ public class TeacherModel extends AbstractTableModel {
     float result = 0;
     
     for (StudentMark studentMark : collection)
-      result += studentMark.getCoeff() * studentMark.getStudentMark();
+      result += studentMark.getCoeff() * studentMark.getValue();
     
     return result;
   }

@@ -1,6 +1,6 @@
 /*
  * This file is part of Symphonie
- * Created : 15 févr. 2005 17:57:09
+ * Created : 15 fï¿½vr. 2005 17:57:09
  */
 package fr.umlv.symphonie.model;
 
@@ -113,7 +113,7 @@ public class StudentModel extends AbstractTableModel {
     float result = 0;
     
     for (StudentMark studentMark : collection)
-      result += studentMark.getCoeff() * studentMark.getStudentMark();
+      result += studentMark.getCoeff() * studentMark.getValue();
     
     return result;
   }

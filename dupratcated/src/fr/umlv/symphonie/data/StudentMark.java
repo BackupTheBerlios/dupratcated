@@ -3,20 +3,20 @@ package fr.umlv.symphonie.data;
 
 public class StudentMark {
 
-  private float studentMark;
+  private float value;
   private float coeff;
   private Student student;
   private Mark mark;
 
   public StudentMark(Student student, Mark mark, float studentMark, float coeff) {
-    this.studentMark = studentMark;
+    this.value = studentMark;
     this.coeff = coeff;
     this.student = student;
     this.mark = mark;
   }
 
-  public float getStudentMark() {
-    return studentMark;
+  public float getValue() {
+    return value;
   }
 
   public float getCoeff() {
@@ -37,6 +37,6 @@ public class StudentMark {
    */
   public String toString() {
     
-    return "" + studentMark;
+    return "" + value;
   }
 }
