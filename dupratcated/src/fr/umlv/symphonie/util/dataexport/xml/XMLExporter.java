@@ -54,7 +54,7 @@ public class XMLExporter implements DataExporter {
 	private static void addCourseNode(Node root, Node before, Course c) {
 		final Node course;
 
-		/** <course id_course="?">... </course> */
+		/** <course id_course="?">...</course> */
 		Element e = root.getOwnerDocument().createElement("course");
 		e.setAttribute("id_course", "" + c.getId());
 
@@ -65,7 +65,7 @@ public class XMLExporter implements DataExporter {
 			course = root.insertBefore(e, before);
 		}
 
-		/** <title>? </title> */
+		/** <title>?</title> */
 		e = course.getOwnerDocument().createElement("title");
 		Node n = course.appendChild(e);
 		n.appendChild(n.getOwnerDocument().createTextNode(c.getTitle()));
@@ -87,19 +87,19 @@ public class XMLExporter implements DataExporter {
 	private static void addExamenNode(Node root, StudentMark sm) {
 		final Node examen;
 
-		/** <examen id_examen="?" id_course>... </examen> */
+		/** <examen id_examen="?" id_course>...</examen> */
 		Element e = root.getOwnerDocument().createElement("examen");
 		e.setAttribute("id_examen", "" + sm.getMark().getId());
 		e.setAttribute("id_course", "" + sm.getCourse().getId());
 		examen = root.appendChild(e);
 
-		/** <desc>? </desc> */
+		/** <desc>?</desc> */
 		e = examen.getOwnerDocument().createElement("desc");
 		Node n = examen.appendChild(e);
 		n.appendChild(n.getOwnerDocument().createTextNode(
 				sm.getMark().getDesc()));
 
-		/** <coeff_examen>? </coeff_examen> */
+		/** <coeff_examen>?</coeff_examen> */
 		e = examen.getOwnerDocument().createElement("coeff_examen");
 		n = examen.appendChild(e);
 		n.appendChild(n.getOwnerDocument().createTextNode("" + sm.getCoeff()));
@@ -119,23 +119,23 @@ public class XMLExporter implements DataExporter {
 	private static Node addStudentNode(Node root, Student s, boolean comment) {
 		final Node student;
 
-		/** <student id_student="?">... </student> */
+		/** <student id_student="?">...</student> */
 		Element e = root.getOwnerDocument().createElement("student");
 		e.setAttribute("id_student", "" + s.getId());
 		student = root.appendChild(e);
 
-		/** <name>? </name> */
+		/** <name>?</name> */
 		e = student.getOwnerDocument().createElement("name");
 		Node n = student.appendChild(e);
 		n.appendChild(n.getOwnerDocument().createTextNode(s.getName()));
 
-		/** <last_name>? </last_name> */
+		/** <last_name>?</last_name> */
 		e = student.getOwnerDocument().createElement("last_name");
 		n = student.appendChild(e);
 		n.appendChild(n.getOwnerDocument().createTextNode(s.getLastName()));
 
 		if (comment) {
-			/** <comment>? </comment> */
+			/** <comment>?</comment> */
 			e = student.getOwnerDocument().createElement("comment");
 			n = student.appendChild(e);
 			n.appendChild(n.getOwnerDocument().createTextNode(s.getComment()));
@@ -154,17 +154,48 @@ public class XMLExporter implements DataExporter {
 	private static void addMarkNode(Node root, StudentMark sm) {
 		final Node mark;
 
-		/** <student_mark id_course="?" id_examen=?">... </student_mark> */
+		/** <student_mark id_course="?" id_examen=?">...</student_mark> */
 		Element e = root.getOwnerDocument().createElement("student_mark");
 		e.setAttribute("id_course", "" + sm.getCourse().getId());
 		e.setAttribute("id_examen", "" + sm.getMark().getId());
 		mark = root.appendChild(e);
 
-		/** <mark>? </mark> */
+		/** <mark>?</mark> */
 		e = mark.getOwnerDocument().createElement("mark");
 		Node n = mark.appendChild(e);
 		n.appendChild(n.getOwnerDocument().createTextNode("" + sm.getValue()));
 	}
+  
+  /**
+   * add a formula node
+   * @param root
+   * @param idCourse true if we need the attribute id_course
+   */
+  private static void  addFormulaNode(Node root, boolean idCourse) {
+    final Node formula;
+    
+    /** <formula id_formula="?" id_title=?">...</formula> */
+    Element e = root.getOwnerDocument().createElement("formula");
+    e.setAttribute("id_formula", "" + 0);
+    e.setAttribute("id_title", "" + 0);
+    
+    /** id_course="?" */
+    if(idCourse) {
+      e.setAttribute("id_course", "" + 0);
+    }
+    
+    formula = root.appendChild(e);
+    
+    /** <column>?</column> */
+    e = formula.getOwnerDocument().createElement("column");
+    Node n = formula.appendChild(e);
+    n.appendChild(n.getOwnerDocument().createTextNode("" + 0));
+    
+    /** <expression>?</expression> */
+    e = formula.getOwnerDocument().createElement("expression");
+    n = formula.appendChild(e);
+    n.appendChild(n.getOwnerDocument().createTextNode(""));
+  }
 
 	/**
 	 * create a new document object
