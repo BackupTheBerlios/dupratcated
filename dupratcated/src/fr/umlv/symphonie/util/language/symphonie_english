@@ -41,4 +41,4 @@ databasedialog.title=Configure Database
 databasedialog.server=Server
 databasedialog.error=Error
 databasedialog.error.port=Invalid port value
-databasedialog.error.server=Please fill the server address
+databasedialog.error.server=Please fill the server and the base addresses

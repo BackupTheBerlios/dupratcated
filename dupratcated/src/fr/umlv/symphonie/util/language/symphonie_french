@@ -41,4 +41,4 @@ databasedialog.title=Configuration de la base de données
 databasedialog.server=Serveur
 databasedialog.error=Erreur
 databasedialog.error.port=Valeur du port invalide
-databasedialog.error.server=Veuillez saisir l'adresse du serveur
+databasedialog.error.server=Veuillez saisir les adresses du serveur et de la base
