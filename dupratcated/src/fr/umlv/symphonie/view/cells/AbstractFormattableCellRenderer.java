@@ -25,6 +25,7 @@ public abstract class AbstractFormattableCellRenderer implements
 
   public void addFormatedObject(Object o, CellFormat format) {
     if (o == null || format == null) return;
+    System.out.println("AbstractFormattableCellRenderer.addFormatedObject(" + o.getClass().getSimpleName()+ ")");
     fObjects.put(o, format);
   }
 

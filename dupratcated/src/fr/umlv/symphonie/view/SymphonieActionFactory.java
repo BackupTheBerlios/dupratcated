@@ -80,9 +80,8 @@ public class SymphonieActionFactory {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
+        symphonie.getFrame().setVisible(false);
         ConnectionManager.closeConnection();
-        System.gc();
-        System.exit(0);
       }
     };
     a.putValue(Action.SMALL_ICON, icon);
@@ -218,40 +217,46 @@ public class SymphonieActionFactory {
   }
 
   /**
-   * Creates an action that deletes format from the current selected cell
+   * Creates an action that deletes format from the current selected cell. This
+   * is a singleton action.
    * 
    * @param icon
    *          the action SMALL_ICON
    * @return an AbstractAction
    */
   public AbstractAction getDeleteCellFormatAction(Icon icon) {
-    AbstractAction a = new AbstractAction() {
+    if (deleteCellFormatAction == null) {
+      deleteCellFormatAction = new AbstractAction() {
 
-      public void actionPerformed(ActionEvent event) {
-        AbstractTableModel atm = null;
-        switch (symphonie.getCurrentView().ordinal()) {
-          case 0:
-            atm = symphonie.getCurrentStudentModel();
-            break;
-          case 1:
-            atm = symphonie.getCurrentTeacherModel();
-            break;
-          case 2:
-            atm = symphonie.getCurrentJuryModel();
-            break;
-          case 3:
-            throw new IllegalStateException("Illegal view number");
+        public void actionPerformed(ActionEvent event) {
+          AbstractTableModel atm = null;
+          switch (symphonie.getCurrentView().ordinal()) {
+            case 0:
+              atm = symphonie.getCurrentStudentModel();
+              break;
+            case 1:
+              atm = symphonie.getCurrentTeacherModel();
+              break;
+            case 2:
+              atm = symphonie.getCurrentJuryModel();
+              break;
+            case 3:
+              throw new IllegalStateException("Illegal view number");
+          }
+
+          ((ObjectFormattingSupport) atm).getFormattableCellRenderer()
+              .removeFormatedObject(symphonie.selectedCell.getFirst());
+          Point p = symphonie.selectedCell.getSecond();
+          atm.fireTableCellUpdated(p.x, p.y);
         }
-
-        ((ObjectFormattingSupport) atm).getFormattableCellRenderer()
-            .removeFormatedObject(symphonie.selectedCell.getFirst());
-        Point p = symphonie.selectedCell.getSecond();
-        atm.fireTableCellUpdated(p.x, p.y);
-      }
-    };
-    a.putValue(Action.SMALL_ICON, icon);
-    return a;
+      };
+      deleteCellFormatAction.putValue(Action.SMALL_ICON, icon);
+    }
+    return deleteCellFormatAction;
   }
+
+  /** getDeleteCellFormatAction singleton instance */
+  protected AbstractAction deleteCellFormatAction;
 
   /**
    * Creates an action that prompts a login dialog

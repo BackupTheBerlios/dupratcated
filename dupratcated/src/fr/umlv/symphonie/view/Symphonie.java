@@ -17,6 +17,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -85,6 +86,7 @@ import fr.umlv.symphonie.util.dataexport.DataExporter;
 import fr.umlv.symphonie.util.dataexport.DataExporterException;
 import fr.umlv.symphonie.util.dataimport.DataImporter;
 import fr.umlv.symphonie.util.dataimport.DataImporterException;
+import fr.umlv.symphonie.util.identification.IdentificationException;
 import fr.umlv.symphonie.util.identification.IdentificationStrategy;
 import fr.umlv.symphonie.util.identification.SQLIdentificationStrategy;
 import fr.umlv.symphonie.util.wizard.DefaultWizardModel;
@@ -457,6 +459,7 @@ public class Symphonie {
             selectedCell = new Pair<Object, Point>(table.getValueAt(row, col),
                 new Point(row, col));
             formatCell.setEnabled(true);
+            actionFactory.deleteCellFormatAction.setEnabled(currentStudentModel.getFormattableCellRenderer().hasFormat(o));
           } else
             formatCell.setEnabled(false);
         }
@@ -624,7 +627,7 @@ public class Symphonie {
             : studentModel;
         table.setModel(currentStudentModel);
         addStudent.getAction().setEnabled(logger.isIdentified());
-        //removeStudent.getAction().setEnabled(logger.isIdentified());
+        // removeStudent.getAction().setEnabled(logger.isIdentified());
       }
     });
 
@@ -633,7 +636,9 @@ public class Symphonie {
 
   /**
    * Builds a panel with the teacher view
-   * @param toolbar A toolbar to add some actions
+   * 
+   * @param toolbar
+   *          A toolbar to add some actions
    * 
    * @return a <code>JSplitPane</code>
    */
@@ -659,6 +664,7 @@ public class Symphonie {
             selectedCell = new Pair<Object, Point>(table.getValueAt(row, col),
                 new Point(row, col));
             formatCell.setEnabled(true);
+            actionFactory.deleteCellFormatAction.setEnabled(currentTeacherModel.getFormattableCellRenderer().hasFormat(o));
           } else
             formatCell.setEnabled(false);
         }
@@ -778,7 +784,8 @@ public class Symphonie {
         SymphonieConstants.ADDCOURSE, ComponentBuilder.ButtonType.MENU_ITEM);
     addCourse.getAction().setEnabled(false);
     treePop.add(addCourse);
-    toolbar.add(createToolbarButton(SymphonieConstants.ADDCOURSE, addCourse, builder));
+    toolbar.add(createToolbarButton(SymphonieConstants.ADDCOURSE, addCourse,
+        builder));
 
     treePop.add(builder.buildButton(actionFactory
         .getUpdateCourseTreeAction(REFRESH_ICON), SymphonieConstants.UPDATE,
@@ -790,7 +797,8 @@ public class Symphonie {
         SymphonieConstants.REMOVECOURSE, ComponentBuilder.ButtonType.MENU_ITEM);
     removeCourse.getAction().setEnabled(false);
     treePop.add(removeCourse);
-    toolbar.add(createToolbarButton(SymphonieConstants.REMOVECOURSE, removeCourse, builder));
+    toolbar.add(createToolbarButton(SymphonieConstants.REMOVECOURSE,
+        removeCourse, builder));
 
     // listener for popup
     tree.addMouseListener(new MouseAdapter() {
@@ -820,7 +828,7 @@ public class Symphonie {
       public void mousePressed(MouseEvent e) {
         if (SwingUtilities.isRightMouseButton(e)) {
           int n = tree.getRowForLocation(e.getX(), e.getY());
-            removeCourse.getAction().setEnabled((n > 0) && logger.isIdentified());
+          removeCourse.getAction().setEnabled((n > 0) && logger.isIdentified());
         }
       }
     });
@@ -884,6 +892,7 @@ public class Symphonie {
             selectedCell = new Pair<Object, Point>(table.getValueAt(row, col),
                 new Point(row, col));
             formatCell.setEnabled(true);
+            actionFactory.deleteCellFormatAction.setEnabled(currentJuryModel.getFormattableCellRenderer().hasFormat(o));
           } else
             formatCell.setEnabled(false);
         }
@@ -1197,9 +1206,9 @@ public class Symphonie {
     dischart = new JButton(actionFactory.getChartDisplayAction(CHART_ICON,
         builder));
     dischart.setEnabled(false);
-    
+
     JMenu admenu = getAdminMenu(toolbar);
-    
+
     JPanel content = getContentPane(toolbar);
     JPanel welcome = getWelcomePagePanel(content, toolbar, mode, imp, exp,
         print);
@@ -1227,7 +1236,7 @@ public class Symphonie {
 
     toolbar.add(createToolbarButton(ADDMARKDIALOG_TITLE, morfula, builder));
     toolbar.addSeparator();
-    
+
     toolbar.add(dischart);
     toolbar.addSeparator();
     toolbar.add(builder.buildLabel(SymphonieConstants.SETSTEP));
@@ -1248,6 +1257,26 @@ public class Symphonie {
     toolbar.add(createToolbarButton(EXIT_MENU_ITEM, exit, builder));
 
     frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.addWindowListener(new WindowAdapter() {
+
+        public void windowClosed(java.awt.event.WindowEvent e) {
+            try {
+            System.out.println("Symphonie.Symphonie()");
+          if (logger.isIdentified()) logger.logout();
+        } catch (IdentificationException e1) {
+          errDisplay.showException(e1);
+        }
+        }
+      public void windowClosing(java.awt.event.WindowEvent e) {
+        try {
+            System.out.println("Symphonie.Symphonie()");
+          if (logger.isIdentified()) logger.logout();
+        } catch (IdentificationException e1) {
+          errDisplay.showException(e1);
+        }
+      }
+    });
   }
 
   /**
