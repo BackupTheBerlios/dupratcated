@@ -12,16 +12,11 @@ import java.awt.print.PrinterException;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Icon;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTable;
 
 import fr.umlv.symphonie.data.ConnectionManager;
-import fr.umlv.symphonie.data.SQLDataManager;
-import fr.umlv.symphonie.model.AdminJuryModel;
-import fr.umlv.symphonie.model.AdminStudentModel;
-import fr.umlv.symphonie.model.AdminTeacherModel;
 import fr.umlv.symphonie.model.JuryModel;
 import fr.umlv.symphonie.model.StudentModel;
 import fr.umlv.symphonie.model.TeacherModel;
@@ -292,7 +287,7 @@ public class SymphonieActionFactory {
   public AbstractAction getPwdAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
-      private final ChangePassDialog cpd = new ChangePassDialog(symphonie.getFrame(), builder);
+      private final ChangePassDialog cpd = new ChangePassDialog(symphonie.getFrame(), builder, symphonie.getIdentificationStrategy());
 
       public void actionPerformed(ActionEvent event) {
         cpd.setVisible(true);

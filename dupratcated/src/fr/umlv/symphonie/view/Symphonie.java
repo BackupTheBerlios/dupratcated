@@ -519,15 +519,16 @@ public class Symphonie {
         }
       }
     });
-    
+
     logger.addChangeListener(new ChangeListener() {
 
       public void stateChanged(ChangeEvent e) {
-        currentStudentModel = logger.isIdentified() ? adminStudentModel : studentModel;
-        table.setModel(currentStudentModel);        
+        currentStudentModel = logger.isIdentified() ? adminStudentModel
+            : studentModel;
+        table.setModel(currentStudentModel);
       }
     });
-    
+
     return split;
   }
 
@@ -659,12 +660,13 @@ public class Symphonie {
 
     JScrollPane pane = new JScrollPane(tree);
     split.setLeftComponent(pane);
-    
+
     logger.addChangeListener(new ChangeListener() {
 
       public void stateChanged(ChangeEvent e) {
-        currentTeacherModel = logger.isIdentified() ? adminTeacherModel : teacherModel;
-        table.setModel(currentTeacherModel);        
+        currentTeacherModel = logger.isIdentified() ? adminTeacherModel
+            : teacherModel;
+        table.setModel(currentTeacherModel);
       }
     });
     return split;
@@ -757,7 +759,7 @@ public class Symphonie {
 
       public void stateChanged(ChangeEvent e) {
         currentJuryModel = logger.isIdentified() ? adminJuryModel : juryModel;
-        table.setModel(currentJuryModel);        
+        table.setModel(currentJuryModel);
       }
     });
 
@@ -1075,6 +1077,13 @@ public class Symphonie {
    */
   public TeacherModel getCurrentTeacherModel() {
     return currentTeacherModel;
+  }
+
+  /**
+   * @return Returns the IdentificationStrategy.
+   */
+  public IdentificationStrategy getIdentificationStrategy() {
+    return logger;
   }
 
   // ----------------------------------------------------------------------------
