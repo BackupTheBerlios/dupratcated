@@ -32,31 +32,31 @@ public class CourseTreeModel extends DefaultTreeModel {
   protected DataManager manager;
   protected List<Course> courseList = null;
   
-  private static CourseTreeModel instance = null;
+//  private static CourseTreeModel instance = null;
   protected final ExecutorService es = Executors.newSingleThreadExecutor();
   protected final Object lock = new Object();
   
-  private CourseTreeModel(DataManager manager) {
+  public CourseTreeModel(DataManager manager) {
     super(null);
     this.manager = manager;
     
     update();
   }
 
-  public static CourseTreeModel getInstance(DataManager manager){
-    if (instance == null)
-      instance = new CourseTreeModel(manager);
-    
-    else instance.setManager(manager);
-    
-    return instance;
-  }
+//  public static CourseTreeModel getInstance(DataManager manager){
+//    if (instance == null)
+//      instance = new CourseTreeModel(manager);
+//    
+//    else instance.setManager(manager);
+//    
+//    return instance;
+//  }
   
   
   
-  private void setManager(DataManager manager) {
-    this.manager = manager;    
-  }
+//  private void setManager(DataManager manager) {
+//    this.manager = manager;    
+//  }
 
   public void update(){
     

@@ -75,6 +75,13 @@ public class SymphonieConstants {
   public static final String ADDMARKDIALOG_TITLE = "addmarkdialog.title";
   public static final String ADDMARKDIALOG_COEFF = "addmarkdialog.coeff";
   
+  public static final String AVERAGE = "average";
+  public static final String COEFF = "coeff";
+  public static final String MARK = "mark";
+  public static final String TITLE = "title";
+  public static final String COURSE = "course";
+  public static final String COMMENT = "comment";
+  
   // added by sus for jury view
   public static final String JURYVIEWPOPUP_TITLE = "juryviewpopup.title";
   

@@ -51,21 +51,21 @@ import fr.umlv.symphonie.view.cells.CellRendererFactory;
  */
 public class AdminTeacherModel extends TeacherModel {
 
-  private static AdminTeacherModel instance = null;
+//  private static AdminTeacherModel instance = null;
   
   
-  private AdminTeacherModel (DataManager manager){
-    super(manager);
+  public AdminTeacherModel (DataManager manager, ComponentBuilder builder){
+    super(manager, builder);
   }
   
-  public static AdminTeacherModel getInstance(DataManager manager){
-    if (instance == null)
-      instance = new AdminTeacherModel(manager);
-    
-    else instance.setManager(manager);
-    
-    return instance;
-  }
+//  public static AdminTeacherModel getInstance(DataManager manager){
+//    if (instance == null)
+//      instance = new AdminTeacherModel(manager);
+//    
+//    else instance.setManager(manager);
+//    
+//    return instance;
+//  }
   
   public boolean isCellEditable(int rowIndex,int columnIndex){
     

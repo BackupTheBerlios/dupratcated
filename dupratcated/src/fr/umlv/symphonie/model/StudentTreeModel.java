@@ -39,29 +39,29 @@ public class StudentTreeModel extends DefaultTreeModel {
   
   protected final Object lock = new Object();
   
-  private static StudentTreeModel instance = null;
+//  private static StudentTreeModel instance = null;
   
-  private StudentTreeModel(DataManager manager){
+  public StudentTreeModel(DataManager manager){
     super(null);
     this.manager = manager;
     update();
   }
   
   
-  public static StudentTreeModel getInstance(DataManager manager){
-    if (instance == null)
-      instance = new StudentTreeModel(manager);
-    
-    else instance.setManager(manager);
-    
-    return instance;
-  }
+//  public static StudentTreeModel getInstance(DataManager manager){
+//    if (instance == null)
+//      instance = new StudentTreeModel(manager);
+//    
+//    else instance.setManager(manager);
+//    
+//    return instance;
+//  }
   
   
   
-  private void setManager(DataManager manager) {
-    this.manager = manager;
-  }
+//  private void setManager(DataManager manager) {
+//    this.manager = manager;
+//  }
 
 
   public void update() {

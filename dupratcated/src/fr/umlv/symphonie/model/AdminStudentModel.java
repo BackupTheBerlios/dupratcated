@@ -32,6 +32,7 @@ import fr.umlv.symphonie.data.Mark;
 import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
+import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.StudentAverage;
 
 
@@ -41,20 +42,11 @@ import fr.umlv.symphonie.util.StudentAverage;
  */
 public class AdminStudentModel extends StudentModel {
 
-  private static AdminStudentModel instance = null;
+//  private static AdminStudentModel instance = null;
   private final ExecutorService es = Executors.newSingleThreadExecutor();
   
-  private AdminStudentModel(DataManager manager){
-    super(manager);
-  }
-  
-  public static AdminStudentModel getInstance(DataManager manager){
-    if (instance == null)
-      instance = new AdminStudentModel(manager);
-    
-    else instance.setManager(manager);
-    
-    return instance;
+  public AdminStudentModel(DataManager manager, ComponentBuilder builder){
+    super(manager, builder);
   }
   
   

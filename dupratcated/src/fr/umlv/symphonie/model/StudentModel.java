@@ -27,10 +27,13 @@ import fr.umlv.symphonie.data.Mark;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
+import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.StudentAverage;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
 import fr.umlv.symphonie.view.cells.FormattableCellRenderer;
 import fr.umlv.symphonie.view.cells.ObjectFormattingSupport;
+
+import static fr.umlv.symphonie.view.SymphonieConstants.*;
 
 /**
  * Suitable data model for a table displaying a Student Courses
@@ -40,12 +43,13 @@ import fr.umlv.symphonie.view.cells.ObjectFormattingSupport;
 public class StudentModel extends AbstractTableModel implements
     ObjectFormattingSupport {
 
-  protected DataManager manager;
+  protected final DataManager manager;
+  protected final ComponentBuilder builder;
   protected Student student = null;
   protected int columnCount = 0;
   protected int rowCount = 0;
   protected Map<Course, Map<Integer, StudentMark>> markMap = null;
-  private static StudentModel instance = null;
+//  private static StudentModel instance = null;
   protected Object[][] matrix = null;
 
   protected final Object lock = new Object();
@@ -58,23 +62,24 @@ public class StudentModel extends AbstractTableModel implements
 
   private int lastRow = -1;
   
-  protected StudentModel(DataManager manager) {
+  public StudentModel(DataManager manager, ComponentBuilder builder) {
     this.manager = manager;
+    this.builder = builder;
   }
 
-  public static StudentModel getInstance(DataManager manager) {
-    if (instance == null)
-      instance = new StudentModel(manager);
+//  public static StudentModel getInstance(DataManager manager) {
+//    if (instance == null)
+//      instance = new StudentModel(manager);
+//
+//    else
+//      instance.setManager(manager);
+//
+//    return instance;
+//  }
 
-    else
-      instance.setManager(manager);
-
-    return instance;
-  }
-
-  protected void setManager(DataManager manager) {
-    this.manager = manager;
-  }
+//  protected void setManager(DataManager manager) {
+//    this.manager = manager;
+//  }
 
   public void setStudent(final Student s) {
 
@@ -117,8 +122,8 @@ public class StudentModel extends AbstractTableModel implements
              * note)
              */
             matrix[row][column] = c;
-            matrix[row + 1][column] = "coeff";
-            matrix[row + 2][column] = "note";
+            matrix[row + 1][column] = builder.getValue(COEFF);
+            matrix[row + 2][column] = builder.getValue(MARK);
 
             column++;
 
@@ -140,7 +145,7 @@ public class StudentModel extends AbstractTableModel implements
             blankRow(row + 2, column);
             blankRow(row + 3, 0);
 
-            matrix[row][columnCount - 1] = "moyenne";
+            matrix[row][columnCount - 1] = builder.getValue(AVERAGE);
             matrix[row + 1][columnCount - 1] = "";
             matrix[row + 2][columnCount - 1] = StudentAverage
                 .getAverage(collection);

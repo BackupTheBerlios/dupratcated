@@ -5,36 +5,14 @@
 package fr.umlv.symphonie.model;
 
 import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Locale;
 import java.util.StringTokenizer;
-
-import javax.swing.AbstractButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.table.DefaultTableCellRenderer;
 
 import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
-import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.formula.Formula;
-import fr.umlv.symphonie.util.ComponentBuilder;
-import fr.umlv.symphonie.util.TextualResourcesLoader;
-import fr.umlv.symphonie.view.PointSaver;
-import fr.umlv.symphonie.view.SymphonieActionFactory;
-import fr.umlv.symphonie.view.SymphonieConstants;
 
 
 /**
@@ -46,21 +24,21 @@ import fr.umlv.symphonie.view.SymphonieConstants;
 public class AdminJuryModel extends JuryModel {
 
   
-  private static AdminJuryModel instance = null;
+//  private static AdminJuryModel instance = null;
   
   
-  private AdminJuryModel(DataManager manager){
+  public AdminJuryModel(DataManager manager){
     super(manager);
   }
   
-  public static AdminJuryModel getInstance(DataManager manager){
-    if (instance == null)
-      instance = new AdminJuryModel(manager);
-    
-    else instance.setManager(manager);
-    
-    return instance;
-  }
+//  public static AdminJuryModel getInstance(DataManager manager){
+//    if (instance == null)
+//      instance = new AdminJuryModel(manager);
+//    
+//    else instance.setManager(manager);
+//    
+//    return instance;
+//  }
   
   
   /* (non-Javadoc)
