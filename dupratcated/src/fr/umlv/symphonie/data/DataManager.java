@@ -58,15 +58,18 @@ public interface DataManager
 	public void removeCourse(Course c) throws SQLException;
 	public void removeCourses(List<Course> list) throws SQLException;
 	
-	public void addStudentMark(Student s, Course c, Mark t, float mark, float coeff) throws SQLException;
-	public void addStudentMarks(List<Student> listS, List<Course> listC, List<Mark> listM, List<Float> listMark, List<Float> listCoeff) throws SQLException, DataManagerException;
-	public void removeStudentMark (StudentMark sm) throws SQLException;
-	public void removeStudentMarks(List<StudentMark> list) throws SQLException;
+//	public void addStudentMark(Student s, Course c, Mark t, float mark, float coeff) throws SQLException;
+//	public void addStudentMarks(List<Student> studentList, int markKey, float value ) throws SQLException, DataManagerException;
+//	public void removeStudentMark (StudentMark sm) throws SQLException;
+//	public void removeStudentMarks(List<StudentMark> list) throws SQLException;
 	
-	public void addMark(String desc) throws SQLException;
-	public void addMarks(List<String> list) throws SQLException;
+  public int addTitle(String desc) throws SQLException;
+//  public void addTitles(List<String> list) throws SQLException;
+  
+	public void addMark(String desc, float coeff, Course c) throws SQLException;
+//	public void addMarks(List<String> list, Course c) throws SQLException;
 	public void removeMark(Mark m) throws SQLException;
-	public void removeMarks(List<Mark> list) throws SQLException;
+//	public void removeMarks(List<Mark> list) throws SQLException;
   
   
   public void changeStudentMarkValue(StudentMark studentMark, float newValue) throws SQLException;

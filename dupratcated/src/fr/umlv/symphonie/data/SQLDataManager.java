@@ -41,19 +41,14 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
   private static int createPrimaryKey(String table, String id)
       throws SQLException {
+    
     ResultSet results = null;
-    String request = "SELECT MAX('" + id + "') + 1 FROM '" + table + "';";
+    String request = "SELECT MAX(`" + id + "`) + 1 FROM `" + table + "`;";
 
-    try {
-      results = connectAndQuery(request);
-    } catch (SQLException e) {
-      System.out.println("Error with current query :\n" + request);
-      e.printStackTrace();
-    }
+    results = connectAndQuery(request);
 
-    if (results.next()) return results.getInt(0);
-
-    return 0;
+    results.next();
+    return results.getInt(1);
   }
 
   
@@ -68,14 +63,14 @@ public class SQLDataManager extends SQLDataManagerConstants implements
   public List<Student> getStudents() {
     ArrayList<Student> list = new ArrayList<Student>();
     ResultSet results = null;
-    String request = "SELECT * FROM '" + TABLE_STUDENT + "';";
+    String request = "SELECT * FROM `" + TABLE_STUDENT + "`;";
 
     try {
       results = connectAndQuery(request);
 
       while (results.next()) {
-        list.add(new Student(results.getInt(0), results.getString(1), results
-            .getString(2), results.getString(3)));
+        list.add(new Student(results.getInt(1), results.getString(2), results
+            .getString(3), results.getString(4)));
       }
     } catch (SQLException e) {
       System.out.println("Error with current query :\n" + request);
@@ -88,14 +83,14 @@ public class SQLDataManager extends SQLDataManagerConstants implements
   public List<Course> getCourses() {
     ArrayList<Course> list = new ArrayList<Course>();
     ResultSet results = null;
-    String request = "SELECT * FROM '" + TABLE_COURSE + "';";
+    String request = "SELECT * FROM `" + TABLE_COURSE + "`;";
 
     try {
       results = connectAndQuery(request);
 
       while (results.next()) {
-        list.add(new Course(results.getInt(0), results.getString(1), results
-            .getFloat(2)));
+        list.add(new Course(results.getInt(1), results.getString(2), results
+            .getFloat(3)));
       }
     } catch (SQLException e) {
       System.out.println("Error with current query :\n" + request);
@@ -124,6 +119,8 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 //    return map;
 //  }
 
+  
+  
   
   // ICI
   public Map<Integer, Mark> getTitlesByCourse(Course c) {
@@ -363,11 +360,11 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       e.printStackTrace();
     }
 
-    String request = "INSERT INTO '" + TABLE_STUDENT + "' ('"
-        + COLUMN_ID_FROM_TABLE_STUDENT + "', '"
-        + COLUMN_NAME_FROM_TABLE_STUDENT + "', '"
-        + COLUMN_LAST_NAME_FROM_TABLE_STUDENT + "', '"
-        + COLUMN_COMMENT_FROM_TABLE_STUDENT + "') VALUES ('" + key + "', '"
+    String request = "INSERT INTO `" + TABLE_STUDENT + "` (`"
+        + COLUMN_ID_FROM_TABLE_STUDENT + "`, `"
+        + COLUMN_NAME_FROM_TABLE_STUDENT + "`, `"
+        + COLUMN_LAST_NAME_FROM_TABLE_STUDENT + "`, `"
+        + COLUMN_COMMENT_FROM_TABLE_STUDENT + "`) VALUES (" + key + ", '"
         + name + "', '" + lastName + "', NULL);";
 
     try {
@@ -380,12 +377,11 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
   public void addStudents(List<String> listName, List<String> listLastName)
       throws SQLException, DataManagerException {
-    String request = "INSERT INTO '" + TABLE_STUDENT + "' ('"
-        + COLUMN_ID_FROM_TABLE_STUDENT + "', '"
-        + COLUMN_NAME_FROM_TABLE_STUDENT + "', '"
-        + COLUMN_LAST_NAME_FROM_TABLE_STUDENT + "', '"
-        + COLUMN_COMMENT_FROM_TABLE_STUDENT
-        + "') VALUES ('?', '?', '?', NULL);";
+    String request = "INSERT INTO `" + TABLE_STUDENT + "` (`"
+        + COLUMN_ID_FROM_TABLE_STUDENT + "`, `"
+        + COLUMN_NAME_FROM_TABLE_STUDENT + "`, `"
+        + COLUMN_LAST_NAME_FROM_TABLE_STUDENT + "`, `"
+        + COLUMN_COMMENT_FROM_TABLE_STUDENT + "`) VALUES (?, ?, ?, NULL);";
     PreparedStatement preparedStatement = null;
     int key = 0;
     int size = listName.size();
@@ -424,8 +420,8 @@ public class SQLDataManager extends SQLDataManagerConstants implements
   }
 
   public void removeStudent(Student s) throws SQLException {
-    String request = "DELETE FROM '" + TABLE_STUDENT + "' WHERE '"
-        + COLUMN_ID_FROM_TABLE_STUDENT + "'='" + s.getId() + "';";
+    String request = "DELETE FROM `" + TABLE_STUDENT + "` WHERE `"
+        + COLUMN_ID_FROM_TABLE_STUDENT + "`=" + s.getId() + ";";
 
     try {
       connectAndQuery(request);
@@ -433,16 +429,14 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       System.out.println("Error with current query :\n" + request);
       e.printStackTrace();
     }
-    
-    
     /*
-     * penser a virer aussi les notes et tout
+     * penser a virer les notes
      */
   }
 
   public void removeStudents(List<Student> list) throws SQLException {
-    String request = "DELETE FROM '" + TABLE_STUDENT + "' WHERE '"
-        + COLUMN_ID_FROM_TABLE_STUDENT + "'='?';";
+    String request = "DELETE FROM `" + TABLE_STUDENT + "` WHERE `"
+        + COLUMN_ID_FROM_TABLE_STUDENT + "`=?;";
     PreparedStatement preparedStatement = null;
 
     try {
@@ -461,9 +455,8 @@ public class SQLDataManager extends SQLDataManagerConstants implements
         e.printStackTrace();
       }
     }
-    
     /*
-     * penser a virer les notes aussi 
+     * penser a virer les notes
      */
   }
 
@@ -478,10 +471,10 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       e.printStackTrace();
     }
 
-    String request = "INSERT INTO '" + TABLE_COURSE + "' ('"
-        + COLUMN_ID_FROM_TABLE_COURSE + "', '" + COLUMN_TITLE_FROM_TABLE_COURSE
-        + "', '" + COLUMN_COEFF_FROM_TABLE_COURSE + "') VALUES ('" + key
-        + "', '" + title + "', '" + coeff + "');";
+    String request = "INSERT INTO `" + TABLE_COURSE + "` (`"
+        + COLUMN_ID_FROM_TABLE_COURSE + "`, `" + COLUMN_TITLE_FROM_TABLE_COURSE
+        + "`, `" + COLUMN_COEFF_FROM_TABLE_COURSE + "`) VALUES (" + key + ", '"
+        + title + "', '" + coeff + "');";
 
     try {
       connectAndQuery(request);
@@ -493,10 +486,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
   public void addCourses(List<String> listTitle, List<Float> listCoeff)
       throws SQLException, DataManagerException {
-    String request = "INSERT INTO '" + TABLE_COURSE + "' ('"
-        + COLUMN_ID_FROM_TABLE_COURSE + "', '" + COLUMN_TITLE_FROM_TABLE_COURSE
-        + "', '" + COLUMN_COEFF_FROM_TABLE_COURSE
-        + "') VALUES ('?', '?', '?');";
+    String request = "INSERT INTO `" + TABLE_COURSE + "` (`"
+        + COLUMN_ID_FROM_TABLE_COURSE + "`, `" + COLUMN_TITLE_FROM_TABLE_COURSE
+        + "`, `" + COLUMN_COEFF_FROM_TABLE_COURSE + "`) VALUES (?, ?, ?);";
     PreparedStatement preparedStatement = null;
     int key = 0;
     int size = listTitle.size();
@@ -525,7 +517,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       try {
         preparedStatement.setInt(1, key);
         preparedStatement.setString(2, listTitle.get(i));
-        preparedStatement.setFloat(3, listCoeff.get(i).floatValue());
+        preparedStatement.setFloat(3, listCoeff.get(i));
         preparedStatement.execute();
       } catch (SQLException e) {
         System.out.println("Error with current query :\n" + request);
@@ -535,8 +527,8 @@ public class SQLDataManager extends SQLDataManagerConstants implements
   }
 
   public void removeCourse(Course c) throws SQLException {
-    String request = "DELETE FROM '" + TABLE_COURSE + "' WHERE '"
-        + COLUMN_ID_FROM_TABLE_COURSE + "'='" + c.getId() + "';";
+    String request = "DELETE FROM `" + TABLE_COURSE + "` WHERE `"
+        + COLUMN_ID_FROM_TABLE_COURSE + "`=" + c.getId() + ";";
 
     try {
       connectAndQuery(request);
@@ -544,16 +536,14 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       System.out.println("Error with current query :\n" + request);
       e.printStackTrace();
     }
-    
     /*
-     * penser a virer les notes et les intitules
+     * penser a virer toutes les notes correspondantes
      */
-    
   }
 
   public void removeCourses(List<Course> list) throws SQLException {
-    String request = "DELETE FROM '" + TABLE_COURSE + "' WHERE '"
-        + COLUMN_ID_FROM_TABLE_COURSE + "'='?';";
+    String request = "DELETE FROM `" + TABLE_COURSE + "` WHERE `"
+        + COLUMN_ID_FROM_TABLE_COURSE + "`=?;";
     PreparedStatement preparedStatement = null;
 
     try {
@@ -572,114 +562,152 @@ public class SQLDataManager extends SQLDataManagerConstants implements
         e.printStackTrace();
       }
     }
-    /*
-     * penser a virer les notes et les intitules
-     */
   }
 
-  public void addStudentMark(Student s, Course c, Mark m, float mark,
-      float coeff) throws SQLException {
-    String request = "INSERT INTO '" + TABLE_HAS_MARK + "' ('"
-        + COLUMN_ID_STUDENT_FROM_TABLE_HAS_MARK + "', '"
-        + COLUMN_ID_TEST_FROM_TABLE_HAS_MARK + "', '"
-        + COLUMN_MARK_FROM_TABLE_HAS_MARK + "') VALUES ('" + s.getId()
-        + "', '" + c.getId() + "', '" + m.getId() + "', '" + mark + "', '"
-        + coeff + "');";
+//  public void addStudentMark(Student s, Course c, Mark m, float mark,
+//      float coeff) throws SQLException {
+//    String request = "INSERT INTO `" + TABLE_HAS_MARK + "` (`"
+//        + COLUMN_ID_STUDENT_FROM_TABLE_HAS_MARK + "`, `"
+//        + COLUMN_ID_COURSE_FROM_TABLE_HAS_MARK + "`, `"
+//        + COLUMN_ID_MARK_FROM_TABLE_HAS_MARK + "`, `"
+//        + COLUMN_MARK_FROM_TABLE_HAS_MARK + "`, `"
+//        + COLUMN_COEFF_FROM_TABLE_HAS_MARK + "`) VALUES (" + s.getId() + ", "
+//        + c.getId() + ", " + m.getId() + ", " + mark + ", " + coeff + ");";
+//
+//    try {
+//      connectAndQuery(request);
+//    } catch (SQLException e) {
+//      System.out.println("Error with current query :\n" + request);
+//      e.printStackTrace();
+//    }
+//  }
+//
+//  public void addStudentMarks(Student s, Course c, List<Mark> listMark,
+//      List<Float> listStudentMark, List<Float> listCoeff) throws SQLException,
+//      DataManagerException {
+//    String request = "INSERT INTO `" + TABLE_HAS_MARK + "` (`"
+//        + COLUMN_ID_STUDENT_FROM_TABLE_HAS_MARK + "`, `"
+//        + COLUMN_ID_COURSE_FROM_TABLE_HAS_MARK + "`, `"
+//        + COLUMN_ID_MARK_FROM_TABLE_HAS_MARK + "`, `"
+//        + COLUMN_MARK_FROM_TABLE_HAS_MARK + "`, `"
+//        + COLUMN_COEFF_FROM_TABLE_HAS_MARK + "`) VALUES (" + s.getId() + ", "
+//        + c.getId() + ", ?, ?, ?);";
+//    PreparedStatement preparedStatement = null;
+//    int size = listMark.size();
+//
+//    if (size != listMark.size() || size != listStudentMark.size()
+//        || size != listCoeff.size()) {
+//      throw new DataManagerException(
+//          "the lists of addStudentMarks(Student s, Course c, List<Mark> ListM, List<float> listMark, List<float> listCoeff) must have the same size.\n");
+//    }
+//
+//    try {
+//      preparedStatement = connectAndPrepare(request);
+//    } catch (SQLException e) {
+//      System.out.println("Error with current query :\n" + request);
+//      e.printStackTrace();
+//    }
+//
+//    for (int i = 0; i < size; i++) {
+//      try {
+//        preparedStatement.setInt(1, listMark.get(i).getId());
+//        preparedStatement.setFloat(2, listStudentMark.get(i));
+//        preparedStatement.setFloat(3, listCoeff.get(i));
+//        preparedStatement.execute();
+//      } catch (SQLException e) {
+//        System.out.println("Error with current query :\n" + request);
+//        e.printStackTrace();
+//      }
+//    }
+//  }
 
-    try {
-      connectAndQuery(request);
-    } catch (SQLException e) {
-      System.out.println("Error with current query :\n" + request);
-      e.printStackTrace();
-    }
-  }
+//  public void addStudentsMarks(List<Student> listS, List<Course> listC,
+//      List<Mark> listM, List<Float> listMark, List<Float> listCoeff)
+//      throws SQLException, DataManagerException {
+//    String request = "INSERT INTO `" + TABLE_HAS_MARK + "` (`"
+//        + COLUMN_ID_STUDENT_FROM_TABLE_HAS_MARK + "`, `"
+//        + COLUMN_ID_COURSE_FROM_TABLE_HAS_MARK + "`, `"
+//        + COLUMN_ID_MARK_FROM_TABLE_HAS_MARK + "`, `"
+//        + COLUMN_MARK_FROM_TABLE_HAS_MARK + "`, `"
+//        + COLUMN_COEFF_FROM_TABLE_HAS_MARK
+//        + "`) VALUES (?, ?, ?, ?, ?);";
+//    PreparedStatement preparedStatement = null;
+//    int size = listS.size();
+//
+//    if (size != listC.size() || size != listM.size() || size != listMark.size()
+//        || size != listCoeff.size()) {
+//      throw new DataManagerException(
+//          "the lists of addStudentMarks(List<Student> listS, List<Course> ListC, List<Mark> ListM, List<float> listMark, List<float> listCoeff) must have the same size.\n");
+//    }
+//
+//    try {
+//      preparedStatement = connectAndPrepare(request);
+//    } catch (SQLException e) {
+//      System.out.println("Error with current query :\n" + request);
+//      e.printStackTrace();
+//    }
+//
+//    for (int i = 0; i < size; i++) {
+//      try {
+//        preparedStatement.setInt(1, listS.get(i).getId());
+//        preparedStatement.setInt(2, listC.get(i).getId());
+//        preparedStatement.setInt(3, listM.get(i).getId());
+//        preparedStatement.setFloat(4, listMark.get(i));
+//        preparedStatement.setFloat(5, listCoeff.get(i));
+//        preparedStatement.execute();
+//      } catch (SQLException e) {
+//        System.out.println("Error with current query :\n" + request);
+//        e.printStackTrace();
+//      }
+//    }
+//  }
+  
+//  public void removeStudentMark(StudentMark sm) throws SQLException {
+//    String request = "DELETE FROM `" + TABLE_HAS_MARK + "` WHERE `"
+//        + COLUMN_ID_STUDENT_FROM_TABLE_HAS_MARK + "`="
+//        + sm.getStudent().getId() + " AND `"
+//        + COLUMN_ID_COURSE_FROM_TABLE_HAS_MARK + "`=" + sm.getCourse().getId()
+//        + " AND `" + COLUMN_ID_MARK_FROM_TABLE_HAS_MARK + "`="
+//        + sm.getMark().getId() + ";";
+//
+//    try {
+//      connectAndQuery(request);
+//    } catch (SQLException e) {
+//      System.out.println("Error with current query :\n" + request);
+//      e.printStackTrace();
+//    }
+//  }
+//
+//  public void removeStudentMarks(List<StudentMark> list) throws SQLException {
+//    String request = "DELETE FROM `" + TABLE_HAS_MARK + "` WHERE `"
+//        + COLUMN_ID_STUDENT_FROM_TABLE_HAS_MARK + "`=? AND `"
+//        + COLUMN_ID_COURSE_FROM_TABLE_HAS_MARK + "`=? AND `"
+//        + COLUMN_ID_MARK_FROM_TABLE_HAS_MARK + "`=?;";
+//    PreparedStatement preparedStatement = null;
+//
+//    try {
+//      preparedStatement = connectAndPrepare(request);
+//    } catch (SQLException e) {
+//      System.out.println("Error with current query :\n" + request);
+//      e.printStackTrace();
+//    }
+//
+//    for (StudentMark sm : list) {
+//      try {
+//        preparedStatement.setInt(1, sm.getStudent().getId());
+//        preparedStatement.setInt(2, sm.getCourse().getId());
+//        preparedStatement.setInt(3, sm.getMark().getId());
+//        preparedStatement.execute();
+//      } catch (SQLException e) {
+//        System.out.println("Error with current query :\n" + request);
+//        e.printStackTrace();
+//      }
+//    }
+//  }
 
-  public void addStudentMarks(List<Student> listS, List<Course> listC,
-      List<Mark> listM, List<Float> listMark, List<Float> listCoeff)
-      throws SQLException, DataManagerException {
-    String request = "INSERT INTO '" + TABLE_HAS_MARK + "' ('"
-        + COLUMN_ID_STUDENT_FROM_TABLE_HAS_MARK + "', '"
-        + COLUMN_ID_COURSE_FROM_TABLE_HAS_MARK + "', '"
-        + COLUMN_ID_MARK_FROM_TABLE_HAS_MARK + "', '"
-        + COLUMN_MARK_FROM_TABLE_HAS_MARK + "', '"
-        + COLUMN_COEFF_FROM_TABLE_HAS_MARK
-        + "') VALUES ('?', '?', '?', '?', '?');";
-    PreparedStatement preparedStatement = null;
-    int size = listS.size();
-
-    if (size != listC.size() || size != listM.size() || size != listMark.size()
-        || size != listCoeff.size()) {
-      throw new DataManagerException(
-          "the lists of addStudentMarks(List<Student> listS, List<Course> ListC, List<Mark> ListM, List<float> listMark, List<float> listCoeff) must have the same size.\n");
-    }
-
-    try {
-      preparedStatement = connectAndPrepare(request);
-    } catch (SQLException e) {
-      System.out.println("Error with current query :\n" + request);
-      e.printStackTrace();
-    }
-
-    for (int i = 0; i < size; i++) {
-      try {
-        preparedStatement.setInt(1, listS.get(i).getId());
-        preparedStatement.setInt(2, listC.get(i).getId());
-        preparedStatement.setInt(3, listM.get(i).getId());
-        preparedStatement.setFloat(4, listMark.get(i).floatValue());
-        preparedStatement.setFloat(5, listCoeff.get(i).floatValue());
-        preparedStatement.execute();
-      } catch (SQLException e) {
-        System.out.println("Error with current query :\n" + request);
-        e.printStackTrace();
-      }
-    }
-  }
-
-  public void removeStudentMark(StudentMark sm) throws SQLException {
-    String request = "DELETE FROM '" + TABLE_HAS_MARK + "' WHERE '"
-        + COLUMN_ID_STUDENT_FROM_TABLE_HAS_MARK + "'='"
-        + sm.getStudent().getId() + "' AND '"
-        + COLUMN_ID_COURSE_FROM_TABLE_HAS_MARK + "'='"
-        + sm.getMark().getCourse().getId() + "' AND '"
-        + COLUMN_ID_MARK_FROM_TABLE_HAS_MARK + "'='" + sm.getMark().getId()
-        + "';";
-
-    try {
-      connectAndQuery(request);
-    } catch (SQLException e) {
-      System.out.println("Error with current query :\n" + request);
-      e.printStackTrace();
-    }
-  }
-
-  public void removeStudentMarks(List<StudentMark> list) throws SQLException {
-    String request = "DELETE FROM '" + TABLE_HAS_MARK + "' WHERE '"
-        + COLUMN_ID_STUDENT_FROM_TABLE_HAS_MARK + "'='?' AND '"
-        + COLUMN_ID_COURSE_FROM_TABLE_HAS_MARK + "'='?' AND '"
-        + COLUMN_ID_MARK_FROM_TABLE_HAS_MARK + "'='?';";
-    PreparedStatement preparedStatement = null;
-
-    try {
-      preparedStatement = connectAndPrepare(request);
-    } catch (SQLException e) {
-      System.out.println("Error with current query :\n" + request);
-      e.printStackTrace();
-    }
-
-    for (StudentMark sm : list) {
-      try {
-        preparedStatement.setInt(1, sm.getStudent().getId());
-        preparedStatement.setInt(2, sm.getMark().getCourse().getId());
-        preparedStatement.setInt(3, sm.getMark().getId());
-        preparedStatement.execute();
-      } catch (SQLException e) {
-        System.out.println("Error with current query :\n" + request);
-        e.printStackTrace();
-      }
-    }
-  }
-
-  public void addMark(String desc) throws SQLException {
+  
+  
+  public int addTitle(String desc) throws SQLException{
     int key = 0;
 
     try {
@@ -690,9 +718,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       e.printStackTrace();
     }
 
-    String request = "INSERT INTO '" + TABLE_TITLE + "' ('"
-        + COLUMN_ID_FROM_TABLE_TITLE + "', '" + COLUMN_DESC_FROM_TABLE_TITLE
-        + "') VALUES ('" + key + "', '" + desc + "');";
+    String request = "INSERT INTO `" + TABLE_TITLE + "` (`"
+        + COLUMN_ID_FROM_TABLE_TITLE + "`, `" + COLUMN_DESC_FROM_TABLE_TITLE
+        + "`) VALUES (" + key + ", '" + desc + "');";
 
     try {
       connectAndQuery(request);
@@ -700,76 +728,156 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       System.out.println("Error with current query :\n" + request);
       e.printStackTrace();
     }
+    
+    return key;
+  }
+  
+  
+  
+//  public void addTitles(List<String> list) throws SQLException {
+//    String request = "INSERT INTO `" + TABLE_TITLE + "` (`"
+//        + COLUMN_ID_FROM_TABLE_TITLE + "`, `" + COLUMN_DESC_FROM_TABLE_TITLE
+//        + "`) VALUES (?, ?);";
+//    PreparedStatement preparedStatement = null;
+//    int key = 0;
+//
+//    try {
+//      preparedStatement = connectAndPrepare(request);
+//    } catch (SQLException e) {
+//      System.out.println("Error with current query :\n" + request);
+//      e.printStackTrace();
+//    }
+//
+//    for (String desc : list) {
+//      try {
+//        key = createPrimaryKey(TABLE_TITLE, COLUMN_ID_FROM_TABLE_TITLE);
+//      } catch (SQLException e) {
+//        System.out.println("Error with current query : createPrimaryKey("
+//            + TABLE_TITLE + ", " + COLUMN_ID_FROM_TABLE_TITLE + ")\n");
+//        e.printStackTrace();
+//      }
+//
+//      try {
+//        preparedStatement.setInt(1, key);
+//        preparedStatement.setString(2, desc);
+//        preparedStatement.execute();
+//      } catch (SQLException e) {
+//        System.out.println("Error with current query :\n" + request);
+//        e.printStackTrace();
+//      }
+//    }
+//  }
+  
+  
+  
+  
+  
+  
+  
+  private int getKeyForTitle(String desc) throws SQLException{
+    String request = "select " + COLUMN_ID_FROM_TABLE_TITLE + " " +
+                    "from " + TABLE_TITLE + " " +
+                    "where " + COLUMN_DESC_FROM_TABLE_TITLE + " = '" + desc + "';";
+    
+    ResultSet result = connectAndQuery(request);
+    
+    
+    if (result.first() == false)
+      return -1;
+    
+    return result.getInt(COLUMN_ID_FROM_TABLE_TITLE);
+  }
+  
+  
+
+  public void addMark(String desc, float coeff, Course c) throws SQLException {
+    int titleKey = -1;
+    
+    
+    try {
+      titleKey= getKeyForTitle(desc);
+    }catch (SQLException e){
+      // erreur de getKey
+    }
+    
+    
+    if (titleKey < 0){
+      try {
+        titleKey = addTitle(desc);
+      }catch (SQLException e){
+        // erreur d'ajout de l'intitule
+      }
+    }
+      
+    
+    int markKey = -1;
+    
+    try {
+      markKey = createPrimaryKey(TABLE_TEST, COLUMN_ID_FROM_TABLE_TEST);
+    }catch (SQLException e){
+      // erreur de creation de cle
+    }
+    
+    String request = "insert into " + TABLE_TEST + " " +
+                     "values (" + markKey + ", " + coeff + ", " + titleKey + ", " + c.getId() + ");";
+
+    try {
+      connectAndQuery(request);
+    } catch (SQLException e) {
+      System.out.println("Error with current query :\n" + request);
+      e.printStackTrace();
+    }
+    
+    try {
+      setDefaultMarkToAllStudents(markKey);
+    }catch (SQLException e){
+      // erreur d'affectation des notes a zero
+    }
+    
+    
   }
 
-  public void addMarks(List<String> list) throws SQLException {
-    String request = "INSERT INTO '" + TABLE_TITLE + "' ('"
-        + COLUMN_ID_FROM_TABLE_TITLE + "', '" + COLUMN_DESC_FROM_TABLE_TITLE
-        + "') VALUES ('?', '?');";
-    PreparedStatement preparedStatement = null;
-    int key = 0;
+//  public void addMarks(List<String> list) throws SQLException {
+//  
+//  }
 
+  /**
+   * @param markKey
+   */
+  private void setDefaultMarkToAllStudents(int markKey)throws SQLException {
+    List<Student> studentList = getStudents();
+    PreparedStatement preparedStatement = null;
+    
+    String request = "insert into " + TABLE_HAS_MARK +
+                    "values (?, "+ markKey + ", 0);"; 
+    
     try {
       preparedStatement = connectAndPrepare(request);
     } catch (SQLException e) {
       System.out.println("Error with current query :\n" + request);
       e.printStackTrace();
     }
-
-    for (String desc : list) {
+    
+    for (Student s : studentList) {
       try {
-        key = createPrimaryKey(TABLE_TITLE, COLUMN_ID_FROM_TABLE_TITLE);
-      } catch (SQLException e) {
-        System.out.println("Error with current query : createPrimaryKey("
-            + TABLE_TITLE + ", " + COLUMN_ID_FROM_TABLE_TITLE + ")\n");
-        e.printStackTrace();
-      }
-
-      try {
-        preparedStatement.setInt(1, key);
-        preparedStatement.setString(2, desc);
+        preparedStatement.setInt(1, s.getId());
         preparedStatement.execute();
       } catch (SQLException e) {
         System.out.println("Error with current query :\n" + request);
         e.printStackTrace();
       }
     }
+    
   }
 
   public void removeMark(Mark m) throws SQLException {
-    String request = "DELETE FROM '" + TABLE_TITLE + "' WHERE '"
-        + COLUMN_ID_FROM_TABLE_TITLE + "'='" + m.getId() + "';";
-
-    try {
-      connectAndQuery(request);
-    } catch (SQLException e) {
-      System.out.println("Error with current query :\n" + request);
-      e.printStackTrace();
-    }
+    
   }
 
-  public void removeMarks(List<Mark> list) throws SQLException {
-    String request = "DELETE FROM '" + TABLE_TITLE + "' WHERE '"
-        + COLUMN_ID_FROM_TABLE_TITLE + "'='?';";
-    PreparedStatement preparedStatement = null;
+//  public void removeMarks(List<Mark> list) throws SQLException {
+//    
+//  }
 
-    try {
-      preparedStatement = connectAndPrepare(request);
-    } catch (SQLException e) {
-      System.out.println("Error with current query :\n" + request);
-      e.printStackTrace();
-    }
-
-    for (Mark m : list) {
-      try {
-        preparedStatement.setInt(1, m.getId());
-        preparedStatement.execute();
-      } catch (SQLException e) {
-        System.out.println("Error with current query :\n" + request);
-        e.printStackTrace();
-      }
-    }
-  }
 
   /* (non-Javadoc)
    * @see fr.umlv.symphonie.data.DataManager#changeStudentMarkValue(float)
