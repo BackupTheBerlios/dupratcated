@@ -5,7 +5,7 @@
 
 package fr.umlv.symphonie.view.cells;
 
-import java.util.IdentityHashMap;
+import java.util.HashMap;
 
 import javax.swing.table.DefaultTableCellRenderer;
 
@@ -18,7 +18,7 @@ public abstract class AbstractFormattableCellRenderer implements
     FormattableCellRenderer {
 
   /** List of formatted objects */
-  protected final IdentityHashMap<Object, CellFormat> fObjects = new IdentityHashMap<Object, CellFormat>();
+  protected final HashMap<Object, CellFormat> fObjects = new HashMap<Object, CellFormat>();
 
   /** Object that can be used in subclasses to delegate TableCellRenderer methods */
   protected final DefaultTableCellRenderer render = new DefaultTableCellRenderer();
