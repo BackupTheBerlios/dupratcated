@@ -8,44 +8,60 @@ import fr.umlv.symphonie.data.formula.Formula;
 import fr.umlv.symphonie.util.Pair;
 
 public interface DataManager {
-	/**	 * 
-	 * @return 
+	/**
+   * Used to get all students from database. 
+	 * @return a <code>Map</code> of <code>Student</code>s, keyed by their id.
 	 * @throws DataManagerException
 	 */
 	public Map<Integer, Student> getStudents() throws DataManagerException;
 
 	/**
-	 * @return
+   * Used to get all students from database, in a <code>List</code>.
+	 * @return a <code>List</code> of <code>Student</code>s.
 	 * @throws DataManagerException
 	 */
 	public List<Student> getStudentList() throws DataManagerException;
 
 	/**
-	 * @return
+   * Used to get all courses form database. 
+	 * @return a <code>Map</code> of <code>Course</code> keyed by their id.
 	 * @throws DataManagerException
 	 */
 	public Map<Integer, Course> getCourses() throws DataManagerException;
 
 	/**
-	 * @return
+   * Used to get all courses from database, in a <code>List</code>.
+	 * @return a <code>List</code> of <code>Course</code>s.
 	 * @throws DataManagerException
 	 */
 	public List<Course> getCoursesList() throws DataManagerException;
 
 	/**
-	 * @return
+   * Used to get all tests from database.
+	 * @return a <code>Map</code> of <code>Mark</code>s keyed by their id.
 	 * @throws DataManagerException
 	 */
 	public Map<Integer, Mark> getMarks() throws DataManagerException;
 
 	/**
-	 * @return
+   * Used to get all marks from database.
+	 * @return a <code>List</code> of <code>StudentMark</code>s.
 	 * @throws DataManagerException
 	 */
 	public List<StudentMark> getStudentMarks() throws DataManagerException;
 
+  /**
+   * Used to get all formulas from the database related to a given course.
+   * @param c The <code>Course</code> to get formulas.
+   * @return a <code>List</code> of <code>Formula</code>s.
+   * @throws DataManagerException
+   */
   public List<Formula> getFormulasByCourse(Course c) throws DataManagerException;
   
+  /**
+   * @return
+   * @throws DataManagerException
+   */
   public List<Formula> getJuryFormulas() throws DataManagerException;
   
 	/**
