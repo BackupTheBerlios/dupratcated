@@ -22,7 +22,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import fr.umlv.symphonie.data.Course;
-import fr.umlv.symphonie.data.DataManagerException;
 import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
@@ -36,7 +35,7 @@ public abstract class XMLExporter {
   protected final String dtd = "symphonie.dtd";
   protected SQLDataManager dm = new SQLDataManager();
 
-  public abstract void export() throws  DataManagerException;
+  public abstract void export();
 
   protected static void addCourseNode(Node root, Course c) {
     Element e = root.getOwnerDocument().createElement("course");
