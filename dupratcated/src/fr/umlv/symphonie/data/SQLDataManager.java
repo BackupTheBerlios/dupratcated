@@ -1779,9 +1779,11 @@ public class SQLDataManager implements
   
   
   public void removeTeacherFormula(Formula f, Course c) throws DataManagerException{
-    String request = "remove from " + TABLE_TEACHER_FORMULA + " " +
+    String request = "delete from " + TABLE_TEACHER_FORMULA + " " +
                      "where " + COLUMN_ID_FORMULA_FROM_TABLE_FORMULA + " = " + f.getID() + " " +
                      ";";
+    
+    System.out.println(request);
     
     // delete from database
     try{

@@ -200,8 +200,6 @@ public class TeacherModel extends AbstractTableModel {
             int column;
 
             for (Formula f : formulaList) {
-              System.out.println("formule pour " + course + " : " + f.getDescription());
-              System.out.println(f);
               column = f.getColumn();
               if (column < 0)
                 columnList.add(0, f);
@@ -256,7 +254,6 @@ public class TeacherModel extends AbstractTableModel {
   
   public void update(){
     setCourse(course);
-    System.out.println("update lance.");
   }
   
   protected void clear() {
