@@ -44,4 +44,5 @@ public class SymphonieConstants {
   public static final String CELLDIALOG_SAMPLE = "celldialog.sample";
   public static final String BUTTON_CANCEL = "bcancel";
   public static final String BUTTON_OK = "bok";
+  public static final String FORMULADIALOG_TITLE = "formuladialog.title";
 }

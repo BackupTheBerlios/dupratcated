@@ -42,6 +42,7 @@ import fr.umlv.symphonie.data.DataManagerException;
 import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.model.CourseTreeModel;
+import fr.umlv.symphonie.model.JuryModel;
 import fr.umlv.symphonie.model.StudentModel;
 import fr.umlv.symphonie.model.StudentTreeModel;
 import fr.umlv.symphonie.model.TeacherModel;
@@ -58,6 +59,7 @@ public class Symphonie {
   private static HashMap<String, String> english;
   private static HashMap<String, String> french;
   private static JFrame frame;
+  private static JTabbedPane tab;
 
   private static JFrame getFrame() throws DataManagerException {
 
@@ -182,33 +184,33 @@ public class Symphonie {
     JMenu mode = builder.buildMenu(SymphonieConstants.CHANGE_VIEW_MENU);
     // Actions
     Action viewStudent = SymphonieActionFactory.getModeChangeAction("student",
-        new ImageIcon());
-    Action viewJury = SymphonieActionFactory.getModeChangeAction("jury",
-        new ImageIcon());
+        new ImageIcon(), tab, 0);
     Action viewTeacher = SymphonieActionFactory.getModeChangeAction("teacher",
-        new ImageIcon());
+        new ImageIcon(), tab, 1);
+    Action viewJury = SymphonieActionFactory.getModeChangeAction("jury",
+        new ImageIcon(), tab, 2);
 
     // Items
     JCheckBoxMenuItem studentBox = (JCheckBoxMenuItem) builder.buildMenuItem(
         viewStudent, SymphonieConstants.VIEW_STUDENT_MENU_ITEM,
         SymphonieComponentBuilder.JMenuItemType.CHECK_BOX_ITEM);
 
-    JCheckBoxMenuItem juryBox = (JCheckBoxMenuItem) builder.buildMenuItem(
-        viewJury, SymphonieConstants.VIEW_JURY_MENU_ITEM,
-        SymphonieComponentBuilder.JMenuItemType.CHECK_BOX_ITEM);
-
     JCheckBoxMenuItem teacherBox = (JCheckBoxMenuItem) builder.buildMenuItem(
         viewTeacher, SymphonieConstants.VIEW_TEACHER_MENU_ITEM,
         SymphonieComponentBuilder.JMenuItemType.CHECK_BOX_ITEM);
 
+    JCheckBoxMenuItem juryBox = (JCheckBoxMenuItem) builder.buildMenuItem(
+        viewJury, SymphonieConstants.VIEW_JURY_MENU_ITEM,
+        SymphonieComponentBuilder.JMenuItemType.CHECK_BOX_ITEM);
+
     ButtonGroup g = new ButtonGroup();
     g.add(studentBox);
-    g.add(juryBox);
     g.add(teacherBox);
+    g.add(juryBox);
 
     mode.add(studentBox);
-    mode.add(juryBox);
     mode.add(teacherBox);
+    mode.add(juryBox);
 
     return mode;
   }
@@ -287,7 +289,7 @@ public class Symphonie {
     Action connect = SymphonieActionFactory.getConnectAction(new ImageIcon(
         Symphonie.class.getResource("icons/admin.png")), builder);
     Action db = SymphonieActionFactory.getDBAction(new ImageIcon(
-        Symphonie.class.getResource("icons/db.png")));
+        Symphonie.class.getResource("icons/db.png")), frame, builder);
     Action pwd = SymphonieActionFactory.getPwdAction(new ImageIcon(
         Symphonie.class.getResource("icons/pwd.png")));
 
@@ -312,19 +314,19 @@ public class Symphonie {
     toolbar.add(SymphonieActionFactory.getConnectAction(new ImageIcon(
         Symphonie.class.getResource("icons/connect.png")), builder));
     toolbar.add(SymphonieActionFactory.getDBAction(new ImageIcon(
-        Symphonie.class.getResource("icons/db.png"))));
+        Symphonie.class.getResource("icons/db.png")),frame,builder));
 
     toolbar.setFloatable(false);
 
     return toolbar;
   }
-/**
- * Build a JSplitPane with the TeacherModel
- * 
- * @param dataManager
- * @return JSplitPane
- *  
- */
+
+  /**
+   * Build a JSplitPane with the TeacherModel
+   * 
+   * @param dataManager
+   * @return JSplitPane
+   */
   private static JSplitPane getTeacherPane(DataManager dataManager) {
     JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
@@ -407,7 +409,6 @@ public class Symphonie {
   }
 
   /**
-   * 
    * @param dataManager
    * @return
    * @throws DataManagerException
@@ -511,8 +512,39 @@ public class Symphonie {
   }
 
   /**
-   * 
-   * @param f the frame
+   * @param dataManager
+   * @return JTable
+   */
+  private static JTable getJuryPane(DataManager dataManager) {
+    JuryModel model = new JuryModel(dataManager);
+
+    JTable table = new JTable(model);
+    table.setTableHeader(null);
+
+    table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+
+      public java.awt.Component getTableCellRendererComponent(JTable table,
+          Object value, boolean isSelected, boolean hasFocus, int row,
+          int column) {
+        JLabel label = (JLabel) super.getTableCellRendererComponent(table,
+            value, isSelected, hasFocus, row, column);
+
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+
+        if (column == 0 || row == 0
+            || column == table.getModel().getColumnCount() - 2)
+          label.setFont(getFont().deriveFont(Font.BOLD));
+
+        return label;
+      }
+    });
+
+    return table;
+  }
+
+  /**
+   * @param f
+   *          the frame
    * @param builder
    * @return JPanel
    * @throws DataManagerException
@@ -524,19 +556,22 @@ public class Symphonie {
 
     DataManager dataManager = new SQLDataManager();
 
-    
-    JTabbedPane tab = new JTabbedPane(JTabbedPane.BOTTOM,
-        JTabbedPane.SCROLL_TAB_LAYOUT);
-    
-    /* Student JTabbedPane */
-    tab.add(SymphonieConstants.VIEW_STUDENT_MENU_ITEM, new JScrollPane(getStudentPane(dataManager)));
-    panel.add(tab);
-    
-    /* Teacher JTabbedPane */
+    tab = new JTabbedPane(JTabbedPane.BOTTOM, JTabbedPane.SCROLL_TAB_LAYOUT);
 
-    tab.add(SymphonieConstants.VIEW_TEACHER_MENU_ITEM, new JScrollPane(getTeacherPane(dataManager)));
+    /* Student JTabbedPane */
+    tab.add(SymphonieConstants.VIEW_STUDENT_MENU_ITEM, new JScrollPane(
+        getStudentPane(dataManager)));
     panel.add(tab);
-    
+
+    /* Teacher JTabbedPane */
+    tab.add(SymphonieConstants.VIEW_TEACHER_MENU_ITEM, new JScrollPane(
+        getTeacherPane(dataManager)));
+    panel.add(tab);
+
+    /* Teacher JTabbedPane */
+    tab.add(SymphonieConstants.VIEW_JURY_MENU_ITEM, new JScrollPane(
+        getJuryPane(dataManager)));
+
     builder.addChangeListener(panel, new ChangeListener() {
 
       public void stateChanged(ChangeEvent arg0) {

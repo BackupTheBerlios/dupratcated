@@ -15,6 +15,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
+import javax.swing.JTabbedPane;
 
 import fr.umlv.symphonie.util.SymphonieComponentBuilder;
 import fr.umlv.symphonie.util.wizard.DefaultWizardModel;
@@ -88,10 +89,13 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getModeChangeAction(String view, ImageIcon icon) {
+  public static AbstractAction getModeChangeAction(String view, ImageIcon icon,final JTabbedPane tab,final int position) {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
+        
+        System.out.println(tab.getTitleAt(position));
+        tab.setSelectedComponent(tab.getComponentAt(position)); 
       }
     };
     a.putValue(Action.SMALL_ICON, icon);
@@ -202,10 +206,11 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getDBAction(Icon icon) {
+  public static AbstractAction getDBAction(Icon icon,final JFrame frame, final SymphonieComponentBuilder builder ) {
     AbstractAction a = new AbstractAction() {
-
       public void actionPerformed(ActionEvent event) {
+        DatabaseDialog dbd = new DatabaseDialog(frame, builder);
+        dbd.setVisible(true);
       }
     };
     a.putValue(Action.SMALL_ICON, icon);
