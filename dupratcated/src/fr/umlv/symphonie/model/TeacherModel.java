@@ -90,7 +90,6 @@ public class TeacherModel extends AbstractTableModel {
   protected final SortedMap<Student, Map<Integer, StudentMark>> studentMarkMap = new TreeMap<Student, Map<Integer, StudentMark>>(
       StudentComparator);
 
-  private final HashMap<Object, CellFormat> formattedObjects = new HashMap<Object, CellFormat>();
 
   /**
    * Pool de threads qui n'en contient qu'un seul et qui sert pour le
@@ -122,9 +121,6 @@ public class TeacherModel extends AbstractTableModel {
     this.manager = manager;
   }
 
-  public HashMap<Object, CellFormat> getFormattedObjects() {
-    return formattedObjects;
-  }
 
   public void setCourse(final Course courseToAdd) {
 
@@ -231,6 +227,8 @@ public class TeacherModel extends AbstractTableModel {
 
     studentMarkMap.clear();
     markMap.clear();
+    
+    fireTableStructureChanged();
   }
 
   public int getRowCount() {
@@ -637,14 +635,6 @@ public class TeacherModel extends AbstractTableModel {
 
     if (course != null) {
       Map<Integer, Integer>[] dataTab;
-
-      // Pair<Map<Integer, Mark>,
-      // SortedMap<Student, Map<Integer, StudentMark>>> data =
-      // dataManager.getAllMarksByCourse(c);
-      //    
-      // Map<Integer, Mark> markMap = data.getFirst();
-      // SortedMap<Student, Map<Integer, StudentMark>> studentMarkMap =
-      // data.getSecond();
 
       int size = (20 % step == 0 ? 20 / step : 20 / step + 1);
 

@@ -179,11 +179,14 @@ public class StudentModel extends AbstractTableModel implements
 
   }
 
-  protected void clear() {
+  public void clear() {
     columnCount = 0;
     rowCount = 0;
     student = null;
     matrix = null;
+    markMap = null;
+    
+    fireTableStructureChanged();
   }
 
   /*
@@ -214,7 +217,9 @@ public class StudentModel extends AbstractTableModel implements
   }
 
   public ChartPanel getChartPanel() {
-
+    
+    if (student != null){
+    
     DefaultKeyedValuesDataset pieDataset = new DefaultKeyedValuesDataset();
 
     for (Course c : markMap.keySet()) {
@@ -229,6 +234,9 @@ public class StudentModel extends AbstractTableModel implements
     pieChart.getPlot().setForegroundAlpha(0.35f);
 
     return new ChartPanel(pieChart);
+    }
+    
+    return null;
   }
 
   public MessageFormat getHeaderMessageFormat() {

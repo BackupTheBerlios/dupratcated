@@ -175,12 +175,15 @@ public class JuryModel extends AbstractTableModel {
 
   }
 
-  protected void clear() {
+  public void clear() {
     rowCount = 0;
     columnCount = 0;
     columnList.clear();
     studentList.clear();
     dataMap.clear();
+    courseMap.clear();
+    
+    fireTableStructureChanged();
   }
 
   /*
