@@ -129,8 +129,6 @@ public class JuryModel extends AbstractTableModel {
             int column;
 
             for (Formula f : formulaList) {
-              System.out.println("formule : " + f.getDescription());
-              System.out.println(f);
               column = f.getColumn();
               if (column < 0)
                 columnList.add(0, f);

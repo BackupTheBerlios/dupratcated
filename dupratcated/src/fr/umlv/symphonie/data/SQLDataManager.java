@@ -544,8 +544,6 @@ public class SQLDataManager implements
           System.out.println("couille de IO.");
           continue;
         }
-
-        System.out.println("formule trouvee : " + f);
         
         // add into tmp list
         tmpList.add(f);
