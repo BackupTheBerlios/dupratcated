@@ -25,7 +25,7 @@ public class StudentAverage {
     float result = 0;
     float div = 0;
 	
-    if (collection == null)
+    if (collection == null || collection.isEmpty())
       return 0;
     
     for (StudentMark sm : collection){
@@ -41,7 +41,7 @@ public class StudentAverage {
     float result = 0;
 	float div = 0;
     
-    if (map == null)
+    if (map == null || map.isEmpty())
       return 0;
     
     for (Course c : map.keySet()){
