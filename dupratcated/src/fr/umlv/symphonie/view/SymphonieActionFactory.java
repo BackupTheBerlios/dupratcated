@@ -30,10 +30,15 @@ import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.identification.IdentificationException;
 import fr.umlv.symphonie.util.identification.IdentificationStrategy;
 import fr.umlv.symphonie.util.wizard.Wizard;
+import fr.umlv.symphonie.view.cells.CellFormat;
+import fr.umlv.symphonie.view.cells.FormattableCellRenderer;
 
 public class SymphonieActionFactory {
 
+  /** Symphonie instance used by the factory */
   protected final Symphonie symphonie;
+
+  /** The builder for internationalization */
   protected final ComponentBuilder builder;
 
   public SymphonieActionFactory(Symphonie symphonie, ComponentBuilder builder) {
@@ -171,22 +176,45 @@ public class SymphonieActionFactory {
   }
 
   /**
-   * Actions that displays a dialog that allows user to conditionally format cells
-   * @param icon the action SMALL_ICON
+   * Actions that displays a dialog that allows user to conditionally format
+   * cells
+   * 
+   * @param icon
+   *          the action SMALL_ICON
    * @return an AbstractAction
    */
   public AbstractAction getFormulaCellAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
-        private final CellDialog cd = new CellDialog(symphonie, builder);
+
+      private final CellDialog cd = new CellDialog(symphonie, builder);
+
       public void actionPerformed(ActionEvent event) {
         cd.setVisible(true);
-        
+        CellFormat cf = cd.getUserFormat();
+        FormattableCellRenderer fcr = null;
+        switch (symphonie.getCurrentView().ordinal()) {
+          case 0:
+            fcr = symphonie.getCurrentStudentModel()
+                .getFormattableCellRenderer();
+            break;
+          case 1:
+            fcr = symphonie.getCurrentTeacherModel()
+                .getFormattableCellRenderer();
+            break;
+          case 2:
+            fcr = symphonie.getCurrentJuryModel().getFormattableCellRenderer();
+            break;
+          case 3:
+            throw new IllegalStateException("Illegal view number");
+        }
+        for (Object o : symphonie.selectedObjects)
+          fcr.addFormatedObject(o, cf);
       }
     };
     a.putValue(Action.SMALL_ICON, icon);
     return a;
   }
-  
+
   /**
    * Creates an action that prompts a login dialog
    * 
@@ -385,48 +413,51 @@ public class SymphonieActionFactory {
   /** getStudentChartAction singleton instance */
   protected AbstractAction studentChartAction;
 
-  public AbstractAction getRemoveStudentAction(Icon icon, final JTree tree){
-    AbstractAction a = new AbstractAction(){
+  public AbstractAction getRemoveStudentAction(Icon icon, final JTree tree) {
+    AbstractAction a = new AbstractAction() {
+
       public void actionPerformed(ActionEvent e) {
         Object o = tree.getLastSelectedPathComponent();
-        
+
         if (o instanceof Student) {
-          symphonie.getStudentTreeModel().removeStudent((Student)o);
+          symphonie.getStudentTreeModel().removeStudent((Student) o);
           symphonie.getCurrentStudentModel().clear();
         }
       }
     };
-    
+
     a.putValue(Action.SMALL_ICON, icon);
     return a;
   }
-  
-  
-  public AbstractAction getAddStudentAction(Icon icon){
-    AbstractAction a = new AbstractAction(){
+
+  public AbstractAction getAddStudentAction(Icon icon) {
+    AbstractAction a = new AbstractAction() {
+
       AddStudentDialog dialog = new AddStudentDialog(symphonie, builder);
-      
-      public void actionPerformed(ActionEvent e){
+
+      public void actionPerformed(ActionEvent e) {
         dialog.setModal(true);
         dialog.setVisible(true);
       }
     };
-    
+
     a.putValue(Action.SMALL_ICON, icon);
     return a;
   }
-  
-  public AbstractAction getUpdateStudentTreeAction(Icon icon){
-    AbstractAction a = new AbstractAction(){
-      public void actionPerformed(ActionEvent e){
+
+  public AbstractAction getUpdateStudentTreeAction(Icon icon) {
+    AbstractAction a = new AbstractAction() {
+
+      public void actionPerformed(ActionEvent e) {
         symphonie.getStudentTreeModel().update();
       }
     };
-    
+
     a.putValue(Action.SMALL_ICON, icon);
-    
+
     return a;
   }
+
   /* TEACHER VIEW ACTIONS ********************************** */
 
   /**
@@ -590,46 +621,50 @@ public class SymphonieActionFactory {
   /** getTeacherChartAction singleton instance */
   protected AbstractAction teacherChartAction;
 
-  public AbstractAction getAddCourseAction(Icon icon){
-    AbstractAction a = new AbstractAction(){
-      private final AddCourseDialog dialog = new AddCourseDialog(symphonie, builder);
-      
-      public void actionPerformed(ActionEvent e){
+  public AbstractAction getAddCourseAction(Icon icon) {
+    AbstractAction a = new AbstractAction() {
+
+      private final AddCourseDialog dialog = new AddCourseDialog(symphonie,
+          builder);
+
+      public void actionPerformed(ActionEvent e) {
         dialog.setModal(true);
         dialog.setVisible(true);
       }
     };
-    
+
     a.putValue(Action.SMALL_ICON, icon);
     return a;
   }
 
-  public AbstractAction getRemoveCourseAction (Icon icon, final JTree tree){
-    AbstractAction a = new AbstractAction(){
+  public AbstractAction getRemoveCourseAction(Icon icon, final JTree tree) {
+    AbstractAction a = new AbstractAction() {
+
       public void actionPerformed(ActionEvent e) {
         Object o = tree.getLastSelectedPathComponent();
-        
-        if (o instanceof Course){
-          symphonie.getCourseTreeModel().removeCourse((Course)o);
+        if (o instanceof Course) {
+          symphonie.getCourseTreeModel().removeCourse((Course) o);
           symphonie.getCurrentTeacherModel().clear();
         }
       }
     };
-    
+
     a.putValue(Action.SMALL_ICON, icon);
     return a;
   }
-  
-  public AbstractAction getUpdateCourseTreeAction(Icon icon){
-    AbstractAction a = new AbstractAction(){
-      public void actionPerformed(ActionEvent e){
+
+  public AbstractAction getUpdateCourseTreeAction(Icon icon) {
+    AbstractAction a = new AbstractAction() {
+
+      public void actionPerformed(ActionEvent e) {
         symphonie.getCourseTreeModel().update();
       }
     };
-    
+
     a.putValue(Action.SMALL_ICON, icon);
     return a;
   }
+
   /* JURY VIEW ACTIONS ************************************* */
 
   /**
