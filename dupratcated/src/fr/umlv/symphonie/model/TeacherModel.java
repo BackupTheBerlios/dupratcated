@@ -5,8 +5,12 @@
 package fr.umlv.symphonie.model;
 
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.Font;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -89,6 +93,14 @@ public class TeacherModel extends AbstractTableModel {
   
   private final HashMap<Object, CellFormat> formattedObjects = new HashMap<Object, CellFormat>();
 
+  
+  /**
+   * Pool de threads qui n'en contient qu'un seul et qui sert pour le
+   * rafraîchissement du canal courant.
+   */
+  private final ExecutorService es = Executors.newSingleThreadExecutor();
+  
+  
   public TeacherModel(DataManager manager) {
     this.manager = manager;
   }
@@ -97,113 +109,62 @@ public class TeacherModel extends AbstractTableModel {
     return formattedObjects;
   }
   
-  public void setCourse(Course course) {
-    
-    clear();
-    
-    this.course = course;
-    
-    /*Map<Integer, Mark> markMap = null;
-    try {
-      markMap = manager.getMarksByCourse(course);
-    } catch (DataManagerException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }*/
-    
-    Pair<Map<Integer, Mark>, SortedMap<Student, Map<Integer, StudentMark>>> studentAndMarkMapPair = null;
-    try {
-      studentAndMarkMapPair = manager.getAllMarksByCourse(course);
-    } catch (DataManagerException e) {
-      System.out.println("error getting data from database for Teacher View.");
-      e.printStackTrace();
-    }
+  public void setCourse(final Course course) {
     
     
-    markMap.putAll(studentAndMarkMapPair.getFirst());
-    studentMarkMap.putAll(studentAndMarkMapPair.getSecond());
-    
-    
-    columnCount = markMap.size() + 2;
-    rowCount = studentMarkMap.size() + 3;
-    
-    System.out.println("lignes : " + rowCount);
-    System.out.println("colonnes : " + columnCount);
-    
-    
-
-    
-    
-    columnList.addAll(markMap.values());
-    
-    /*Collections.sort(columnList, new Comparator<Mark>(){
-      public int compare(Mark arg0,Mark arg1){
-        int n = arg0.getDesc().compareToIgnoreCase(arg1.getDesc());
+    es.execute(new Runnable(){
+      
+      /* (non-Javadoc)
+       * @see java.lang.Runnable#run()
+       */
+      public void run() {
         
-        if (n == 0){
-          return arg0.getId() - arg1.getId();
+        TeacherModel.this.clear();
+        TeacherModel.this.course = course;
+        
+        Pair<Map<Integer, Mark>, SortedMap<Student, Map<Integer, StudentMark>>> studentAndMarkMapPair = null;
+        try {
+          studentAndMarkMapPair = manager.getAllMarksByCourse(course);
+        } catch (DataManagerException e) {
+          System.out.println("error getting data from database for Teacher View.");
+          e.printStackTrace();
         }
         
-        return n;
-      }
-    });*/
+        
+        markMap.putAll(studentAndMarkMapPair.getFirst());
+        studentMarkMap.putAll(studentAndMarkMapPair.getSecond());
+        
+        
+        columnCount = markMap.size() + 2;
+        rowCount = studentMarkMap.size() + 3;
+        
+        System.out.println("lignes : " + rowCount);
+        System.out.println("colonnes : " + columnCount);
+        
+        columnList.addAll(markMap.values());
 
-    studentList.addAll(studentMarkMap.keySet());
-  
+        studentList.addAll(studentMarkMap.keySet());
+        
+        try {
+          EventQueue.invokeAndWait(new Runnable() {
+
+            public void run() {
+              TeacherModel.this.fireTableStructureChanged();
+            }
+            
+          });
+        } catch (InterruptedException e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+        } catch (InvocationTargetException e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+        }
+
+      }
+    });
     
     
-    
-    
-    
-    
-//    matrix = new Object[rowCount][columnCount];
-//    
-//    matrix[0][0] = "Intitule";
-//    matrix[1][0] = "Coeff";
-//
-//    
-//    int column = 1;
-//    int row = 0;
-//    
-//    
-//    /*
-//     * On remplit la partie haute du modele
-//     * (celle avec les intitules et les coeff)
-//     */
-//    for (int n : markMap.keySet()){
-//      matrix[row][column] = markMap.get(n);
-//      matrix[row + 1][column] = markMap.get(n).getCoeff();
-//      column++;
-//    }
-//    
-//    matrix[row][column] = "Moyenne";
-//    matrix[row + 1][column] = "";
-//    
-//    blankRow(row+2,0 );
-//    row += 3;
-//    
-//    /* fin du remplissage de la partie haute */
-//    
-//    
-//    
-//    
-//    SortedMap<Student, Map<Integer, StudentMark>> studentAndMarkMap = studentAndMarkMapPair.getSecond();
-//    /*
-//     * On remplit le reste des donnï¿½es
-//     * concernant les etudiants
-//     */
-//    for (Student s : studentAndMarkMap.keySet()){
-//      matrix[row][0] = s;
-//      for (column = 1 ; column < columnCount -1 ; column++){
-//        matrix[row][column] = (studentAndMarkMap.get(s)).get( ((Mark)matrix[0][column]).getId() );
-//      }
-//      
-//      matrix[row][columnCount-1] = getAverage(studentAndMarkMap.get(s).values());
-//      
-//      row++;
-//    }
-    
-    fireTableStructureChanged();
   }
   
   
@@ -218,12 +179,6 @@ public class TeacherModel extends AbstractTableModel {
     studentMarkMap.clear();
     markMap.clear();
   }
-
-  /*private void blankRow(int row, int column) {
-    for (;column < columnCount-1 ; column++)
-      matrix[row][column] = "";
-    
-  }*/
 
   /**
    * @param list
@@ -535,11 +490,11 @@ public class TeacherModel extends AbstractTableModel {
         if (o instanceof Course){
           System.out.println("on a selectionne une matiere !");
           ((TeacherModel)table.getModel()).setCourse((Course)o);
-          CellFormat f = new CellFormat(BasicFormulaFactory.booleanInstance(true), Color.RED, Color.CYAN);
+          /*CellFormat f = new CellFormat(BasicFormulaFactory.booleanInstance(true), Color.RED, Color.CYAN);
           for (int i = 3; i < 7; i++) {
             Object ob = teacherModel.getValueAt(i, 0);
             teacherModel.getFormattedObjects().put(ob, f);
-          }
+          }*/
         }
       }
       
