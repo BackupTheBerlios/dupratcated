@@ -311,6 +311,10 @@ public class TeacherModel extends AbstractTableModel implements
 
     studentMarkMap.clear();
 
+    /*
+     * before cleaning markMap, remove all
+     * tests' descriptions from the dictionary.
+     */
     for (Mark m : markMap.values()) {
       dictionary.remove(m.getDesc());
     }
@@ -343,14 +347,14 @@ public class TeacherModel extends AbstractTableModel implements
   public Object getValueAt(int rowIndex, int columnIndex) {
 
     /*
-     * cas de la ligne separatrice
+     * case of the separate line
      */
     if (rowIndex == 2) return null;
 
     fillFormulaMap(rowIndex);
 
     /*
-     * cas de la colonne tout a gauche
+     * case of the first column
      */
     if (columnIndex == 0) {
       if (rowIndex == 0) return builder.getValue(TITLE);
@@ -359,7 +363,7 @@ public class TeacherModel extends AbstractTableModel implements
     }
 
     /*
-     * cas de la colonne tout a droite
+     * case of the last column
      */
     if (columnIndex == columnCount - 1) {
       if (rowIndex == 0) return builder.getValue(AVERAGE);
@@ -369,8 +373,14 @@ public class TeacherModel extends AbstractTableModel implements
           studentList.get(rowIndex - 3)).values());
     }
 
+    /*
+     * other cases
+     */
     Object o = columnList.get(columnIndex - 1);
 
+    /*
+     * case of a formula
+     */
     if (o instanceof Formula) {
       Formula f = (Formula) o;
 
@@ -385,6 +395,9 @@ public class TeacherModel extends AbstractTableModel implements
       return f.getValue();
     }
 
+    /*
+     * case of a test
+     */
     else if (o instanceof Mark) {
       Mark m = (Mark) o;
       if (rowIndex == 0) return m;
@@ -405,7 +418,7 @@ public class TeacherModel extends AbstractTableModel implements
   public boolean isCellEditable(int rowIndex, int columnIndex) {
 
     /*
-     * Cas ou c'est pas editable :
+     * Case where it's note editable
      */
     if (columnIndex == 0 || rowIndex == 2 || columnIndex == columnCount - 1) return false;
 
@@ -429,7 +442,7 @@ public class TeacherModel extends AbstractTableModel implements
     final int row = rowIndex;
 
     /*
-     * cas des intitules :
+     * case of the tests' titles :
      */
     if (rowIndex == 0) {
 
@@ -475,7 +488,7 @@ public class TeacherModel extends AbstractTableModel implements
     }
 
     /*
-     * cas des coeffs
+     * case of the coefficients' line
      */
     else if (rowIndex == 1) {
 
@@ -519,7 +532,7 @@ public class TeacherModel extends AbstractTableModel implements
     }
 
     /*
-     * cas des notes
+     * case of the marks
      */
     if (o instanceof Formula) return;
 
