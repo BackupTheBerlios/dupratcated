@@ -1,0 +1,132 @@
+
+Package fr.umlv.symphonie.data.formula;
+
+Helpers
+ 
+  small_acute      = 'á' | 'é' | 'í' | 'ó' | 'ú';
+  small_grave      = 'à' | 'è' | 'ì' | 'ò' | 'ù';
+  small_umlaut     = 'ä' | 'ë' | 'ï' | 'ö' | 'ü';
+  small_circumflex = 'â' | 'ê' | 'î' | 'ô' | 'û';
+  small_others     = 'ç' | 'å' | 'æ' | 'ñ';
+  small            = ['a' .. 'z'];
+
+  capital_others = 'Ç' | 'Ñ';
+  capital        = ['A' .. 'Z'];
+
+  digit   = ['0' .. '9'];
+  
+  sp    = ' ';
+
+  letter  = small | capital;
+  special = small_acute | small_grave | small_umlaut | small_circumflex | small_others | capital_others;
+  
+  id_character = small | digit | special;
+    
+  digit_separator = '.';
+  
+  
+Tokens
+
+  block_prefix = '$';
+  left_brace   = '{';
+  right_brace  = '}';
+  id_separator = ',';
+
+  integer_literal = digit+;
+  double_literal  = digit+ digit_separator digit+;
+  boolean_literal  = 'true' | 'false';
+  
+  left_parenthesis  = '(';
+  right_parenthesis = ')';
+  
+  multiplication_operator  = '*';
+  division_operator        = '/';
+  modulus_operator         = '%';
+ 
+  addition_operator     = '+';
+  substraction_operator = '-';
+  
+  equals = '==';
+  not_equals = '!=';
+  
+  less_than              = '<';
+  less_than_or_equals    = '<=';
+  greater_than           = '>';
+  greater_than_or_equals = '>=';
+ 
+  logical_and_operator = '&&';
+  
+  logical_or_operator  = '||';
+
+  identifier = id_character (id_character | sp)*;
+    
+  
+Productions
+
+  expression =
+    {numeric} additive_expression   |
+    {boolean} logical_or_expression ;
+    
+  additive_expression =
+    {multiplicative} multiplicative_expression |
+    {addition}       [left]:additive_expression   addition_operator   [right]:multiplicative_expression |
+    {substraction}   [left]:additive_expression substraction_operator [right]:multiplicative_expression ;
+  
+  multiplicative_expression =
+    {unary}          unary_expression |
+    {multiplication} [left]:multiplicative_expression multiplication_operator [right]:unary_expression |
+    {division}       [left]:multiplicative_expression    division_operator    [right]:unary_expression |
+    {modulus}        [left]:multiplicative_expression     modulus_operator    [right]:unary_expression ;
+  
+  unary_expression =
+    {numeric} numeric_expression |
+    {minus}   substraction_operator numeric_expression ;
+      
+  numeric_expression =
+    {literal}     literal_expression     |
+    {evaluated}   evaluated_expression   |
+    {parenthetic} left_parenthesis additive_expression right_parenthesis ;
+    
+  literal_expression =
+    {integer} integer_literal |
+    {double}  double_literal  ;
+  
+  evaluated_expression =
+    {function} identifier left_parenthesis block_expression right_parenthesis |
+    {cell}     block_prefix left_brace identifier right_brace ;
+
+  block_expression =
+    {data} block_prefix identifier |
+    {cell} block_prefix left_brace identifiers right_brace ;
+
+  identifiers =
+    separator_suffixed_id* identifier ; 
+
+  separator_suffixed_id =
+    identifier id_separator ;
+
+
+
+  logical_or_expression =
+    {logical_and} logical_and_expression |
+    {logical_or}  [left]:logical_or_expression logical_or_operator [right]:logical_and_expression ;
+  
+  logical_and_expression =
+    {comparative} comparative_expression |
+    {logical_and} [left]:logical_and_expression logical_and_operator [right]:comparative_expression ;
+
+  comparative_expression =
+    {equality}     equality_expression   |
+    {relational}   relational_expression |
+    {literal}      boolean_literal       |
+    {parenthethic} left_parenthesis logical_or_expression right_parenthesis;
+        
+  equality_expression =
+    {equals}     [left]:additive_expression   equals   [right]:additive_expression |
+    {not_equals} [left]:additive_expression not_equals [right]:additive_expression ;
+    
+  relational_expression =
+    {less_than}              [left]:additive_expression        less_than       [right]:additive_expression |
+    {less_than_or_equals}    [left]:additive_expression   less_than_or_equals  [right]:additive_expression |
+    {greater_than}           [left]:additive_expression      greater_than      [right]:additive_expression |
+    {greater_than_or_equals} [left]:additive_expression greater_than_or_equals [right]:additive_expression ;
