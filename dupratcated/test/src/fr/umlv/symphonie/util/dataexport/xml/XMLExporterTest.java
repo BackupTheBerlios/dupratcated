@@ -19,7 +19,7 @@ import fr.umlv.symphonie.util.dataexport.xml.XMLExporter;
 public class XMLExporterTest extends TestCase {
 
   final DataExporter de = new XMLExporter();
-  final DataManager dm = new SQLDataManager();
+  final DataManager dm = SQLDataManager.getInstance();
 
   /**
    * A SUPRIMER c'est juste pour tester pour nous. Mettre la dtd à la racine

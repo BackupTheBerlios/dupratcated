@@ -16,7 +16,7 @@ import junit.framework.TestCase;
  */
 public class SQLDataManagerTest extends TestCase {
 
-  SQLDataManager dm = new SQLDataManager();
+  SQLDataManager dm = SQLDataManager.getInstance();
   
   public void testCreatePrimaryKey() throws SQLException, DataManagerException {
     int key1 = -1;

@@ -18,7 +18,7 @@ public class XMLImporterTest extends TestCase {
 
 	final DataImporter di = new XMLImporter();
 
-	final DataManager dm = new SQLDataManager();
+	final DataManager dm = SQLDataManager.getInstance();
 
 	public void testImportStudentView() {
 		try {
