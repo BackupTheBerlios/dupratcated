@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!-- ====================================================================== 
+     26 mars 2005 14:57:12                                                        
+
+     Symphonie
+     
+     Laurent GARCIA
+     Sebastian PENA SALDARRIAGA
+     Nathalie PERSIN
+     Fabien VALLE
+     ====================================================================== -->
+
+<project name="project" default="all">
+    
+	<description>
+		Génie Logiciel 1 - Symphonie Dupratcated
+		Master 1 Informatique - 2004/2005
+    </description>
+
+	
+	<property name="src" value="src" />
+	<property name="classes" value="classes" />
+	<property name="lib" value="lib"/>
+	<property name="bin" value="bin"/>
+	<property name="docs" value="docs" />
+	<property name="api" value="api" />
+	
+	<property name="package" value="fr/umlv/symphonie" />
+	<property name="grammar" value="formulas.grammar"/>
+	<property name="formula" value="${package}/data/formula"/>
+
+	<property name="symphonie.jar" value="symphonie.jar" />
+	<property name="Main" value="fr.umlv.symphonie.view.SymphonieLauncher"/>
+
+	<property name="icon_dir" value="${package}/view/icons"/>
+	<property name="lexer.dat" value="${formula}/lexer/lexer.dat"/>
+	<property name="parser.dat" value="${formula}/parser/parser.dat"/>
+	<property name="welcomepage" value="${package}/view/readme.htm"/>
+	<property name="dtdxml" value="${package}/util/dataexport/xml/symphonie.dtd" />
+	
+	<condition property="exec.message" value="  > run [--reset]">
+		<os family="windows" />
+	</condition>
+	<condition property="exec.message" value="  > run.sh [--reset]">
+		<os family="unix" />
+	</condition>
+	
+	<path id="extra_class_path">
+		<pathelement location="${lib}/jfreechart-0.9.21.jar"/>
+		<pathelement location="${lib}/poi-2.5.1-final-20040804.jar"/>
+		<pathelement location="${lib}/rowset.jar"/>
+		<pathelement location="${lib}/jcommon-0.9.6.jar"/>
+		<pathelement location="${lib}/mysql-connector-java-3.2.0-alpha-bin.jar"/>
+	</path>
+	
+	
+    <!-- ================================= 
+          target: help              
+          description: displays help
+         ================================= -->
+	<target name="help">
+		<echo level="info" message="ant : Create executable jar file : ${symphonie.jar}" />
+		<echo level="info" message="ant test : Execute graphic JUnit test suite" />
+		<echo level="info" message="ant javadoc: Create software documentation ${docs}/${api}" />
+		<echo level="info" message="ant clean : Delete compiled classes and executable jar file" />
+		<echo level="info" message="Run (after building) :${line.separator}${exec.message}" />
+	</target>
+	
+	<!-- ================================= 
+	      target: sablecc
+	      description: compile grammar
+	     ================================= -->
+	<target name="sablecc">
+		<java jar="${lib}/sablecc.jar" fork="true">
+			<arg value="${src}/${grammar}" />
+			<arg value="-d" />
+			<arg value="${src}" />
+		</java>
+	</target>
+
+    <!-- ================================= 
+          target: compile
+          description: compile source files              
+         ================================= -->
+	<target name="compile" depends="sablecc">
+		<mkdir dir="${classes}" />
+		<javac srcdir="${src}/${package}"
+         destdir="${classes}"
+         debug="on"
+		 classpathref="extra_class_path"
+		/>
+		<copy todir="${classes}/${icon_dir}">
+			<fileset dir="${src}/${icon_dir}"/>
+		</copy>
+		<copy file="${src}/${lexer.dat}" tofile="${classes}/${lexer.dat}" />
+		<copy file="${src}/${parser.dat}" tofile="${classes}/${parser.dat}" />
+		<copy file="${src}/${welcomepage}" tofile="${classes}/${welcomepage}" />
+		<copy file="${src}/${dtdxml}" tofile="${classes}/${dtdxml}"/>
+	</target>
+
+    
+    <!-- ================================= 
+          target: jar
+          description: jar compiled classes
+         ================================= -->
+    <target name="jar" depends="compile">
+        <jar jarfile="${bin}/${symphonie.jar}" basedir="${classes}">
+        	<manifest>
+        		<attribute name="Main-Class" value="${Main}" />
+        	</manifest>
+    	</jar>
+    	<chmod file="run.sh" perm="ugo+rx" />
+    </target>
+	
+	
+    <!-- ================================= 
+          target: javadoc              
+          description: javadoc generation
+         ================================= -->
+    <target name="javadoc">
+        <mkdir dir="${docs}/${api}"/>
+    	<javadoc access="private" author="true" classpath="classes" destdir="${docs}/${api}"
+    		doctitle="Symphonie Dupratcated"
+    		bottom="Copyright © 2005 Skiimo, Snowman, Spraynasal, Susmab - Master 1 Informatique, Université de Marne la Vallée."
+    		nodeprecated="false" nodeprecatedlist="false" verbose="false"
+    		noindex="false" nonavbar="false" notree="false"
+    		splitindex="true" use="true" version="true">
+    		
+    		<packageset dir="${src}" />
+    	</javadoc>
+    </target>
+	
+	
+    <!-- ================================= 
+          target: all
+          description: compile + jar
+         ================================= -->
+    <target name="all" depends="jar" />
+        
+	
+    <!-- - - - - - - - - - - - - - - - - - 
+          target: clean                      
+         - - - - - - - - - - - - - - - - - -->
+    <target name="clean">
+    	<delete dir="${classes}" />
+    	<delete dir="${src}/${formula}/lexer" />
+    	<delete dir="${src}/${formula}/parser" />
+      	<delete dir="${src}/${formula}/analysis" />
+       	<delete dir="${src}/${formula}/node" />
+        <delete file="${symphonie.jar}" />
+    </target>
+	
+</project>
