@@ -19,11 +19,11 @@ import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.table.AbstractTableModel;
 
 import fr.umlv.symphonie.data.ConnectionManager;
 import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.Student;
+import fr.umlv.symphonie.model.AbstractSymphonieTableModel;
 import fr.umlv.symphonie.model.JuryModel;
 import fr.umlv.symphonie.model.StudentModel;
 import fr.umlv.symphonie.model.TeacherModel;
@@ -33,7 +33,6 @@ import fr.umlv.symphonie.util.identification.IdentificationException;
 import fr.umlv.symphonie.util.identification.IdentificationStrategy;
 import fr.umlv.symphonie.util.wizard.Wizard;
 import fr.umlv.symphonie.view.cells.CellFormat;
-import fr.umlv.symphonie.view.cells.ObjectFormattingSupport;
 import fr.umlv.symphonie.view.dialog.AddCourseDialog;
 import fr.umlv.symphonie.view.dialog.AddMarkDialog;
 import fr.umlv.symphonie.view.dialog.AddStudentDialog;
@@ -205,10 +204,10 @@ public class SymphonieActionFactory {
         cd.setVisible(true);
         CellFormat cf = cd.getUserFormat();
         if (cf != null) {
-          AbstractTableModel atm = symphonie.getCurrentView().getModel(
-              symphonie);
-          ((ObjectFormattingSupport) atm).getFormattableCellRenderer()
-              .addFormatedObject(symphonie.selectedCell.getFirst(), cf);
+          AbstractSymphonieTableModel atm = symphonie.getCurrentView()
+              .getModel(symphonie);
+          atm.getFormattableCellRenderer().addFormatedObject(
+              symphonie.selectedCell.getFirst(), cf);
           Point p = symphonie.selectedCell.getSecond();
           atm.fireTableCellUpdated(p.x, p.y);
         }
@@ -231,10 +230,10 @@ public class SymphonieActionFactory {
       deleteCellFormatAction = new AbstractAction() {
 
         public void actionPerformed(ActionEvent event) {
-          AbstractTableModel atm = symphonie.getCurrentView().getModel(
-              symphonie);
-          ((ObjectFormattingSupport) atm).getFormattableCellRenderer()
-              .removeFormatedObject(symphonie.selectedCell.getFirst());
+          AbstractSymphonieTableModel atm = symphonie.getCurrentView()
+              .getModel(symphonie);
+          atm.getFormattableCellRenderer().removeFormatedObject(
+              symphonie.selectedCell.getFirst());
           Point p = symphonie.selectedCell.getSecond();
           atm.fireTableCellUpdated(p.x, p.y);
         }
@@ -438,49 +437,36 @@ public class SymphonieActionFactory {
   protected AbstractAction studentChartAction;
 
   public AbstractAction getRemoveStudentAction(Icon icon, final JTree tree) {
-    
-    if (removeStudentAction == null) {
+    AbstractAction a = new AbstractAction() {
 
-      removeStudentAction = new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        Object o = tree.getLastSelectedPathComponent();
 
-        public void actionPerformed(ActionEvent e) {
-          Object o = tree.getLastSelectedPathComponent();
-
-          if (o instanceof Student) {
-            symphonie.getStudentTreeModel().removeStudent((Student) o);
-            symphonie.getCurrentStudentModel().clear();
-          }
+        if (o instanceof Student) {
+          symphonie.getStudentTreeModel().removeStudent((Student) o);
+          symphonie.getCurrentStudentModel().clear();
         }
-      };
-    }
-    removeStudentAction.putValue(Action.SMALL_ICON, icon);
-    
-    return removeStudentAction;
+      }
+    };
+
+    a.putValue(Action.SMALL_ICON, icon);
+    return a;
   }
 
-  protected AbstractAction removeStudentAction = null;
-  
-  
   public AbstractAction getAddStudentAction(Icon icon) {
-    
-    if (addStudentAction == null) {
+    AbstractAction a = new AbstractAction() {
 
-      addStudentAction = new AbstractAction() {
+      AddStudentDialog dialog = new AddStudentDialog(symphonie, builder);
 
-        AddStudentDialog dialog = new AddStudentDialog(symphonie, builder);
+      public void actionPerformed(ActionEvent e) {
+        dialog.setModal(true);
+        dialog.setVisible(true);
+      }
+    };
 
-        public void actionPerformed(ActionEvent e) {
-          dialog.setModal(true);
-          dialog.setVisible(true);
-        }
-      };
-    }
-    addStudentAction.putValue(Action.SMALL_ICON, icon);
-
-    return addStudentAction;
+    a.putValue(Action.SMALL_ICON, icon);
+    return a;
   }
-  
-  protected AbstractAction addStudentAction = null;
 
   public AbstractAction getUpdateStudentTreeAction(Icon icon) {
     AbstractAction a = new AbstractAction() {

@@ -16,15 +16,44 @@ import java.util.TreeMap;
 
 import javax.sql.rowset.CachedRowSet;
 
-import com.mysql.jdbc.UpdatableResultSet;
 import com.sun.rowset.CachedRowSetImpl;
 
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_COEFF_FROM_TABLE_COURSE;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_COEFF_FROM_TABLE_TEST;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_COLUMN_FROM_TABLE_FORMULA;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_COMMENT_FROM_TABLE_STUDENT;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_DESC_FROM_TABLE_TITLE;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_EXPRESSION_FROM_TABLE_FORMULA;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_ID_COURSE_FROM_TABLE_TEACHER_FORMULA;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_ID_COURSE_FROM_TABLE_TEST;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_ID_FORMULA_FROM_TABLE_FORMULA;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_ID_FROM_TABLE_COURSE;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_ID_FROM_TABLE_STUDENT;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_ID_FROM_TABLE_TEST;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_ID_FROM_TABLE_TITLE;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_ID_STUDENT_FROM_TABLE_HAS_MARK;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_ID_TEST_FROM_TABLE_HAS_MARK;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_ID_TITLE_FROM_TABLE_FORMULA;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_ID_TITLE_FROM_TABLE_TEST;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_LAST_NAME_FROM_TABLE_STUDENT;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_MARK_FROM_TABLE_HAS_MARK;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_NAME_FROM_TABLE_STUDENT;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_TABLE_NAME_FROM_TABLE_TIMESTAMP;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_TIMESTAMP_FROM_TABLE_TIMESTAMP;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.COLUMN_TITLE_FROM_TABLE_COURSE;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.TABLE_COURSE;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.TABLE_HAS_MARK;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.TABLE_JURY_FORMULA;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.TABLE_STUDENT;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.TABLE_TEACHER_FORMULA;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.TABLE_TEST;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.TABLE_TIMESTAMP;
+import static fr.umlv.symphonie.data.SQLDataManagerConstants.TABLE_TITLE;
 import fr.umlv.symphonie.data.formula.Formula;
 import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
 import fr.umlv.symphonie.data.formula.lexer.LexerException;
 import fr.umlv.symphonie.data.formula.parser.ParserException;
 import fr.umlv.symphonie.util.Pair;
-import static fr.umlv.symphonie.data.SQLDataManagerConstants.*;
 
 /**
  * Classe implementing the <code>DataManager</code> interface for a
@@ -34,14 +63,6 @@ import static fr.umlv.symphonie.data.SQLDataManagerConstants.*;
  * For example, jury and teacher view display students in their tables. These students are
  * the same instances, so modifying one in a view will modify the same in the other view.
  * @author susmab
- */
-/**
- * @author susmab
- *
- */
-/**
- * @author susmab
- *
  */
 public class SQLDataManager implements
 		DataManager {

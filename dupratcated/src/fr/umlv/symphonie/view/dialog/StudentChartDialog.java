@@ -53,7 +53,7 @@ public class StudentChartDialog {
    */
   public void setChart(StudentModel model) {
     panel.removeAll();
-    ChartPanel chart = model.getChartPanel();
+    ChartPanel chart = model.getChartPanel(0);
     if (chart != null) panel.add(chart);
   }
 

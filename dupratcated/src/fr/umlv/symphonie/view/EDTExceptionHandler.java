@@ -16,7 +16,6 @@ public final class EDTExceptionHandler {
    *          The exception thrown
    */
     public void handle(Throwable t) {
-    System.out.println("tarass");
       if (errHandler != null)
       synchronized (lock) {
         errHandler.showException(t);

@@ -58,17 +58,16 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.tree.DefaultTreeCellRenderer;
-
-import com.sun.org.apache.bcel.internal.generic.LLOAD;
+import javax.swing.tree.TreeSelectionModel;
 
 import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
 import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
+import fr.umlv.symphonie.model.AbstractSymphonieTableModel;
 import fr.umlv.symphonie.model.AdminJuryModel;
 import fr.umlv.symphonie.model.AdminStudentModel;
 import fr.umlv.symphonie.model.AdminTeacherModel;
@@ -530,8 +529,10 @@ public class Symphonie {
     final JTree tree = new JTree(studentTreeModel);
     tree.setCellRenderer(new DefaultTreeCellRenderer() {
 
-      private final ImageIcon leafIcon = new ImageIcon(Symphonie.class.getResource("icons/student.png"));
-      private final ImageIcon rootIcon = new ImageIcon(Symphonie.class.getResource("icons/students.png"));
+      private final ImageIcon leafIcon = new ImageIcon(Symphonie.class
+          .getResource("icons/student.png"));
+      private final ImageIcon rootIcon = new ImageIcon(Symphonie.class
+          .getResource("icons/students.png"));
 
       public Component getTreeCellRendererComponent(JTree tree, Object value,
           boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
@@ -556,15 +557,14 @@ public class Symphonie {
       }
     });
 
+    tree.getSelectionModel().setSelectionMode(
+        TreeSelectionModel.SINGLE_TREE_SELECTION);
     final JPopupMenu treePop = builder.buildPopupMenu(STUDENTVIEWPOPUP_TITLE);
-    
-/***********************************************************************************************************************************/
-    // TODO
-    addStudentAction = actionFactory.getAddStudentAction(new ImageIcon(Symphonie.class.getResource("icons/add_student.png")));
-    
-    
-    final AbstractButton addStudent = builder.buildButton(addStudentAction, ADD_STUDENT_TITLE,
-        ComponentBuilder.ButtonType.MENU_ITEM);
+
+    addStudentAction = actionFactory.getAddStudentAction(new ImageIcon(
+        Symphonie.class.getResource("icons/add_student.png")));
+    final AbstractButton addStudent = builder.buildButton(addStudentAction,
+        ADD_STUDENT_TITLE, ComponentBuilder.ButtonType.MENU_ITEM);
     addStudent.getAction().setEnabled(false);
     treePop.add(addStudent);
     toolbar.add(createToolbarButton(ADD_STUDENT_TITLE, addStudent, builder));
@@ -574,17 +574,18 @@ public class Symphonie {
         ComponentBuilder.ButtonType.MENU_ITEM));
 
     treePop.add(new JSeparator());
-    
-    removeStudentAction = actionFactory.getRemoveStudentAction(new ImageIcon(Symphonie.class.getResource("icons/remove_student.png")), tree);
-    
-    
-    final AbstractButton removeStudent = builder.buildButton(removeStudentAction, REMOVE_STUDENT,
+
+    removeStudentAction = actionFactory.getRemoveStudentAction(new ImageIcon(
+        Symphonie.class.getResource("icons/remove_student.png")), tree);
+
+    final AbstractButton removeStudent = builder.buildButton(
+        removeStudentAction, REMOVE_STUDENT,
         ComponentBuilder.ButtonType.MENU_ITEM);
     removeStudent.getAction().setEnabled(false);
     treePop.add(removeStudent);
     toolbar.add(createToolbarButton(REMOVE_STUDENT, removeStudent, builder));
     toolbar.addSeparator();
-/************************************************************************************************************************************/
+
     // listener for popup
     tree.addMouseListener(new MouseAdapter() {
 
@@ -763,8 +764,9 @@ public class Symphonie {
     });
 
     // Tree
-    // CourseTreeModel courseModel = new CourseTreeModel(manager);
     final JTree tree = new JTree(courseTreeModel);
+    tree.getSelectionModel().setSelectionMode(
+        TreeSelectionModel.SINGLE_TREE_SELECTION);
     tree.setCellRenderer(new DefaultTreeCellRenderer() {
 
       private final Icon leafIcon = new ImageIcon(Symphonie.class
@@ -797,10 +799,10 @@ public class Symphonie {
 
     final JPopupMenu treePop = builder.buildPopupMenu(TEACHERVIEWPOPUP_TITLE);
 
-    final AbstractButton addCourse = builder.buildButton(actionFactory
-        .getAddCourseAction(new ImageIcon(Symphonie.class
-            .getResource("icons/add_course.png"))), ADDCOURSE,
-        ComponentBuilder.ButtonType.MENU_ITEM);
+    addCourseAction = actionFactory.getAddCourseAction(new ImageIcon(
+        Symphonie.class.getResource("icons/add_course.png")));
+    final AbstractButton addCourse = builder.buildButton(addCourseAction,
+        ADDCOURSE, ComponentBuilder.ButtonType.MENU_ITEM);
     addCourse.getAction().setEnabled(false);
     treePop.add(addCourse);
     toolbar.add(createToolbarButton(ADDCOURSE, addCourse, builder));
@@ -809,10 +811,11 @@ public class Symphonie {
         .getUpdateCourseTreeAction(REFRESH_ICON), UPDATE,
         ComponentBuilder.ButtonType.MENU_ITEM));
     treePop.add(new JSeparator());
-    final AbstractButton removeCourse = builder.buildButton(actionFactory
-        .getRemoveCourseAction(new ImageIcon(Symphonie.class
-            .getResource("icons/delete_course.png")), tree), REMOVECOURSE,
-        ComponentBuilder.ButtonType.MENU_ITEM);
+
+    removeCourseAction = actionFactory.getRemoveCourseAction(new ImageIcon(
+        Symphonie.class.getResource("icons/delete_course.png")), tree);
+    final AbstractButton removeCourse = builder.buildButton(removeCourseAction,
+        REMOVECOURSE, ComponentBuilder.ButtonType.MENU_ITEM);
     removeCourse.getAction().setEnabled(false);
     treePop.add(removeCourse);
     toolbar.add(createToolbarButton(REMOVECOURSE, removeCourse, builder));
@@ -832,21 +835,10 @@ public class Symphonie {
     tree.addMouseListener(new MouseAdapter() {
 
       public void mousePressed(MouseEvent e) {
-        if (SwingUtilities.isRightMouseButton(e)) {
-          int n = tree.getRowForLocation(e.getX(), e.getY());
-
-          if (n > 0) tree.setSelectionRow(n);
-        }
-      }
-    });
-
-    // listener which enables the remove button
-    tree.addMouseListener(new MouseAdapter() {
-
-      public void mousePressed(MouseEvent e) {
-        if (SwingUtilities.isRightMouseButton(e)) {
-          int n = tree.getRowForLocation(e.getX(), e.getY());
-          removeCourse.getAction().setEnabled((n > 0) && logger.isIdentified());
+        int n = tree.getRowForLocation(e.getX(), e.getY());
+        if (n > 0) {
+          tree.setSelectionRow(n);
+          updateActions();
         }
       }
     });
@@ -858,7 +850,7 @@ public class Symphonie {
         boolean value = (o instanceof Course);
 
         if (value) {
-          ((TeacherModel) table.getModel()).setCourse((Course) o);
+          currentTeacherModel.setCourse((Course) o);
           ((DefaultWizardModel) exportW.getModel()).getInterPanelData().put(
               SymphonieWizardConstants.TEACHER_DATA, o);
         } else
@@ -978,7 +970,7 @@ public class Symphonie {
       public void stateChanged(ChangeEvent e) {
         currentJuryModel = logger.isIdentified() ? adminJuryModel : juryModel;
         table.setModel(currentJuryModel);
-        updateActions();        
+        updateActions();
       }
     });
 
@@ -1184,8 +1176,7 @@ public class Symphonie {
     addColumn = actionFactory.getAddMarkAction(new ImageIcon(Symphonie.class
         .getResource("icons/insert_column.png")));
     addColumn.setEnabled(false);
-    
-    
+
     // Content pane
     JMenu mode = getModeMenu();
     JMenuItem imp = (JMenuItem) builder.buildButton(actionFactory
@@ -1333,54 +1324,27 @@ public class Symphonie {
         SymphonieWizardConstants.DATA_VIEW, newView);
 
     updateActions();
-    /*if (newView.equals(View.student)) {
-      addColumn.setEnabled(false);
-      addFormula.setEnabled(false);
-      dischart.setEnabled(!currentStudentModel.isEmpty());
-      spinner.setEnabled(false);
-      
-      if (logger.isIdentified()){
-        addStudentAction.setEnabled(true);
-        if (currentStudentModel.isEmpty())
-          removeStudentAction.setEnabled(false);
-        else removeStudentAction.setEnabled(true);
-      }
-      
-    }
-
-    else if (newView.equals(View.teacher)) {
-      boolean value = !currentTeacherModel.isEmpty();
-
-      addColumn.setEnabled(value);
-      addFormula.setEnabled(value);
-      dischart.setEnabled(value);
-      spinner.setEnabled(value);
-      addStudentAction.setEnabled(false);
-      removeStudentAction.setEnabled(false);
-    }
-
-    else if (newView.equals(View.jury)) {
-      addColumn.setEnabled(false);
-      addFormula.setEnabled(true);
-      dischart.setEnabled(true);
-      spinner.setEnabled(true);
-      addStudentAction.setEnabled(false);
-      removeStudentAction.setEnabled(false);
-    }*/
   }
-  
+
   /**
    * Updates symphonie actions
    */
   protected final void updateActions() {
+    if (currentView == null) return;
+    AbstractSymphonieTableModel atm = currentView.getModel(this);
     boolean isStudentView = currentView.equals(View.student);
+    boolean isTeacherView = currentView.equals(View.teacher);
     boolean isIdentified = logger.isIdentified();
-    addColumn.setEnabled(!isStudentView);
-    addFormula.setEnabled(!isStudentView);
-    dischart.setEnabled(isStudentView && !currentStudentModel.isEmpty());
+    addColumn.setEnabled(isTeacherView && !atm.isEmpty());
+    addFormula.setEnabled(currentView.isFormulaSupported());
     spinner.setEnabled(!isStudentView);
+    dischart.setEnabled(!atm.isEmpty());
     addStudentAction.setEnabled(isStudentView && isIdentified);
-    removeStudentAction.setEnabled(isStudentView && isIdentified && !currentStudentModel.isEmpty());
+    removeStudentAction.setEnabled(isStudentView && isIdentified
+        && !atm.isEmpty());
+    addCourseAction.setEnabled(isIdentified && isTeacherView);
+    removeCourseAction.setEnabled(isTeacherView && isIdentified
+        && !atm.isEmpty());
   }
 
   /**
@@ -1659,7 +1623,7 @@ public class Symphonie {
       void displayFormulaDialog(Symphonie s, ActionEvent e) {
       }
 
-      AbstractTableModel getModel(Symphonie s) {
+      AbstractSymphonieTableModel getModel(Symphonie s) {
         return s.getCurrentStudentModel();
       }
     },
@@ -1692,7 +1656,7 @@ public class Symphonie {
         s.actionFactory.teacherAddFormulaAction.actionPerformed(e);
       }
 
-      AbstractTableModel getModel(Symphonie s) {
+      AbstractSymphonieTableModel getModel(Symphonie s) {
         return s.getCurrentTeacherModel();
       }
     },
@@ -1724,7 +1688,7 @@ public class Symphonie {
         s.actionFactory.juryAddFormulaAction.actionPerformed(e);
       }
 
-      AbstractTableModel getModel(Symphonie s) {
+      AbstractSymphonieTableModel getModel(Symphonie s) {
         return s.getCurrentJuryModel();
       }
     };
@@ -1817,7 +1781,7 @@ public class Symphonie {
      *          The symphonie instance
      * @return a <code>TableModel</code>
      */
-    abstract AbstractTableModel getModel(Symphonie s);
+    abstract AbstractSymphonieTableModel getModel(Symphonie s);
 
   }
 
@@ -1843,23 +1807,41 @@ public class Symphonie {
   /** Cell selected in current view */
   protected Pair<Object, Point> selectedCell;
 
+  /** Step interval for charts */
   protected int chartStep = 5;
 
+  /** Spinner for selecting chart interval */
   protected final JSpinner spinner;
 
+  /** Button that allows user to display chart */
   protected final JButton dischart;
 
-  
-  
-  /****** SUS POWA ******/
+  /** Action that allows users to add a student */
   protected AbstractAction addStudentAction;
+
+  /** Action that allows user to remove a student */
   protected AbstractAction removeStudentAction;
-  
-  
+
+  /** Action that allows user to add a course */
+  protected AbstractAction addCourseAction;
+
+  /** Action that allows user to remove a course */
+  protected AbstractAction removeCourseAction;
+
+  /**
+   * Returns the treemodel for teacher view
+   * 
+   * @return a CourseTreeModel
+   */
   public CourseTreeModel getCourseTreeModel() {
     return courseTreeModel;
   }
 
+  /**
+   * Returns the tree model for student view
+   * 
+   * @return a StudentTreeModel
+   */
   public StudentTreeModel getStudentTreeModel() {
     return studentTreeModel;
   }
