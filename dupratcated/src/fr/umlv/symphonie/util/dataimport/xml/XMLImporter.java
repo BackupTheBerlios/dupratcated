@@ -12,7 +12,6 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -26,6 +25,7 @@ import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.util.dataimport.DataImporter;
+import fr.umlv.symphonie.util.dataimport.DataImporterException;
 
 /**
  * @author Laurent GARCIA
@@ -215,8 +215,9 @@ public class XMLImporter implements DataImporter {
    * create a new document object
    * 
    * @return a new document object
+   * @throws DataImporterException
    */
-  protected Document newDocument() {
+  protected Document newDocument() throws DataImporterException {
     try {
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
@@ -228,23 +229,16 @@ public class XMLImporter implements DataImporter {
 
       return dbf.newDocumentBuilder().parse(new File(documentName));
     } catch (ParserConfigurationException e) {
-      System.out
-          .println("Error during the creation of the document object : \n" + e
-              + "\n");
-      e.printStackTrace();
+      throw new DataImporterException(
+          "Error during the creation of the document object : \n", e);
     } catch (SAXException e) {
-      System.out
-          .println("Error during the creation of the document object : \n" + e
-              + "\n");
-      e.printStackTrace();
+      throw new DataImporterException(
+          "Error during the creation of the document object : \n", e);
     } catch (IOException e) {
-      System.out
-          .println("Error during the creation of the document object : \n" + e
-              + "\n");
-      e.printStackTrace();
+      throw new DataImporterException(
+          "Error during the creation of the document object : \n", e);
     }
 
-    return null;
   }
 
   /*
@@ -252,15 +246,16 @@ public class XMLImporter implements DataImporter {
    * 
    * @see fr.umlv.symphonie.util.dataimport.DataImporter#importStudentView(java.lang.String)
    */
-  public void importStudentView(String documentName) {
+  public void importStudentView(String documentName)
+      throws DataImporterException {
     this.documentName = documentName;
     HashMap<Course, Map<Integer, StudentMark>> studentViewMap;
     Document d = newDocument();
     Element root = d.getDocumentElement();
 
+    /** if the document isn't a xml student view we stop */
     if (!root.getAttribute("view").equals("student")) {
-      throw new DOMException(DOMException.NOT_FOUND_ERR,
-          "the file isn't a student view.\n");
+      throw new DataImporterException("the file isn't a student view.\n");
     }
 
     Map<Integer, Course> courseMap = getCourseNodes(root);
@@ -289,7 +284,15 @@ public class XMLImporter implements DataImporter {
    * 
    * @see fr.umlv.symphonie.util.dataimport.DataImporter#importTeacherView(java.lang.String)
    */
-  public void importTeacherView(String documentName) {
+  public void importTeacherView(String documentName)
+      throws DataImporterException {
+    this.documentName = documentName;
+    Document d = newDocument();
+    Element root = d.getDocumentElement();
+
+    if (!root.getAttribute("view").equals("teacher")) {
+      throw new DataImporterException("the file isn't a teacher view.\n");
+    }
   }
 
   /*
@@ -297,6 +300,12 @@ public class XMLImporter implements DataImporter {
    * 
    * @see fr.umlv.symphonie.util.dataimport.DataImporter#importJuryView(java.lang.String)
    */
-  public void importJuryView(String documentName) {
+  public void importJuryView(String documentName) throws DataImporterException {
+    Document d = newDocument();
+    Element root = d.getDocumentElement();
+
+    if (!root.getAttribute("view").equals("jury")) {
+      throw new DataImporterException("the file isn't a jury view.\n");
+    }
   }
 }

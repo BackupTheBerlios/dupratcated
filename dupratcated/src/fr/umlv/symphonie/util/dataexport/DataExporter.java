@@ -12,32 +12,37 @@ import fr.umlv.symphonie.data.Student;
  */
 public interface DataExporter {
 
-	/**
-	 * export a student view
-	 * 
-	 * @param documentName
-	 *            the name of the document exporter
-	 * @param s
-	 *            the student object
-	 */
-	public void exportStudentView(String documentName, Student s);
+  /**
+   * export a student view
+   * 
+   * @param documentName
+   *          the name of the document exporter
+   * @param s
+   *          the student object
+   * @throws DataExporterException
+   */
+  public void exportStudentView(String documentName, Student s)
+      throws DataExporterException;
 
-	/**
-	 * export a teacher view
-	 * 
-	 * @param documentName
-	 *            the name of the document exporter
-	 * @param c
-	 *            the course object
-	 */
-	public void exportTeacherView(String documentName, Course c);
+  /**
+   * export a teacher view
+   * 
+   * @param documentName
+   *          the name of the document exporter
+   * @param c
+   *          the course object
+   * @throws DataExporterException
+   */
+  public void exportTeacherView(String documentName, Course c)
+      throws DataExporterException;
 
-	/**
-	 * export a jury view
-	 * 
-	 * @param documentName
-	 *            the name of the document exporter
-	 */
-	public void exportJuryView(String documentName);
+  /**
+   * export a jury view
+   * 
+   * @param documentName
+   *          the name of the document exporter
+   * @throws DataExporterException
+   */
+  public void exportJuryView(String documentName) throws DataExporterException;
 
 }
