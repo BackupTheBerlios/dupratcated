@@ -4,6 +4,7 @@
 
 package fr.umlv.symphonie.util.export.xml;
 
+
 import java.io.File;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -33,7 +34,7 @@ import fr.umlv.symphonie.util.export.DataExporter;
 public abstract class XMLExporter implements DataExporter {
 
   protected String documentName;
-  protected final String dtd = "symphonie.dtd";
+  protected final String dtd = this.getClass().getResource("symphonie.dtd").toString();
   protected SQLDataManager dm = new SQLDataManager();
 
   /**
@@ -185,13 +186,12 @@ public abstract class XMLExporter implements DataExporter {
    */
   protected void writeDocument(Document document) {
     try {
-
       Transformer transformer = TransformerFactory.newInstance()
           .newTransformer();
-
+  
       /** <!DOCTYPE symphonie SYSTEM "file:?"> */
       transformer.setOutputProperty(
-          javax.xml.transform.OutputKeys.DOCTYPE_SYSTEM, "file:" + dtd);
+          javax.xml.transform.OutputKeys.DOCTYPE_SYSTEM, dtd);
 
       /** indention of the tags */
       transformer.setOutputProperty(OutputKeys.INDENT, "yes");
