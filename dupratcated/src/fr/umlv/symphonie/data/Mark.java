@@ -63,7 +63,6 @@ public class Mark {
   
   
   
-  @Override
   public boolean equals(Object obj) {
     System.out.println("sa mere !");
     

@@ -402,49 +402,49 @@ public class TeacherModel extends AbstractTableModel {
     
     DataManager dataManager = new SQLDataManager();
     
-    /*
-     * test des etudiants
-     */
-    Map<Integer, Student> studentMap = dataManager.getStudents();
-    System.out.println(studentMap.size() + " etudiants.");
-    for (Student s : studentMap.values())
-      System.out.println(s);
-    System.out.println("\n\n");
-    /*******************************/
-    
-    
-    /*
-     * test des matieres
-     */
-    Map<Integer, Course> courseMap = dataManager.getCourses();
-    System.out.println(courseMap.size() + " matieres");
-    for (Course c : courseMap.values())
-      System.out.println(c + " " + c.getCoeff());
-    System.out.println("\n\n");
-    /***************************/
-    
-    /*
-     * test des epreuves
-     */
-    Map<Integer, Mark> markMap = dataManager.getMarks();
-    System.out.println(markMap.size() + " epreuves");
-    for (Mark m : markMap.values())
-      System.out.println(m + " pour " + m.getCourse());
-    System.out.println("\n\n");
-    /******************************/
-    
-    /*
-     * test des notes
-     */
-    List<StudentMark> list = dataManager.getStudentMarks();
-    System.out.println(list.size() + " notes.");
-    
-    for (StudentMark sm : list){
-      sm.printData();
-    }
-    
-    System.out.println("\n\n");
-    /******************************/
+//    /*
+//     * test des etudiants
+//     */
+//    Map<Integer, Student> studentMap = dataManager.getStudents();
+//    System.out.println(studentMap.size() + " etudiants.");
+//    for (Student s : studentMap.values())
+//      System.out.println(s);
+//    System.out.println("\n\n");
+//    /*******************************/
+//    
+//    
+//    /*
+//     * test des matieres
+//     */
+//    Map<Integer, Course> courseMap = dataManager.getCourses();
+//    System.out.println(courseMap.size() + " matieres");
+//    for (Course c : courseMap.values())
+//      System.out.println(c + " " + c.getCoeff());
+//    System.out.println("\n\n");
+//    /***************************/
+//    
+//    /*
+//     * test des epreuves
+//     */
+//    Map<Integer, Mark> markMap = dataManager.getMarks();
+//    System.out.println(markMap.size() + " epreuves");
+//    for (Mark m : markMap.values())
+//      System.out.println(m + " pour " + m.getCourse());
+//    System.out.println("\n\n");
+//    /******************************/
+//    
+//    /*
+//     * test des notes
+//     */
+//    List<StudentMark> list = dataManager.getStudentMarks();
+//    System.out.println(list.size() + " notes.");
+//    
+//    for (StudentMark sm : list){
+//      sm.printData();
+//    }
+//    
+//    System.out.println("\n\n");
+//    /******************************/
     
     TeacherModel model = new TeacherModel(dataManager);
     

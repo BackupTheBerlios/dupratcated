@@ -6,11 +6,15 @@ package fr.umlv.symphonie.model;
 
 import java.util.*;
 
+import java.awt.BorderLayout;
 import java.awt.Font;
 
 import javax.swing.*;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.tree.DefaultTreeCellRenderer;
 
 import fr.umlv.symphonie.data.*;
 import fr.umlv.symphonie.util.Pair;
@@ -180,7 +184,7 @@ public class StudentModel extends AbstractTableModel {
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     
     DataManager dataManager = new SQLDataManager();
-    StudentModel model = new StudentModel(dataManager);
+    StudentModel studentModel = new StudentModel(dataManager);
     
     Map<Integer, Student> studentMap = null;
     try {
@@ -190,8 +194,8 @@ public class StudentModel extends AbstractTableModel {
       return;
     }
     
-    Student student = new Student(6, "Paul", "Ochon");
-    Student s = new Student (0, "Fabien", "Vallee");
+    /*Student student = new Student(6, "Paul", "Ochon");
+    Student s = new Student (0, "Fabien", "Vallee");*/
     
  //   dataManager.addCourse("Walibi", 0.1f);
     
@@ -210,15 +214,24 @@ public class StudentModel extends AbstractTableModel {
     
  //   dataManager.addStudent("Machin", "Chose");
     
-    Map<Course, Map<Integer, StudentMark>> map = dataManager.getAllMarksByStudent(student);
+    /*Map<Course, Map<Integer, StudentMark>> map = dataManager.getAllMarksByStudent(student);
     
-    System.out.println("taille de la map : " + map.size());
+    System.out.println("taille de la map : " + map.size());*/
     
     
     
-    model.setStudent(s);
+    /*studentModel.setStudent(s);*/
     
-    JTable table = new JTable(model);
+    
+    
+    JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+    
+    
+    /*
+     * table
+     */
+    
+    final JTable table = new JTable(studentModel);
     table.setTableHeader(null);
     
     
@@ -238,11 +251,74 @@ public class StudentModel extends AbstractTableModel {
     });
     
     
-    JScrollPane scroll = new JScrollPane(table);
+    JScrollPane scroll1 = new JScrollPane(table);
     
-    frame.setContentPane(scroll);
+    split.setRightComponent(scroll1);
+    
+    
+    
+    /*
+     * arbre
+     */
+    
+    StudentTreeModel treeModel = new StudentTreeModel(dataManager);
+    final JTree tree = new JTree(treeModel);
+    
+    tree.setCellRenderer(new DefaultTreeCellRenderer(){
+      
+      private final Icon leafIcon = new ImageIcon(StudentTreeModel.class.getResource("../view/icons/student.png"));
+      private final Icon rootIcon = new ImageIcon(StudentTreeModel.class.getResource("../view/icons/students.png"));
+      
+      public java.awt.Component getTreeCellRendererComponent(JTree tree,Object value,boolean sel,boolean expanded,boolean leaf,int row,boolean hasFocus){
+
+        Font font = getFont();
+        
+        if (font != null){
+          font = font.deriveFont(Font.BOLD);
+          setFont(font);
+        }
+        
+        if (leaf){
+          setLeafIcon(leafIcon);
+        }
+        else {
+          setClosedIcon(rootIcon);
+          setOpenIcon(rootIcon);
+        }
+        
+        super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+        return this;
+      }
+    });
+    
+    JScrollPane pane = new JScrollPane(tree);
+    
+    split.setLeftComponent(pane);
+    
+    tree.addTreeSelectionListener(new TreeSelectionListener(){
+      
+      /* (non-Javadoc)
+       * @see javax.swing.event.TreeSelectionListener#valueChanged(javax.swing.event.TreeSelectionEvent)
+       */
+      public void valueChanged(TreeSelectionEvent e) {
+        Object o = tree.getLastSelectedPathComponent();
+        
+        if (o instanceof Student)
+          ((StudentModel)(table.getModel())).setStudent((Student)o);
+
+      }
+    });
+    
+    
+    frame.setContentPane(split);
+    
+    /*
+     * fin du main
+     */
     
     frame.setVisible(true);
+    
+    System.out.println("zarma!!!");
   }
   
   
