@@ -37,7 +37,7 @@ public class XMLImporter implements DataImporter {
 	 *            the root of the document
 	 * @return a map with all the courses
 	 */
-	private Map<Integer, Course> getCourseNodes(Element root) {
+	protected Map<Integer, Course> getCourseNodes(Element root) {
 		final HashMap<Integer, Course> map = new HashMap<Integer, Course>();
 		final NodeList nodes = root.getElementsByTagName("course");
 		Course c;
@@ -74,7 +74,7 @@ public class XMLImporter implements DataImporter {
 	 *            a map with all the courses
 	 * @return a map with all the marks
 	 */
-	private Map<Integer, Mark> getMarkNodes(Element root,
+	protected Map<Integer, Mark> getMarkNodes(Element root,
 			Map<Integer, Course> courseMap) {
 		final HashMap<Integer, Mark> map = new HashMap<Integer, Mark>();
 		final NodeList nodes = root.getElementsByTagName("examen");
@@ -121,7 +121,7 @@ public class XMLImporter implements DataImporter {
 	 *            a map with all the marks
 	 * @return a map with all the students
 	 */
-	private Map<Student, Map<Integer, StudentMark>> getStudentNodes(
+	protected Map<Student, Map<Integer, StudentMark>> getStudentNodes(
 			Element root, boolean comment, Map<Integer, Mark> markMap) {
 		final Map<Student, Map<Integer, StudentMark>> map = new HashMap<Student, Map<Integer, StudentMark>>();
 		final NodeList nodes = root.getElementsByTagName("student");
@@ -172,7 +172,7 @@ public class XMLImporter implements DataImporter {
 	 *            a map with all the marks
 	 * @return a map with all the student marks
 	 */
-	private Map<Integer, StudentMark> getStudentMarkNodes(Element root,
+	protected Map<Integer, StudentMark> getStudentMarkNodes(Element root,
 			Student s, Map<Integer, Mark> markMap) {
 		final HashMap<Integer, StudentMark> map = new HashMap<Integer, StudentMark>();
 		final NodeList nodes = root.getElementsByTagName("student_mark");
