@@ -172,7 +172,7 @@ public final class BasicFormulaFactory {
             b.append(pS);
             if (c-- != 0) b.append(',');
           }
-          b.append('}');
+          b.append("})");
           asString = b.toString();
         }
         return asString;
