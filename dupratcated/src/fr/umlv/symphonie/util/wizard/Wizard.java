@@ -196,6 +196,10 @@ public class Wizard {
     finishAction.setEnabled(b);
   }
 
+  public WizardModel getModel() {
+    return model;
+  }
+
   /**
    * Initializes wizard dialog graphic components
    * 
