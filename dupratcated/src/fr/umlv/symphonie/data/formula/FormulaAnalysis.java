@@ -50,6 +50,11 @@ import fr.umlv.symphonie.data.formula.node.TBooleanLiteral;
 import fr.umlv.symphonie.data.formula.node.TDoubleLiteral;
 import fr.umlv.symphonie.data.formula.node.TIntegerLiteral;
 
+/**
+ * Parser for symphonie formulas
+ * 
+ * @author PEÑA SALDARRIAGA Sébastian
+ */
 public class FormulaAnalysis extends AnalysisAdapter {
 
   /** The map used to create variable values */
@@ -176,9 +181,9 @@ public class FormulaAnalysis extends AnalysisAdapter {
         public int getColumn() {
           return column;
         }
-        
+
         public int getID() {
-         return ID;   
+          return ID;
         }
 
         public String toString() {
@@ -197,9 +202,9 @@ public class FormulaAnalysis extends AnalysisAdapter {
         }
 
         public int getID() {
-          return ID;   
-         }
-        
+          return ID;
+        }
+
         public String toString() {
           return intern.toString();
         }

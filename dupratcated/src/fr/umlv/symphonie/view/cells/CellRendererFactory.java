@@ -13,6 +13,12 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 
+/**
+ * Factory class that provides cell renderer objects that support single object
+ * conditional formatting.
+ * 
+ * @author PEÑA SALDARRIAGA Sébastian
+ */
 public final class CellRendererFactory {
 
   /** Unmodifiable cell renderer used to retrieve default rendering values */

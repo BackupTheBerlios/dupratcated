@@ -9,12 +9,32 @@ import java.awt.Color;
 
 import fr.umlv.symphonie.data.formula.BooleanFormula;
 
+/**
+ * Format of a cell in the Symphonie object-formatting model
+ * 
+ * @author PEÑA SALDARRIAGA Sébastian
+ */
 public final class CellFormat {
 
+  /** Condition that the format depends on */
   private BooleanFormula condition;
+
+  /** Cell's background color */
   private Color background;
+
+  /** Cell's foreground color */
   private Color foreground;
 
+  /**
+   * Creates a new instance with the given condition and colors.
+   * 
+   * @param condition
+   *          Condition that the format depends on
+   * @param background
+   *          Cell's background color
+   * @param foreground
+   *          Cell's foreground color
+   */
   public CellFormat(BooleanFormula condition, Color background, Color foreground) {
     this.condition = condition;
     this.background = background;

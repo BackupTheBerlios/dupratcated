@@ -1,6 +1,11 @@
 
 package fr.umlv.symphonie.data.formula;
 
+/**
+ * Formula whose return value is a <code>Boolean</code>
+ * 
+ * @author PEÑA SALDARRIAGA Sébastian
+ */
 public abstract class BooleanFormula implements Formula<Boolean> {
 
   public String getDescription() {
@@ -14,7 +19,7 @@ public abstract class BooleanFormula implements Formula<Boolean> {
   public int getColumn() {
     return -1;
   }
-  
+
   /**
    * Always returns -1, you may override this method in subclasses or wrap it in
    * another formula instance
@@ -22,7 +27,7 @@ public abstract class BooleanFormula implements Formula<Boolean> {
    * @return -1
    */
   public int getID() {
-   return -1; 
+    return -1;
   }
 
   public boolean equals(Object obj) {

@@ -30,8 +30,8 @@ public final class AutoCompleteSupport {
   }
 
   /**
-   * Adds autcomplete support to the given text component and returns it. <br>
-   * ATTENTION : Autocomplete support can be removed by removing returned
+   * Adds autcomplete support to the given text component. <br>
+   * ATTENTION : Autocomplete support can be removed by removing the returned
    * <code>KeyListener</code>
    * 
    * @param textCo
@@ -97,10 +97,10 @@ public final class AutoCompleteSupport {
         }
       }
     };
-    
+
     textCo.addKeyListener(ka);
     ka.setDictionary(dictionary);
-    
+
     return ka;
   }
 }

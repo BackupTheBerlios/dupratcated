@@ -161,17 +161,6 @@ public final class ExceptionDisplayDialog {
     dialog.setVisible(false);
   }
 
-  /**
-   * This method has been created so that users can use this class as the
-   * EventDispatchThread uncaught exception handler.
-   * 
-   * @param t
-   *          The throwable object to handle
-   */
-  public void handle(Throwable t) {
-    showException(t);
-  }
-
   // ----------------------------------------------------------------------------
   // Static members
   // ---------------------------------------------------------------------------

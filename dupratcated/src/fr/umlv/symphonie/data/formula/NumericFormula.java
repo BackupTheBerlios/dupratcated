@@ -9,7 +9,7 @@ package fr.umlv.symphonie.data.formula;
  * <code>BigDecimal, BigInteger, Byte, Double, Float, Integer, Long,</code>
  * and <code>Short</code> can be used as return types for
  * <code>NumericFormula</code>s, binary operators are only defined for
- * <code>Double</code> and <code>Integer</code> instances.
+ * <code>Float</code> and <code>Integer</code> instances.
  * </p>
  */
 public abstract class NumericFormula implements Formula<Number> {
