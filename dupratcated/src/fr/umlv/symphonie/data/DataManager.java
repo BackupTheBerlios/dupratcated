@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 
+import fr.umlv.symphonie.data.formula.Formula;
 import fr.umlv.symphonie.util.Pair;
 
 public interface DataManager {
@@ -262,4 +263,11 @@ public interface DataManager {
 	 */
 	public void changeCourseCoeff(Course c, float newCoeff)
 			throws DataManagerException;
+
+  /**
+   * @param f
+   * @param course
+   * @param column
+   */
+  public void addFormula(Formula f, Course course, int column)throws DataManagerException;
 }

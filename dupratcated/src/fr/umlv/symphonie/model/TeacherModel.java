@@ -367,6 +367,14 @@ public class TeacherModel extends AbstractTableModel {
   }
   
   
+  public void addFormula(Formula f, int column){
+    try{
+      manager.addFormula(f, course, column);
+    }catch (DataManagerException e){
+      System.out.println(e.getMessage());
+    }
+  }
+  
   public static void main(String[] args) throws DataManagerException {
     JFrame frame = new JFrame ("test TeacherModel");
     frame.setSize(800,600);

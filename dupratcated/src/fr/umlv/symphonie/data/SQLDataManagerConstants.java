@@ -10,6 +10,8 @@ public abstract class SQLDataManagerConstants {
   static public final String TABLE_HAS_MARK = "has_mark";
   static public final String TABLE_TEST = "test";
   static public final String TABLE_TIMESTAMP = "timestamp";
+  static public final String TABLE_TEACHER_FORMULA = "teacher_formula";
+  static public final String TABLE_JURY_FORMULA = "jury_formula";
 
   // attributs de la table student
   static public final String COLUMN_ID_FROM_TABLE_STUDENT = "id_student";
@@ -40,4 +42,12 @@ public abstract class SQLDataManagerConstants {
   // attributs de la table timestamp
   static public final String COLUMN_TABLE_NAME_FROM_TABLE_TIMESTAMP = "table_name";
   static public final String COLUMN_TIMESTAMP_FROM_TABLE_TIMESTAMP = "stamp";
+  
+  // attributs communs des tables formula
+  static public final String COLUMN_ID_FORMULA_FROM_TABLE_FORMULA = "id_formula";
+  static public final String COLUMN_ID_TITLE_FROM_TABLE_FORMULA = "id_title";
+  static public final String COLUMN_EXPRESSION_FROM_TABLE_FORMULA = "expression";
+  static public final String COLUMN_COLUMN_FROM_TABLE_FORMULA = "column";
+  
+  static public final String COLUMN_ID_COURSE_FROM_TABLE_TEACHER_FORMULA = "id_course";
 }
