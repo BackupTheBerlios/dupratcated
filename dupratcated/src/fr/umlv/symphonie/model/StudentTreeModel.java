@@ -16,6 +16,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
+import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
 import fr.umlv.symphonie.data.Student;
@@ -87,9 +88,21 @@ public class StudentTreeModel extends DefaultTreeModel {
           
           try {
             EventQueue.invokeAndWait(new Runnable() {
-
+              private final Object source = root;
+              private Object[] path = new Object[1];
+              
               public void run() {
-                StudentTreeModel.this.reload();
+                path[0] = source;
+                
+                int[] childIndices = new int[studentList.size()];
+                
+                for (int i = 0 ; i < studentList.size() ; i++)
+                  childIndices[i] = i;
+                
+                Student[] children = new Student[1];
+                children = studentList.toArray(children);
+                
+                StudentTreeModel.this.fireTreeStructureChanged(source, path, childIndices, children);
               }
             });
           } catch (InterruptedException e1) {
