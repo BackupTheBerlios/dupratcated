@@ -1,26 +1,24 @@
 /*
- * This file is part of Symphonie Created : 8 mars 2005 21:52:16
+ * This file is part of Symphonie Created : 9 mars 2005 18:13:54
  */
-
 package fr.umlv.symphonie.util.dataimport.xml;
 
-import junit.framework.TestCase;
 import fr.umlv.symphonie.util.dataimport.DataImporter;
 import fr.umlv.symphonie.util.dataimport.DataImporterException;
-import fr.umlv.symphonie.util.dataimport.xml.XMLImporter;
+import junit.framework.TestCase;
 
 /**
  * @author Laurent GARCIA
  */
-public class XMLImporterTest extends TestCase {
+public class XMLImporterAdminTest extends TestCase {
 
-	final DataImporter di = new XMLImporter();
+	final DataImporter di = new XMLImporterAdmin();
 
 	public void testImportStudentView() {
 		try {
 			di.importStudentView("student_view.xml");
 		} catch (DataImporterException e) {
-			;
+			e.printStackTrace();
 		}
 	}
 
