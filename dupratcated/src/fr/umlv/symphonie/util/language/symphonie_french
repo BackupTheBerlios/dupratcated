@@ -123,3 +123,4 @@ teacherchart.markforcourse=Notes pour la matière
 teacher.header=Notes des étudiants pour la matière 
 jurychart.studentsaverages=Moyennes des étudiants
 jury.header=Ensemble des moyennes des étudiants et délibérés
+cellformat.delete=Effacer le formattage
