@@ -12,8 +12,12 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
@@ -23,6 +27,7 @@ import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
@@ -122,32 +127,26 @@ public class Symphonie {
    *          The export menu item
    * @param imp
    *          The import menu item
+   * @param print
+   *          The print menu item
    * @return a <code>JMenu</code>
    */
-  private final JMenu getFileMenu(JMenuItem exp, JMenuItem imp) {
+  private final JMenu getFileMenu(JMenuItem exp, JMenuItem imp, JMenuItem print) {
     JMenu file = (JMenu) builder.buildButton(FILE_MENU, ButtonType.MENU);
 
-    Action print = SymphonieActionFactory.getPrintAction(new ImageIcon(
-        Symphonie.class.getResource("icons/print.png")), this);
+    file.add(print);
 
-    Action exit = SymphonieActionFactory.getExitAction(new ImageIcon(
-        Symphonie.class.getResource("icons/exit.png")));
-
-    /*
-     * Items Menu "File"
-     * *********************************************************
-     */
+    file.add(new JSeparator());
 
     file.add(imp);
     file.add(exp);
 
     file.add(new JSeparator());
 
-    file.add(builder.buildButton(print, PRINT_MENU_ITEM, ButtonType.MENU_ITEM));
-
-    file.add(new JSeparator());
-
-    file.add(builder.buildButton(exit, EXIT_MENU_ITEM, ButtonType.MENU_ITEM));
+    file.add(builder.buildButton(SymphonieActionFactory
+        .getExitAction(new ImageIcon(Symphonie.class
+            .getResource("icons/exit.png"))), EXIT_MENU_ITEM,
+        ButtonType.MENU_ITEM));
 
     return file;
   }
@@ -265,9 +264,11 @@ public class Symphonie {
   /**
    * Builds the "Admin" menu
    * 
+   * @param toolbar
+   *          A toolbar to add some buttons
    * @return a <code>JMenu</code>
    */
-  private final JMenu getAdminMenu() {
+  private final JMenu getAdminMenu(JToolBar toolbar) {
     JMenu admin = (JMenu) builder.buildButton(ADMIN_MENU, ButtonType.MENU);
     /* Actions ******************************************************* */
     final Action connect = SymphonieActionFactory.getConnectAction(
@@ -299,10 +300,19 @@ public class Symphonie {
     });
 
     /* Items********************************************************* */
-    admin.add(builder.buildButton(connect, CONNECT_MENU_ITEM,
-        ButtonType.MENU_ITEM));
-    admin.add(builder.buildButton(db, DB_MENU_ITEM, ButtonType.MENU_ITEM));
-    admin.add(builder.buildButton(pwd, PWD_MENU_ITEM, ButtonType.MENU_ITEM));
+    AbstractButton b = builder.buildButton(connect, CONNECT_MENU_ITEM,
+        ButtonType.MENU_ITEM);
+    admin.add(b);
+    toolbar.add(createToolbarButton(CONNECT_MENU_ITEM, b, builder));
+
+    b = builder.buildButton(db, DB_MENU_ITEM, ButtonType.MENU_ITEM);
+    admin.add(b);
+    toolbar.add(createToolbarButton(DB_MENU_ITEM, b, builder));
+
+    b = builder.buildButton(pwd, PWD_MENU_ITEM, ButtonType.MENU_ITEM);
+    admin.add(b);
+    toolbar.add(createToolbarButton(PWD_MENU_ITEM, b, builder));
+
     return admin;
   }
 
@@ -318,24 +328,6 @@ public class Symphonie {
     for (JMenu m : menus)
       bar.add(m);
     return bar;
-  }
-
-  /**
-   * Builds the toolbar
-   * 
-   * @return a ready-to-use <code>JToolBar</code>
-   */
-  private final JToolBar getToolbar() {
-    JToolBar toolbar = new JToolBar();
-    toolbar.add(SymphonieActionFactory.getConnectAction(new ImageIcon(
-        Symphonie.class.getResource("icons/connect.png")), builder, logger,
-        this));
-    toolbar.add(SymphonieActionFactory.getDBAction(new ImageIcon(
-        Symphonie.class.getResource("icons/db.png")), frame));
-
-    toolbar.setFloatable(false);
-
-    return toolbar;
   }
 
   // ----------------------------------------------------------------------------
@@ -403,12 +395,13 @@ public class Symphonie {
     final JPopupMenu pop = builder
         .buildPopupMenu(SymphonieConstants.STUDENTVIEWPOPUP_TITLE);
 
-    pop.add(builder.buildButton(getStudentUpdateAction(null,studentModel), UPDATE,
-        ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(getStudentUpdateAction(null, studentModel),
+        UPDATE, ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(getStudentPrintAction(null, table, this),
         PRINT_MENU_ITEM, ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(getStudentChartAction(null, frame, studentModel),
-        DISPLAY_CHART, ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(
+        getStudentChartAction(null, frame, studentModel), DISPLAY_CHART,
+        ButtonType.MENU_ITEM));
 
     // table listeners
 
@@ -524,17 +517,18 @@ public class Symphonie {
     final JPopupMenu pop = builder
         .buildPopupMenu(SymphonieConstants.TEACHERVIEWPOPUP_TITLE);
 
-    pop.add(builder.buildButton(getAddMarkAction(null, frame, teacherModel, builder),
-        ADDMARKDIALOG_TITLE, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(
-        getTeacherAddFormulaAction(null, frame, teacherModel,builder), ADD_FORMULA,
+    pop.add(builder.buildButton(getAddMarkAction(null, frame, teacherModel,
+        builder), ADDMARKDIALOG_TITLE, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(getTeacherAddFormulaAction(null, frame,
+        teacherModel, builder), ADD_FORMULA,
         ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(getTeacherUpdateAction(null,teacherModel), UPDATE,
-        ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(getTeacherUpdateAction(null, teacherModel),
+        UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(getTeacherPrintAction(null, table, this),
         PRINT_MENU_ITEM, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(getTeacherChartAction(null, frame, teacherModel),
-        DISPLAY_CHART, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(
+        getTeacherChartAction(null, frame, teacherModel), DISPLAY_CHART,
+        ComponentBuilder.ButtonType.MENU_ITEM));
 
     final AbstractButton removeColumn = builder.buildButton(
         getRemoveTeacherColumnAction(null, table, teacherModel), REMOVE_COLUMN,
@@ -647,8 +641,8 @@ public class Symphonie {
     pop.add(builder.buildButton(SymphonieActionFactory.getJuryAddFormulaAction(
         null, frame, model, builder), SymphonieConstants.ADD_FORMULA,
         ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(SymphonieActionFactory
-        .getJuryUpdateAction(null, model), SymphonieConstants.UPDATE,
+    pop.add(builder.buildButton(SymphonieActionFactory.getJuryUpdateAction(
+        null, model), SymphonieConstants.UPDATE,
         ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(SymphonieActionFactory.getJuryPrintAction(null,
         table, this), SymphonieConstants.PRINT_MENU_ITEM,
@@ -730,8 +724,8 @@ public class Symphonie {
    * @return The html welcome page as a panel
    */
   private final JPanel getWelcomePagePanel(final JPanel content,
-      final AbstractButton... butts) {
-    JPanel p = new JPanel(new GridBagLayout());
+      final JToolBar toolbar, final AbstractButton... butts) {
+    JPanel p = new JPanel(new BorderLayout());
     final JEditorPane jeep = new JEditorPane();
     jeep.setEditorKit(new HTMLEditorKit());
     jeep.setEditable(false);
@@ -749,6 +743,7 @@ public class Symphonie {
           setCurrentView(View.valueOf(f.substring(f.lastIndexOf('/') + 1)));
           for (AbstractButton b : butts)
             b.setEnabled(true);
+          content.add(toolbar, BorderLayout.NORTH);
           frame.setContentPane(content);
         }
       }
@@ -774,13 +769,15 @@ public class Symphonie {
       }
     });
 
+    JPanel jp = new JPanel(new GridBagLayout());
     GridBagConstraints gbc = new GridBagConstraints();
-    gbc.insets = new Insets(30, 30, 30, 30);
+    gbc.insets = new Insets(20, 20, 20, 20);
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.weightx = 1.0;
-    gbc.weighty = 1.0;
-    p.add(jeep, gbc);
-    p.setBackground(jeep.getBackground());
+    jp.setBackground(jeep.getBackground());
+    jp.add(jeep, gbc);
+    p.add(toolbar, BorderLayout.NORTH);
+    p.add(jp, BorderLayout.CENTER);
     return p;
   }
 
@@ -792,7 +789,6 @@ public class Symphonie {
   private final JPanel getContentPane() {
 
     JPanel panel = new JPanel(new BorderLayout());
-    panel.add(getToolbar(), BorderLayout.NORTH);
 
     tab = new JTabbedPane(JTabbedPane.BOTTOM, JTabbedPane.SCROLL_TAB_LAYOUT);
 
@@ -850,6 +846,10 @@ public class Symphonie {
     // Main frame
     frame = new JFrame(builder.getValue(FRAME_TITLE));
 
+    // Toolbar
+    JToolBar toolbar = new JToolBar();
+    toolbar.setFloatable(false);
+
     // Exception dialog
     errDisplay = new ExceptionDisplayDialog(frame, builder);
 
@@ -867,14 +867,20 @@ public class Symphonie {
         .getWizardAction(new ImageIcon(Symphonie.class
             .getResource("icons/export.png")), exportW), EXPORT_MENU_ITEM,
         ButtonType.MENU_ITEM);
+    JMenuItem print = (JMenuItem) builder.buildButton(SymphonieActionFactory
+        .getPrintAction(new ImageIcon(Symphonie.class
+            .getResource("icons/print.png")), this), PRINT_MENU_ITEM,
+        ButtonType.MENU_ITEM);
 
     JPanel content = getContentPane();
-    JPanel welcome = getWelcomePagePanel(content, mode, imp, exp);
+    JPanel welcome = getWelcomePagePanel(content, toolbar, mode, imp, exp,
+        print);
     frame.setContentPane((welcome != null) ? welcome : content);
 
     // Menu bar
-    frame.setJMenuBar(getMenubar(getFileMenu(exp, imp), getWindowMenu(mode,
-        getLangMenu()), getFormatMenu(), getInsertMenu(), getAdminMenu()));
+    frame.setJMenuBar(getMenubar(getFileMenu(exp, imp, print), getWindowMenu(
+        mode, getLangMenu()), getFormatMenu(), getInsertMenu(),
+        getAdminMenu(toolbar)));
 
     // Listen changes in builder for frame title
     builder.addChangeListener(content, new ChangeListener() {
@@ -983,6 +989,41 @@ public class Symphonie {
         tabs.setTitleAt(v.ordinal(), builder.getValue(v.getNameKey()));
       }
     };
+  }
+
+  /**
+   * Creates an icon-only button that can be used in a toolbar
+   * 
+   * @param key
+   *          The tooltip key, usually the same that is used to internationalize
+   *          key that was used to build the button
+   * @param del
+   *          The button that will serve a data source, and whose action will be
+   *          performed by toolbar button
+   * @param builder
+   *          The builder for internationalization
+   * @return a <code>JButton</code>
+   */
+  private static final JButton createToolbarButton(String key,
+      final AbstractButton del, ComponentBuilder builder) {
+    final JButton tb = new JButton();
+    final Action a = del.getAction();
+    tb.setEnabled(a.isEnabled());
+    a.addPropertyChangeListener(new PropertyChangeListener() {
+
+      public void propertyChange(PropertyChangeEvent evt) {
+        tb.setEnabled(a.isEnabled());
+      }
+    });
+    tb.setIcon((Icon) a.getValue(Action.SMALL_ICON));
+    builder.buildToolTip(key, tb);
+    tb.addActionListener(new ActionListener() {
+
+      public void actionPerformed(ActionEvent e) {
+        a.actionPerformed(e);
+      }
+    });
+    return tb;
   }
 
   // ----------------------------------------------------------------------------
