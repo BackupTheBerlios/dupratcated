@@ -47,6 +47,7 @@ public class SymphonieConstants {
   public static final String BUTTON_CANCEL = "bcancel";
   public static final String BUTTON_OK = "bok";
   public static final String FORMULADIALOG_TITLE = "formuladialog.title";
+  public static final String FORMULA_TITLE = "formula.title";
   public static final String DATABASEDIALOG_TITLE = "databasedialog.title";
   public static final String DATABASEDIALOG_SERVER = "databasedialog.server";
   public static final String ERROR = "error";

@@ -43,8 +43,7 @@ public class SymphonieActionFactory {
 //  protected final AdminStudentModel adminStudentModel;
 //  protected final AdminJuryModel adminJuryModel;
   
-  public SymphonieActionFactory(Symphonie symphonie,ComponentBuilder builder,
-      StudentModel studentModel, TeacherModel teacherModel, JuryModel juryModel, AdminStudentModel adminStudentModel, AdminTeacherModel adminTeacherModel, AdminJuryModel adminJuryModel){
+  public SymphonieActionFactory(Symphonie symphonie,ComponentBuilder builder){
     
     this.symphonie=symphonie;
     this.builder=builder;

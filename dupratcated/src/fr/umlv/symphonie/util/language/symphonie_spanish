@@ -37,6 +37,7 @@ bcancel=Cancelar
 bok=OK
 error=Error
 formuladialog.title=Añadir una fórmula
+formula.title=Prueba :
 changepassdialog.old=Contraseña
 changepassdialog.new=Nueva contraseña
 changepassdialog.verif=Confirmar la nueva contraseña

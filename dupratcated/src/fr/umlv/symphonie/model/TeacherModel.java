@@ -200,6 +200,8 @@ public class TeacherModel extends AbstractTableModel {
             int column;
 
             for (Formula f : formulaList) {
+              System.out.println("formule pour " + course + " : " + f.getDescription());
+              System.out.println(f);
               column = f.getColumn();
               if (column < 0)
                 columnList.add(0, f);
@@ -314,6 +316,7 @@ public class TeacherModel extends AbstractTableModel {
     
     if(o instanceof Formula){
       Formula f = (Formula)o;
+      
       
       if (rowIndex == 0){
         return f.getDescription();

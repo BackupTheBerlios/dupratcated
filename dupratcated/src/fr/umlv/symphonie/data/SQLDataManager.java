@@ -405,7 +405,7 @@ public class SQLDataManager implements
                      COLUMN_EXPRESSION_FROM_TABLE_FORMULA + ", " +
                      COLUMN_COLUMN_FROM_TABLE_FORMULA + " " +
                      "from " + TABLE_TEACHER_FORMULA + ", " + TABLE_TITLE + " " +
-                     "where " + TABLE_TITLE + "." + COLUMN_ID_FROM_TABLE_TITLE + " = " + TABLE_TEACHER_FORMULA + "." + COLUMN_ID_COURSE_FROM_TABLE_TEACHER_FORMULA + " " +
+                     "where " + TABLE_TITLE + "." + COLUMN_ID_FROM_TABLE_TITLE + " = " + TABLE_TEACHER_FORMULA + "." + COLUMN_ID_TITLE_FROM_TABLE_FORMULA + " " +
                      "order by " + COLUMN_COLUMN_FROM_TABLE_FORMULA + " " +
                      ";";
     

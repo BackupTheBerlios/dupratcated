@@ -38,6 +38,7 @@ bcancel=Cancel
 bok=OK
 error=Error
 formuladialog.title=Add formula
+formula.title=Title :
 changepassdialog.old=Old password
 changepassdialog.new=New password
 changepassdialog.verif=Confirm password

@@ -38,6 +38,7 @@ bcancel=Annuler
 bok=OK
 error=Erreur
 formuladialog.title=Ajout de formules
+formula.title=Intitulé :
 changepassdialog.old=Ancien mot de passe
 changepassdialog.new=Nouveau mot de passe
 changepassdialog.verif=Confirmer le mot de passe

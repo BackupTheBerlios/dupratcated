@@ -933,9 +933,7 @@ public class Symphonie {
     adminJuryModel = AdminJuryModel.getInstance(manager);
 
     // Action factory
-    actionFactory = new SymphonieActionFactory(this, builder, studentModel,
-        teacherModel, juryModel, adminStudentModel, adminTeacherModel,
-        adminJuryModel);
+    actionFactory = new SymphonieActionFactory(this, builder);
 
     // Content pane
     JMenu mode = getModeMenu();
