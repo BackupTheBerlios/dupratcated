@@ -203,13 +203,16 @@ public class HSSFDataExporter implements DataExporter {
         formulas = null;
       }
 
-      if (formulas != null)
+      short columnCount = (short) (marx.size() + 2);
+      if (formulas != null) {
         HSSFDataExporter.insertFormulaColumns(columns, formulas);
+        columnCount += formulas.size();
+      }
 
       int rowCount = studentMarx.size() + 3;
-      short columnCount = (short) (marx.size() + 2 + formulas.size());
 
-      short[] formulaColumns = new short[formulas.size()];
+      short[] formulaColumns = new short[(formulas == null) ? 0 : formulas
+          .size()];
       short[] markColumns = new short[marx.values().size()];
       ArrayList<Pair<String, Short>> columNames = new ArrayList<Pair<String, Short>>();
 
@@ -435,7 +438,7 @@ public class HSSFDataExporter implements DataExporter {
           .setCellValue(strValue);
       HSSFExportUtils
           .setColumnWidth((short) (columnCount - 3), sheet, strValue);
-      
+
       strValue = bu.getValue(HSSFExportUtils.COMMENT_KEY);
       HSSFExportUtils.getCell(sheet, 0, (short) (columnCount - 1), boldCell)
           .setCellValue(strValue);
@@ -518,7 +521,7 @@ public class HSSFDataExporter implements DataExporter {
               .setCellFormula(excelFormula);
         }
       }
-      
+
       // Write workbook on disc
       FileOutputStream fos = new FileOutputStream(documentName);
       wkbook.write(fos);
@@ -614,5 +617,28 @@ public class HSSFDataExporter implements DataExporter {
       else
         columns.add(formulaColumn - 1, f);
     }
+  }
+
+  // ----------------------------------------------------------------------------
+  // Singleton Method
+  // ----------------------------------------------------------------------------
+
+  /**
+   * Singleton object, note that this class is not a singleton, it just add a
+   * method for a singleton instance that may be useful for some programmers
+   */
+  private static HSSFDataExporter singleExporter;
+
+  /**
+   * Returns a singleton instance of <code>HSSFDataExporter</code>
+   * 
+   * @param builder
+   *          The builder for the instance
+   * @return a <code>HSSFDataExporter</code>
+   */
+  public static final HSSFDataExporter getSingletonInstance(
+      ComponentBuilder builder) {
+    if (singleExporter == null) singleExporter = new HSSFDataExporter(builder);
+    return singleExporter;
   }
 }

@@ -39,17 +39,54 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 
-import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManager;
-import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.ExceptionDisplayDialog;
+import fr.umlv.symphonie.util.ComponentBuilder.ButtonType;
 import fr.umlv.symphonie.util.dataexport.DataExporter;
+import fr.umlv.symphonie.util.dataexport.hssf.HSSFDataExporter;
+import fr.umlv.symphonie.util.dataexport.xml.XMLExporter;
 import fr.umlv.symphonie.util.dataimport.DataImporter;
+import fr.umlv.symphonie.util.dataimport.xml.XMLImporter;
 import fr.umlv.symphonie.util.wizard.DefaultWizardModel;
 import fr.umlv.symphonie.util.wizard.Wizard;
 import fr.umlv.symphonie.util.wizard.WizardModel;
 import fr.umlv.symphonie.util.wizard.WizardPanel;
+import fr.umlv.symphonie.util.wizard.event.WizardEvent;
+import fr.umlv.symphonie.util.wizard.event.WizardListenerAdapter;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.DATA_EXPORTABLE;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.DATA_EXPORTER;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.DATA_EXPORT_TYPE;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.DATA_EX_DIALOG;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.DATA_FILE;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.DATA_IMPORTER;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.DATA_MANAGER;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.DATA_VIEW;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.EWIZARD_DEST_FILE;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.EWIZARD_DEST_FILE_TITLE;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.EWIZARD_FORMAT;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.EWIZARD_FORMAT_SELECTION;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.EWIZARD_HELP;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.EWIZARD_READY;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.EWIZARD_READY_HELP1;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.EWIZARD_READY_HELP2;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.EWIZARD_TITLE;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.IWIZARD_HELP;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.IWIZARD_READY;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.IWIZARD_READY_HELP1;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.IWIZARD_READY_HELP2;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.IWIZARD_SRC_FILE;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.IWIZARD_SRC_FILE_TITLE;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.IWIZARD_TITLE;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.WIZARD_BROWSE;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.WIZARD_CANCEL;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.WIZARD_EXPORT;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.WIZARD_FINISH;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.WIZARD_HELP;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.WIZARD_IMPORT;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.WIZARD_NEXT;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.WIZARD_PREVIOUS;
+import fr.umlv.symphonie.view.Symphonie.View;
 
 public class WizardPanelFactory {
 
@@ -110,6 +147,18 @@ public class WizardPanelFactory {
       FileFilter getFileFilter() {
         return XML_FILTER;
       }
+
+      private XMLExporter exporter = new XMLExporter();
+
+      DataExporter getExporter(Object o) {
+        return exporter;
+      }
+
+      private XMLImporter importer = new XMLImporter();
+
+      DataImporter getImporter(Object o) {
+        return importer;
+      }
     },
     HSSF {
 
@@ -127,6 +176,14 @@ public class WizardPanelFactory {
 
       FileFilter getFileFilter() {
         return HSSF_FILTER;
+      }
+
+      DataExporter getExporter(Object o) {
+        return HSSFDataExporter.getSingletonInstance((ComponentBuilder) o);
+      }
+
+      DataImporter getImporter(Object o) {
+        return null;
       }
     };
 
@@ -157,6 +214,24 @@ public class WizardPanelFactory {
      * @return A file filter usable in a <code>JFileChooser</code>
      */
     abstract FileFilter getFileFilter();
+
+    /**
+     * Provides an exporter for the type, for some types it may return null
+     * 
+     * @param o
+     *          Some data
+     * @return a <code>DataExporter</code>
+     */
+    abstract DataExporter getExporter(Object o);
+
+    /**
+     * Provides an importer for the type, for some types it may return null
+     * 
+     * @param o
+     *          Some data
+     * @return a <code>DataImporter</code>
+     */
+    abstract DataImporter getImporter(Object o);
   }
 
   /**
@@ -212,7 +287,7 @@ public class WizardPanelFactory {
 
       public void keyPressed(KeyEvent e) {
         String fname = field.getText();
-        wp.getData().put(SymphonieWizardConstants.DATA_FILE,
+        wp.getData().put(DATA_FILE,
             ((fname == null) || (fname.equals(""))) ? null : new File(fname));
         wp.firePanelChanged();
       }
@@ -224,7 +299,7 @@ public class WizardPanelFactory {
         if (r == JFileChooser.APPROVE_OPTION) {
           File f = fileChooser.getSelectedFile();
           field.setText(f.getPath());
-          wp.getData().put(SymphonieWizardConstants.DATA_FILE, f);
+          wp.getData().put(DATA_FILE, f);
           wp.firePanelChanged();
         }
       }
@@ -238,8 +313,7 @@ public class WizardPanelFactory {
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.insets.left = 5;
     gbc.insets.right = 50;
-    p.add(b.buildButton(a, SymphonieWizardConstants.WIZARD_BROWSE,
-        ComponentBuilder.ButtonType.BUTTON), gbc);
+    p.add(b.buildButton(a, WIZARD_BROWSE, ButtonType.BUTTON), gbc);
     gbc.weightx = 1.0;
     gbc.insets.left = 50;
     gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -281,23 +355,23 @@ public class WizardPanelFactory {
     return new DefaultWizardModel() {
 
       public String getCancelButtonText() {
-        return b.getValue(SymphonieWizardConstants.WIZARD_CANCEL);
+        return b.getValue(WIZARD_CANCEL);
       }
 
       public String getFinishButtonText() {
-        return b.getValue(SymphonieWizardConstants.WIZARD_FINISH);
+        return b.getValue(WIZARD_FINISH);
       }
 
       public String getHelpButtonText() {
-        return b.getValue(SymphonieWizardConstants.WIZARD_HELP);
+        return b.getValue(WIZARD_HELP);
       }
 
       public String getNextButtonText() {
-        return b.getValue(SymphonieWizardConstants.WIZARD_NEXT);
+        return b.getValue(WIZARD_NEXT);
       }
 
       public String getPreviousButtonText() {
-        return b.getValue(SymphonieWizardConstants.WIZARD_PREVIOUS);
+        return b.getValue(WIZARD_PREVIOUS);
       }
 
       public String getWizardTitle() {
@@ -329,8 +403,7 @@ public class WizardPanelFactory {
     gbc.insets.left = 30;
     gbc.insets.right = 30;
     gbc.insets.top = 20;
-    JLabel lab = b
-        .buildLabel(SymphonieWizardConstants.EWIZARD_FORMAT_SELECTION);
+    JLabel lab = b.buildLabel(EWIZARD_FORMAT_SELECTION);
     lab.setFont(lab.getFont().deriveFont(Font.PLAIN));
     p.add(lab, gbc);
     gbc.insets.top = 5;
@@ -343,11 +416,11 @@ public class WizardPanelFactory {
     final WizardPanel pan = new WizardPanel() {
 
       public String getTitle() {
-        return b.getValue(SymphonieWizardConstants.EWIZARD_TITLE);
+        return b.getValue(EWIZARD_TITLE);
       }
 
       public String getDescription() {
-        return b.getValue(SymphonieWizardConstants.EWIZARD_FORMAT);
+        return b.getValue(EWIZARD_FORMAT);
       }
 
       public JComponent getPanelComponent() {
@@ -366,8 +439,9 @@ public class WizardPanelFactory {
     list.addListSelectionListener(new ListSelectionListener() {
 
       public void valueChanged(ListSelectionEvent event) {
-        pan.getData().put(SymphonieWizardConstants.DATA_EXPORT_TYPE,
-            list.getSelectedValue());
+        ImportExportFormats f = (ImportExportFormats) list.getSelectedValue();
+        pan.getData().put(DATA_EXPORT_TYPE, f);
+        pan.getData().put(DATA_EXPORTER, f.getExporter(b));
         pan.firePanelChanged();
       }
     });
@@ -390,11 +464,11 @@ public class WizardPanelFactory {
       private final JFileChooser fileChooser = new JFileChooser();
 
       public String getTitle() {
-        return b.getValue(SymphonieWizardConstants.EWIZARD_TITLE);
+        return b.getValue(EWIZARD_TITLE);
       }
 
       public String getDescription() {
-        return b.getValue(SymphonieWizardConstants.EWIZARD_DEST_FILE_TITLE);
+        return b.getValue(EWIZARD_DEST_FILE_TITLE);
       }
 
       public JComponent getPanelComponent() {
@@ -402,18 +476,17 @@ public class WizardPanelFactory {
           p = new JPanel(new GridBagLayout());
           fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           fileChooser.setMultiSelectionEnabled(false);
-          makeBrowsePanel(this, p, fileChooser, b,
-              SymphonieWizardConstants.EWIZARD_DEST_FILE,
-              SymphonieWizardConstants.EWIZARD_HELP);
+          makeBrowsePanel(this, p, fileChooser, b, EWIZARD_DEST_FILE,
+              EWIZARD_HELP);
         }
         fileChooser.resetChoosableFileFilters();
         fileChooser.setFileFilter(((ImportExportFormats) data
-            .get(SymphonieWizardConstants.DATA_EXPORT_TYPE)).getFileFilter());
+            .get(DATA_EXPORT_TYPE)).getFileFilter());
         return p;
       }
 
       public boolean isValid() {
-        File f = (File) data.get(SymphonieWizardConstants.DATA_FILE);
+        File f = (File) data.get(DATA_FILE);
         return (f != null) && (f.exists() ? f.canWrite() : true);
       }
 
@@ -439,9 +512,9 @@ public class WizardPanelFactory {
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.insets = new Insets(20, 50, 0, 50);
     gbc.gridwidth = GridBagConstraints.REMAINDER;
-    p.add(b.buildLabel(SymphonieWizardConstants.EWIZARD_READY_HELP1), gbc);
+    p.add(b.buildLabel(EWIZARD_READY_HELP1), gbc);
     gbc.insets.top = 10;
-    p.add(b.buildLabel(SymphonieWizardConstants.EWIZARD_READY_HELP2), gbc);
+    p.add(b.buildLabel(EWIZARD_READY_HELP2), gbc);
     gbc.insets.top = 30;
     gbc.insets.bottom = 30;
     gbc.weightx = 1.0;
@@ -451,19 +524,18 @@ public class WizardPanelFactory {
     p.add(prog, gbc);
     gbc.insets.top = 0;
     gbc.fill = GridBagConstraints.NONE;
-    final JButton fin = (JButton) b.buildButton(
-        SymphonieWizardConstants.WIZARD_EXPORT,
-        ComponentBuilder.ButtonType.BUTTON);
+    final JButton fin = (JButton) b.buildButton(WIZARD_EXPORT,
+        ButtonType.BUTTON);
     p.add(fin, gbc);
 
     final WizardPanel wp = new WizardPanel() {
 
       public String getTitle() {
-        return b.getValue(SymphonieWizardConstants.EWIZARD_TITLE);
+        return b.getValue(EWIZARD_TITLE);
       }
 
       public String getDescription() {
-        return b.getValue(SymphonieWizardConstants.EWIZARD_READY);
+        return b.getValue(EWIZARD_READY);
       }
 
       public JComponent getPanelComponent() {
@@ -486,30 +558,19 @@ public class WizardPanelFactory {
         fin.setEnabled(false);
         final Map<Object, Object> data = wp.getData();
         final ExceptionDisplayDialog dialog = (ExceptionDisplayDialog) data
-            .get(SymphonieWizardConstants.DATA_EX_DIALOG);
+            .get(DATA_EX_DIALOG);
+        final DataManager dm = (DataManager) data.get(DATA_MANAGER);
+        final DataExporter exp = (DataExporter) data.get(DATA_EXPORTER);
+        final String file = ((File) data.get(DATA_FILE)).getAbsolutePath();
+        final Object o = data.get(DATA_EXPORTABLE);
         prog.setValue(15);
         new Thread() {
 
           public void run() {
             try {
-              DataExporter exp = (DataExporter) data
-                  .get(SymphonieWizardConstants.DATA_EXPORTER);
-              String file = ((File) data
-                  .get(SymphonieWizardConstants.DATA_FILE)).getAbsolutePath();
-              Object o = data.get(SymphonieWizardConstants.DATA_EXPORTABLE);
-              DataManager dm = (DataManager) data
-                  .get(SymphonieWizardConstants.DATA_MANAGER);
-              if (o == null) {
-                exp.exportJuryView(file, dm);
-              } else {
-                if (o instanceof Course)
-                  exp.exportTeacherView(file, dm, (Course) o);
-                else if (o instanceof Student)
-                  exp.exportStudentView(file, dm, (Student) o);
-                else
-                  throw new IllegalStateException("Invalid export type :"
-                      + o.getClass().getName());
-              }
+              Symphonie.View view = (View) data.get(DATA_VIEW);
+
+              view.exportView(exp, dm, o, file);
             } catch (Throwable t) {
               if (dialog != null)
                 dialog.showException(t);
@@ -523,6 +584,13 @@ public class WizardPanelFactory {
       }
     });
 
+    wiz.getModel().addWizardListener(new WizardListenerAdapter() {
+
+      public void wizardFinished(WizardEvent we) {
+        prog.setValue(0);
+        fin.setEnabled(true);
+      }
+    });
     return wp;
   }
 
@@ -543,11 +611,11 @@ public class WizardPanelFactory {
       private final JFileChooser fileChooser = new JFileChooser();
 
       public String getTitle() {
-        return b.getValue(SymphonieWizardConstants.IWIZARD_TITLE);
+        return b.getValue(IWIZARD_TITLE);
       }
 
       public String getDescription() {
-        return b.getValue(SymphonieWizardConstants.IWIZARD_SRC_FILE_TITLE);
+        return b.getValue(IWIZARD_SRC_FILE_TITLE);
       }
 
       public JComponent getPanelComponent() {
@@ -555,23 +623,10 @@ public class WizardPanelFactory {
           p = new JPanel(new GridBagLayout());
           fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           fileChooser.setMultiSelectionEnabled(false);
-          fileChooser.setFileFilter(new FileFilter() {
-
-            public boolean accept(File f) {
-              String fname = f.getName();
-              for (ImportExportFormats format : ImportExportFormats.values())
-                if (fname.endsWith('.' + format.getExtension())) return true;
-              return false;
-            }
-
-            public String getDescription() {
-              return "XML/Excel 97 Horrible files";
-            }
-          });
-
-          makeBrowsePanel(this, p, fileChooser, b,
-              SymphonieWizardConstants.IWIZARD_SRC_FILE,
-              SymphonieWizardConstants.IWIZARD_HELP);
+          fileChooser.setFileFilter(ImportExportFormats.XML.getFileFilter());
+          makeBrowsePanel(this, p, fileChooser, b, IWIZARD_SRC_FILE,
+              IWIZARD_HELP);
+          data.put(DATA_IMPORTER, ImportExportFormats.XML.getImporter(null));
         }
         return p;
       }
@@ -590,7 +645,7 @@ public class WizardPanelFactory {
 
   /**
    * Gets the last panel for the import wizard
-   * TODO : import code
+   * 
    * @param wiz
    *          The wizard that will display the panel
    * @param b
@@ -604,9 +659,9 @@ public class WizardPanelFactory {
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.insets = new Insets(20, 50, 0, 50);
     gbc.gridwidth = GridBagConstraints.REMAINDER;
-    p.add(b.buildLabel(SymphonieWizardConstants.IWIZARD_READY_HELP1), gbc);
+    p.add(b.buildLabel(IWIZARD_READY_HELP1), gbc);
     gbc.insets.top = 10;
-    p.add(b.buildLabel(SymphonieWizardConstants.IWIZARD_READY_HELP2), gbc);
+    p.add(b.buildLabel(IWIZARD_READY_HELP2), gbc);
     gbc.insets.top = 30;
     gbc.insets.bottom = 30;
     gbc.weightx = 1.0;
@@ -616,19 +671,18 @@ public class WizardPanelFactory {
     p.add(prog, gbc);
     gbc.insets.top = 0;
     gbc.fill = GridBagConstraints.NONE;
-    final JButton fin = (JButton) b.buildButton(
-        SymphonieWizardConstants.WIZARD_IMPORT,
-        ComponentBuilder.ButtonType.BUTTON);
+    final JButton fin = (JButton) b.buildButton(WIZARD_IMPORT,
+        ButtonType.BUTTON);
     p.add(fin, gbc);
 
     final WizardPanel wp = new WizardPanel() {
 
       public String getTitle() {
-        return b.getValue(SymphonieWizardConstants.IWIZARD_TITLE);
+        return b.getValue(IWIZARD_TITLE);
       }
 
       public String getDescription() {
-        return b.getValue(SymphonieWizardConstants.IWIZARD_READY);
+        return b.getValue(IWIZARD_READY);
       }
 
       public JComponent getPanelComponent() {
@@ -651,20 +705,17 @@ public class WizardPanelFactory {
         fin.setEnabled(false);
         final Map<Object, Object> data = wp.getData();
         final ExceptionDisplayDialog dialog = (ExceptionDisplayDialog) data
-            .get(SymphonieWizardConstants.DATA_EX_DIALOG);
+            .get(DATA_EX_DIALOG);
+        final DataManager dm = (DataManager) data.get(DATA_MANAGER);
+        final String file = ((File) data.get(DATA_FILE)).getAbsolutePath();
+        final DataImporter imp = (DataImporter) data.get(DATA_IMPORTER);
         prog.setValue(15);
         new Thread() {
 
           public void run() {
             try {
-              DataImporter exp = (DataImporter) data
-                  .get(SymphonieWizardConstants.DATA_IMPORTER);
-              String file = ((File) data
-                  .get(SymphonieWizardConstants.DATA_FILE)).getAbsolutePath();
-              Object o = data.get(SymphonieWizardConstants.DATA_IMPORTABLE);
-              DataManager dm = (DataManager) data
-                  .get(SymphonieWizardConstants.DATA_MANAGER);
-              // TODO export data
+              Symphonie.View view = (View) data.get(DATA_VIEW);
+              view.importView(imp, dm, file);
             } catch (Throwable t) {
               if (dialog != null)
                 dialog.showException(t);
@@ -678,6 +729,13 @@ public class WizardPanelFactory {
       }
     });
 
+    wiz.getModel().addWizardListener(new WizardListenerAdapter() {
+
+      public void wizardFinished(WizardEvent we) {
+        prog.setValue(0);
+        fin.setEnabled(true);
+      }
+    });
     return wp;
   }
 }

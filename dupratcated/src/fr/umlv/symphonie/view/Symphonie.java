@@ -58,6 +58,10 @@ import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.ExceptionDisplayDialog;
 import fr.umlv.symphonie.util.TextualResourcesLoader;
 import fr.umlv.symphonie.util.ComponentBuilder.ButtonType;
+import fr.umlv.symphonie.util.dataexport.DataExporter;
+import fr.umlv.symphonie.util.dataexport.DataExporterException;
+import fr.umlv.symphonie.util.dataimport.DataImporter;
+import fr.umlv.symphonie.util.dataimport.DataImporterException;
 import fr.umlv.symphonie.util.wizard.DefaultWizardModel;
 import fr.umlv.symphonie.util.wizard.Wizard;
 import static fr.umlv.symphonie.view.SymphonieConstants.ADMIN_MENU;
@@ -86,6 +90,7 @@ import fr.umlv.symphonie.view.cells.CellRendererFactory;
 
 public class Symphonie {
 
+  /** Symphonie data source */
   private final DataManager manager;
 
   /** The international builder */
@@ -346,6 +351,7 @@ public class Symphonie {
             SymphonieWizardConstants.EXPORT_WIZARD_ICON);
     exp.getInterPanelData().put(SymphonieWizardConstants.DATA_EX_DIALOG,
         errDisplay);
+    exp.getInterPanelData().put(SymphonieWizardConstants.DATA_MANAGER, manager);
     Wizard wesh = new Wizard(frame, exp, builder, new Dimension(600, 400));
     exp.addPanel(WizardPanelFactory.getExportFormatSelectionPanel(builder));
     exp.addPanel(WizardPanelFactory.getExportFileSelectionPanel(builder));
@@ -365,6 +371,7 @@ public class Symphonie {
             SymphonieWizardConstants.IMPORT_WIZARD_ICON);
     imp.getInterPanelData().put(SymphonieWizardConstants.DATA_EX_DIALOG,
         errDisplay);
+    imp.getInterPanelData().put(SymphonieWizardConstants.DATA_MANAGER, manager);
     Wizard iWish = new Wizard(frame, imp, builder, new Dimension(600, 400));
     imp.addPanel(WizardPanelFactory.getImportFileSelectionPanel(builder));
     imp.addPanel(WizardPanelFactory.getImportPanel(iWish, builder));
@@ -448,7 +455,8 @@ public class Symphonie {
         Object o = tree.getLastSelectedPathComponent();
         if (o instanceof Student) {
           ((StudentModel) (table.getModel())).setStudent((Student) o);
-          // TODO import/export data
+          ((DefaultWizardModel) exportW.getModel()).getInterPanelData().put(
+              SymphonieWizardConstants.DATA_EXPORTABLE, o);
         }
       }
     });
@@ -516,6 +524,8 @@ public class Symphonie {
         if (o instanceof Course) {
           System.out.println("on a selectionne une matiere !");
           ((TeacherModel) table.getModel()).setCourse((Course) o);
+          ((DefaultWizardModel) exportW.getModel()).getInterPanelData().put(
+              SymphonieWizardConstants.DATA_EXPORTABLE, o);
         }
       }
     });
@@ -563,12 +573,12 @@ public class Symphonie {
    * 
    * @param content
    *          The panel that contains Symphonie views
-   * @param modeMenu
+   * @param mode
    *          The mode menu
    * @return The html welcome page as a panel
    */
   private final JPanel getWelcomePagePanel(final JPanel content,
-      final JMenu modeMenu) {
+      final JMenu mode) {
     JPanel p = new JPanel(new GridBagLayout());
     final JEditorPane jeep = new JEditorPane();
     jeep.setEditorKit(new HTMLEditorKit());
@@ -580,10 +590,9 @@ public class Symphonie {
       public void hyperlinkUpdate(HyperlinkEvent e) {
         if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
           String f = e.getURL().getFile();
-          currentView = View.valueOf(f.substring(f.lastIndexOf('/') + 1));
-          modeMenu.setEnabled(true);
+          setCurrentView(View.valueOf(f.substring(f.lastIndexOf('/') + 1)));
+          mode.setEnabled(true);
           frame.setContentPane(content);
-          tab.setSelectedIndex(currentView.ordinal());
         }
       }
     });
@@ -674,14 +683,14 @@ public class Symphonie {
 
     // Main frame
     frame = new JFrame(builder.getValue(FRAME_TITLE));
-    
+
     // Exception dialog
     errDisplay = new ExceptionDisplayDialog(frame, builder);
-    
+
     // Wizards
     importW = getImportWizard();
     exportW = getExportWizard();
-    
+
     // Content pane
     JMenu mode = getModeMenu();
     JPanel content = getContentPane();
@@ -728,6 +737,13 @@ public class Symphonie {
   public void setCurrentView(View newView) {
     this.currentView = newView;
     tab.setSelectedIndex(currentView.ordinal());
+    ((DefaultWizardModel) exportW.getModel()).getInterPanelData().put(
+        SymphonieWizardConstants.DATA_VIEW, newView);
+    ((DefaultWizardModel) importW.getModel()).getInterPanelData().put(
+        SymphonieWizardConstants.DATA_VIEW, newView);
+    if (newView.equals(View.jury))
+      ((DefaultWizardModel) exportW.getModel()).getInterPanelData().remove(
+          SymphonieWizardConstants.DATA_EXPORTABLE);
   }
 
   // ----------------------------------------------------------------------------
@@ -849,7 +865,10 @@ public class Symphonie {
   }
 
   /**
-   * Enum represents program views
+   * Enum represents program views <br>
+   * A <code>View</code> can be exported and imported. <br>
+   * In order to make abstraction of the export/import implemetations
+   * <code>Views</code> use a visitor-like design pattern.
    */
   enum View {
     student {
@@ -857,17 +876,47 @@ public class Symphonie {
       String getNameKey() {
         return VIEW_STUDENT_MENU_ITEM;
       }
+
+      void exportView(DataExporter exporter, DataManager manager, Object data,
+          String output) throws DataExporterException {
+        exporter.exportStudentView(output, manager, (Student) data);
+      }
+
+      void importView(DataImporter importer, DataManager manager, Object input)
+          throws DataImporterException {
+        importer.importStudentView((String) input, manager);
+      }
     },
     teacher {
 
       String getNameKey() {
         return VIEW_TEACHER_MENU_ITEM;
       }
+
+      void exportView(DataExporter exporter, DataManager manager, Object data,
+          String output) throws DataExporterException {
+        exporter.exportTeacherView(output, manager, (Course) data);
+      }
+
+      void importView(DataImporter importer, DataManager manager, Object input)
+          throws DataImporterException {
+        importer.importTeacherView((String) input, manager);
+      }
     },
     jury {
 
       String getNameKey() {
         return VIEW_JURY_MENU_ITEM;
+      }
+
+      void exportView(DataExporter exporter, DataManager manager, Object data,
+          String output) throws DataExporterException {
+        exporter.exportJuryView(output, manager);
+      }
+
+      void importView(DataImporter importer, DataManager manager, Object input)
+          throws DataImporterException {
+        importer.importJuryView((String) input, manager);
       }
     };
 
@@ -877,5 +926,40 @@ public class Symphonie {
      * @return a <code>String</code>
      */
     abstract String getNameKey();
+
+    /**
+     * Exports view usign the given exporter
+     * 
+     * @param exporter
+     *          The exporter object
+     * @param manager
+     *          The data manager that is the source view
+     * @param data
+     *          Some extra data that may be needed by the export process
+     * @param output
+     *          The output file, note that export can be done to something else
+     *          than a file and the programme can use this <code>String</code>
+     *          at his convenience.
+     * @throws DataExporterException
+     *           If the exporter reports a problem
+     */
+    abstract void exportView(DataExporter exporter, DataManager manager,
+        Object data, String output) throws DataExporterException;
+
+    /**
+     * Imports view using the given importer
+     * 
+     * @param importer
+     *          The importer object
+     * @param manager
+     *          The data manager that will receive imported data
+     * @param input
+     *          Input can be any object that the programmers may need,
+     *          typically, it's a file name.
+     * @throws DataImporterException
+     *           If the importer reports any problem
+     */
+    abstract void importView(DataImporter importer, DataManager manager,
+        Object input) throws DataImporterException;
   }
 }

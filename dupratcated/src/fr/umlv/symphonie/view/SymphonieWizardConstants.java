@@ -62,7 +62,7 @@ public final class SymphonieWizardConstants {
   // ----------------------------------------------------------------------------
   // Import wizard texts
   // ---------------------------------------------------------------------------
-  
+
   public static final String IWIZARD_TITLE = "importexport.iwizard";
   public static final String IWIZARD_SRC_FILE_TITLE = "importexport.ifile";
   public static final String IWIZARD_SRC_FILE = "importexport.isrcfile";
@@ -70,14 +70,14 @@ public final class SymphonieWizardConstants {
   public static final String IWIZARD_READY = "importexport.iready";
   public static final String IWIZARD_READY_HELP1 = "importexport.ireadyhelp1";
   public static final String IWIZARD_READY_HELP2 = "importexport.ireadyhelp2";
-  
-  
+
   // ----------------------------------------------------------------------------
   // Internal data
   // ---------------------------------------------------------------------------
-  
+
   public static final String DATA_FILE = "file";
   public static final String DATA_EXPORT_TYPE = "exportType";
+  public static final String DATA_VIEW = "view";
   public static final String DATA_EXPORTABLE = "exportableData";
   public static final String DATA_IMPORTABLE = "importableData";
   public static final String DATA_EX_DIALOG = "exceptionDialog";
