@@ -33,6 +33,7 @@ celldialog.textcolor=Color del texto
 celldialog.bgcolor=Color de fondo
 celldialog.preview=Vista previa
 celldialog.sample=Ejemplo
+celldialog.columnnumber=Indice de columna
 bcancel=Cancelar
 bok=OK
 error=Error
