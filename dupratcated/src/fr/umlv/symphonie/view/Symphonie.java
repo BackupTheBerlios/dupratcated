@@ -161,24 +161,20 @@ public class Symphonie {
    *          The import menu item
    * @param print
    *          The print menu item
+   *          @param exit The exit menu item
    * @return a <code>JMenu</code>
    */
-  private final JMenu getFileMenu(JMenuItem exp, JMenuItem imp, JMenuItem print) {
+  private final JMenu getFileMenu(JMenuItem exp, JMenuItem imp, JMenuItem print, JMenuItem exit) {
     JMenu file = (JMenu) builder.buildButton(FILE_MENU, ButtonType.MENU);
 
     file.add(print);
-
     file.add(new JSeparator());
 
     file.add(imp);
     file.add(exp);
-
     file.add(new JSeparator());
 
-    file.add(builder.buildButton(actionFactory.getExitAction(new ImageIcon(
-        Symphonie.class.getResource("icons/exit.png"))), EXIT_MENU_ITEM,
-        ButtonType.MENU_ITEM));
-
+    file.add(exit);
     return file;
   }
 
@@ -298,32 +294,29 @@ public class Symphonie {
    * @return a <code>JMenu</code>
    */
   private final JMenu getAdminMenu(JToolBar toolbar) {
+    
     JMenu admin = (JMenu) builder.buildButton(ADMIN_MENU, ButtonType.MENU);
+    
     /* Actions ******************************************************* */
     final Action connect = actionFactory.getConnectAction(new ImageIcon(
         Symphonie.class.getResource("icons/admin.png")), logger);
-    logger.addChangeListener(new ChangeListener() {
-
-      public void stateChanged(ChangeEvent e) {
-        connect.setEnabled(!logger.isIdentified());
-      }
-    });
+    final Action logout = actionFactory.getLogoutAction(new ImageIcon(Symphonie.class.getResource("icons/logout.png")));
+    logout.setEnabled(false);
     final Action db = actionFactory.getDBAction(new ImageIcon(Symphonie.class
         .getResource("icons/db.png")));
     db.setEnabled(false);
-    logger.addChangeListener(new ChangeListener() {
-
-      public void stateChanged(ChangeEvent e) {
-        db.setEnabled(logger.isIdentified());
-      }
-    });
     final Action pwd = actionFactory.getPwdAction(new ImageIcon(Symphonie.class
         .getResource("icons/pwd.png")));
     pwd.setEnabled(false);
+    
     logger.addChangeListener(new ChangeListener() {
 
       public void stateChanged(ChangeEvent e) {
-        pwd.setEnabled(logger.isIdentified());
+        boolean b = logger.isIdentified();
+        connect.setEnabled(!b);
+        logout.setEnabled(b);
+        db.setEnabled(b);
+        pwd.setEnabled(b);
       }
     });
 
@@ -332,6 +325,10 @@ public class Symphonie {
         ButtonType.MENU_ITEM);
     admin.add(b);
     toolbar.add(createToolbarButton(CONNECT_MENU_ITEM, b, builder));
+    
+    b = builder.buildButton(logout, LOGOUT_MENU_ITEM, ButtonType.MENU_ITEM);
+    admin.add(b);
+    toolbar.add(createToolbarButton(LOGOUT_MENU_ITEM, b, builder));
 
     b = builder.buildButton(db, DB_MENU_ITEM, ButtonType.MENU_ITEM);
     admin.add(b);
@@ -951,6 +948,10 @@ public class Symphonie {
         .getPrintAction(new ImageIcon(Symphonie.class
             .getResource("icons/print.png"))), PRINT_MENU_ITEM,
         ButtonType.MENU_ITEM);
+    
+    JMenuItem exit = (JMenuItem) builder.buildButton(actionFactory.getExitAction(new ImageIcon(
+        Symphonie.class.getResource("icons/exit.png"))), EXIT_MENU_ITEM,
+        ButtonType.MENU_ITEM);
 
     toolbar.add(createToolbarButton(PRINT_MENU_ITEM, print, builder));
     toolbar.addSeparator();
@@ -964,7 +965,7 @@ public class Symphonie {
     frame.setContentPane((welcome != null) ? welcome : content);
 
     // Menu bar
-    frame.setJMenuBar(getMenubar(getFileMenu(exp, imp, print), getWindowMenu(
+    frame.setJMenuBar(getMenubar(getFileMenu(exp, imp, print, exit), getWindowMenu(
         mode, getLangMenu()), getFormatMenu(), getInsertMenu(),
         getAdminMenu(toolbar)));
 
@@ -979,6 +980,8 @@ public class Symphonie {
     currentJuryModel = juryModel;
     currentTeacherModel = teacherModel;
     currentStudentModel = studentModel;
+    
+    toolbar.add(createToolbarButton(EXIT_MENU_ITEM, exit, builder));
 
     frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
   }

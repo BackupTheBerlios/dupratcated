@@ -29,29 +29,12 @@ public class SymphonieActionFactory {
 
   protected final Symphonie symphonie;
   protected final ComponentBuilder builder;
-  
-//  protected final TeacherModel teacherModel;
-//  protected final StudentModel studentModel;
-//  protected final JuryModel juryModel;
-//  
-//  protected final AdminTeacherModel adminTeacherModel;
-//  protected final AdminStudentModel adminStudentModel;
-//  protected final AdminJuryModel adminJuryModel;
-  
-  public SymphonieActionFactory(Symphonie symphonie,ComponentBuilder builder){
-    
-    this.symphonie=symphonie;
-    this.builder=builder;
-//    this.teacherModel=teacherModel;
-//    this.studentModel=studentModel;
-//    this.juryModel=juryModel;
-//    this.adminTeacherModel=adminTeacherModel;
-//    this.adminStudentModel=adminStudentModel;
-//    this.adminJuryModel=adminJuryModel;
+
+  public SymphonieActionFactory(Symphonie symphonie, ComponentBuilder builder) {
+    this.symphonie = symphonie;
+    this.builder = builder;
   }
-  
-  
-  
+
   /* FILE MENU ACTIONS ***************************************** */
 
   /**
@@ -156,8 +139,8 @@ public class SymphonieActionFactory {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
-//        FormulaDialog fd = new FormulaDialog(frame, builder);
-//        fd.setVisible(true);
+        // FormulaDialog fd = new FormulaDialog(frame, builder);
+        // fd.setVisible(true);
       }
     };
     a.putValue(Action.SMALL_ICON, icon);
@@ -209,7 +192,8 @@ public class SymphonieActionFactory {
    *          The symphonie instance
    * @return an AbstractAction
    */
-  public AbstractAction getConnectAction(Icon icon,final IdentificationStrategy is) {
+  public AbstractAction getConnectAction(Icon icon,
+      final IdentificationStrategy is) {
 
     AbstractAction a = new AbstractAction() {
 
@@ -227,8 +211,9 @@ public class SymphonieActionFactory {
         option[1] = builder
             .getValue(SymphonieConstants.ADMIN_JOPTIONPANE_BCANCEL);
 
-        int result = JOptionPane.showOptionDialog(symphonie.getFrame(), message,
-            builder.getValue(SymphonieConstants.ADMIN_JOPTIONPANE_TITLE),
+        int result = JOptionPane.showOptionDialog(symphonie.getFrame(),
+            message, builder
+                .getValue(SymphonieConstants.ADMIN_JOPTIONPANE_TITLE),
             JOptionPane.DEFAULT_OPTION, // type of dialog
             JOptionPane.QUESTION_MESSAGE, // type of icone
             null, // optional icon
@@ -252,6 +237,24 @@ public class SymphonieActionFactory {
   }
 
   /**
+   * Creates an action that logs user out
+   * 
+   * @param icon
+   *          The action SMALL_ICON
+   * @return an <code>AbstractAction</code>
+   */
+  public AbstractAction getLogoutAction(Icon icon) {
+    AbstractAction a = new AbstractAction() {
+
+      public void actionPerformed(ActionEvent event) {
+        symphonie.getIdentificationStrategy().logout();
+      }
+    };
+    a.putValue(Action.SMALL_ICON, icon);
+    return a;
+  }
+
+  /**
    * Creates an action that prompts a DB config dialog
    * 
    * @param icon
@@ -263,7 +266,8 @@ public class SymphonieActionFactory {
   public AbstractAction getDBAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
-      private final DatabaseDialog dbd = new DatabaseDialog(symphonie.getFrame());
+      private final DatabaseDialog dbd = new DatabaseDialog(symphonie
+          .getFrame());
 
       public void actionPerformed(ActionEvent event) {
         dbd.setVisible(true);
@@ -287,7 +291,8 @@ public class SymphonieActionFactory {
   public AbstractAction getPwdAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
-      private final ChangePassDialog cpd = new ChangePassDialog(symphonie, builder);
+      private final ChangePassDialog cpd = new ChangePassDialog(symphonie,
+          builder);
 
       public void actionPerformed(ActionEvent event) {
         cpd.setVisible(true);
@@ -346,7 +351,8 @@ public class SymphonieActionFactory {
   public AbstractAction getStudentChartAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
-      private final StudentChartDialog dialog = new StudentChartDialog(symphonie);
+      private final StudentChartDialog dialog = new StudentChartDialog(
+          symphonie);
 
       public void actionPerformed(ActionEvent e) {
         dialog.setChart(symphonie.getCurrentStudentModel());
@@ -391,7 +397,8 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public AbstractAction getRemoveTeacherColumnAction(Icon icon, final JTable table) {
+  public AbstractAction getRemoveTeacherColumnAction(Icon icon,
+      final JTable table) {
     AbstractAction a = new AbstractAction() {
 
       private Point p;
@@ -462,7 +469,8 @@ public class SymphonieActionFactory {
   public AbstractAction getTeacherChartAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
-      private final TeacherChartDialog dialog = new TeacherChartDialog(symphonie);
+      private final TeacherChartDialog dialog = new TeacherChartDialog(
+          symphonie);
 
       public void actionPerformed(ActionEvent e) {
         dialog.setChart(symphonie.getCurrentTeacherModel());
@@ -479,7 +487,8 @@ public class SymphonieActionFactory {
   public AbstractAction getJuryAddFormulaAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
-      private final JuryFormulaDialog dialog = new JuryFormulaDialog(symphonie, builder);
+      private final JuryFormulaDialog dialog = new JuryFormulaDialog(symphonie,
+          builder);
 
       public void actionPerformed(ActionEvent e) {
         dialog.setModal(true);

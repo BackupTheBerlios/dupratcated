@@ -27,6 +27,7 @@ public class SymphonieConstants {
   public static final String INSERT_LINE_MENU_ITEM = "insert_line";
   public static final String ADMIN_MENU = "admin";
   public static final String CONNECT_MENU_ITEM = "connect";
+  public static final String LOGOUT_MENU_ITEM = "logout";
   public static final String DB_MENU_ITEM = "db";
   public static final String PWD_MENU_ITEM = "pwd";
   public static final String ENGLISH_MENU_ITEM = "english";
