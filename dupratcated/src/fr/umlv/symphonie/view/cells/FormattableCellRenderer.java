@@ -33,4 +33,14 @@ public interface FormattableCellRenderer extends TableCellRenderer {
    * @return The format that was associated to the object
    */
   public CellFormat removeFormatedObject(Object o);
+
+  /**
+   * Tells whether this object has a format mapped or no
+   * 
+   * @param o
+   *          the object to test
+   * @return <code>true</code> if the object is formatted <code>false</code>
+   *         otherwise
+   */
+  public boolean hasFormat(Object o);
 }

@@ -31,4 +31,9 @@ public abstract class AbstractFormattableCellRenderer implements
   public CellFormat removeFormatedObject(Object o) {
     return fObjects.remove(o);
   }
+
+  public boolean hasFormat(Object o) {
+    if (o == null) return false;
+    return fObjects.containsKey(o);
+  }
 }
