@@ -11,14 +11,20 @@
      Fabien VALLE
      ====================================================================== -->
 
-<project name="project" default="all">
-    
+<project name="project" default="all" basedir=".">
+
+  <!-- ================================= 
+       Project description
+       ================================= -->
   <description>
     Génie Logiciel 1 - Symphonie Dupratcated
     Master 1 Informatique - 2004/2005
   </description>
 
-  
+
+  <!-- ================================= 
+       Global properties
+       ================================= -->  
   <property name="src" value="src" />
   <property name="classes" value="classes" />
   <property name="lib" value="lib"/>
@@ -32,7 +38,7 @@
   <property name="formula" value="${package}/data/formula"/>
 
   <property name="symphonie.jar" value="symphonie.jar" />
-  <property name="manifest" value="etc/MANIFEST.MF"/>
+  <property name="manifest" value="etc/manifest"/>
 
   <property name="language" value="${package}/util/language"/>
   <property name="icon_dir" value="${package}/view/icons"/>
@@ -70,7 +76,24 @@
     <echo level="info" message="ant clean : Delete compiled classes" />
     <echo level="info" message="Run (after building) :${line.separator}${exec.message}" />
   </target>
-  
+
+  <!-- ================================= 
+	   target: srcdist              
+	   description: Source distribution
+	   ================================= -->
+  <target name="srcdist">
+  	<tstamp/>
+  	<zip destfile="symphonie-src-${DSTAMP}.zip">
+  	  <zipfileset file="build.xml"/>
+  	  <zipfileset file="symphonie.jpg"/>
+  	  <zipfileset dir="${lib}" prefix="${lib}"/>
+   	  <zipfileset dir="${bin}" prefix="${bin}" excludes="**.jar"/>
+  	  <zipfileset dir="etc" prefix="etc"/>
+  	  <zipfileset dir="${src}" prefix="${src}" excludes="**CVS**"/>
+  	  <zipfileset dir="${tests}/${src}" prefix="${tests}/${src}" excludes="**CVS**"/>
+  	</zip>
+  </target>
+	
   <!-- ================================= 
        target: sablecc
        description: compile grammar
@@ -123,13 +146,8 @@
           description: jar compiled classes
          ================================= -->
   <target name="jar" depends="compile">
-    <jar jarfile="${bin}/${symphonie.jar}" basedir="${classes}" manifest="${manifest}">
-      <manifest mode="update">
-        <attribute name="Built-By" value="${user.name}"/>
-        <attribute name="Build-date" value="${TODAY}"/>
-      </manifest>
-    </jar>
-    <chmod file="symphonie.sh" perm="ugo+rx" />
+    <jar jarfile="${bin}/${symphonie.jar}" basedir="${classes}" manifest="${manifest}" />
+    <chmod file="${bin}/symphonie.sh" perm="ugo+rx" />
   	<antcall target="clean"/>
   </target>
   
@@ -162,8 +180,9 @@
        target: all
        description: compile + jar
        ================================= -->
-  <target name="all" depends="jar">
-    <splash/>
+  <target name="all">
+    <splash imageurl="file://${basedir}/symphonie.jpg"/>
+    <antcall target="jar"/>
   </target>
         
   
