@@ -112,8 +112,9 @@ public abstract class XMLExporter {
     try {
 
       Transformer transformer = TransformerFactory.newInstance().newTransformer();
-      transformer.setOutputProperty(javax.xml.transform.OutputKeys.DOCTYPE_SYSTEM, dtd);
+      transformer.setOutputProperty(javax.xml.transform.OutputKeys.DOCTYPE_SYSTEM, "file:" + dtd);
       transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+      transformer.setOutputProperty(OutputKeys.ENCODING, "ISO-8859-1");
       transformer.transform(new DOMSource(document), new StreamResult(new File(documentName)));
      
     } catch (TransformerConfigurationException e) {
