@@ -34,6 +34,7 @@ import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
 import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.Pair;
 import fr.umlv.symphonie.util.StudentAverage;
+import fr.umlv.symphonie.util.completion.CompletionDictionary;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
 import fr.umlv.symphonie.view.cells.FormattableCellRenderer;
 import fr.umlv.symphonie.view.cells.ObjectFormattingSupport;
@@ -73,10 +74,24 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
 
   private int lastRow = -1;
   
+  protected CompletionDictionary dictionary = new CompletionDictionary();
+  
   public JuryModel(DataManager manager, ComponentBuilder builder) {
     this.manager = manager;
-	this.builder = builder;
+    this.builder = builder;
+    
+    fillDefaultDictionary();
+    
     update();
+  }
+
+/**
+   * 
+   */
+  private void fillDefaultDictionary() {
+    dictionary.add("average");
+    dictionary.add("min");
+    dictionary.add("max");
   }
 
 //  protected void setManager(DataManager manager) {
@@ -120,6 +135,10 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
           studentList.addAll(allData.getSecond().keySet());
           dataMap.putAll(allData.getSecond());
           courseMap.putAll(allData.getFirst());
+          
+          for (Course c : courseMap.values())
+            dictionary.add(c.getTitle());
+          
 
           /*
            * ici ajouter les formules de la vue jury
@@ -181,12 +200,22 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
 
   }
 
+  /**
+   * @return Returns the dictionary.
+   */
+  public CompletionDictionary getDictionary() {
+    return dictionary;
+  }
   public void clear() {
     rowCount = 0;
     columnCount = 0;
     columnList.clear();
     studentList.clear();
     dataMap.clear();
+    
+    for (Course c : courseMap.values())
+      dictionary.remove(c.getTitle());
+    
     courseMap.clear();
     
     fireTableStructureChanged();

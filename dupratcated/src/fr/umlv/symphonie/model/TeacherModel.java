@@ -170,6 +170,10 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
           }
 
           markMap.putAll(studentAndMarkMapPair.getFirst());
+          
+          for (Mark m : markMap.values())
+            dictionary.add(m.getDesc());
+          
           studentMarkMap.putAll(studentAndMarkMapPair.getSecond());
 
           columnList.addAll(markMap.values());

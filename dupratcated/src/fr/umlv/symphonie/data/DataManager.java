@@ -155,7 +155,7 @@ public interface DataManager {
 	 * @param c
 	 * @throws DataManagerException
 	 */
-	public void addMark(String desc, float coeff, Course c)
+	public Mark addMark(String desc, float coeff, Course c)
 			throws DataManagerException;
 
 	/**

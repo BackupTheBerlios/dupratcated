@@ -29,6 +29,7 @@ import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
 import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.StudentAverage;
+import fr.umlv.symphonie.util.completion.CompletionDictionary;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
 import fr.umlv.symphonie.view.cells.FormattableCellRenderer;
 import fr.umlv.symphonie.view.cells.ObjectFormattingSupport;
@@ -52,8 +53,11 @@ public class StudentModel extends AbstractTableModel implements
 //  private static StudentModel instance = null;
   protected Object[][] matrix = null;
 
+  protected final CompletionDictionary dictionary = new CompletionDictionary();
+  
   protected final Object lock = new Object();
 
+  
   /**
    * Pool de threads qui n'en contient qu'un seul et qui sert pour le
    * rafraîchissement du canal courant.
@@ -65,6 +69,17 @@ public class StudentModel extends AbstractTableModel implements
   public StudentModel(DataManager manager, ComponentBuilder builder) {
     this.manager = manager;
     this.builder = builder;
+    
+    fillDefaultDictionnary();
+  }
+
+/**
+   * 
+   */
+  private void fillDefaultDictionnary() {
+    dictionary.add("average");
+    dictionary.add("min");
+    dictionary.add("max");
   }
 
 //  public static StudentModel getInstance(DataManager manager) {
