@@ -28,8 +28,10 @@ import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
 import fr.umlv.symphonie.util.ComponentBuilder;
+import fr.umlv.symphonie.util.LookableCollection;
 import fr.umlv.symphonie.util.StudentAverage;
 import fr.umlv.symphonie.util.completion.CompletionDictionary;
+import fr.umlv.symphonie.util.completion.IDictionarySupport;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
 import fr.umlv.symphonie.view.cells.FormattableCellRenderer;
 import fr.umlv.symphonie.view.cells.ObjectFormattingSupport;
@@ -42,7 +44,7 @@ import static fr.umlv.symphonie.view.SymphonieConstants.*;
  * @author fvallee
  */
 public class StudentModel extends AbstractTableModel implements
-    ObjectFormattingSupport {
+    ObjectFormattingSupport, IDictionarySupport {
 
   protected final DataManager manager;
   protected final ComponentBuilder builder;
@@ -50,14 +52,13 @@ public class StudentModel extends AbstractTableModel implements
   protected int columnCount = 0;
   protected int rowCount = 0;
   protected Map<Course, Map<Integer, StudentMark>> markMap = null;
-//  private static StudentModel instance = null;
+  // private static StudentModel instance = null;
   protected Object[][] matrix = null;
 
   protected final CompletionDictionary dictionary = new CompletionDictionary();
-  
+
   protected final Object lock = new Object();
 
-  
   /**
    * Pool de threads qui n'en contient qu'un seul et qui sert pour le
    * rafraîchissement du canal courant.
@@ -65,15 +66,15 @@ public class StudentModel extends AbstractTableModel implements
   private final ExecutorService es = Executors.newSingleThreadExecutor();
 
   private int lastRow = -1;
-  
+
   public StudentModel(DataManager manager, ComponentBuilder builder) {
     this.manager = manager;
     this.builder = builder;
-    
+
     fillDefaultDictionnary();
   }
 
-/**
+  /**
    * 
    */
   private void fillDefaultDictionnary() {
@@ -82,19 +83,19 @@ public class StudentModel extends AbstractTableModel implements
     dictionary.add("max");
   }
 
-//  public static StudentModel getInstance(DataManager manager) {
-//    if (instance == null)
-//      instance = new StudentModel(manager);
-//
-//    else
-//      instance.setManager(manager);
-//
-//    return instance;
-//  }
+  // public static StudentModel getInstance(DataManager manager) {
+  // if (instance == null)
+  // instance = new StudentModel(manager);
+  //
+  // else
+  // instance.setManager(manager);
+  //
+  // return instance;
+  // }
 
-//  protected void setManager(DataManager manager) {
-//    this.manager = manager;
-//  }
+  // protected void setManager(DataManager manager) {
+  // this.manager = manager;
+  // }
 
   public void setStudent(final Student s) {
 
@@ -209,7 +210,7 @@ public class StudentModel extends AbstractTableModel implements
     student = null;
     matrix = null;
     markMap = null;
-    
+
     fireTableStructureChanged();
   }
 
@@ -242,33 +243,33 @@ public class StudentModel extends AbstractTableModel implements
   }
 
   public ChartPanel getChartPanel() {
-    
+
     if (student != null) {
 
-		float div = 0;
-		
-		DefaultKeyedValuesDataset pieDataset = new DefaultKeyedValuesDataset();
+      float div = 0;
 
-		for (Course c : markMap.keySet())
-			div += c.getCoeff();
+      DefaultKeyedValuesDataset pieDataset = new DefaultKeyedValuesDataset();
 
-		for (Course c : markMap.keySet()) {
-					pieDataset.setValue(c.getTitle()
-							+ " : "
-							+ StudentAverage
-									.getAverage(markMap.get(c).values()), (c
-							.getCoeff() / div));
-				}
+      for (Course c : markMap.keySet())
+        div += c.getCoeff();
 
-			JFreeChart pieChart = ChartFactory.createPieChart3D(builder.getValue(STUDENT_CHART_SENTENCE_1)
-					+ student + builder.getValue(STUDENT_CHART_SENTENCE_2)
-					+ StudentAverage.getAnnualAverage(markMap), pieDataset,
-					false, false, false);
-			pieChart.getPlot().setForegroundAlpha(0.35f);
+      for (Course c : markMap.keySet()) {
+        pieDataset.setValue(c.getTitle() + " : "
+            + StudentAverage.getAverage(markMap.get(c).values()),
+            (c.getCoeff() / div));
+      }
 
-			return new ChartPanel(pieChart);
-		}
-    
+      JFreeChart pieChart = ChartFactory.createPieChart3D(builder
+          .getValue(STUDENT_CHART_SENTENCE_1)
+          + student
+          + builder.getValue(STUDENT_CHART_SENTENCE_2)
+          + StudentAverage.getAnnualAverage(markMap), pieDataset, false, false,
+          false);
+      pieChart.getPlot().setForegroundAlpha(0.35f);
+
+      return new ChartPanel(pieChart);
+    }
+
     return null;
   }
 
@@ -286,25 +287,40 @@ public class StudentModel extends AbstractTableModel implements
   public FormattableCellRenderer getFormattableCellRenderer() {
     return formatter;
   }
-  
-  public boolean isEmpty(){
+
+  public boolean isEmpty() {
     return (student == null);
   }
 
-  public void fillFormulaMap(int rowIndex){
+  public void fillFormulaMap(int rowIndex) {
     int row = rowIndex / 4;
 
-    if (lastRow != row){
+    if (lastRow != row) {
       lastRow = row;
-      row *=4;
-      
+      row *= 4;
+
       SymphonieFormulaFactory.clearMappedValues();
-      
-      for (int i = 1 ; matrix[row][i] != null && i < columnCount - 1 ; i++)
-        SymphonieFormulaFactory.putMappedValue( ((Mark)(matrix[row][i])).getDesc(), ((StudentMark)(matrix[row+2][i])).getValue() );
+
+      for (int i = 1; matrix[row][i] != null && i < columnCount - 1; i++)
+        SymphonieFormulaFactory.putMappedValue(((Mark) (matrix[row][i]))
+            .getDesc(), ((StudentMark) (matrix[row + 2][i])).getValue());
     }
   }
-  
+
+  public LookableCollection<String> getDictionary() {
+    return dictionary;
+  }
+
+  /**
+   * Throws an <code>UnsupportedOperationException</code>
+   * 
+   * @param dictionary
+   *          Useless
+   */
+  public void setDictionary(LookableCollection<String> dictionary) {
+    throw new UnsupportedOperationException("Cannot override dictionary");
+  }
+
   // public static void main(String[] args) throws DataManagerException {
   // JFrame frame = new JFrame ("test StudentModel");
   // frame.setSize(800,600);

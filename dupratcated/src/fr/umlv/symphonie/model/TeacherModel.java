@@ -1,6 +1,6 @@
 /*
  * This file is part of Symphonie
- * Created : 20-fï¿½vr.-2005 16:13:25
+ * Created : 20-février.-2005 16:13:25
  */
 
 package fr.umlv.symphonie.model;
@@ -35,26 +35,29 @@ import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.data.formula.Formula;
 import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
 import fr.umlv.symphonie.util.ComponentBuilder;
+import fr.umlv.symphonie.util.LookableCollection;
 import fr.umlv.symphonie.util.Pair;
 import fr.umlv.symphonie.util.StudentAverage;
 import fr.umlv.symphonie.util.completion.CompletionDictionary;
-import fr.umlv.symphonie.view.cells.CellFormat;
+import fr.umlv.symphonie.util.completion.IDictionarySupport;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
 import fr.umlv.symphonie.view.cells.FormattableCellRenderer;
 import fr.umlv.symphonie.view.cells.ObjectFormattingSupport;
 
 import static fr.umlv.symphonie.view.SymphonieConstants.*;
+
 /*
  * par convention il est decide que la derniere colonne est toujours la moyenne
  * il faudra donc verifier a l'ajout de nouvelle colonne de bien laisser la
  * moyenne a la fin
  */
 
-public class TeacherModel extends AbstractTableModel implements ObjectFormattingSupport {
+public class TeacherModel extends AbstractTableModel implements
+    ObjectFormattingSupport, IDictionarySupport {
 
   private final Map<String, Number> mappedValues = new HashMap<String, Number>();
 
-//  private static TeacherModel instance = null;
+  // private static TeacherModel instance = null;
 
   protected final Comparator<Student> StudentComparator = new Comparator<Student>() {
 
@@ -95,7 +98,6 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
   protected final SortedMap<Student, Map<Integer, StudentMark>> studentMarkMap = new TreeMap<Student, Map<Integer, StudentMark>>(
       StudentComparator);
 
-
   /**
    * Pool de threads qui n'en contient qu'un seul et qui sert pour le
    * rafraîchissement du canal courant.
@@ -105,17 +107,17 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
   protected final Object lock = new Object();
 
   private int lastRow = -1;
-  
+
   protected final CompletionDictionary dictionary = new CompletionDictionary();
-  
+
   public TeacherModel(DataManager manager, ComponentBuilder builder) {
     this.manager = manager;
     this.builder = builder;
-    
+
     fillDefaultDictionary();
   }
 
-/**
+  /**
    * 
    */
   private void fillDefaultDictionary() {
@@ -124,24 +126,23 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
     dictionary.add("max");
   }
 
-//  static public TeacherModel getInstance(final DataManager manager) {
-//    if (instance == null)
-//      instance = new TeacherModel(manager);
-//
-//    else
-//      instance.setManager(manager);
-//
-//    return instance;
-//  }
+  // static public TeacherModel getInstance(final DataManager manager) {
+  // if (instance == null)
+  // instance = new TeacherModel(manager);
+  //
+  // else
+  // instance.setManager(manager);
+  //
+  // return instance;
+  // }
 
-//  /**
-//   * @param manager
-//   *          The manager to set.
-//   */
-//  protected void setManager(DataManager manager) {
-//    this.manager = manager;
-//  }
-
+  // /**
+  // * @param manager
+  // * The manager to set.
+  // */
+  // protected void setManager(DataManager manager) {
+  // this.manager = manager;
+  // }
 
   public void setCourse(final Course courseToAdd) {
 
@@ -170,10 +171,10 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
           }
 
           markMap.putAll(studentAndMarkMapPair.getFirst());
-          
+
           for (Mark m : markMap.values())
             dictionary.add(m.getDesc());
-          
+
           studentMarkMap.putAll(studentAndMarkMapPair.getSecond());
 
           columnList.addAll(markMap.values());
@@ -251,14 +252,13 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
     studentList.clear();
 
     studentMarkMap.clear();
-    
-    for(Mark m : markMap.values()){
+
+    for (Mark m : markMap.values()) {
       dictionary.remove(m.getDesc());
     }
-    
+
     markMap.clear();
-    
-    
+
     fireTableStructureChanged();
   }
 
@@ -278,7 +278,7 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
     if (rowIndex == 2) return null;
 
     fillFormulaMap(rowIndex);
-    
+
     /*
      * cas de la colonne tout a gauche
      */
@@ -319,10 +319,7 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
       Mark m = (Mark) o;
       if (rowIndex == 0) return m;
       if (rowIndex == 1) return m.getCoeff();
-      return studentMarkMap.get(
-          studentList.get(
-              rowIndex - 3)).get(
-                  m.getId())
+      return studentMarkMap.get(studentList.get(rowIndex - 3)).get(m.getId())
           .getValue();
     }
 
@@ -340,12 +337,7 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
     /*
      * Cas ou c'est pas editable :
      */
-    if (columnIndex == 0 || rowIndex == 2 || columnIndex == columnCount - 1 /*
-                                                                             * &&
-                                                                             * rowIndex <=
-                                                                             * 1
-                                                                             */)
-      return false;
+    if (columnIndex == 0 || rowIndex == 2 || columnIndex == columnCount - 1) return false;
 
     Object o = columnList.get(columnIndex - 1);
 
@@ -376,11 +368,11 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
       es.execute(new Runnable() {
 
         public void run() {
-          
-          Mark m = (Mark)o;
-          
+
+          Mark m = (Mark) o;
+
           dictionary.remove(m.getDesc());
-          
+
           try {
             manager.changeMarkDescription(m, (String) value);
           } catch (DataManagerException e) {
@@ -391,7 +383,7 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
           }
 
           dictionary.add(m.getDesc());
-          
+
           try {
             EventQueue.invokeAndWait(new Runnable() {
 
@@ -539,9 +531,9 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
         synchronized (lock) {
 
           if (course != null) {
-            
+
             Mark m = null;
-            
+
             try {
               m = manager.addMark(desc, coeff, course);
             } catch (DataManagerException e) {
@@ -549,7 +541,7 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
             }
 
             dictionary.add(m.getDesc());
-            
+
             try {
               EventQueue.invokeAndWait(new Runnable() {
 
@@ -624,7 +616,7 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
 
       public void run() {
         synchronized (lock) {
-          
+
           try {
             manager.removeMark(mark);
           } catch (DataManagerException e) {
@@ -632,7 +624,7 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
           }
 
           dictionary.remove(mark.getDesc());
-          
+
           try {
             EventQueue.invokeAndWait(new Runnable() {
 
@@ -650,13 +642,20 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
     });
   }
 
-  /**
-   * @return Returns the dictionary.
-   */
-  public CompletionDictionary getDictionary() {
+  public LookableCollection<String> getDictionary() {
     return dictionary;
   }
-  
+
+  /**
+   * Throws an <code>UnsupportedOperationException</code>
+   * 
+   * @param dictionary
+   *          Useless
+   */
+  public void setDictionary(LookableCollection<String> dictionary) {
+    throw new UnsupportedOperationException("Cannot override dictionary");
+  }
+
   public MessageFormat getHeaderMessageFormat() {
     return new MessageFormat(builder.getValue(TEACHER_HEADER) + course);
   }
@@ -708,20 +707,21 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
       for (Map<Integer, Integer> map : dataTab) {
         for (int markId : map.keySet()) {
           dataset.addValue(map.get(markId), markMap.get(markId).getDesc(),
-              /*builder.getValue(CHART_FROM) +*/ low + builder.getValue(CHART_TO) + hi);
+          /* builder.getValue(CHART_FROM) + */low + builder.getValue(CHART_TO)
+              + hi);
         }
 
         low += step;
         hi += step;
-        
-        if (hi > 20)
-          hi = 20;
+
+        if (hi > 20) hi = 20;
       }
 
-      JFreeChart barChart = ChartFactory.createBarChart3D(
-          builder.getValue(TEACHER_CHART_MARK_FOR_COURSE) + course, builder.getValue(CHART_MARK_INTERVAL),
-          builder.getValue(CHART_STUDENT_NUMBER), dataset, PlotOrientation.VERTICAL, true, true,
-          false);
+      JFreeChart barChart = ChartFactory.createBarChart3D(builder
+          .getValue(TEACHER_CHART_MARK_FOR_COURSE)
+          + course, builder.getValue(CHART_MARK_INTERVAL), builder
+          .getValue(CHART_STUDENT_NUMBER), dataset, PlotOrientation.VERTICAL,
+          true, true, false);
       barChart.getPlot().setForegroundAlpha(0.65f);
 
       return new ChartPanel(barChart);
@@ -740,14 +740,13 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
   public FormattableCellRenderer getFormattableCellRenderer() {
     return formatter;
   }
-  
-  public boolean isEmpty(){
+
+  public boolean isEmpty() {
     return (course == null);
   }
 
-  
-  private void fillFormulaMap(int rowIndex){
-    
+  private void fillFormulaMap(int rowIndex) {
+
     if (rowIndex >= 3 && lastRow != rowIndex) {
 
       SymphonieFormulaFactory.clearMappedValues();
@@ -761,7 +760,7 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
       lastRow = rowIndex;
     }
   }
-  
+
   // public static void main(String[] args) throws DataManagerException,
   // IOException {
   // JFrame frame = new JFrame ("test TeacherModel");

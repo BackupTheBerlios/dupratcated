@@ -32,9 +32,11 @@ import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.data.formula.Formula;
 import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
 import fr.umlv.symphonie.util.ComponentBuilder;
+import fr.umlv.symphonie.util.LookableCollection;
 import fr.umlv.symphonie.util.Pair;
 import fr.umlv.symphonie.util.StudentAverage;
 import fr.umlv.symphonie.util.completion.CompletionDictionary;
+import fr.umlv.symphonie.util.completion.IDictionarySupport;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
 import fr.umlv.symphonie.view.cells.FormattableCellRenderer;
 import fr.umlv.symphonie.view.cells.ObjectFormattingSupport;
@@ -45,7 +47,7 @@ import static fr.umlv.symphonie.view.SymphonieConstants.*;
  * @author susmab
  * 
  */
-public class JuryModel extends AbstractTableModel implements ObjectFormattingSupport {
+public class JuryModel extends AbstractTableModel implements ObjectFormattingSupport, IDictionarySupport {
 
   protected final DataManager manager;
   protected final ComponentBuilder builder;
@@ -200,12 +202,20 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
 
   }
 
-  /**
-   * @return Returns the dictionary.
-   */
-  public CompletionDictionary getDictionary() {
+  public LookableCollection<String> getDictionary() {
     return dictionary;
   }
+
+  /**
+   * Throws an <code>UnsupportedOperationException</code>
+   * 
+   * @param dictionary
+   *          Useless
+   */
+  public void setDictionary(LookableCollection<String> dictionary) {
+    throw new UnsupportedOperationException("Cannot override dictionary");
+  }
+  
   public void clear() {
     rowCount = 0;
     columnCount = 0;
