@@ -34,7 +34,7 @@ import fr.umlv.symphonie.util.export.DataExporter;
 public abstract class XMLExporter implements DataExporter {
 
   protected String documentName;
-  protected final File dtd = new File("symphonie.dtd");
+  protected final File dtd = new File("src/fr/umlv/symphonie/util/export/xml/symphonie.dtd");
   protected SQLDataManager dm = new SQLDataManager();
 
   /**
