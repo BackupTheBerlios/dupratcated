@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.TreeMap;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
@@ -121,7 +120,7 @@ public class HSSFDataExporter implements DataExporter {
 
       iCol++;
 
-      StringBuilder averageFormula = new StringBuilder("((");
+      StringBuilder averageFormula = new StringBuilder();
 
       // Put marks' values
       for (StudentMark mark : marks) {
@@ -151,8 +150,6 @@ public class HSSFDataExporter implements DataExporter {
 
         if (iCol <= marks.size()) averageFormula.append('+');
       }
-
-      averageFormula.append(")*100)/100");
 
       // Put average title
       strValue = bu.getValue(HSSFExportUtils.AVERAGE_KEY);
@@ -192,8 +189,8 @@ public class HSSFDataExporter implements DataExporter {
 
       HashMap<Integer, Mark> marx = new HashMap<Integer, Mark>();
       marx.putAll(studentAndMarkPair.getFirst());
-      TreeMap<Student, Map<Integer, StudentMark>> studentMarx = new TreeMap<Student, Map<Integer, StudentMark>>(
-          HSSFExportUtils.STUDENT_COMPARATOR);
+      SortedMap<Student, Map<Integer, StudentMark>> studentMarx = studentAndMarkPair
+          .getSecond();
       studentMarx.putAll(studentAndMarkPair.getSecond());
 
       ArrayList<Object> columns = new ArrayList<Object>(marx.values());
@@ -203,7 +200,7 @@ public class HSSFDataExporter implements DataExporter {
       } catch (DataManagerException e1) {
         formulas = null;
       }
-      
+
       HSSFDataExporter.insertFormulaColumns(columns, formulas);
 
       int rowCount = studentMarx.size() + 3;
@@ -211,15 +208,19 @@ public class HSSFDataExporter implements DataExporter {
 
       short[] formulaColumns = new short[formulas.size()];
       short[] markColumns = new short[marx.values().size()];
+      ArrayList<Pair<String, Short>> columNames = new ArrayList<Pair<String, Short>>();
+
       int iFormula = 0;
       int iMark = 0;
       short iCol = 1;
       for (Object o : columns) {
-        if (o instanceof Formula)
+        if (o instanceof Formula) {
           formulaColumns[iFormula++] = iCol;
-        else if (o instanceof Mark)
+          columNames.add(new Pair(((Formula) o).getDescription(), iCol));
+        } else if (o instanceof Mark) {
           markColumns[iMark++] = iCol;
-        else
+          columNames.add(new Pair(((Mark) o).getDesc(), iCol));
+        } else
           throw new DataExporterException(new IllegalStateException(
               "Invalid column object"));
         iCol++;
@@ -272,15 +273,57 @@ public class HSSFDataExporter implements DataExporter {
         HSSFExportUtils.getCell(sheet, 0, col, boldCell).setCellValue(
             m.getDesc());
         HSSFExportUtils.setColumnWidth(col, sheet, m.getDesc());
-        
+
         // Put mark coeff
-        HSSFExportUtils.getCell(sheet, 1, col, twoDecimalsStyle).setCellValue(m.getCoeff());
-        
+        HSSFExportUtils.getCell(sheet, 1, col, twoDecimalsStyle).setCellValue(
+            m.getCoeff());
+
         // Put values
         iRow = 3;
         for (Map<Integer, StudentMark> mism : studentMarx.values()) {
-          HSSFExportUtils.getCell(sheet, iRow++, col, twoDecimalsStyle).setCellValue(mism.get(m.getId()).getValue());
+          HSSFExportUtils.getCell(sheet, iRow++, col, twoDecimalsStyle)
+              .setCellValue(mism.get(m.getId()).getValue());
         }
+      }
+
+      // Put formulas
+      HashMap<String, String> referenceMap = new HashMap<String, String>();
+      iRow = 3;
+      String excelFormula;
+      for (short col : formulaColumns) {
+
+        // Put formula title
+        Formula f = (Formula) columns.get(col - 1);
+        HSSFExportUtils.getCell(sheet, 0, col, boldCell).setCellValue(
+            f.getDescription());
+        HSSFExportUtils.setColumnWidth(col, sheet, f.getDescription());
+
+        // Fill cells
+        for (; iRow < rowCount; iRow++) {
+          // Put excel references in a map
+          referenceMap.clear();
+          for (Pair<String, Short> p : columNames) {
+            referenceMap.put(p.getFirst(), HSSFExportUtils.getCellReference(
+                iRow, p.getSecond().shortValue()));
+          }
+
+          // Convert formula
+          excelFormula = FormulaConverter.toExcelString(f, referenceMap);
+
+          // Put the formula
+          HSSFExportUtils.getCell(sheet, iRow, col, twoDecimalsStyle)
+              .setCellFormula(excelFormula);
+        }
+      }
+
+      // Make average mark columns
+      iRow = 3;
+      iCol = (short) (columnCount - 1);
+      String averageFormula;
+      for (; iRow < rowCount; iRow++) {
+        averageFormula = HSSFDataExporter.getAverageFormula(iRow, markColumns);
+        HSSFExportUtils.getCell(sheet, iRow, iCol, twoDecimalsStyle)
+            .setCellFormula(averageFormula);
       }
 
       // Write workbook on disc
@@ -303,6 +346,28 @@ public class HSSFDataExporter implements DataExporter {
   // ----------------------------------------------------------------------------
   // Static methods
   // ----------------------------------------------------------------------------
+
+  /**
+   * Creates a formula that calculates the average mark of the given row
+   * 
+   * @param row
+   *          The sheet row
+   * @param markColumns
+   *          The columns that are to be used for calculating the average
+   * @return An excel formula
+   */
+  private static String getAverageFormula(int row, short[] columns) {
+    StringBuilder formula = new StringBuilder();
+    for (int i = columns.length - 1; i >= 0; i--) {
+      formula.append('(');
+      formula.append(HSSFExportUtils.getCellReference(row, columns[i]));
+      formula.append('*').append(
+          HSSFExportUtils.getCellReference(1, columns[i]));
+      formula.append(')');
+      if (i != 0) formula.append('+');
+    }
+    return formula.toString();
+  }
 
   /**
    * Calculates the max column index needed to correctly display all the marks
@@ -353,7 +418,8 @@ public class HSSFDataExporter implements DataExporter {
   public static void main(String[] args) {
     ComponentBuilder b = null;
     try {
-      SymphonieFormulaFactory.parseFormula("fcuk", new String("${examen}*2".getBytes(), "ascii"), 45, 2);
+      SymphonieFormulaFactory.parseFormula("fcuk", new String("${examen}*2"
+          .getBytes(), "ascii"), 45, 2);
       DataManager dm = SQLDataManager.getInstance();
       Course c = dm.getCoursesList().get(1);
       HashMap<String, String> peuma = new HashMap<String, String>();
@@ -368,7 +434,7 @@ public class HSSFDataExporter implements DataExporter {
       peuma.put("bok", "OK");
       b = new ComponentBuilder(peuma);
       new HSSFDataExporter(b).exportTeacherView(
-          "C:\\jdgujr.xls", dm, c);
+          "/home/mif001/spenasal/jdgujr.xls", dm, c);
     } catch (Exception e) {
       e.printStackTrace();
       new ExceptionDisplayDialog(null, b).showException(e);
