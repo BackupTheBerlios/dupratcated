@@ -54,4 +54,8 @@ public abstract class NumericFormula implements Formula<Number> {
   private static boolean isValidType(Number n) {
     return (n instanceof Float) || (n instanceof Integer);
   }
+  
+  public String getDescription() {
+    return null;
+  }
 }

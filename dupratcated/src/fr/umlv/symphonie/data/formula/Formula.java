@@ -13,4 +13,10 @@ public interface Formula<T> {
    * @return This formula's value of type T
    */
   public T getValue();
+  
+  /**
+   * Returns this formula description
+   * @return a <code>String</code>
+   */
+  public String getDescription();
 }

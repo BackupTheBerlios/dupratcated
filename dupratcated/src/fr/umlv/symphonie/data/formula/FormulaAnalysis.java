@@ -63,6 +63,11 @@ public class FormulaAnalysis extends AnalysisAdapter {
   private Map<String, FormulaFunction> functionMap;
 
   /**
+   * The description that will be applied to parsed formulas
+   */
+  private String description;
+
+  /**
    * Creates a new formula analyser. <br>
    * 
    * @param mappedValues
@@ -87,6 +92,14 @@ public class FormulaAnalysis extends AnalysisAdapter {
 
   public Map<String, Number> getMappedValues() {
     return mappedValues;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   /**
@@ -126,9 +139,20 @@ public class FormulaAnalysis extends AnalysisAdapter {
     this.functionMap = functionMap;
   }
 
-  public void caseStart(Start node) {
+  public void caseStart(final Start node) {
     node.getPExpression().apply(this);
-    setOut(node, getOut(node.getPExpression()));
+    final Formula intern = (Formula) getOut(node.getPExpression());
+    final String desc = description;
+    setOut(node, new Formula<Object>() {
+
+      public Object getValue() {
+        return intern.getValue();
+      }
+
+      public String getDescription() {
+        return desc;
+      }
+    });
   }
 
   public void caseANumericExpression(ANumericExpression node) {
