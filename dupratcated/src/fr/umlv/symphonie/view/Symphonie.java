@@ -302,7 +302,7 @@ public class Symphonie {
     Action connect = SymphonieActionFactory.getConnectAction(new ImageIcon(
         Symphonie.class.getResource("icons/admin.png")), builder);
     Action db = SymphonieActionFactory.getDBAction(new ImageIcon(
-        Symphonie.class.getResource("icons/db.png")), frame, builder);
+        Symphonie.class.getResource("icons/db.png")), frame);
     Action pwd = SymphonieActionFactory.getPwdAction(new ImageIcon(
         Symphonie.class.getResource("icons/pwd.png")), frame, builder);
 
