@@ -5,7 +5,6 @@
 package fr.umlv.symphonie.model;
 
 import java.awt.Font;
-import java.sql.SQLException;
 import java.util.*;
 
 import javax.swing.JFrame;
@@ -21,7 +20,6 @@ import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
 import fr.umlv.symphonie.data.Mark;
 import fr.umlv.symphonie.data.SQLDataManager;
-import fr.umlv.symphonie.data.SgainDataManager;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.data.formula.Formula;
