@@ -1,5 +1,6 @@
 /*
- * This file is part of Symphonie Created : 17 févr. 2005 21:30:59
+ * This file is part of Symphonie
+ * Created : 17 févr. 2005 21:30:59
  */
 
 package fr.umlv.symphonie.view;
@@ -18,6 +19,7 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -52,6 +54,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -110,7 +114,6 @@ import static fr.umlv.symphonie.view.SymphonieConstants.VIEW_JURY_MENU_ITEM;
 import static fr.umlv.symphonie.view.SymphonieConstants.VIEW_STUDENT_MENU_ITEM;
 import static fr.umlv.symphonie.view.SymphonieConstants.VIEW_TEACHER_MENU_ITEM;
 import static fr.umlv.symphonie.view.SymphonieConstants.WINDOW_MENU;
-import fr.umlv.symphonie.view.cells.CellRendererFactory;
 
 public class Symphonie {
 
@@ -448,14 +451,24 @@ public class Symphonie {
    */
   private final JSplitPane getStudentPane() {
 
-//    studentModel = StudentModel.getInstance(manager);
     JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
     // Table
     final JTable table = new JTable(studentModel);
     table.setTableHeader(null);
     table.setDefaultRenderer(Object.class, studentModel.getFormattableCellRenderer());
+    table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
+      public void valueChanged(ListSelectionEvent e) {
+//        if (!e.getValueIsAdjusting()) {
+//         Object o = table.getValueAt(table.getSelectedRow(), e.getFirstIndex());
+//         System.out.println(o);
+//         selectedObjects.clear();
+//         selectedObjects.add(o);
+//        }        
+      }        
+    });
+    
     // pop up and actions
     final JPopupMenu pop = builder
         .buildPopupMenu(SymphonieConstants.STUDENTVIEWPOPUP_TITLE);
@@ -1608,6 +1621,9 @@ public class Symphonie {
   /** Add column action (depends on views) */
   private AbstractAction addColumn;
 
+  /** List of selected objects in current view */
+  protected final ArrayList<Object> selectedObjects = new ArrayList<Object>();
+  
   public CourseTreeModel getCourseTreeModel() {
     return courseTreeModel;
   }
@@ -1615,5 +1631,4 @@ public class Symphonie {
   public StudentTreeModel getStudentTreeModel() {
     return studentTreeModel;
   }
-
 }
