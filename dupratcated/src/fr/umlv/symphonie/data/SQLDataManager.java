@@ -20,17 +20,41 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     DataManager {
 
   private final Map<Integer, Student> studentMap = new HashMap<Integer, Student>();
+  private final List<Student> studentList = new ArrayList<Student>();
   private int studentMapTimeStamp = -1;
 
   private final Map<Integer, Mark> markMap = new HashMap<Integer, Mark>();
   private int markMapTimeStamp = -1;
 
   private final Map<Integer, Course> courseMap = new HashMap<Integer, Course>();
+  private final List<Course> courseList = new ArrayList<Course>();
   private int courseMapTimeStamp = -1;
 
   private final List<StudentMark> studentMarkList = new ArrayList<StudentMark>();
   private int studentMarkListTimeStamp = -1;
+  
+  
+  private final Comparator<Student> studentComparator = new Comparator<Student>(){
+    public int compare(Student arg0,Student arg1){
+      int n = arg0.getLastName().compareToIgnoreCase(arg1.getLastName());
+      
+      if (n == 0)
+        n = arg0.getName().compareToIgnoreCase(arg1.getName());
+      
+      if (n == 0)
+        n = arg0.getId() - arg1.getId();
+      
+      return n;
+    }
+  };
 
+  private final Comparator<Course> courseComparator = new Comparator<Course>(){
+    public int compare(Course o1, Course o2) {
+      return o1.getTitle().compareToIgnoreCase(o2.getTitle());
+    }
+  };
+  
+  
   /*
    * methodes internes
    */
@@ -146,12 +170,18 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     for (int i : tmpMap.keySet()){
       if (studentMap.containsKey(i))
         studentMap.get(i).update(tmpMap.get(i));
-      else studentMap.put(i, tmpMap.get(i));
+      else {
+        studentMap.put(i, tmpMap.get(i));
+        studentList.add(tmpMap.get(i));
+        Collections.sort(studentList, studentComparator);
+      }
     }
     
     for (int i : studentMap.keySet()){
-      if (tmpMap.containsKey(i) == false)
+      if (tmpMap.containsKey(i) == false){
+        studentList.remove(studentMap.get(i));
         studentMap.remove(i);
+      }
     }
   }
   
@@ -243,12 +273,18 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     for (int i : tmpMap.keySet()){
       if (courseMap.containsKey(i))
         courseMap.get(i).update(tmpMap.get(i));
-      else courseMap.put(i, tmpMap.get(i));
+      else {
+        courseMap.put(i, tmpMap.get(i));
+        courseList.add(tmpMap.get(i));
+        Collections.sort(courseList, courseComparator);
+      }
     }
     
     for (int i : courseMap.keySet()){
-      if (tmpMap.containsKey(i) == false)
+      if (tmpMap.containsKey(i) == false){
+        courseList.remove(courseMap.get(i));
         courseMap.remove(i);
+      }
     }
   }
   
@@ -298,6 +334,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     }
   }
   
+  
   public Map<Integer, Student> getStudents() throws DataManagerException {
 
     int n;
@@ -315,6 +352,23 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     return studentMap;
   }
 
+  public List<Student> getStudentList() throws DataManagerException {
+    int n;
+    
+    try {
+      n = getTimeStamp(TABLE_STUDENT);
+    }catch (SQLException e) {
+      n = studentMapTimeStamp;
+    }
+    
+    if (n > studentMapTimeStamp) {
+      syncStudentData();
+      studentMapTimeStamp = n;
+    }
+    
+    return studentList;
+  }
+  
   public Map<Integer, Course> getCourses() throws DataManagerException {
 
     int n;
@@ -332,6 +386,22 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     return courseMap;
   }
 
+  public List<Course> getCoursesList() throws DataManagerException {
+    int n;
+    try {
+      n = getTimeStamp(TABLE_COURSE);
+    } catch (SQLException e1) {
+      n = courseMapTimeStamp-1;
+    }
+
+    if ( n > courseMapTimeStamp ) {
+      syncCourseData();
+      courseMapTimeStamp = n;
+    }
+
+    return courseList;
+  }
+  
   public Map<Integer, Mark> getMarks() throws DataManagerException {
     int n;
     try {
@@ -520,7 +590,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       Course c) throws DataManagerException {
 
     TreeMap<Student, Map<Integer, StudentMark>> map = new TreeMap<Student, Map<Integer, StudentMark>>(
-        new Comparator<Student>() {
+        /*new Comparator<Student>() {
 
           public int compare(Student arg0, Student arg1) {
             int n = arg0.getLastName().compareToIgnoreCase(arg1.getLastName());
@@ -532,7 +602,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
             return n;
           }
 
-        });
+        }*/studentComparator);
 
     // on recupere la liste des etudiants
     Map<Integer, Student> studentMap = getStudents();
@@ -566,7 +636,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     Map<Integer, Course> courseMap = getCourses();
 
     SortedMap<Student, Map<Course, Map<Integer, StudentMark>>> sortedMap = new TreeMap<Student, Map<Course, Map<Integer, StudentMark>>>(
-        new Comparator<Student>() {
+        /*new Comparator<Student>() {
 
           public int compare(Student arg0, Student arg1) {
             int n = arg0.getLastName().compareToIgnoreCase(arg1.getLastName());
@@ -577,7 +647,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
             return n;
           }
-        });
+        }*/studentComparator);
 
     for (Student s : studentMap.values()) {
       sortedMap.put(s, getAllMarksByStudent(s));
@@ -597,6 +667,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
   public void addStudent(String name, String lastName) throws DataManagerException {
     int key = 0;
 
+    // on cree une cle pour l'etudiant
     try {
       key = createPrimaryKey(TABLE_STUDENT, COLUMN_ID_FROM_TABLE_STUDENT);
     } catch (SQLException e) {
@@ -610,23 +681,32 @@ public class SQLDataManager extends SQLDataManagerConstants implements
         + COLUMN_COMMENT_FROM_TABLE_STUDENT + "`) VALUES (" + key + ", '"
         + name + "', '" + lastName + "', NULL);";
 
+    // on l'insere dans la base
     try {
       connectAndUpdate(request);
     } catch (SQLException e) {
       throw new DataManagerException("error inserting new student " + lastName + " " + name, e);
     }
     
+    // on l'insere dans les donnees locales
     Student s = new Student(key, name, lastName);
     
-    Map<Integer, Student> studentMap = getStudents();
+    /*Map<Integer, Student> studentMap = getStudents();*/
     studentMap.put(key, s);
     
+    /*List<Student> studentList = getStudentList();*/
+    studentList.add(s);
+    Collections.sort(studentList, studentComparator);
+    
+    // on update le tout
     try {
       updateStudentData(studentMapTimeStamp + 1);
     }catch (DataManagerException e){
       throw new DataManagerException("error updating data.", e);
     }
     
+    // on lui ajoute des notes par defaut
+    // dans toutes les matieres
     try {
       addDefaultMarksForStudent(s);
     }catch (DataManagerException e){
@@ -676,8 +756,6 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     
     PreparedStatement preparedStatement = null;
     int key = 0;
-    Map<Integer, Student> studentMap = getStudents();
-    List<Student> studentList = new ArrayList<Student>();
     
     try {
       preparedStatement = connectAndPrepare(request);
@@ -685,13 +763,21 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       throw new DataManagerException ("error preparing multi request.", e);
     }
 
+    
+    Map<Integer, Student> studentMap = getStudents(); // map des etudiants
+    List<Student> studentList = getStudentList(); // liste des etudiants
+    List<Student> studentToAddList = new ArrayList<Student>(); // liste des etudiants qu'on rajoute
+    
     for (Pair<String, String> p : namesList) {
+      
+      // on cree une cle pour chaque etudiant
       try {
         key = createPrimaryKey(TABLE_STUDENT, COLUMN_ID_FROM_TABLE_STUDENT);
       } catch (SQLException e) {
         throw new DataManagerException ("error creating new primary key for student " + p.getFirst() + " " + p.getSecond(), e);
       }
 
+      // on ajoute chaque etudiant dans la base
       try {
         preparedStatement.setInt(1, key);
         preparedStatement.setString(2, p.getFirst());
@@ -703,16 +789,25 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       
       Student s = new Student(key, p.getFirst(), p.getSecond());
       
+      // on l'ajoute dans la map et dans la liste locale
       studentMap.put(s.getId(), s);
       studentList.add(s);
+      Collections.sort(studentList, studentComparator);
+      
+      // et on l'ajoute dans la liste des nouveaux etudiants
+      // afin de leur rajouter leurs notes
+      studentToAddList.add(s);
+      
     }
     
+    // mises a jour des donnees etudiants
     try{
       updateStudentData(studentMapTimeStamp + 1);
     }catch (DataManagerException e){
       throw new DataManagerException("error updating data.", e);
     }
     
+    // ajout des notes a tous les nouveaux etudiants
     try {
       addDefaultMarksForStudents(studentList);
     }catch (DataManagerException e){
@@ -727,7 +822,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     String request = "insert into " + TABLE_HAS_MARK + " " +
                      "values ( ?, ?, 0 );";
     
-    List<StudentMark> studentMarkList = getStudentMarks();
+    
     
     try {
       preparedStatement = connectAndPrepare(request);
@@ -735,6 +830,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       throw new DataManagerException ("error preparing multi request.", e);
     }
     
+    List<StudentMark> studentMarkList = getStudentMarks();
     for (Student s : studentList) {
 
       for (int key : markMap.keySet()) {
@@ -778,6 +874,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     Map<Integer, Student> studentMap = getStudents();
     studentMap.remove(s.getId());
     
+    // effacement de la liste locale
+    List<Student> studentList = getStudentList();
+    studentList.remove(s);
     
     // mise a jour des donnees
     // (a cause des acces multiples) 
@@ -824,7 +923,6 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       }
     }
     
-    
     // mise a jour des donnees
     // (a cause des acces multiples)
     try {
@@ -856,10 +954,15 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       throw new DataManagerException("error inserting new course " + title + " into database.", e);
     }
     
+    Course c = new Course(key, title, coeff);
     
     // ajout dans la map locale
-    Map<Integer, Course> courseMap = getCourses();
-    courseMap.put(key, new Course(key, title, coeff));
+    /*Map<Integer, Course> courseMap = getCourses();*/
+    courseMap.put(key, c);
+    
+    /*List<Course> courseList = getCoursesList();*/
+    courseList.add(c);
+    Collections.sort(courseList, courseComparator);
     
     // mise a jour avec le timestamp
     try{
@@ -869,15 +972,16 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     }
   }
 
-  public void addCourses(List<Pair<String, Float>> courseList) throws DataManagerException {
-    String request = "INSERT INTO `" + TABLE_COURSE + "` (`"
-        + COLUMN_ID_FROM_TABLE_COURSE + "`, `" + COLUMN_TITLE_FROM_TABLE_COURSE
-        + "`, `" + COLUMN_COEFF_FROM_TABLE_COURSE + "`) VALUES (?, ?, ?);";
+  public void addCourses(List<Pair<String, Float>> coursesToAddList) throws DataManagerException {
     
     PreparedStatement preparedStatement = null;
     int key = 0;
     
-    Map<Integer, Course> courseMap = getCourses();
+    String request = "INSERT INTO `" + TABLE_COURSE + "` (`"
+        + COLUMN_ID_FROM_TABLE_COURSE + "`, `" + COLUMN_TITLE_FROM_TABLE_COURSE
+        + "`, `" + COLUMN_COEFF_FROM_TABLE_COURSE + "`) VALUES (?, ?, ?);";
+    
+    /*Map<Integer, Course> courseMap = getCourses();*/
     
 
     try {
@@ -886,7 +990,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       throw new DataManagerException("error preparing multi request.", e);
     }
 
-    for (Pair<String, Float> p : courseList) {
+    for (Pair<String, Float> p : coursesToAddList) {
       try {
         key = createPrimaryKey(TABLE_COURSE, COLUMN_ID_FROM_TABLE_COURSE);
       } catch (SQLException e) {
@@ -905,6 +1009,8 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       Course c = new Course(key, p.getFirst(), p.getSecond());
       
       courseMap.put(c.getId(), c);
+      courseList.add(c);
+      Collections.sort(courseList, courseComparator);
     }
     
     try {
@@ -921,14 +1027,13 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     System.out.println(markMap.size() + " tests pour la matiere " + c);
 
     for (Mark m : markMap.values()) {
-      System.out.println("on teste d'effacer le test " + m);
       removeMark(m);
     }
     
     // on la retire ensuite de la map locale
-    Map<Integer, Course> courseMap = getCourses();
+    /*Map<Integer, Course> courseMap = getCourses();*/
     courseMap.remove(c.getId());
-    
+    courseList.remove(c);
     
     // on l'efface de la base
     String request = "DELETE FROM `" + TABLE_COURSE + "` WHERE `"

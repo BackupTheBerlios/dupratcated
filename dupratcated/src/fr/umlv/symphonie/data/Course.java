@@ -30,6 +30,16 @@ public class Course {
     coeff = c.getCoeff();
   }
   
+  
+  public boolean equals(Object obj) {
+    if (!(obj instanceof Course))
+      return false;
+    
+    Course c = (Course)obj;
+    
+    return id == c.id;
+  }
+  
   /* (non-Javadoc)
    * @see java.lang.Object#toString()
    */

@@ -11,7 +11,9 @@ import fr.umlv.symphonie.util.Pair;
 public interface DataManager
 {    
 	public Map<Integer, Student> getStudents()throws DataManagerException;
+  public List<Student> getStudentList() throws DataManagerException;
 	public Map<Integer, Course> getCourses()throws DataManagerException;
+  public List<Course> getCoursesList() throws DataManagerException;
 	public Map<Integer, Mark> getMarks()throws DataManagerException;
   public List<StudentMark> getStudentMarks()throws DataManagerException;
 	public Map<Integer, Mark> getMarksByCourse(Course c)throws DataManagerException;

@@ -193,11 +193,13 @@ public class StudentModel extends AbstractTableModel {
     Student student = new Student(6, "Paul", "Ochon");
     Student s = new Student (0, "Fabien", "Vallee");
     
-//    Course c = dataManager.getCourses().get(2);
-//    
-//    /*dataManager.addMark("projet", 0.1f, c);*/
-//    
-//    dataManager.removeCourse(c);
+ //   dataManager.addCourse("Walibi", 0.1f);
+    
+ //   Course c = dataManager.getCourses().get(2);
+    
+ //   dataManager.addMark("projet", 0.1f, c);
+    
+ //   dataManager.removeCourse(c);
     
     /*List<StudentMark> sgain = dataManager.getStudentMarks();
     
@@ -206,6 +208,7 @@ public class StudentModel extends AbstractTableModel {
     
     System.out.println("position de la note recherchee (doit etre 0) : " + sgain.indexOf(sm));*/
     
+ //   dataManager.addStudent("Machin", "Chose");
     
     Map<Course, Map<Integer, StudentMark>> map = dataManager.getAllMarksByStudent(student);
     
