@@ -86,6 +86,8 @@
   	<zip destfile="symphonie-src-${DSTAMP}.zip">
   	  <zipfileset file="build.xml"/>
   	  <zipfileset file="symphonie.jpg"/>
+	  <zipfileset file="*.sql"/>
+  	  <zipfileset dir="${docs}" prefix="${docs}"/>
   	  <zipfileset dir="${lib}" prefix="${lib}"/>
    	  <zipfileset dir="${bin}" prefix="${bin}" excludes="**.jar"/>
   	  <zipfileset dir="etc" prefix="etc"/>
@@ -191,50 +193,6 @@
        - - - - - - - - - - - - - - - - - -->
   <target name="clean" depends="nosablecc">
     <delete dir="${classes}" />
-  </target>
-
-  
-  <!-- ================================= 
-       target: compile_test
-       description: compile test source files              
-       ================================= -->
-  <target name="compile_test" depends="compile">
-    <mkdir dir="${tests}/${classes}" />
-    <javac srcdir="${tests}/${src}/${package}"
-           destdir="${tests}/${classes}"
-           debug="on"
-           classpathref="lib_classpath"
-      />
-    <copy file="${tests}/${src}/${dtdxml}" tofile="${classes}/${dtdxml}"/>
-  </target>
-
-  <!-- ================================= 
-	   target: test
-	   description: run JUnit tests
-	   ================================= -->
-  <target name="test">
-  	<splash/>
-  	<junit fork="yes" printsummary="on">
-  	  <classpath>
-        <pathelement location="${lib}/junit.jar"/>
-  	    <pathelement location="${classes}"/>
-  	  </classpath>
-  		<test name="fr.umlv.symphonie.util.TestSymphoniePreferencesManager">
-  			<formatter type="plain"/>
-  		</test>
-	  <batchtest>
-        <fileset dir="${tests}/${src}" id="id">
-          <include name="${package}/util**"/>
-        </fileset>
-      </batchtest>
-  	</junit>
-  </target>
-	
-  <!-- - - - - - - - - - - - - - - - - - 
-       target: clean_test                      
-       - - - - - - - - - - - - - - - - - -->
-  <target name="clean_test" depends="nosablecc">
-    <delete dir="${test}/${classes}" />
   </target>
   
 </project>
