@@ -5,8 +5,8 @@
 package fr.umlv.symphonie.util.export.xml;
 
 import java.io.File;
-import java.io.IOException;
-import javax.xml.XMLConstants;
+
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerConfigurationException;
@@ -15,14 +15,12 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
 
+import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
+import org.w3c.dom.DocumentType;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
 import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManagerException;
@@ -41,74 +39,76 @@ public abstract class XMLExporter {
 
   public abstract void export() throws  DataManagerException;
 
-  protected static void addCourseNode(Node root, Course c) {
-    Element e = root.getOwnerDocument().createElement("course");
+  protected static void addCourseNode(Document d, Course c) {
+    Element e = d.createElement("course");
     e.setAttribute("id_course", "" + c.getId());
-    Node n = root.appendChild(e);
+    Node course = d.appendChild(e);
 
-    e = n.getOwnerDocument().createElement("title");
-    e.setNodeValue(c.getTitle());
-    n.appendChild(e);
-
-    e = n.getOwnerDocument().createElement("coeff_course");
-    e.setNodeValue("" + c.getCoeff());
-    n.appendChild(e);
+    e  = course.getOwnerDocument().createElement("title");
+    Node n = course.appendChild(e);
+    n.appendChild(n.getOwnerDocument().createTextNode(c.getTitle()));
+    
+    e  = course.getOwnerDocument().createElement("coeff_course");
+    n = course.appendChild(e);
+    n.appendChild(n.getOwnerDocument().createTextNode("" + c.getCoeff()));
   }
 
-  protected static void addExamenNode(Node root, StudentMark sm) {
-    Element e = root.getOwnerDocument().createElement("examen");
+  protected static void addExamenNode(Document d, StudentMark sm) {
+    Element e = d.createElement("examen");
     e.setAttribute("id_examen", "" + sm.getMark().getId());
-    Node n = root.appendChild(e);
+    Node examen = d.appendChild(e);
 
-    e = n.getOwnerDocument().createElement("desc");
-    e.setNodeValue(sm.getMark().getDesc());
-    n.appendChild(e);
+    e  = examen.getOwnerDocument().createElement("desc");
+    Node n = examen.appendChild(e);
+    n.appendChild(n.getOwnerDocument().createTextNode(sm.getMark().getDesc()));
 
-    e = n.getOwnerDocument().createElement("coeff_examen");
-    e.setNodeValue("" + sm.getCoeff());
-    n.appendChild(e);
+    e  = examen.getOwnerDocument().createElement("coeff_examen");
+    n = examen.appendChild(e);
+    n.appendChild(n.getOwnerDocument().createTextNode("" + sm.getCoeff()));   
   }
 
-  protected static Node addStudentNode(Node root, Student s) {
-    Element e = root.getOwnerDocument().createElement("student");
+  protected static Node addStudentNode(Document d, Student s) {
+    Element e = d.createElement("student");
     e.setAttribute("id_student", "" + s.getId());
-    Node n = root.appendChild(e);
+    Node student = d.appendChild(e);
 
-    e = n.getOwnerDocument().createElement("name");
-    e.setNodeValue(s.getName());
-    n.appendChild(e);
+    e  = student.getOwnerDocument().createElement("name");
+    Node n = student.appendChild(e);
+    n.appendChild(n.getOwnerDocument().createTextNode(s.getName()));
 
-    e = n.getOwnerDocument().createElement("last_name");
-    e.setNodeValue(s.getLastName());
-    n.appendChild(e);
+    e  = student.getOwnerDocument().createElement("last_name");
+    n = student.appendChild(e);
+    n.appendChild(n.getOwnerDocument().createTextNode(s.getLastName()));
 
-    e = n.getOwnerDocument().createElement("comment");
-    e.setNodeValue(s.getComment());
+    e  = student.getOwnerDocument().createElement("comment");
+    n = student.appendChild(e);
+    n.appendChild(n.getOwnerDocument().createTextNode(s.getComment()));
 
-    return n.appendChild(e);
+    return student;
   }
 
-  protected static void addMarkNode(Node root, StudentMark sm) {
-    Element e = root.getOwnerDocument().createElement("student_mark");
+  protected static void addMarkNode(Node student, StudentMark sm) {
+    Element e = student.getOwnerDocument().createElement("student_mark");
     e.setAttribute("id_course", "" + sm.getCourse().getId());
     e.setAttribute("id_examen", "" + sm.getMark().getId());
-    Node n = root.appendChild(e);
+    Node mark = student.appendChild(e);
 
-    e = n.getOwnerDocument().createElement("mark");
-    e.setNodeValue("" + sm.getValue());
-    n.appendChild(e);
+    e  = mark.getOwnerDocument().createElement("mark");
+    Node n = mark.appendChild(e);
+    n.appendChild(n.getOwnerDocument().createTextNode("" + sm.getValue()));
   }
   
   protected Document newDocument(){
     try {
-      return DocumentBuilderFactory.newInstance()
-      .newDocumentBuilder().parse(new File(documentName));
-    } catch (SAXException e) {
-      System.out.println("Error during the creation of the document object : \n" + e + "\n");
-      e.printStackTrace();
-    } catch (IOException e) {
-      System.out.println("Error during the creation of the document object : \n" + e + "\n");
-      e.printStackTrace();
+    
+     DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder(); 
+     DOMImplementation impl = db.getDOMImplementation(); 
+
+     DocumentType dt = impl.createDocumentType("symphonie", null, dtd);
+    
+     return db.newDocument();
+     //return impl.createDocument(null, null, null); 
+     //return impl.createDocument(null, "symphonie", dt); 
     } catch (ParserConfigurationException e) {
       System.out.println("Error during the creation of the document object : \n" + e + "\n");
       e.printStackTrace();
@@ -131,37 +131,6 @@ public abstract class XMLExporter {
       System.out.println("Error during the exportation : \n" + e + "\n");
       e.printStackTrace();
     }
-  }
-
-  public boolean isValidate() {
-
-    Document document = newDocument();
-
-    Validator validator = null;
-    
-    try {
-      validator = SchemaFactory.newInstance(
-          XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(
-          new StreamSource(new File(dtd).getAbsolutePath())).newValidator();
-    } catch (SAXException e) {
-      System.out.println("Error during the validation : \n" + e + "\n");
-      e.printStackTrace();
-      return false;
-    }
-
-      try {
-        validator.validate(new DOMSource(document));
-      } catch (SAXException e) {
-        System.out.println("Error during the validation : \n" + e + "\n");
-        e.printStackTrace();
-        return false;
-      } catch (IOException e) {
-        System.out.println("Error during the validation : \n" + e + "\n");
-        e.printStackTrace();  
-        return false;  
-      }
-    
-    return true;
   }
   
 }
