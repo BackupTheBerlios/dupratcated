@@ -15,7 +15,6 @@ public class DriverLoader {
             try {
                 Class.forName("com.mysql.jdbc.Driver");
                 Class.forName("org.postgresql.Driver");
-                System.out.println("drivers charges.");
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
