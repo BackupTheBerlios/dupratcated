@@ -87,6 +87,11 @@ import static fr.umlv.symphonie.view.SymphonieWizardConstants.WIZARD_NEXT;
 import static fr.umlv.symphonie.view.SymphonieWizardConstants.WIZARD_PREVIOUS;
 import fr.umlv.symphonie.view.Symphonie.View;
 
+/**
+ * Factory of panels used in <code>Symphonie</code> import/export wizards.
+ * 
+ * @author PEÑA SALDARRIAGA Sébastian
+ */
 public class WizardPanelFactory {
 
   /** Icon for XML import/export type */
