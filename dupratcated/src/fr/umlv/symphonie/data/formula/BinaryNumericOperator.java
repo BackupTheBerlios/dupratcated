@@ -29,6 +29,10 @@ public enum BinaryNumericOperator {
             + nv1.getClass().getName() + ", " + nv2.getClass().getName() + ')');
       }
     }
+
+    public String toString() {
+      return "+";
+    }
   },
   SUBSTRACTION {
 
@@ -44,6 +48,10 @@ public enum BinaryNumericOperator {
             + nv1.getClass().getName() + ", " + nv2.getClass().getName() + ')');
       }
     }
+
+    public String toString() {
+      return "-";
+    }
   },
   MULTIPLICATION {
 
@@ -58,6 +66,10 @@ public enum BinaryNumericOperator {
         throw new IllegalStateException(invalidTypeMessage + "* : ("
             + nv1.getClass().getName() + ", " + nv2.getClass().getName() + ')');
       }
+    }
+
+    public String toString() {
+      return "*";
     }
   },
   DIVISION {
@@ -78,6 +90,10 @@ public enum BinaryNumericOperator {
             + nv1.getClass().getName() + ", " + nv2.getClass().getName() + ')');
       }
     }
+
+    public String toString() {
+      return "/";
+    }
   },
   MODULUS {
 
@@ -90,6 +106,10 @@ public enum BinaryNumericOperator {
         throw new IllegalStateException(invalidTypeMessage + "% : ("
             + nv1.getClass().getName() + ", " + nv2.getClass().getName() + ')');
       }
+    }
+
+    public String toString() {
+      return "%";
     }
   };
 

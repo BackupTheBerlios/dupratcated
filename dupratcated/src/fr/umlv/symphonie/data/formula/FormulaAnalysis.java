@@ -152,6 +152,10 @@ public class FormulaAnalysis extends AnalysisAdapter {
       public String getDescription() {
         return desc;
       }
+
+      public String toString() {
+        return intern.toString();
+      }
     });
   }
 
@@ -282,7 +286,8 @@ public class FormulaAnalysis extends AnalysisAdapter {
     node.getBlockExpression().apply(this);
     List<NumericFormula> params = (List<NumericFormula>) getOut(node
         .getBlockExpression());
-    setOut(node, BasicFormulaFactory.functionInstance(func, params));
+    setOut(node, BasicFormulaFactory.functionInstance(node.getIdentifier()
+        .getText(), func, params));
   }
 
   public void caseACellEvaluatedExpression(ACellEvaluatedExpression node) {

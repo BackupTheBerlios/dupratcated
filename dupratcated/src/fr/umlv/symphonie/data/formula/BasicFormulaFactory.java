@@ -29,6 +29,10 @@ public class BasicFormulaFactory {
       public Integer getValue() {
         return val;
       }
+
+      public String toString() {
+        return val.toString();
+      }
     };
   }
 
@@ -47,6 +51,10 @@ public class BasicFormulaFactory {
       public Float getValue() {
         return val;
       }
+
+      public String toString() {
+        return val.toString();
+      }
     };
   }
 
@@ -64,6 +72,10 @@ public class BasicFormulaFactory {
 
       public Boolean getValue() {
         return val;
+      }
+
+      public String toString() {
+        return val.toString();
       }
     };
   }
@@ -86,6 +98,10 @@ public class BasicFormulaFactory {
 
       public Number getValue() {
         return values.get(key);
+      }
+
+      public String toString() {
+        return "${" + key + "}";
       }
     };
   }
@@ -110,6 +126,10 @@ public class BasicFormulaFactory {
       public Number getValue() {
         return op.operate(left, right);
       }
+
+      public String toString() {
+        return left.toString() + op.toString() + right.toString();
+      }
     };
   }
 
@@ -117,18 +137,39 @@ public class BasicFormulaFactory {
    * Returns a formula whose value is given by a function.
    * 
    * @see FormulaFunction
+   * @param name
+   *          The function name
    * @param f
    *          The function
    * @param params
    *          The parameters used by the function.
    * @return a <code>NumericFormula</code> object.
    */
-  public static NumericFormula functionInstance(final FormulaFunction f,
-      final List<NumericFormula> params) {
+  public static NumericFormula functionInstance(final String name,
+      final FormulaFunction f, final List<NumericFormula> params) {
     return new NumericFormula() {
+
+      private String asString;
 
       public Number getValue() {
         return f.calculate(params);
+      }
+
+      public String toString() {
+        if (asString == null) {
+          StringBuilder b = new StringBuilder(name + "(${");
+          String pS = null;
+          int c = params.size() - 1;
+          for (NumericFormula nf : params) {
+            pS = nf.toString();
+            if (pS.startsWith("$")) pS = pS.substring(2, pS.length() - 1);
+            b.append(pS);
+            if (c-- != 0) b.append(',');
+          }
+          b.append('}');
+          asString = b.toString();
+        }
+        return asString;
       }
     };
   }
@@ -154,6 +195,10 @@ public class BasicFormulaFactory {
       public Boolean getValue() {
         return op.operate(left, right);
       }
+
+      public String toString() {
+        return left.toString() + op.toString() + right.toString();
+      }
     };
   }
 
@@ -178,11 +223,16 @@ public class BasicFormulaFactory {
       public Boolean getValue() {
         return op.operate(left, right);
       }
+
+      public String toString() {
+        return left.toString() + op.toString() + right.toString();
+      }
     };
   }
 
-  /**
-   * Numeric formula of value 0.
-   */
+  /** Numeric formula of value 0. */
   public static final NumericFormula ZERO = integerInstance(0);
+
+  /** Numeric formula of value 1. */
+  public static final NumericFormula ONE = integerInstance(1);
 }

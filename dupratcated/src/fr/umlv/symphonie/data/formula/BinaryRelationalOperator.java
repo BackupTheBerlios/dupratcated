@@ -30,12 +30,20 @@ public enum BinaryRelationalOperator {
             + nv1.getClass().getName() + ", " + nv2.getClass().getName() + ')');
       }
     }
+
+    public String toString() {
+      return "==";
+    }
   },
   NOT_EQUALS {
 
     Boolean operate(NumericFormula v1, NumericFormula v2) {
       return new Boolean(!BinaryRelationalOperator.EQUALS.operate(v1, v2)
           .booleanValue());
+    }
+
+    public String toString() {
+      return "!=";
     }
   },
   LESS_THAN {
@@ -52,6 +60,10 @@ public enum BinaryRelationalOperator {
             + nv1.getClass().getName() + ", " + nv2.getClass().getName() + ')');
       }
     }
+
+    public String toString() {
+      return "<";
+    }
   },
   LESS_THAN_OR_EQUALS {
 
@@ -60,6 +72,10 @@ public enum BinaryRelationalOperator {
           .booleanValue()
           || BinaryRelationalOperator.EQUALS.operate(v1, v2).booleanValue();
       return new Boolean(r);
+    }
+
+    public String toString() {
+      return "<=";
     }
   },
   GREATER_THAN {
@@ -76,6 +92,10 @@ public enum BinaryRelationalOperator {
             + nv1.getClass().getName() + ", " + nv2.getClass().getName() + ')');
       }
     }
+
+    public String toString() {
+      return ">";
+    }
   },
   GREATER_THAN_OR_EQUALS {
 
@@ -84,6 +104,10 @@ public enum BinaryRelationalOperator {
           .booleanValue()
           || BinaryRelationalOperator.EQUALS.operate(v1, v2).booleanValue();
       return new Boolean(r);
+    }
+
+    public String toString() {
+      return ">=";
     }
   };
 

@@ -18,12 +18,20 @@ public enum BinaryLogicalOperator {
       return new Boolean(v1.getValue().booleanValue()
           && v2.getValue().booleanValue());
     }
+
+    public String toString() {
+      return "&&";
+    }
   },
   OR {
 
     Boolean operate(BooleanFormula v1, BooleanFormula v2) {
       return new Boolean(v1.getValue().booleanValue()
           || v2.getValue().booleanValue());
+    }
+
+    public String toString() {
+      return "||";
     }
   };
 
