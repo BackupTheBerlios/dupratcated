@@ -19,6 +19,15 @@ public class StudentMark {
     return value;
   }
 
+  
+  
+  /**
+   * @param value The value to set.
+   */
+  public void setValue(float value) {
+    this.value = value;
+  }
+  
   public float getCoeff() {
     return coeff;
   }

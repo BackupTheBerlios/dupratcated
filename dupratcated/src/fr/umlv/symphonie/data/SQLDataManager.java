@@ -667,6 +667,22 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     }
   }
 
+  /* (non-Javadoc)
+   * @see fr.umlv.symphonie.data.DataManager#changeStudentMarkValue(float)
+   */
+  public void changeStudentMarkValue(StudentMark studentMark, float newValue) throws SQLException {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see fr.umlv.symphonie.data.DataManager#changeMarkDescription(java.lang.String)
+   */
+  public void changeMarkDescription(Mark mark, String newDescription) throws SQLException {
+    // TODO Auto-generated method stub
+    
+  }
+
 
 
 }

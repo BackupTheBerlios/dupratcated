@@ -37,4 +37,24 @@ public interface DataManager
 	public void addMarks(List<String> list) throws SQLException;
 	public void removeMark(Mark m) throws SQLException;
 	public void removeMarks(List<Mark> list) throws SQLException;
+  
+  
+  public void changeStudentMarkValue(StudentMark studentMark, float newValue) throws SQLException;
+  public void changeMarkDescription(Mark mark, String newDescription) throws SQLException;
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 }

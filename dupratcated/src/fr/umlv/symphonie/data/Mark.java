@@ -26,6 +26,13 @@ public class Mark {
   }
   
   
+  /**
+   * @param desc The desc to set.
+   */
+  public void setDesc(String desc) {
+    this.desc = desc;
+  }
+  
   /* (non-Javadoc)
    * @see java.lang.Object#toString()
    */

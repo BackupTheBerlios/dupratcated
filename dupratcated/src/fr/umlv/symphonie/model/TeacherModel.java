@@ -5,6 +5,7 @@
 package fr.umlv.symphonie.model;
 
 import java.awt.Font;
+import java.sql.SQLException;
 import java.util.*;
 
 import javax.swing.JFrame;
@@ -145,6 +146,54 @@ public class TeacherModel extends AbstractTableModel {
     return matrix[rowIndex][columnIndex];
   }
 
+  
+  
+  /* (non-Javadoc)
+   * @see javax.swing.table.AbstractTableModel#isCellEditable(int, int)
+   */
+  public boolean isCellEditable(int rowIndex, int columnIndex) {
+    
+    
+    /*
+     * Cas ou c'est pas editable :
+     */
+    if (columnIndex == 0 ||
+        rowIndex == 2 ||
+        columnIndex == columnCount -1 && rowIndex <= 1 )
+      return false;
+    
+    
+    
+    return true;
+  }
+  
+  
+  
+  /* (non-Javadoc)
+   * @see javax.swing.table.AbstractTableModel#setValueAt(java.lang.Object, int, int)
+   */
+  public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+    
+    /*
+     * cas des intitulés :
+     */
+    
+    if (rowIndex == 0){
+      try {
+        manager.changeMarkDescription((Mark)matrix[rowIndex][columnIndex], (String)aValue);
+      } catch (SQLException e) {
+        System.out.println("Error while attempting to modify the mark name to " + aValue);
+        e.printStackTrace();
+      }
+    }
+    
+    else if (rowIndex == 1){
+      
+    }
+    
+  }
+  
+  
   public static void main(String[] args) {
     JFrame frame = new JFrame ("test TeacherModel");
     frame.setSize(800,600);
@@ -183,4 +232,9 @@ public class TeacherModel extends AbstractTableModel {
     
     frame.setVisible(true);
   }
+  
+  
+
+  
+
 }
