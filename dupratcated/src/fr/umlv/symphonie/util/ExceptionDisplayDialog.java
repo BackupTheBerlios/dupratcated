@@ -30,39 +30,25 @@ import javax.swing.event.ChangeListener;
  */
 public final class ExceptionDisplayDialog {
 
-  /**
-   * The internal dialog
-   */
+  /** The internal dialog */
   protected final JDialog dialog;
 
-  /**
-   * Text area to display the exception stack trace
-   */
+  /** Text area to display the exception stack trace */
   private final JTextArea stackTrace = new JTextArea();
 
-  /**
-   * Label where the exception name is to be displayed
-   */
+  /** Label where the exception name is to be displayed */
   private final JLabel exName = new JLabel("Exception");
 
-  /**
-   * Action for showing stack trace
-   */
+  /** Action for showing stack trace */
   protected final AbstractAction show;
 
-  /**
-   * Action for hiding stack trace
-   */
+  /** Action for hiding stack trace */
   protected final AbstractAction hide;
 
-  /**
-   * Dimension when stack trace is not shown
-   */
+  /** Dimension when stack trace is not shown */
   protected final Dimension little = new Dimension(450, 127);
-  
-  /**
-   * Dimension when stack trace is not shown
-   */
+
+  /** Dimension when stack trace is not shown */
   protected final Dimension big = new Dimension(450, 320);
 
   /**
@@ -172,6 +158,17 @@ public final class ExceptionDisplayDialog {
    */
   public void hide() {
     dialog.setVisible(false);
+  }
+
+  /**
+   * This method has been created so that users can use this class as the
+   * EventDispatchThread uncaught exception handler.
+   * 
+   * @param t
+   *          The throwable object to handle
+   */
+  public void handle(Throwable t) {
+    showException(t);
   }
 
   // ----------------------------------------------------------------------------
