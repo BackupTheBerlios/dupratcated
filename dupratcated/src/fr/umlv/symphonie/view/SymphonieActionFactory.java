@@ -392,7 +392,7 @@ public class SymphonieActionFactory {
         
         if (o instanceof Student) {
           symphonie.getStudentTreeModel().removeStudent((Student)o);
-          //symphonie.getCurrentTeacherModel().clear();
+          symphonie.getCurrentStudentModel().clear();
         }
       }
     };
@@ -609,8 +609,10 @@ public class SymphonieActionFactory {
       public void actionPerformed(ActionEvent e) {
         Object o = tree.getLastSelectedPathComponent();
         
-        if (o instanceof Course)
+        if (o instanceof Course){
           symphonie.getCourseTreeModel().removeCourse((Course)o);
+          symphonie.getCurrentTeacherModel().clear();
+        }
       }
     };
     

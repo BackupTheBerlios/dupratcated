@@ -217,7 +217,7 @@ public class TeacherModel extends AbstractTableModel {
     setCourse(course);
   }
 
-  protected void clear() {
+  public void clear() {
     course = null;
     rowCount = 0;
     columnCount = 0;
@@ -503,8 +503,6 @@ public class TeacherModel extends AbstractTableModel {
 
       public void run() {
         synchronized (lock) {
-
-          printCourse();
 
           if (course != null) {
             try {

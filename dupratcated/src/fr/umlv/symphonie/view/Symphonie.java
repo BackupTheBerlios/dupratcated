@@ -118,13 +118,13 @@ public class Symphonie {
   private final DataManager manager;
 
   /** The international builder */
-  private ComponentBuilder builder;
+  protected ComponentBuilder builder;
 
   /** The default language */
   private Language currentLanguage = SymphoniePreferencesManager.getLanguage();
 
   /** The main frame */
-  private JFrame frame;
+  protected JFrame frame;
 
   /** The views tabbed pane */
   protected JTabbedPane tab = new JTabbedPane(JTabbedPane.BOTTOM,
@@ -134,43 +134,43 @@ public class Symphonie {
   public final ExceptionDisplayDialog errDisplay;
 
   /** Current view */
-  private View currentView;
+  protected View currentView;
 
   /** Export wizard model */
-  private final Wizard exportW;
+  protected final Wizard exportW;
 
   /** Import wizard model */
   private final Wizard importW;
 
   /** Identification service */
-  private IdentificationStrategy logger;
+  protected IdentificationStrategy logger;
 
   /** Student Table Model * */
-  private final StudentModel studentModel;
+  protected final StudentModel studentModel;
 
   /** Admin Student Table Model * */
-  private final AdminStudentModel adminStudentModel;
+  protected final AdminStudentModel adminStudentModel;
 
   /** Current Student Table Model */
-  private StudentModel currentStudentModel;
+  protected StudentModel currentStudentModel;
 
   /** Teacher Table Model * */
-  private final TeacherModel teacherModel;
+  protected final TeacherModel teacherModel;
 
   /** Admin Teacher Table Model * */
-  private final AdminTeacherModel adminTeacherModel;
+  protected final AdminTeacherModel adminTeacherModel;
 
   /** Current Teacher Table Model */
-  private TeacherModel currentTeacherModel;
+  protected TeacherModel currentTeacherModel;
 
   /** Jury Table Model * */
-  private final JuryModel juryModel;
+  protected final JuryModel juryModel;
 
   /** Admin Jury Table Model * */
-  private final AdminJuryModel adminJuryModel;
+  protected final AdminJuryModel adminJuryModel;
 
   /** Current Jury Table Model */
-  private JuryModel currentJuryModel;
+  protected JuryModel currentJuryModel;
 
   /** StudentTreeModel * */
   private final StudentTreeModel studentTreeModel;
@@ -533,20 +533,15 @@ public class Symphonie {
         .getAddStudentAction(null), SymphonieConstants.ADD_STUDENT_TITLE,
         ComponentBuilder.ButtonType.MENU_ITEM);
     treePop.add(addStudent);
+    
+    treePop.add(builder.buildButton(actionFactory.getUpdateStudentTreeAction(null), SymphonieConstants.UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
+    
+    
     final AbstractButton removeStudent = builder.buildButton(actionFactory
         .getRemoveStudentAction(null, tree), SymphonieConstants.REMOVE_STUDENT,
         ComponentBuilder.ButtonType.MENU_ITEM);
     treePop.add(removeStudent);
 
-    // listener which saves mouse position
-    tree.addMouseListener(new MouseAdapter() {
-
-      public void mouseClicked(MouseEvent e) {
-        if (SwingUtilities.isRightMouseButton(e)) {
-          PointSaver.setPoint(e.getPoint());
-        }
-      }
-    });
 
     // listener for popup
     tree.addMouseListener(new MouseAdapter() {
@@ -570,6 +565,21 @@ public class Symphonie {
       }
     });
 
+    // listener which enables the remove button
+    tree.addMouseListener(new MouseAdapter() {
+
+      public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)) {
+          int n = tree.getRowForLocation(e.getX(), e.getY());
+
+          if (n > 0)
+            removeStudent.setEnabled(true);
+          
+          else removeStudent.setEnabled(false);
+        }
+      }
+    });
+    
     JScrollPane pane = new JScrollPane(tree);
     split.setLeftComponent(pane);
     tree.addTreeSelectionListener(new TreeSelectionListener() {
@@ -708,6 +718,64 @@ public class Symphonie {
       }
     });
 
+    
+    
+    final JPopupMenu treePop = builder
+        .buildPopupMenu(SymphonieConstants.TEACHERVIEWPOPUP_TITLE);
+
+    final AbstractButton addCourse = builder.buildButton(actionFactory
+        .getAddCourseAction(null), SymphonieConstants.ADDCOURSE,
+        ComponentBuilder.ButtonType.MENU_ITEM);
+    treePop.add(addCourse);
+
+    treePop.add(builder.buildButton(actionFactory
+        .getUpdateCourseTreeAction(null), SymphonieConstants.UPDATE,
+        ComponentBuilder.ButtonType.MENU_ITEM));
+
+    final AbstractButton removeCourse = builder.buildButton(actionFactory
+        .getRemoveCourseAction(null, tree), SymphonieConstants.REMOVECOURSE,
+        ComponentBuilder.ButtonType.MENU_ITEM);
+    treePop.add(removeCourse);
+
+    // listener for popup
+    tree.addMouseListener(new MouseAdapter() {
+
+      public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)) {
+          treePop.show(e.getComponent(), e.getX(), e.getY());
+        }
+      }
+    });
+
+    // listener which selects the right-cliqued row
+    tree.addMouseListener(new MouseAdapter() {
+
+      public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)) {
+          int n = tree.getRowForLocation(e.getX(), e.getY());
+
+          if (n > 0) tree.setSelectionRow(n);
+        }
+      }
+    });
+
+    // listener which enables the remove button
+    tree.addMouseListener(new MouseAdapter() {
+
+      public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)) {
+          int n = tree.getRowForLocation(e.getX(), e.getY());
+
+          if (n > 0)
+            removeCourse.setEnabled(true);
+
+          else
+            removeCourse.setEnabled(false);
+        }
+      }
+    });  
+    
+    
     tree.addTreeSelectionListener(new TreeSelectionListener() {
 
       public void valueChanged(TreeSelectionEvent e) {
@@ -1351,7 +1419,7 @@ public class Symphonie {
    * In order to make abstraction of the export/import implemetations
    * <code>Views</code> use a visitor-like design pattern.
    */
-  enum View {
+  public enum View {
     student {
 
       String getNameKey() {
