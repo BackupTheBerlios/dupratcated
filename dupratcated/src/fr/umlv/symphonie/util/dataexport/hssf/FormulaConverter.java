@@ -19,7 +19,7 @@ import fr.umlv.symphonie.data.formula.parser.ParserException;
  * <code>Formula</code> into excel compatible <code>String</code> formulas.
  * <br>
  * Note that currently, only functions that takes cell groups as parameters are
- * supported. TODO : Optimize replace patterns
+ * supported.
  */
 public final class FormulaConverter {
 

@@ -521,9 +521,7 @@ public class HSSFDataExporter implements DataExporter {
               .setCellFormula(excelFormula);
         }
       }
-
-      // Put comments
-
+      
       // Write workbook on disc
       FileOutputStream fos = new FileOutputStream(documentName);
       wkbook.write(fos);
