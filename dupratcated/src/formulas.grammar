@@ -13,24 +13,44 @@ Helpers
   capital_others = 'Ç' | 'Ñ';
   capital        = ['A' .. 'Z'];
 
-  digit   = ['0' .. '9'];
+  digit = ['0' .. '9'];
   
-  sp    = ' ';
+  sp  = ' ';
+  cr  = 13;
+  lf  = 0;
+  tab = 9;
+  eol = cr | lf | cr lf;  
 
   letter  = small | capital;
   special = small_acute | small_grave | small_umlaut | small_circumflex | small_others | capital_others;
   
   id_character = small | digit | special;
+  func_id_character = small;
     
   digit_separator = '.';
+
+
+States
+  normal_state,
+  id_state;
   
   
 Tokens
 
   block_prefix = '$';
-  left_brace   = '{';
-  right_brace  = '}';
+
+  {normal_state->id_state}
+  block_start = '${';
+
+  {id_state->normal_state}
+  block_end = '}';
+
+  {id_state}
+  identifier = id_character (id_character | sp)*;
   id_separator = ',';
+
+  {normal_state}
+  blanks = (eol | tab | sp)+ ;
 
   integer_literal = digit+;
   double_literal  = digit+ digit_separator digit+;
@@ -58,8 +78,13 @@ Tokens
   
   logical_or_operator  = '||';
 
-  identifier = id_character (id_character | sp)*;
+  func_id = func_id_character+;
     
+
+Ignored Tokens
+
+  blanks;
+
   
 Productions
 
@@ -92,12 +117,12 @@ Productions
     {double}  double_literal  ;
   
   evaluated_expression =
-    {function} identifier left_parenthesis block_expression right_parenthesis |
-    {cell}     block_prefix left_brace identifier right_brace ;
+    {function} func_id left_parenthesis block_expression right_parenthesis |
+    {cell}     block_start identifier block_end ;
 
   block_expression =
-    {data} block_prefix identifier |
-    {cell} block_prefix left_brace identifiers right_brace ;
+    {data} block_prefix func_id |
+    {cell} block_start identifiers block_end ;
 
   identifiers =
     separator_suffixed_id* identifier ; 
