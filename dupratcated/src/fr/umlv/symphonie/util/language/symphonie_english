@@ -21,6 +21,7 @@ admin=Administration
 connect=Login as admin
 db=Database...
 pwd=Change password ...
+languageKey=english
 english=English
 french=French
 spanish=Spanish

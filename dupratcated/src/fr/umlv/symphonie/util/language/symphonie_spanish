@@ -21,6 +21,7 @@ admin=Administración
 connect=Identificarse como administrador 
 db=Base de datos...
 pwd=Cambiar la contraseña
+languageKey=spanish
 english=Inglés
 french=Francés
 spanish=Español
