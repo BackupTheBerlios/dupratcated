@@ -1,5 +1,6 @@
 /*
- * This file is part of Symphonie Created : 17 févr. 2005 21:30:59
+ * This file is part of Symphonie
+ * Created : 17 févr. 2005 21:30:59
  */
 
 package fr.umlv.symphonie.view;
@@ -55,6 +56,8 @@ public class Symphonie {
 
   private static final String FILE_PATTERN = "language/symphonie";
   private static final String FILE_CHARSET = "ISO-8859-1";
+  private static final ImageIcon EMPTYICON = new ImageIcon(Symphonie.class
+      .getResource("icons/empty.png"));
 
   private static ComponentBuilder builder;
   private static HashMap<String, String> english;
@@ -71,7 +74,7 @@ public class Symphonie {
       french = TextualResourcesLoader.getResourceMap(FILE_PATTERN, new Locale(
           "french"), FILE_CHARSET);
       spanish = TextualResourcesLoader.getResourceMap(FILE_PATTERN, new Locale(
-      "spanish"), FILE_CHARSET);
+          "spanish"), FILE_CHARSET);
     } catch (IOException e) {
       throw new AssertionError("Bim ! -> " + e.getMessage());
     }
@@ -99,7 +102,8 @@ public class Symphonie {
    * @return JMenu
    */
   private static JMenu getFileMenu() {
-    JMenu file = (JMenu) builder.buildButton(SymphonieConstants.FILE_MENU, ComponentBuilder.ButtonType.MENU);
+    JMenu file = (JMenu) builder.buildButton(SymphonieConstants.FILE_MENU,
+        ComponentBuilder.ButtonType.MENU);
 
     /*
      * Actions Menu "File"
@@ -123,8 +127,7 @@ public class Symphonie {
      * *********************************************************
      */
 
-    file.add(builder.buildButton(a_import,
-        SymphonieConstants.IMPORT_MENU_ITEM,
+    file.add(builder.buildButton(a_import, SymphonieConstants.IMPORT_MENU_ITEM,
         ComponentBuilder.ButtonType.MENU_ITEM));
     file.add(builder.buildButton(export, SymphonieConstants.EXPORT_MENU_ITEM,
         ComponentBuilder.ButtonType.MENU_ITEM));
@@ -148,7 +151,9 @@ public class Symphonie {
    * @return JMenu
    */
   private static JMenu getLangMenu() {
-    JMenu lang = (JMenu) builder.buildButton(SymphonieConstants.LANGUAGE_MENU_ITEM, ComponentBuilder.ButtonType.MENU);
+    JMenu lang = (JMenu) builder
+        .buildButton(SymphonieConstants.LANGUAGE_MENU_ITEM,
+            ComponentBuilder.ButtonType.MENU);
 
     // Actions
     Action inEnglish = SymphonieActionFactory.getLanguageChangeAction(english,
@@ -160,15 +165,15 @@ public class Symphonie {
 
     // Items
 
-    JCheckBoxMenuItem frBox = (JCheckBoxMenuItem) builder.buildButton(
-        inFrench, SymphonieConstants.FRENCH_MENU_ITEM,
+    JCheckBoxMenuItem frBox = (JCheckBoxMenuItem) builder.buildButton(inFrench,
+        SymphonieConstants.FRENCH_MENU_ITEM,
         ComponentBuilder.ButtonType.CHECK_BOX_MENU_ITEM);
     frBox.setSelected(true);
 
     JCheckBoxMenuItem engBox = (JCheckBoxMenuItem) builder.buildButton(
         inEnglish, SymphonieConstants.ENGLISH_MENU_ITEM,
         ComponentBuilder.ButtonType.CHECK_BOX_MENU_ITEM);
-    
+
     JCheckBoxMenuItem spBox = (JCheckBoxMenuItem) builder.buildButton(
         inSpanish, SymphonieConstants.SPANISH_MENU_ITEM,
         ComponentBuilder.ButtonType.CHECK_BOX_MENU_ITEM);
@@ -195,13 +200,14 @@ public class Symphonie {
   private static JMenu getModeMenu() {
     JMenu mode = (JMenu) builder.buildButton(
         SymphonieConstants.CHANGE_VIEW_MENU, ComponentBuilder.ButtonType.MENU);
+    mode.setIcon(EMPTYICON);
     // Actions
     Action viewStudent = SymphonieActionFactory.getModeChangeAction("student",
-        new ImageIcon(), tab, 0);
+        null, tab, 0);
     Action viewTeacher = SymphonieActionFactory.getModeChangeAction("teacher",
-        new ImageIcon(), tab, 1);
-    Action viewJury = SymphonieActionFactory.getModeChangeAction("jury",
-        new ImageIcon(), tab, 2);
+        null, tab, 1);
+    Action viewJury = SymphonieActionFactory.getModeChangeAction("jury", null,
+        tab, 2);
 
     // Items
     JCheckBoxMenuItem studentBox = (JCheckBoxMenuItem) builder.buildButton(
@@ -257,8 +263,8 @@ public class Symphonie {
     /* Actions ******************************************************* */
     Action formula = SymphonieActionFactory.getFormulaAction(new ImageIcon(
         Symphonie.class.getResource("icons/formula.png")), frame, builder);
-    Action f_cell = SymphonieActionFactory.getFormulaCellAction(
-        new ImageIcon(), frame, builder);
+    Action f_cell = SymphonieActionFactory.getFormulaCellAction(EMPTYICON,
+        frame, builder);
 
     /* Items********************************************************* */
     format.add(builder.buildButton(formula,
