@@ -38,3 +38,7 @@ bcancel=Annuler
 bok=OK
 formuladialog.title=Ajout de formules
 databasedialog.title=Configuration de la base de données
+databasedialog.server=Serveur
+databasedialog.error=Erreur
+databasedialog.error.port=Valeur du port invalide
+databasedialog.error.server=Veuillez saisir l'adresse du serveur
