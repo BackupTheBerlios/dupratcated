@@ -12,6 +12,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -19,7 +20,6 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -56,8 +56,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -79,6 +77,7 @@ import fr.umlv.symphonie.model.StudentTreeModel;
 import fr.umlv.symphonie.model.TeacherModel;
 import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.ExceptionDisplayDialog;
+import fr.umlv.symphonie.util.Pair;
 import fr.umlv.symphonie.util.SymphoniePreferencesManager;
 import fr.umlv.symphonie.util.TextualResourcesLoader;
 import fr.umlv.symphonie.util.ComponentBuilder.ButtonType;
@@ -101,7 +100,6 @@ import static fr.umlv.symphonie.view.SymphonieConstants.DISPLAY_CHART;
 import static fr.umlv.symphonie.view.SymphonieConstants.EXIT_MENU_ITEM;
 import static fr.umlv.symphonie.view.SymphonieConstants.EXPORT_MENU_ITEM;
 import static fr.umlv.symphonie.view.SymphonieConstants.FILE_MENU;
-import static fr.umlv.symphonie.view.SymphonieConstants.FORMAT_MENU;
 import static fr.umlv.symphonie.view.SymphonieConstants.FORMULA_MENU_ITEM;
 import static fr.umlv.symphonie.view.SymphonieConstants.FRAME_TITLE;
 import static fr.umlv.symphonie.view.SymphonieConstants.IMPORT_MENU_ITEM;
@@ -292,22 +290,6 @@ public class Symphonie {
   }
 
   /**
-   * Builds the "Format" menu
-   * 
-   * @return a <code>JMenu</code>
-   */
-  private final JMenu getFormatMenu() {
-    JMenu format = (JMenu) builder.buildButton(FORMAT_MENU, ButtonType.MENU);
-
-    Action f_cell = actionFactory.getFormulaCellAction(null);
-
-    format.add(builder
-        .buildButton(f_cell, CELL_MENU_ITEM, ButtonType.MENU_ITEM));
-
-    return format;
-  }
-
-  /**
    * Builds the "Insert" menu
    * 
    * @param formula
@@ -454,41 +436,43 @@ public class Symphonie {
   private final JSplitPane getStudentPane() {
 
     JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+    split.setDividerSize(5);
 
     // Table
     final JTable table = new JTable(studentModel);
     table.setTableHeader(null);
     table.setDefaultRenderer(Object.class, studentModel
         .getFormattableCellRenderer());
-    table.getSelectionModel().addListSelectionListener(
-        new ListSelectionListener() {
+    table.addMouseListener(new MouseAdapter() {
 
-          public void valueChanged(ListSelectionEvent e) {
-            if (!e.getValueIsAdjusting()) {
-              int row = table.getSelectedRow();
-              int col = e.getFirstIndex();
-              if (row != -1 && col != -1) {
-                System.out.println("[" + row + ',' + col + "]");
-                Object o = table.getValueAt(table.getSelectedRow(), e
-                    .getFirstIndex());
-                System.out.println(o);
-                selectedObjects.clear();
-                selectedObjects.add(o);
-              }
-            }
-          }
-        });
+      public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isLeftMouseButton(e) || SwingUtilities.isRightMouseButton(e)) {
+          int row = table.rowAtPoint(e.getPoint());
+          if ((row % 4) == 2) {
+            int col = table.columnAtPoint(e.getPoint());
+            Object o = table.getValueAt(row, col);
+            selectedCell = new Pair<Object, Point>(table.getValueAt(row, col),
+                new Point(row, col));
+            formatCell.setEnabled(true);
+          } else
+            formatCell.setEnabled(false);
+        }
+      }
+    });
 
     // pop up and actions
     final JPopupMenu pop = builder
         .buildPopupMenu(SymphonieConstants.STUDENTVIEWPOPUP_TITLE);
 
-    pop.add(builder.buildButton(actionFactory.getStudentUpdateAction(REFRESH_ICON),
-        UPDATE, ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(actionFactory
+        .getStudentUpdateAction(REFRESH_ICON), UPDATE, ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(actionFactory.getStudentPrintAction(PRINT_ICON,
         table), PRINT_MENU_ITEM, ButtonType.MENU_ITEM));
+    pop.add(new JSeparator());
     pop.add(builder.buildButton(
         actionFactory.getStudentChartAction(CHART_ICON), DISPLAY_CHART,
+        ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(formatCell, CELL_MENU_ITEM,
         ButtonType.MENU_ITEM));
 
     // table listeners
@@ -564,6 +548,7 @@ public class Symphonie {
         .getUpdateStudentTreeAction(REFRESH_ICON), SymphonieConstants.UPDATE,
         ComponentBuilder.ButtonType.MENU_ITEM));
 
+    treePop.add(new JSeparator());
     final AbstractButton removeStudent = builder.buildButton(actionFactory
         .getRemoveStudentAction(new ImageIcon(Symphonie.class
             .getResource("icons/remove_student.png")), tree),
@@ -650,12 +635,30 @@ public class Symphonie {
   private final JSplitPane getTeacherPane() {
 
     JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+    split.setDividerSize(5);
 
     // Table
     final JTable table = new JTable(teacherModel);
     table.setTableHeader(null);
     table.setDefaultRenderer(Object.class, teacherModel
         .getFormattableCellRenderer());
+    table.addMouseListener(new MouseAdapter() {
+
+      public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)
+            || SwingUtilities.isLeftMouseButton(e)) {
+          int row = table.rowAtPoint(e.getPoint());
+          if (row >= 3) {
+            int col = table.columnAtPoint(e.getPoint());
+            Object o = table.getValueAt(row, col);
+            selectedCell = new Pair<Object, Point>(table.getValueAt(row, col),
+                new Point(row, col));
+            formatCell.setEnabled(true);
+          } else
+            formatCell.setEnabled(false);
+        }
+      }
+    });
 
     JScrollPane scroll1 = new JScrollPane(table);
 
@@ -670,13 +673,19 @@ public class Symphonie {
     pop.add(builder.buildButton(actionFactory
         .getTeacherAddFormulaAction(FORMULA_ICON), ADD_FORMULA,
         ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(actionFactory.getTeacherUpdateAction(REFRESH_ICON),
-        UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(new JSeparator());
+    pop.add(builder.buildButton(actionFactory
+        .getTeacherUpdateAction(REFRESH_ICON), UPDATE,
+        ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(actionFactory.getTeacherPrintAction(PRINT_ICON,
         table), PRINT_MENU_ITEM, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(
-        actionFactory.getTeacherChartAction(CHART_ICON), DISPLAY_CHART,
+    pop.add(new JSeparator());
+    pop.add(builder.buildButton(actionFactory
+        .getTeacherChartAction(CHART2_ICON), DISPLAY_CHART,
         ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(formatCell, CELL_MENU_ITEM,
+        ButtonType.MENU_ITEM));
+    pop.add(new JSeparator());
 
     final AbstractButton removeColumn = builder.buildButton(actionFactory
         .getRemoveTeacherColumnAction(EMPTY_ICON, table), REMOVE_COLUMN,
@@ -767,10 +776,10 @@ public class Symphonie {
     treePop.add(builder.buildButton(actionFactory
         .getUpdateCourseTreeAction(REFRESH_ICON), SymphonieConstants.UPDATE,
         ComponentBuilder.ButtonType.MENU_ITEM));
-
+    treePop.add(new JSeparator());
     final AbstractButton removeCourse = builder.buildButton(actionFactory
-        .getRemoveCourseAction(EMPTY_ICON, tree), SymphonieConstants.REMOVECOURSE,
-        ComponentBuilder.ButtonType.MENU_ITEM);
+        .getRemoveCourseAction(EMPTY_ICON, tree),
+        SymphonieConstants.REMOVECOURSE, ComponentBuilder.ButtonType.MENU_ITEM);
     treePop.add(removeCourse);
 
     // listener for popup
@@ -855,6 +864,26 @@ public class Symphonie {
 
     final JTable table = new JTable(juryModel);
     table.setTableHeader(null);
+    table.setDefaultRenderer(Object.class, juryModel
+        .getFormattableCellRenderer());
+    table.addMouseListener(new MouseAdapter() {
+
+      public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)
+            || SwingUtilities.isLeftMouseButton(e)) {
+          int row = table.rowAtPoint(e.getPoint());
+          if (row >= 3) {
+            int col = table.columnAtPoint(e.getPoint());
+            Object o = table.getValueAt(row, col);
+            System.out.println(o);
+            selectedCell = new Pair<Object, Point>(table.getValueAt(row, col),
+                new Point(row, col));
+            formatCell.setEnabled(true);
+          } else
+            formatCell.setEnabled(false);
+        }
+      }
+    });
 
     final JPopupMenu pop = builder
         .buildPopupMenu(SymphonieConstants.JURYVIEWPOPUP_TITLE);
@@ -862,22 +891,27 @@ public class Symphonie {
     pop.add(builder.buildButton(actionFactory
         .getJuryAddFormulaAction(FORMULA_ICON), SymphonieConstants.ADD_FORMULA,
         ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(actionFactory.getJuryUpdateAction(REFRESH_ICON),
+    pop.add(new JSeparator());
+    pop.add(builder.buildButton(
+        actionFactory.getJuryUpdateAction(REFRESH_ICON),
         SymphonieConstants.UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(actionFactory.getJuryPrintAction(PRINT_ICON,
         table), SymphonieConstants.PRINT_MENU_ITEM,
         ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(new JSeparator());
     pop.add(builder
-        .buildButton(actionFactory.getJuryChartAction(CHART_ICON),
+        .buildButton(actionFactory.getJuryChartAction(CHART2_ICON),
             SymphonieConstants.DISPLAY_CHART,
             ComponentBuilder.ButtonType.MENU_ITEM));
-
+    pop.add(new JSeparator());
     final AbstractButton removeColumn = builder
         .buildButton(
             actionFactory.getRemoveJuryColumnAction(EMPTY_ICON, table),
             SymphonieConstants.REMOVE_COLUMN,
             ComponentBuilder.ButtonType.MENU_ITEM);
     pop.add(removeColumn);
+    pop.add(builder.buildButton(formatCell, CELL_MENU_ITEM,
+        ButtonType.MENU_ITEM));
 
     // listener which displays the popup
     table.addMouseListener(new MouseAdapter() {
@@ -1122,6 +1156,7 @@ public class Symphonie {
 
     // Action factory
     actionFactory = new SymphonieActionFactory(this, builder);
+    formatCell = actionFactory.getFormulaCellAction(EMPTY_ICON);
     addColumn = actionFactory.getAddMarkAction(new ImageIcon(Symphonie.class
         .getResource("icons/insert_column.png")));
     addColumn.setEnabled(false);
@@ -1165,8 +1200,8 @@ public class Symphonie {
         FORMULA_MENU_ITEM, ButtonType.MENU_ITEM);
     JMenu admenu = getAdminMenu(toolbar);
     frame.setJMenuBar(getMenubar(getFileMenu(exp, imp, print, exit),
-        getWindowMenu(mode, getLangMenu()), getFormatMenu(), getInsertMenu(
-            morfula, toolbar), admenu));
+        getWindowMenu(mode, getLangMenu()), getInsertMenu(morfula, toolbar),
+        admenu));
 
     // Listen changes in builder for frame title
     builder.addChangeListener(content, new ChangeListener() {
@@ -1400,6 +1435,10 @@ public class Symphonie {
   public static final ImageIcon CHART_ICON = new ImageIcon(Symphonie.class
       .getResource("icons/chart.png"));
 
+  /** Another chart 16x16 icon */
+  public static final ImageIcon CHART2_ICON = new ImageIcon(Symphonie.class
+      .getResource("icons/chart2.png"));
+
   /** Printer 16x16 icon */
   public static final ImageIcon PRINT_ICON = new ImageIcon(Symphonie.class
       .getResource("icons/print.png"));
@@ -1407,7 +1446,7 @@ public class Symphonie {
   /** Printer 16x16 icon */
   public static final ImageIcon FORMULA_ICON = new ImageIcon(Symphonie.class
       .getResource("icons/formula.png"));
-  
+
   /** Printer 16x16 icon */
   public static final ImageIcon REFRESH_ICON = new ImageIcon(Symphonie.class
       .getResource("icons/reload.png"));
@@ -1703,8 +1742,11 @@ public class Symphonie {
   /** Add column action (depends on views) */
   protected AbstractAction addColumn;
 
-  /** List of selected objects in current view */
-  protected final ArrayList<Object> selectedObjects = new ArrayList<Object>();
+  /** Format cell action (depends on selected cell) */
+  protected AbstractAction formatCell;
+
+  /** Cell selected in current view */
+  protected Pair<Object, Point> selectedCell;
 
   protected int chartStep = 5;
 

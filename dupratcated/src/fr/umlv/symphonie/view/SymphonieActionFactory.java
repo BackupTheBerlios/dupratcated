@@ -19,6 +19,7 @@ import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.table.AbstractTableModel;
 
 import fr.umlv.symphonie.data.ConnectionManager;
 import fr.umlv.symphonie.data.Course;
@@ -31,7 +32,7 @@ import fr.umlv.symphonie.util.identification.IdentificationException;
 import fr.umlv.symphonie.util.identification.IdentificationStrategy;
 import fr.umlv.symphonie.util.wizard.Wizard;
 import fr.umlv.symphonie.view.cells.CellFormat;
-import fr.umlv.symphonie.view.cells.FormattableCellRenderer;
+import fr.umlv.symphonie.view.cells.ObjectFormattingSupport;
 
 public class SymphonieActionFactory {
 
@@ -191,24 +192,25 @@ public class SymphonieActionFactory {
       public void actionPerformed(ActionEvent event) {
         cd.setVisible(true);
         CellFormat cf = cd.getUserFormat();
-        FormattableCellRenderer fcr = null;
+        AbstractTableModel atm = null;
         switch (symphonie.getCurrentView().ordinal()) {
           case 0:
-            fcr = symphonie.getCurrentStudentModel()
-                .getFormattableCellRenderer();
+            atm = symphonie.getCurrentStudentModel();
             break;
           case 1:
-            fcr = symphonie.getCurrentTeacherModel()
-                .getFormattableCellRenderer();
+            atm = symphonie.getCurrentTeacherModel();
             break;
           case 2:
-            fcr = symphonie.getCurrentJuryModel().getFormattableCellRenderer();
+            atm = symphonie.getCurrentJuryModel();
             break;
           case 3:
             throw new IllegalStateException("Illegal view number");
         }
-        for (Object o : symphonie.selectedObjects)
-          fcr.addFormatedObject(o, cf);
+
+        ((ObjectFormattingSupport) atm).getFormattableCellRenderer()
+            .addFormatedObject(symphonie.selectedCell.getFirst(), cf);
+        Point p = symphonie.selectedCell.getSecond();
+        atm.fireTableCellUpdated(p.x, p.y);
       }
     };
     a.putValue(Action.SMALL_ICON, icon);
@@ -606,7 +608,8 @@ public class SymphonieActionFactory {
             symphonie);
 
         public void actionPerformed(ActionEvent e) {
-          dialog.setChart(symphonie.getCurrentTeacherModel(), symphonie.getChartStep());
+          dialog.setChart(symphonie.getCurrentTeacherModel(), symphonie
+              .getChartStep());
           dialog.setModal(true);
           dialog.setVisible(true);
         }
@@ -778,7 +781,8 @@ public class SymphonieActionFactory {
         private final JuryChartDialog dialog = new JuryChartDialog(symphonie);
 
         public void actionPerformed(ActionEvent e) {
-          dialog.setChart(symphonie.getCurrentJuryModel(), symphonie.getChartStep());
+          dialog.setChart(symphonie.getCurrentJuryModel(), symphonie
+              .getChartStep());
           dialog.setModal(true);
           dialog.setVisible(true);
         }
