@@ -21,6 +21,7 @@ import java.awt.event.WindowAdapter;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -1015,7 +1016,8 @@ public class Symphonie {
 
       public void hyperlinkUpdate(HyperlinkEvent e) {
         if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
-          String f = e.getURL().getFile();
+          URL lurl = e.getURL();
+          String f = (lurl != null) ? lurl.getFile() : e.getDescription();
           setCurrentView(View.valueOf(f.substring(f.lastIndexOf('/') + 1)));
           Action act;
           for (AbstractButton b : butts) {
