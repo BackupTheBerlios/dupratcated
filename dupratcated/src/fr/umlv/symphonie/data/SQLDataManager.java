@@ -374,7 +374,7 @@ public class SQLDataManager implements
   /*
    * ici
    */
-  public void syncTeacherFormulaData() throws DataManagerException{
+  private void syncTeacherFormulaData() throws DataManagerException{
     Map<Integer, List<Formula>> tmpMap = new HashMap<Integer, List<Formula>>();
     
     String request = "select " + COLUMN_ID_FORMULA_FROM_TABLE_FORMULA + ", " + 
@@ -394,14 +394,77 @@ public class SQLDataManager implements
       
       Formula f = SymphonieFormulaFactory.parseFormula(result.getString(COLUMN_DESC_FROM_TABLE_TITLE),
                                                        result.getString(COLUMN_EXPRESSION_FROM_TABLE_FORMULA),
-                                                       result.getInt(COLUMN_ID_FORMULA_FROM_TABLE_FORMULA));
+                                                       result.getInt(COLUMN_ID_FORMULA_FROM_TABLE_FORMULA),
+                                                       result.getInt(COLUMN_COLUMN_FROM_TABLE_FORMULA));
       
       courseKey = result.getInt(COLUMN_ID_COURSE_FROM_TABLE_TEACHER_FORMULA);
       
+      List<Formula> list = tmpMap.get(courseKey);
       
+      if (list == null){
+        list = new ArrayList<Formula>();
+        tmpMap.put(courseKey, list);
+      }
+      
+      list.add(f);
       
     }catch(SQLException e){
-      throw new DataManagerException("error getting teacher formulas from datbase", e);
+      throw new DataManagerException("error getting teacher formulas from database", e);
+    }
+    
+    List<Formula> tmpList;
+    List<Formula> localList;
+    
+    // for each list contained in tmpMap
+    for (int i : teacherFormulaMap.keySet()){
+      tmpList = tmpMap.get(i);
+      
+      // if the list is not null
+      if (tmpList != null){
+        
+        // take the corresponding list in local map
+        localList = teacherFormulaMap.get(i);
+        
+        // if the local list is null just
+        // copy the tmp list
+        if (localList == null)
+          teacherFormulaMap.put(i, tmpList);
+        
+        // else insert all formulas from tmp list
+        // into local list
+        else {
+          for (Formula f : tmpList)
+            localList.add(f);
+        }
+      }
+    }
+    
+    // for each list contained in local map
+    for (int i : teacherFormulaMap.keySet()){
+      localList = teacherFormulaMap.get(i);
+      
+      // if the list is not null
+      if (localList != null){
+        
+        // take the corresponding list in tmpMap
+        tmpList = tmpMap.get(i);
+        
+        // if the tmp list is null just
+        // remove the local list from local map
+        if (tmpList == null){
+          teacherFormulaMap.remove(i);
+        }
+        
+        // else remove every formula from local list
+        // that is not in tmp list
+        else {
+          for (int j = 0 ; j < localList.size() ; j++)
+            if (tmpList.contains(localList.get(j)) == false){
+              localList.remove(j);
+              j--;
+            }
+        }
+      }
     }
   }
   
@@ -526,7 +589,24 @@ public class SQLDataManager implements
 		return studentMarkList;
 	}
 
-	/* (non-Javadoc)
+	private Map<Integer, List<Formula>> getTeacherFormulas() throws DataManagerException {
+    int n;
+    
+    try {
+      n = getTimeStamp(TABLE_TEACHER_FORMULA);
+    }catch (SQLException e){
+      n = teacherFormulaMapTimeStamp;
+    }
+    
+    if (n > teacherFormulaMapTimeStamp) {
+      syncTeacherFormulaData();
+      teacherFormulaMapTimeStamp = n;
+    }
+    
+    return teacherFormulaMap;
+  }
+  
+  /* (non-Javadoc)
 	 * @see fr.umlv.symphonie.data.DataManager#getMarksByCourse(fr.umlv.symphonie.data.Course)
 	 */
 	public Map<Integer, Mark> getMarksByCourse(Course c)
@@ -649,7 +729,17 @@ public class SQLDataManager implements
 		markMapTimeStamp = supposedTimestamp;
 	}
 
-	/*
+	private void updateTeacherFormula(int supposedTimestamp) throws DataManagerException{
+   int n;
+   
+   try {
+     n = getTimeStamp(TABLE_TEACHER_FORMULA);
+   }catch (SQLException e){
+     throw new DataManagerException("error getting timestamp for teacher formulas.", e);
+   }
+  }
+  
+  /*
 	 * methodes de la vue etudiant
 	 */
 	public Map<Integer, StudentMark> getMarksByStudentAndCourse(Student s,
