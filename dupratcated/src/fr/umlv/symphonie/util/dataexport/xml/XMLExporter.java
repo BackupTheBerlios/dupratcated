@@ -148,7 +148,7 @@ public class XMLExporter implements DataExporter {
    * add a mark node
    * 
    * @param root
-   *          the parent node the of student mark node
+   *          the parent node of the student mark node
    * @param sm
    *          the student mark object
    */
@@ -171,24 +171,17 @@ public class XMLExporter implements DataExporter {
    * add a formula node
    * 
    * @param root
-   * @param idCourse
-   *          true if we need the attribute id_course
+   *          the parent node of the formula node
    * @param f
    *          the formula object
    */
-  private static void addFormulaNode(Node root, boolean idCourse, Formula f) {
+  private static void addFormulaNode(Node root, Formula f) {
     final Node formula;
 
     /** <formula id_formula="?" id_title=?">... </formula> */
     Element e = root.getOwnerDocument().createElement("formula");
     e.setAttribute("id_formula", "" + 0);
     e.setAttribute("id_title", "" + 0);
-
-    /** id_course="?" */
-    if (idCourse) {
-      e.setAttribute("id_course", "" + 0);
-    }
-
     formula = root.appendChild(e);
 
     /** <column>? </column> */
@@ -374,7 +367,7 @@ public class XMLExporter implements DataExporter {
 
     /** we export all the formulas for this course */
     for (Formula f : list) {
-      addFormulaNode(root, true, f);
+      addFormulaNode(root, f);
     }
 
     /** we create the document */
@@ -437,7 +430,7 @@ public class XMLExporter implements DataExporter {
 
     /** we export all the formulas */
     for (Formula f : list) {
-      addFormulaNode(root, false, f);
+      addFormulaNode(root, f);
     }
 
     writeDocument(document, documentName);
