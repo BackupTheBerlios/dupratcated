@@ -104,7 +104,8 @@ public class Symphonie {
   private JFrame frame;
 
   /** The views tabbed pane */
-  protected JTabbedPane tab;
+  protected JTabbedPane tab = new JTabbedPane(JTabbedPane.BOTTOM,
+      JTabbedPane.SCROLL_TAB_LAYOUT);
 
   /** Exception display tool */
   public final ExceptionDisplayDialog errDisplay;
@@ -223,14 +224,22 @@ public class Symphonie {
     mode.setIcon(EMPTYICON);
 
     ButtonGroup g = new ButtonGroup();
-    JCheckBoxMenuItem vBox;
+
     javax.swing.AbstractAction a;
-    for (View v : View.values()) {
+    for (final View v : View.values()) {
       a = actionFactory.getModeChangeAction(v);
-      vBox = (JCheckBoxMenuItem) builder.buildButton(a, v.getNameKey(),
-          ButtonType.CHECK_BOX_MENU_ITEM);
+      final JCheckBoxMenuItem vBox = (JCheckBoxMenuItem) builder.buildButton(a,
+          v.getNameKey(), ButtonType.CHECK_BOX_MENU_ITEM);
       g.add(vBox);
       mode.add(vBox);
+      tab.getModel().addChangeListener(new ChangeListener() {
+
+        public void stateChanged(ChangeEvent e) {
+          SingleSelectionModel ssm = (SingleSelectionModel) e.getSource();
+          int idx = ssm.getSelectedIndex();
+          vBox.setSelected(idx == v.ordinal());
+        }
+      });
     }
     mode.setEnabled(false);
     return mode;
@@ -277,7 +286,7 @@ public class Symphonie {
     JMenu insert = (JMenu) builder.buildButton(INSERT_MENU, ButtonType.MENU);
 
     JMenuItem addCol = (JMenuItem) builder.buildButton(addColumn,
-        INSERT_COLUMN_MENU_ITEM, ButtonType.MENU_ITEM);
+        ADDMARKDIALOG_TITLE, ButtonType.MENU_ITEM);
 
     insert.add(addCol);
     tbar.add(createToolbarButton(ADDMARKDIALOG_TITLE, addCol, builder));
@@ -843,8 +852,6 @@ public class Symphonie {
 
     JPanel panel = new JPanel(new BorderLayout());
 
-    tab = new JTabbedPane(JTabbedPane.BOTTOM, JTabbedPane.SCROLL_TAB_LAYOUT);
-
     /* Student JTabbedPane */
     JScrollPane jsp = new JScrollPane(getStudentPane());
     tab.add(builder.getValue(VIEW_STUDENT_MENU_ITEM), jsp);
@@ -983,9 +990,9 @@ public class Symphonie {
     addFormula.setEnabled(false);
     JMenuItem morfula = (JMenuItem) builder.buildButton(addFormula,
         FORMULA_MENU_ITEM, ButtonType.MENU_ITEM);
+    JMenu admenu = getAdminMenu(toolbar);
     frame.setJMenuBar(getMenubar(getFileMenu(exp, imp, print, exit),
-        getWindowMenu(mode, getLangMenu()), getFormatMenu(), getInsertMenu(
-            morfula, toolbar), getAdminMenu(toolbar)));
+        getWindowMenu(mode, getLangMenu()), getFormatMenu(), getInsertMenu(morfula, toolbar), admenu));
 
     // Listen changes in builder for frame title
     builder.addChangeListener(content, new ChangeListener() {
