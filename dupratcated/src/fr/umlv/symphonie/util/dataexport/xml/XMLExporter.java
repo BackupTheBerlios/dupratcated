@@ -190,7 +190,7 @@ public abstract class XMLExporter implements DataExporter {
 	 */
 	protected void writeDocument(Document document) {
 		try {
-			Transformer transformer = TransformerFactory.newInstance()
+			final Transformer transformer = TransformerFactory.newInstance()
 					.newTransformer();
 
 			/** <!DOCTYPE symphonie SYSTEM "file:?"> */
