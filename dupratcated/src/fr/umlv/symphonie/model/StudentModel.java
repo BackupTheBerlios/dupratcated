@@ -5,10 +5,19 @@
 
 package fr.umlv.symphonie.model;
 
+import static fr.umlv.symphonie.view.SymphonieConstants.AVERAGE;
+import static fr.umlv.symphonie.view.SymphonieConstants.COEFF;
+import static fr.umlv.symphonie.view.SymphonieConstants.MARK;
+import static fr.umlv.symphonie.view.SymphonieConstants.STUDENT_CHART_SENTENCE_1;
+import static fr.umlv.symphonie.view.SymphonieConstants.STUDENT_CHART_SENTENCE_2;
+import static fr.umlv.symphonie.view.SymphonieConstants.STUDENT_HEADER;
+
 import java.awt.EventQueue;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,11 +32,11 @@ import org.jfree.data.general.DefaultKeyedValuesDataset;
 import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
-import fr.umlv.symphonie.data.Mark;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
 import fr.umlv.symphonie.util.ComponentBuilder;
+import fr.umlv.symphonie.util.ExceptionDisplayDialog;
 import fr.umlv.symphonie.util.LookableCollection;
 import fr.umlv.symphonie.util.StudentAverage;
 import fr.umlv.symphonie.util.completion.CompletionDictionary;
@@ -35,8 +44,6 @@ import fr.umlv.symphonie.util.completion.IDictionarySupport;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
 import fr.umlv.symphonie.view.cells.FormattableCellRenderer;
 import fr.umlv.symphonie.view.cells.ObjectFormattingSupport;
-
-import static fr.umlv.symphonie.view.SymphonieConstants.*;
 
 /**
  * Suitable data model for a table displaying a Student Courses
@@ -52,8 +59,9 @@ public class StudentModel extends AbstractTableModel implements
   protected int columnCount = 0;
   protected int rowCount = 0;
   protected Map<Course, Map<Integer, StudentMark>> markMap = null;
+  protected List<Course> courseList = new ArrayList<Course>();
   // private static StudentModel instance = null;
-  protected Object[][] matrix = null;
+//  protected Object[][] matrix = null;
 
   protected final CompletionDictionary dictionary = new CompletionDictionary();
 
@@ -83,19 +91,6 @@ public class StudentModel extends AbstractTableModel implements
     dictionary.add("max");
   }
 
-  // public static StudentModel getInstance(DataManager manager) {
-  // if (instance == null)
-  // instance = new StudentModel(manager);
-  //
-  // else
-  // instance.setManager(manager);
-  //
-  // return instance;
-  // }
-
-  // protected void setManager(DataManager manager) {
-  // this.manager = manager;
-  // }
 
   public void setStudent(final Student s) {
 
@@ -109,66 +104,73 @@ public class StudentModel extends AbstractTableModel implements
           try {
             markMap = manager.getAllMarksByStudent(student);
           } catch (DataManagerException e) {
-            System.out.println(e.getMessage());
+            ExceptionDisplayDialog.postException(e);
             return;
           }
 
           int n;
           int tmp = 0;
           for (Course c : markMap.keySet()) {
+            
             if ((n = markMap.get(c).size()) > tmp) tmp = n;
+            
+            courseList.add(c);
+            
+            for (StudentMark sm : markMap.get(c).values())
+              if (dictionary.contains(sm.getMark().getDesc()) == false)
+                dictionary.add(sm.getMark().getDesc());
           }
 
           columnCount = tmp + 2;
           rowCount = 4 * markMap.size();
 
-          matrix = new Object[rowCount][columnCount];
-
-          int row = 0;
-          int column;
-          Collection<StudentMark> collection = null;
-
-          for (Course c : markMap.keySet()) {
-
-            column = 0;
-            collection = markMap.get(c).values();
-
-            /*
-             * On met les donnees dans la premiere colonne (matiere, coeff,
-             * note)
-             */
-            matrix[row][column] = c;
-            matrix[row + 1][column] = builder.getValue(COEFF);
-            matrix[row + 2][column] = builder.getValue(MARK);
-
-            column++;
-
-            /*
-             * On remplit les cases de la matrice avec les notes
-             */
-            for (StudentMark sm : collection) {
-              matrix[row][column] = sm.getMark();
-              matrix[row + 1][column] = sm.getCoeff();
-              matrix[row + 2][column] = sm;
-              column++;
-            }
-
-            /*
-             * On remplit le reste des cases de bon gros vide
-             */
-            blankRow(row, column);
-            blankRow(row + 1, column);
-            blankRow(row + 2, column);
-            blankRow(row + 3, 0);
-
-            matrix[row][columnCount - 1] = builder.getValue(AVERAGE);
-            matrix[row + 1][columnCount - 1] = null;
-            matrix[row + 2][columnCount - 1] = StudentAverage
-                .getAverage(collection);
-
-            row += 4;
-
-          }
+//          matrix = new Object[rowCount][columnCount];
+//
+//          int row = 0;
+//          int column;
+//          Collection<StudentMark> collection = null;
+//
+//          for (Course c : markMap.keySet()) {
+//
+//            column = 0;
+//            collection = markMap.get(c).values();
+//
+//            /*
+//             * On met les donnees dans la premiere colonne (matiere, coeff,
+//             * note)
+//             */
+//            matrix[row][column] = c;
+//            matrix[row + 1][column] = builder.getValue(COEFF);
+//            matrix[row + 2][column] = builder.getValue(MARK);
+//
+//            column++;
+//
+//            /*
+//             * On remplit les cases de la matrice avec les notes
+//             */
+//            for (StudentMark sm : collection) {
+//              matrix[row][column] = sm.getMark();
+//              matrix[row + 1][column] = sm.getCoeff();
+//              matrix[row + 2][column] = sm;
+//              column++;
+//            }
+//
+//            /*
+//             * On remplit le reste des cases de bon gros vide
+//             */
+//            blankRow(row, column);
+//            blankRow(row + 1, column);
+//            blankRow(row + 2, column);
+//            blankRow(row + 3, 0);
+//
+//            matrix[row][columnCount - 1] = builder.getValue(AVERAGE);
+//            matrix[row + 1][columnCount - 1] = null;
+//            matrix[row + 2][columnCount - 1] = StudentAverage
+//                .getAverage(collection);
+//
+//            row += 4;
+//
+//          }
 
           try {
             EventQueue.invokeAndWait(new Runnable() {
@@ -179,9 +181,9 @@ public class StudentModel extends AbstractTableModel implements
 
             });
           } catch (InterruptedException e1) {
-            e1.printStackTrace();
+            ExceptionDisplayDialog.postException(e1);
           } catch (InvocationTargetException e1) {
-            e1.printStackTrace();
+            ExceptionDisplayDialog.postException(e1);
           }
         }
       }
@@ -194,23 +196,33 @@ public class StudentModel extends AbstractTableModel implements
     if (student != null) setStudent(student);
   }
 
-  /**
-   * @param row
-   * @param column
-   */
-  protected void blankRow(int row, int column) {
-    for (; column < columnCount - 1; column++)
-      matrix[row][column] = null;
-
-  }
+//  /**
+//   * @param row
+//   * @param column
+//   */
+//  protected void blankRow(int row, int column) {
+//    for (; column < columnCount - 1; column++)
+//      matrix[row][column] = null;
+//
+//  }
 
   public void clear() {
     columnCount = 0;
     rowCount = 0;
     student = null;
-    matrix = null;
+//    matrix = null;
+    courseList.clear();
+    
+    if (markMap != null){
+    
+    for (Course c : markMap.keySet()){
+      for (StudentMark sm : markMap.get(c).values())
+        dictionary.remove(sm.getMark().getDesc());
+    }
+    
     markMap = null;
-
+    }
+    
     fireTableStructureChanged();
   }
 
@@ -239,7 +251,73 @@ public class StudentModel extends AbstractTableModel implements
    */
   public Object getValueAt(int rowIndex, int columnIndex) {
     fillFormulaMap(rowIndex);
-    return matrix[rowIndex][columnIndex];
+    
+    int index = rowIndex / 4;
+    int line = rowIndex % 4;
+    
+    if (line == 3) return null;
+    
+    Course c = courseList.get(index);
+    
+    if (columnIndex == 0){
+      
+      switch (line){
+        case 0 : {
+          return c;
+        }
+        case 1 : {
+          return builder.getValue(COEFF);
+        }
+        case 2 : {
+          return builder.getValue(MARK);
+        } 
+      }
+    }
+    
+    else if (columnIndex == columnCount - 1){
+      
+      switch(line){
+        case 0 : {
+          return builder.getValue(AVERAGE);
+        }
+        
+        case 2 : {
+          return StudentAverage.getAverage(markMap.get(c).values());
+        }
+      }
+      
+      return null;
+    }
+    
+    int column = columnIndex - 1;
+    
+    Collection<StudentMark> collection = markMap.get(c).values();
+    
+    if (column >= collection.size())
+      return null;
+    
+    StudentMark[] tab = new StudentMark[1];
+    
+    tab = collection.toArray(tab);
+    
+    StudentMark sm = tab[column]; 
+    
+    switch(line){
+      
+      case 0 : {
+        return sm.getMark();
+      }
+      
+      case 1 : {
+        return sm.getCoeff();
+      }
+      
+      case 2 : {
+        return sm;
+      }
+    }
+    
+    return null;
   }
 
   public ChartPanel getChartPanel() {
@@ -297,13 +375,12 @@ public class StudentModel extends AbstractTableModel implements
 
     if (lastRow != row) {
       lastRow = row;
-      row *= 4;
+//      row *= 4;
 
       SymphonieFormulaFactory.clearMappedValues();
 
-      for (int i = 1; matrix[row][i] != null && i < columnCount - 1; i++)
-        SymphonieFormulaFactory.putMappedValue(((Mark) (matrix[row][i]))
-            .getDesc(), ((StudentMark) (matrix[row + 2][i])).getValue());
+      for (StudentMark sm : markMap.get(courseList.get(row)).values())
+        SymphonieFormulaFactory.putMappedValue(sm.getMark().getDesc(), sm.getValue());
     }
   }
 

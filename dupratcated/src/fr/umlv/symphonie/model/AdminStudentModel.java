@@ -5,35 +5,17 @@
 package fr.umlv.symphonie.model;
 
 import java.awt.EventQueue;
-import java.awt.Font;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
+import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTable;
-import javax.swing.JTree;
-import javax.swing.SwingConstants;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.tree.DefaultTreeCellRenderer;
 
 import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
-import fr.umlv.symphonie.data.Mark;
-import fr.umlv.symphonie.data.SQLDataManager;
-import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.util.ComponentBuilder;
-import fr.umlv.symphonie.util.StudentAverage;
+import fr.umlv.symphonie.util.ExceptionDisplayDialog;
 
 
 /**
@@ -55,37 +37,52 @@ public class AdminStudentModel extends StudentModel {
     if (columnIndex == columnCount - 1)
       return false;
     
-    Object o = matrix[rowIndex][columnIndex];
     
-    if (o == null || o instanceof String)
+    int index = rowIndex / 4;
+    int line = rowIndex % 4;
+    
+    if (line == 3) return false;
+    
+    
+    if (columnIndex == 0){
+      
+      if (line == 0)
+        return true;
+      
+      return false;
+    }
+    
+    Course c = courseList.get(index);
+    
+    int column = columnIndex - 1;
+    
+    Collection<StudentMark> collection = markMap.get(c).values();
+    
+    if (column >= collection.size())
       return false;
     
-    if (o instanceof Course
-        || o instanceof Mark
-        || o instanceof StudentMark
-        || o instanceof Float)
-      return true;
-    
-    return false;
+    return true;
   }
   
   public void setValueAt(Object aValue,int rowIndex,int columnIndex){
-    final Object o = matrix[rowIndex][columnIndex];
+
     final int row = rowIndex;
     final int column = columnIndex;
     
-    if (o instanceof Course){
-//      System.out.println("matiere.");
+    final int index = rowIndex / 4;
+    final int line = rowIndex % 4;
+    
+    if (columnIndex == 0){
       final String value = (String)aValue;
       
       if (value.equals("") == false)
         es.execute(new Runnable(){
           public void run() {
             try {
-              manager.changeCourseTitle((Course)o, value);
+              manager.changeCourseTitle(courseList.get(index), value);
             } catch (DataManagerException e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
+              ExceptionDisplayDialog.postException(e);
+              return;
             }
             
             try {
@@ -95,9 +92,11 @@ public class AdminStudentModel extends StudentModel {
                 }
               });
             } catch (InterruptedException e1) {
-              e1.printStackTrace();
+              ExceptionDisplayDialog.postException(e1);
+              return;
             } catch (InvocationTargetException e1) {
-              e1.printStackTrace();
+              ExceptionDisplayDialog.postException(e1);
+              return;
             }
             
           }
@@ -106,80 +105,97 @@ public class AdminStudentModel extends StudentModel {
       return;
     }
     
-    if (o instanceof StudentMark){
-      final float value;
-      try {
-        value = Float.parseFloat((String)aValue);
-      }catch (NumberFormatException e){
+    final Course c = courseList.get(index);
+    
+    final int columnListIndex = columnIndex - 1;
+    
+    Collection<StudentMark> collection = markMap.get(c).values();
+    
+    StudentMark[] tab = new StudentMark[1];
+    
+    tab = collection.toArray(tab);
+    
+    final StudentMark sm = tab[columnListIndex];
+    
+    switch(line){
+      
+      case 0 : {
+        final String value = (String)aValue;
+        
+        if (value.equals("") == false){
+          es.execute(new Runnable(){
+            public void run() {
+              try {
+                manager.changeMarkDescription(sm.getMark(), value);
+              } catch (DataManagerException e) {
+                ExceptionDisplayDialog.postException(e);
+                return;
+              }
+              
+              try {
+                EventQueue.invokeAndWait(new Runnable() {
+                  public void run() {
+                    AdminStudentModel.this.fireTableRowsUpdated(row, row);
+                  }
+                });
+              } catch (InterruptedException e1) {
+                ExceptionDisplayDialog.postException(e1);
+                return;
+              } catch (InvocationTargetException e1) {
+                ExceptionDisplayDialog.postException(e1);
+                return;
+              }
+              
+            }
+          });
+        
+        return;
+        }
+      }
+      
+      case 1 : {
+
+        final float value;
+
+        try {
+          value = Float.parseFloat((String) aValue);
+        } catch (NumberFormatException e) {
+          return;
+        }
+
+        es.execute(new Runnable() {
+
+          public void run() {
+            try {
+              manager.changeMarkCoeff(sm.getMark(), value);
+            } catch (DataManagerException e) {
+              ExceptionDisplayDialog.postException(e);
+              return;
+            }
+
+            try {
+              EventQueue.invokeAndWait(new Runnable() {
+
+                public void run() {
+                  AdminStudentModel.this.fireTableRowsUpdated(row, row + 1);
+                }
+              });
+            } catch (InterruptedException e1) {
+              ExceptionDisplayDialog.postException(e1);
+              return;
+            } catch (InvocationTargetException e1) {
+              ExceptionDisplayDialog.postException(e1);
+              return;
+            }
+          }
+        });
+
         return;
       }
       
-      es.execute(new Runnable(){
-        public void run() {
-          try {
-            manager.changeStudentMarkValue((StudentMark)o, value);
-          } catch (DataManagerException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
-          
-          try {
-            EventQueue.invokeAndWait(new Runnable() {
-              public void run() {
-                AdminStudentModel.this.fireTableRowsUpdated(row, row);
-              }
-            });
-          } catch (InterruptedException e1) {
-            e1.printStackTrace();
-          } catch (InvocationTargetException e1) {
-            e1.printStackTrace();
-          }
-          
-        }
-      });
-      
-      return;
-    }
-    
-    if (o instanceof Mark){
-      final String value = (String)aValue;
-      
-      if (value.equals("") == false){
-        es.execute(new Runnable(){
-          public void run() {
-            try {
-              manager.changeMarkDescription((Mark)o, value);
-            } catch (DataManagerException e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
-            }
-            
-            try {
-              EventQueue.invokeAndWait(new Runnable() {
-                public void run() {
-                  AdminStudentModel.this.fireTableRowsUpdated(row, row);
-                }
-              });
-            } catch (InterruptedException e1) {
-              e1.printStackTrace();
-            } catch (InvocationTargetException e1) {
-              e1.printStackTrace();
-            }
-            
-          }
-        });
-      
-      return;
-      }
-    }
-    
-    if (o instanceof Float){
-      final Object o2 = matrix[rowIndex - 1][columnIndex];
-      
-      if (o2 instanceof Mark){
+      case 2 : {
         final float value;
-        
-        try{
+        try {
           value = Float.parseFloat((String)aValue);
         }catch (NumberFormatException e){
           return;
@@ -188,29 +204,27 @@ public class AdminStudentModel extends StudentModel {
         es.execute(new Runnable(){
           public void run() {
             try {
-              manager.changeMarkCoeff((Mark)o2, value);
+              manager.changeStudentMarkValue(sm, value);
             } catch (DataManagerException e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
+              ExceptionDisplayDialog.postException(e);
+              return;
             }
-            
-            matrix[row][column] = value;
-            matrix[row + 1][columnCount -1] = StudentAverage.getAverage(markMap.get(((Mark)o2).getCourse()).values());
             
             try {
               EventQueue.invokeAndWait(new Runnable() {
                 public void run() {
-                  AdminStudentModel.this.fireTableRowsUpdated(row, row + 1);
+                  AdminStudentModel.this.fireTableRowsUpdated(row, row);
                 }
               });
             } catch (InterruptedException e1) {
-              e1.printStackTrace();
+              ExceptionDisplayDialog.postException(e1);
+              return;
             } catch (InvocationTargetException e1) {
-              e1.printStackTrace();
+              ExceptionDisplayDialog.postException(e1);
+              return;
             }
           }
         });
-        
         return;
       }
     }
