@@ -799,7 +799,7 @@ public class Symphonie {
   /**
    * Enum defines languages supported by Symphonie.
    */
-  enum Language {
+  public enum Language {
 
     FRENCH(new Locale("french")) {
 
