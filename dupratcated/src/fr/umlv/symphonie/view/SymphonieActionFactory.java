@@ -34,6 +34,17 @@ import fr.umlv.symphonie.util.identification.IdentificationStrategy;
 import fr.umlv.symphonie.util.wizard.Wizard;
 import fr.umlv.symphonie.view.cells.CellFormat;
 import fr.umlv.symphonie.view.cells.ObjectFormattingSupport;
+import fr.umlv.symphonie.view.dialog.AddCourseDialog;
+import fr.umlv.symphonie.view.dialog.AddMarkDialog;
+import fr.umlv.symphonie.view.dialog.AddStudentDialog;
+import fr.umlv.symphonie.view.dialog.CellDialog;
+import fr.umlv.symphonie.view.dialog.ChangePassDialog;
+import fr.umlv.symphonie.view.dialog.DatabaseDialog;
+import fr.umlv.symphonie.view.dialog.FormulaDialog;
+import fr.umlv.symphonie.view.dialog.JuryChartDialog;
+import fr.umlv.symphonie.view.dialog.JuryFormulaDialog;
+import fr.umlv.symphonie.view.dialog.StudentChartDialog;
+import fr.umlv.symphonie.view.dialog.TeacherChartDialog;
 
 public class SymphonieActionFactory {
 
