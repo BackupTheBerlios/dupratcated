@@ -80,4 +80,5 @@ public class SymphonieConstants {
   public static final String ADD_STUDENT_TITLE = "addstudent.title";
   public static final String ADD_STUDENT_NAME = "addstudent.name";
   public static final String ADD_STUDENT_LASTNAME = "addstudent.lastname";
+  public static final String REMOVE_STUDENT = "removestudent";
 }

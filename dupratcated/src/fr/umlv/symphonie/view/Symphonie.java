@@ -1,6 +1,5 @@
 /*
- * This file is part of Symphonie
- * Created : 17 févr. 2005 21:30:59
+ * This file is part of Symphonie Created : 17 févr. 2005 21:30:59
  */
 
 package fr.umlv.symphonie.view;
@@ -16,6 +15,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -148,6 +148,12 @@ public class Symphonie {
 
   /** Current Jury Table Model */
   private JuryModel currentJuryModel;
+
+  /** StudentTreeModel * */
+  private final StudentTreeModel studentTreeModel;
+
+  /** CourseTreeModel * */
+  private final CourseTreeModel courseTreeModel;
 
   /** Action Factory * */
   protected final SymphonieActionFactory actionFactory;
@@ -480,8 +486,8 @@ public class Symphonie {
     split.setRightComponent(scroll1);
 
     // Tree
-    StudentTreeModel treeModel = new StudentTreeModel(manager);
-    final JTree tree = new JTree(treeModel);
+    // StudentTreeModel treeModel = new StudentTreeModel(manager);
+    final JTree tree = new JTree(studentTreeModel);
     tree.setCellRenderer(new DefaultTreeCellRenderer() {
 
       private final Icon leafIcon = new ImageIcon(StudentTreeModel.class
@@ -509,6 +515,50 @@ public class Symphonie {
         super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf,
             row, hasFocus);
         return this;
+      }
+    });
+
+    final JPopupMenu treePop = builder
+        .buildPopupMenu(SymphonieConstants.STUDENTVIEWPOPUP_TITLE);
+
+    final AbstractButton addStudent = builder.buildButton(actionFactory
+        .getAddStudentAction(null), SymphonieConstants.ADD_STUDENT_TITLE,
+        ComponentBuilder.ButtonType.MENU_ITEM);
+    treePop.add(addStudent);
+    final AbstractButton removeStudent = builder.buildButton(actionFactory
+        .getRemoveStudentAction(null, tree), SymphonieConstants.REMOVE_STUDENT,
+        ComponentBuilder.ButtonType.MENU_ITEM);
+    treePop.add(removeStudent);
+
+    // listener which saves mouse position
+    tree.addMouseListener(new MouseAdapter() {
+
+      public void mouseClicked(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)) {
+          PointSaver.setPoint(e.getPoint());
+        }
+      }
+    });
+
+    // listener for popup
+    tree.addMouseListener(new MouseAdapter() {
+
+      public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)) {
+          treePop.show(e.getComponent(), e.getX(), e.getY());
+        }
+      }
+    });
+
+    // listener which selects the right-cliqued row
+    tree.addMouseListener(new MouseAdapter() {
+
+      public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)) {
+          int n = tree.getRowForLocation(e.getX(), e.getY());
+
+          if (n > 0) tree.setSelectionRow(n);
+        }
       }
     });
 
@@ -619,8 +669,8 @@ public class Symphonie {
     });
 
     // Tree
-    CourseTreeModel courseModel = new CourseTreeModel(manager);
-    final JTree tree = new JTree(courseModel);
+    // CourseTreeModel courseModel = new CourseTreeModel(manager);
+    final JTree tree = new JTree(courseTreeModel);
     tree.setCellRenderer(new DefaultTreeCellRenderer() {
 
       private final Icon leafIcon = new ImageIcon(StudentTreeModel.class
@@ -947,6 +997,9 @@ public class Symphonie {
     adminTeacherModel = AdminTeacherModel.getInstance(manager);
     adminJuryModel = AdminJuryModel.getInstance(manager);
 
+    studentTreeModel = StudentTreeModel.getInstance(manager);
+    courseTreeModel = CourseTreeModel.getInstance(manager);
+
     // Action factory
     actionFactory = new SymphonieActionFactory(this, builder);
     addColumn = actionFactory.getAddMarkAction(new ImageIcon(Symphonie.class
@@ -992,7 +1045,8 @@ public class Symphonie {
         FORMULA_MENU_ITEM, ButtonType.MENU_ITEM);
     JMenu admenu = getAdminMenu(toolbar);
     frame.setJMenuBar(getMenubar(getFileMenu(exp, imp, print, exit),
-        getWindowMenu(mode, getLangMenu()), getFormatMenu(), getInsertMenu(morfula, toolbar), admenu));
+        getWindowMenu(mode, getLangMenu()), getFormatMenu(), getInsertMenu(
+            morfula, toolbar), admenu));
 
     // Listen changes in builder for frame title
     builder.addChangeListener(content, new ChangeListener() {
@@ -1186,7 +1240,7 @@ public class Symphonie {
 
   /** Chart 16x16 icon */
   public static final ImageIcon CHARTICON = new ImageIcon(Symphonie.class
-      .getResource("icons/chart.png"));
+      .getResource("icons/empty.png"));
 
   /**
    * Enum defines languages supported by Symphonie.
@@ -1480,4 +1534,13 @@ public class Symphonie {
 
   /** Add column action (depends on views) */
   private AbstractAction addColumn;
+
+  public CourseTreeModel getCourseTreeModel() {
+    return courseTreeModel;
+  }
+
+  public StudentTreeModel getStudentTreeModel() {
+    return studentTreeModel;
+  }
+
 }

@@ -102,3 +102,4 @@ logout=Logout
 addstudent.title=Student add
 addstudent.name=Name :
 addstudent.lastname=Last Name :
+removestudent=Remove student

@@ -16,10 +16,12 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTable;
+import javax.swing.JTree;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import fr.umlv.symphonie.data.ConnectionManager;
+import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.model.JuryModel;
 import fr.umlv.symphonie.model.StudentModel;
 import fr.umlv.symphonie.model.TeacherModel;
@@ -377,6 +379,34 @@ public class SymphonieActionFactory {
   /** getStudentChartAction singleton instance */
   protected AbstractAction studentChartAction;
 
+  public AbstractAction getRemoveStudentAction(Icon icon, final JTree tree){
+    AbstractAction a = new AbstractAction(){
+      public void actionPerformed(ActionEvent e) {
+        Object o = tree.getLastSelectedPathComponent();
+        
+        if (o instanceof Student)
+          symphonie.getStudentTreeModel().removeStudent((Student)o);
+      }
+    };
+    
+    a.putValue(Action.SMALL_ICON, icon);
+    return a;
+  }
+  
+  
+  public AbstractAction getAddStudentAction(Icon icon){
+    AbstractAction a = new AbstractAction(){
+      AddStudentDialog dialog = new AddStudentDialog(symphonie, builder);
+      
+      public void actionPerformed(ActionEvent e){
+        dialog.setModal(true);
+        dialog.setVisible(true);
+      }
+    };
+    
+    a.putValue(Action.SMALL_ICON, icon);
+    return a;
+  }
   /* TEACHER VIEW ACTIONS ********************************** */
 
   /**
