@@ -137,7 +137,7 @@ public class Symphonie {
   }
 
   /**
-   * Build "Language" JMenu included in the "Window" JMenu
+   * Build the nested JMenu "Language" included in the "Window" JMenu
    * 
    * @return JMenu
    */
@@ -174,7 +174,7 @@ public class Symphonie {
   }
 
   /**
-   * Build "Mode" JMenu included in the "Window" JMenu
+   * Build the nested JMenu "Mode" included in the "Window" JMenu
    * 
    * @return JMenu
    */
@@ -318,7 +318,13 @@ public class Symphonie {
 
     return toolbar;
   }
-
+/**
+ * Build a JSplitPane with the TeacherModel
+ * 
+ * @param dataManager
+ * @return JSplitPane
+ *  
+ */
   private static JSplitPane getTeacherPane(DataManager dataManager) {
     JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
@@ -400,6 +406,12 @@ public class Symphonie {
 
   }
 
+  /**
+   * 
+   * @param dataManager
+   * @return
+   * @throws DataManagerException
+   */
   private static JSplitPane getStudentPane(DataManager dataManager)
       throws DataManagerException {
     StudentModel studentModel = new StudentModel(dataManager);
@@ -498,6 +510,13 @@ public class Symphonie {
     return split;
   }
 
+  /**
+   * 
+   * @param f the frame
+   * @param builder
+   * @return JPanel
+   * @throws DataManagerException
+   */
   private static JPanel getContentPane(final JFrame f,
       final SymphonieComponentBuilder builder) throws DataManagerException {
     JPanel panel = new JPanel(new BorderLayout());
