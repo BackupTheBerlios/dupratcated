@@ -20,6 +20,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
 
@@ -87,7 +88,9 @@ import fr.umlv.symphonie.util.wizard.DefaultWizardModel;
 import fr.umlv.symphonie.util.wizard.Wizard;
 import static fr.umlv.symphonie.view.SymphonieConstants.*;
 import static fr.umlv.symphonie.util.ComponentBuilder.ButtonType;
+import fr.umlv.symphonie.view.cells.CellFormat;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
+import fr.umlv.symphonie.view.cells.FormattableCellRenderer;
 
 public class Symphonie {
 
@@ -466,21 +469,7 @@ public class Symphonie {
       }
     });
 
-    table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
-
-      public Component getTableCellRendererComponent(JTable table,
-          Object value, boolean isSelected, boolean hasFocus, int row,
-          int column) {
-        JLabel label = (JLabel) super.getTableCellRendererComponent(table,
-            value, isSelected, hasFocus, row, column);
-
-        label.setHorizontalAlignment(SwingConstants.CENTER);
-        if (column == 0 || row % 4 == 0)
-          label.setFont(getFont().deriveFont(Font.BOLD));
-
-        return label;
-      }
-    });
+    table.setDefaultRenderer(Object.class, CellRendererFactory.getStudentModelCellRenderer(studentModel));
 
     JScrollPane scroll1 = new JScrollPane(table);
     split.setRightComponent(scroll1);
