@@ -87,7 +87,8 @@ public class XMLImporter implements DataImporter {
 		Mark m;
 		Node n;
 		Element e;
-		int id;
+		int examenId;
+		int courseId;
 
 		/** for each course node */
 		for (int i = 0; i < nodes.getLength(); i++) {
@@ -97,17 +98,21 @@ public class XMLImporter implements DataImporter {
 			/** we create an element by using the course node */
 			e = (Element) n;
 
-			/** we get the attribute id_examen from the element examen */
-			id = Integer.parseInt(e.getAttribute("id_examen"));
+			/**
+			 * we get the attributes id_examen and id_course from the element
+			 * examen
+			 */
+			examenId = Integer.parseInt(e.getAttribute("id_examen"));
+			courseId = Integer.parseInt(e.getAttribute("id_course"));
 
 			/** we create the mark object */
-			m = new Mark(id, e.getElementsByTagName("desc").item(0)
+			m = new Mark(examenId, e.getElementsByTagName("desc").item(0)
 					.getTextContent(), Float.parseFloat(e.getElementsByTagName(
 					"coeff_examen").item(0).getTextContent()), courseMap
-					.get(id));
+					.get(courseId));
 
 			/** we put the map object into the map */
-			map.put(id, m);
+			map.put(examenId, m);
 		}
 
 		return map;
@@ -122,9 +127,9 @@ public class XMLImporter implements DataImporter {
 	 *            a map with all the marks
 	 * @return a map with all the students
 	 */
-	protected Map<Student, Map<Integer, StudentMark>> getStudentNodes(Element root,
-			boolean comment, Map<Integer, Mark> markMap) {
-		final Map<Student, Map<Integer, StudentMark>> map = new HashMap<Student, Map<Integer, StudentMark>> ();
+	protected Map<Student, Map<Integer, StudentMark>> getStudentNodes(
+			Element root, boolean comment, Map<Integer, Mark> markMap) {
+		final Map<Student, Map<Integer, StudentMark>> map = new HashMap<Student, Map<Integer, StudentMark>>();
 		final NodeList nodes = root.getElementsByTagName("student");
 		Student s;
 		Node n;
@@ -155,9 +160,11 @@ public class XMLImporter implements DataImporter {
 						.item(0).getTextContent());
 			}
 
-			/** we get all the student marks for this student and we put the student and his marks in the map */		
-			map.put(s, getStudentMarkNodes(e,
-					s, markMap));
+			/**
+			 * we get all the student marks for this student and we put the
+			 * student and his marks in the map
+			 */
+			map.put(s, getStudentMarkNodes(e, s, markMap));
 		}
 
 		return map;
@@ -264,10 +271,11 @@ public class XMLImporter implements DataImporter {
 		if (!root.getAttribute("view").equals("teacher")) {
 			throw new DataImporterException("the file isn't a teacher view.\n");
 		}
-
-		Map<Integer, Mark> markMap = getMarkNodes(root, getCourseNodes(root));
-		Map<Student, Map<Integer, StudentMark>> studentAndStudentMakMap = getStudentNodes(root, false,
-				markMap);
+		final Map<Integer, Course> courseMap = getCourseNodes(root);
+		final Map<Integer, Mark> markMap = getMarkNodes(root,
+				getCourseNodes(root));
+		final Map<Student, Map<Integer, StudentMark>> studentAndStudentMakMap = getStudentNodes(
+				root, false, markMap);
 
 		/** we update the mark data : desc et coeff */
 		for (Mark m : markMap.values()) {
@@ -279,22 +287,20 @@ public class XMLImporter implements DataImporter {
 						"Error during the importation with the bdd.\n", e);
 			}
 		}
-		
+
 		/** we update the student mark data : mark */
 		for (Map<Integer, StudentMark> tmp : studentAndStudentMakMap.values()) {
-		      for (StudentMark sm : tmp.values()) {
-		    	System.out.println(sm.getValue() + " " +sm.getStudent().getName() + 
-	      	 			sm.getCourse().getTitle());
-		      	 /*try {		      	 
+			for (StudentMark sm : tmp.values()) {
+				try {
 					dm.changeStudentMarkValue(sm, sm.getValue());
 				} catch (DataManagerException e) {
 					throw new DataImporterException(
 							"Error during the importation with the bdd.\n", e);
-				}*/
-		      }
-		    }
+				}
+			}
+		}
 	}
- 
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -302,11 +308,25 @@ public class XMLImporter implements DataImporter {
 	 */
 	public void importJuryView(String documentName)
 			throws DataImporterException {
+		this.documentName = documentName;
 		Document d = newDocument();
 		Element root = d.getDocumentElement();
 
 		if (!root.getAttribute("view").equals("jury")) {
 			throw new DataImporterException("the file isn't a jury view.\n");
+		}
+
+		final Map<Student, Map<Integer, StudentMark>> map = getStudentNodes(
+				root, true, getMarkNodes(root, getCourseNodes(root)));
+
+		for (Student s : map.keySet()) {
+			try {
+				dm.changeStudentComment(s, s.getComment());
+			} catch (DataManagerException e) {
+				throw new DataImporterException(
+						"Error during the importation with the bdd.\n", e);
+			}
+
 		}
 	}
 }
