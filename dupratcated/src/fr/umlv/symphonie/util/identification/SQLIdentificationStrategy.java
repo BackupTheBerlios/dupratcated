@@ -86,11 +86,12 @@ public final class SQLIdentificationStrategy extends
       Statement stmt = con.createStatement();
       ResultSet rs = stmt.executeQuery(PASSWORD_REQUEST + WHERE_CLAUSE + pwd
           + "' ;");
-      if (rs.first()) {
+      if (rs.next()) {
         return true;
       }
     } catch (SQLException e) {
-      throw new IdentificationException("Unable to verify password validity", e);
+      throw new IdentificationException("Unable to verify password validity : "
+          + e.getSQLState(), e);
     }
     return false;
   }
@@ -100,7 +101,10 @@ public final class SQLIdentificationStrategy extends
   // ---------------------------------------------------------------------------
 
   public void identify(String password) throws IdentificationException {
-    if (isValidPassword(password)) fireStateChanged();
+    if (!isValidPassword(password))
+      throw new IdentificationException("Invalid password");
+    loggedIn = true;
+    fireStateChanged();
   }
 
   /**
