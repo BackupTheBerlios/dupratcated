@@ -7,6 +7,15 @@ import java.util.SortedMap;
 import fr.umlv.symphonie.data.formula.Formula;
 import fr.umlv.symphonie.util.Pair;
 
+/**
+ * Interface which set the standard methods for interacting with
+ * all kind of data implementation in Symphonie.
+ * Some return types of some methods may sound complicated, but they are crucial
+ * to the design of the application, which is elaborated in order to share the
+ * same data-structure between all views.
+ * @author susmab
+ *
+ */
 public interface DataManager {
 	/**
    * Used to get all students from database. 

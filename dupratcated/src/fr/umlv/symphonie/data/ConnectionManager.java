@@ -11,10 +11,19 @@ import javax.swing.JOptionPane;
 import fr.umlv.symphonie.util.SymphoniePreferencesManager;
 import fr.umlv.symphonie.view.dialog.DatabaseDialog;
 
+/**
+ * A class which provides connection handling over a database.
+ * The connection in Symphonie is a singleton, so the application does not have
+ * to connect many times to the database server while running.
+ * @author susmab
+ *
+ */
 public class ConnectionManager {
 
+  /**
+   * The current connection.
+   */
   static private Connection connection = null;
-  static private boolean driversLoaded = false;
 
   /**
    * Opens a dialog asking for DB connection parameter
@@ -27,6 +36,13 @@ public class ConnectionManager {
     return dbd.getUserInput();
   }
 
+  /**
+   * Creates a <code>Connection</code> if it has not already been earlier.
+   * In this case, a dialog box appears on screen to ask parameters for connection.
+   * The parameters are saved in Java <code>Properties</code> format, so the next time
+   * the application is launched, the configuration part will be skipped.
+   * @return
+   */
   public static Connection createConnection() {
 
     DriverLoader.loadDrivers();
@@ -60,6 +76,10 @@ public class ConnectionManager {
     return connection;
   }
 
+  /**
+   * Closes the connection with the database.
+   * Should be called whenever the program quits.
+   */
   public static void closeConnection() {
     if (connection != null) try {
       connection.close();
