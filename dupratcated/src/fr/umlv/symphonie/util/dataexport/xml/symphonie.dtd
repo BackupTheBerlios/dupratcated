@@ -3,18 +3,18 @@
 	<!ATTLIST symphonie view (student|teacher|jury) #REQUIRED >
 
 <!ELEMENT course (title, coeff_course?)>
-		<!ATTLIST course id_course CDATA>
+		<!ATTLIST course id_course CDATA #IMPLIED>
 		<!ELEMENT title (#PCDATA)>
 		<!ELEMENT coeff_course (#PCDATA)>
 			
 <!ELEMENT examen (desc, coeff_examen)>
-		<!ATTLIST examen id_examen CDATA>
+		<!ATTLIST examen id_examen CDATA #IMPLIED>
 		<!ATTLIST examen id_course CDATA #REQUIRED>
 		<!ELEMENT desc (#PCDATA)>
 		<!ELEMENT coeff_examen (#PCDATA)>
 		
 <!ELEMENT student (name, last_name, comment?, student_mark*)>
-	<!ATTLIST student id_student CDATA>
+	<!ATTLIST student id_student CDATA #IMPLIED>
 	<!ELEMENT name (#PCDATA)>
 	<!ELEMENT last_name (#PCDATA)>		
 	<!ELEMENT student_mark (mark)>		
