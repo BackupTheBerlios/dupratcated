@@ -11,6 +11,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -107,21 +108,27 @@ public class Symphonie {
   /** Import wizard model */
   private final Wizard importW;
 
+  /** Identification service */
+  private IdentificationStrategy logger;
+
   // ----------------------------------------------------------------------------
   // Menu building methods
   // ----------------------------------------------------------------------------
 
   /**
    * Builds the "File" frame menu
-   * @param exp The export menu item
-   * @param imp The import menu item
+   * 
+   * @param exp
+   *          The export menu item
+   * @param imp
+   *          The import menu item
    * @return a <code>JMenu</code>
    */
   private final JMenu getFileMenu(JMenuItem exp, JMenuItem imp) {
     JMenu file = (JMenu) builder.buildButton(FILE_MENU, ButtonType.MENU);
 
     Action print = SymphonieActionFactory.getPrintAction(new ImageIcon(
-        Symphonie.class.getResource("icons/print.png")));
+        Symphonie.class.getResource("icons/print.png")), this);
 
     Action exit = SymphonieActionFactory.getExitAction(new ImageIcon(
         Symphonie.class.getResource("icons/exit.png")));
@@ -263,12 +270,33 @@ public class Symphonie {
   private final JMenu getAdminMenu() {
     JMenu admin = (JMenu) builder.buildButton(ADMIN_MENU, ButtonType.MENU);
     /* Actions ******************************************************* */
-    Action connect = SymphonieActionFactory.getConnectAction(new ImageIcon(
-        Symphonie.class.getResource("icons/admin.png")), builder);
-    Action db = SymphonieActionFactory.getDBAction(new ImageIcon(
+    final Action connect = SymphonieActionFactory.getConnectAction(
+        new ImageIcon(Symphonie.class.getResource("icons/admin.png")), builder,
+        logger, this);
+    logger.addChangeListener(new ChangeListener() {
+
+      public void stateChanged(ChangeEvent e) {
+        connect.setEnabled(!logger.isIdentified());
+      }
+    });
+    final Action db = SymphonieActionFactory.getDBAction(new ImageIcon(
         Symphonie.class.getResource("icons/db.png")), frame);
-    Action pwd = SymphonieActionFactory.getPwdAction(new ImageIcon(
+    db.setEnabled(false);
+    logger.addChangeListener(new ChangeListener() {
+
+      public void stateChanged(ChangeEvent e) {
+        db.setEnabled(logger.isIdentified());
+      }
+    });
+    final Action pwd = SymphonieActionFactory.getPwdAction(new ImageIcon(
         Symphonie.class.getResource("icons/pwd.png")), frame, builder);
+    pwd.setEnabled(false);
+    logger.addChangeListener(new ChangeListener() {
+
+      public void stateChanged(ChangeEvent e) {
+        pwd.setEnabled(logger.isIdentified());
+      }
+    });
 
     /* Items********************************************************* */
     admin.add(builder.buildButton(connect, CONNECT_MENU_ITEM,
@@ -300,7 +328,8 @@ public class Symphonie {
   private final JToolBar getToolbar() {
     JToolBar toolbar = new JToolBar();
     toolbar.add(SymphonieActionFactory.getConnectAction(new ImageIcon(
-        Symphonie.class.getResource("icons/connect.png")), builder));
+        Symphonie.class.getResource("icons/connect.png")), builder, logger,
+        this));
     toolbar.add(SymphonieActionFactory.getDBAction(new ImageIcon(
         Symphonie.class.getResource("icons/db.png")), frame));
 
@@ -376,7 +405,7 @@ public class Symphonie {
 
     pop.add(builder.buildButton(getStudentUpdateAction(null), UPDATE,
         ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(getStudentPrintAction(null, table),
+    pop.add(builder.buildButton(getStudentPrintAction(null, table, this),
         PRINT_MENU_ITEM, ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(getStudentChartAction(null, frame),
         DISPLAY_CHART, ButtonType.MENU_ITEM));
@@ -502,7 +531,7 @@ public class Symphonie {
         ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(getTeacherUpdateAction(null), UPDATE,
         ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(getTeacherPrintAction(null, table),
+    pop.add(builder.buildButton(getTeacherPrintAction(null, table, this),
         PRINT_MENU_ITEM, ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(getTeacherChartAction(null, frame),
         DISPLAY_CHART, ComponentBuilder.ButtonType.MENU_ITEM));
@@ -622,7 +651,7 @@ public class Symphonie {
         .getJuryUpdateAction(null), SymphonieConstants.UPDATE,
         ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(SymphonieActionFactory.getJuryPrintAction(null,
-        table), SymphonieConstants.PRINT_MENU_ITEM,
+        table, this), SymphonieConstants.PRINT_MENU_ITEM,
         ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(SymphonieActionFactory.getJuryChartAction(null,
         frame), SymphonieConstants.DISPLAY_CHART,
@@ -710,7 +739,7 @@ public class Symphonie {
     // Disable
     for (AbstractButton b : butts)
       b.setEnabled(false);
-    
+
     // Listen user clicks
     jeep.addHyperlinkListener(new HyperlinkListener() {
 
@@ -746,10 +775,12 @@ public class Symphonie {
     });
 
     GridBagConstraints gbc = new GridBagConstraints();
-    gbc.fill = GridBagConstraints.BOTH;
+    gbc.insets = new Insets(30, 30, 30, 30);
+    gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.weightx = 1.0;
     gbc.weighty = 1.0;
     p.add(jeep, gbc);
+    p.setBackground(jeep.getBackground());
     return p;
   }
 
@@ -810,6 +841,9 @@ public class Symphonie {
     // Data source
     this.manager = manager;
 
+    // Loggin manager
+    this.logger = rootLogger;
+
     // Language tools
     builder = new ComponentBuilder(currentLanguage.getMap());
 
@@ -849,6 +883,8 @@ public class Symphonie {
         frame.setTitle(builder.getValue(FRAME_TITLE));
       }
     });
+
+    frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
   }
 
   /**
@@ -871,7 +907,6 @@ public class Symphonie {
    * @return a <code>JFrame</code>
    */
   public JFrame getFrame() {
-    frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
     return frame;
   }
 
@@ -980,8 +1015,14 @@ public class Symphonie {
       String getCharset() {
         return ISO88591;
       }
+    },
+    RUSSIAN(new Locale("russian")) {
+
+      String getCharset() {
+        return UTF8;
+      }
     }/*
-       * , RUSSIAN { }, JAPANESE { }
+       * , JAPANESE { }
        */;
 
     /** Language locale */
@@ -1046,8 +1087,8 @@ public class Symphonie {
     /** US-ASCII charset */
     public static final String USASCII = "US-ASCII";
 
-    /** Unicode charset */
-    public static final String UNICODE = "Unicode";
+    /** UTF-8 charset */
+    public static final String UTF8 = "UTF-8";
   }
 
   /**
@@ -1072,6 +1113,10 @@ public class Symphonie {
           throws DataImporterException {
         importer.importStudentView((String) input, manager);
       }
+
+      void print() {
+        SymphonieActionFactory.studentPrintAction.actionPerformed(null);
+      }
     },
     teacher {
 
@@ -1088,6 +1133,10 @@ public class Symphonie {
           throws DataImporterException {
         importer.importTeacherView((String) input, manager);
       }
+
+      void print() {
+        SymphonieActionFactory.teacherPrintAction.actionPerformed(null);
+      }
     },
     jury {
 
@@ -1103,6 +1152,10 @@ public class Symphonie {
       void importView(DataImporter importer, DataManager manager, Object input)
           throws DataImporterException {
         importer.importJuryView((String) input, manager);
+      }
+
+      void print() {
+        SymphonieActionFactory.juryPrintAction.actionPerformed(null);
       }
     };
 
@@ -1147,5 +1200,10 @@ public class Symphonie {
      */
     abstract void importView(DataImporter importer, DataManager manager,
         Object input) throws DataImporterException;
+
+    /**
+     * Prints the view
+     */
+    abstract void print();
   }
 }

@@ -23,6 +23,8 @@ import fr.umlv.symphonie.model.JuryModel;
 import fr.umlv.symphonie.model.StudentModel;
 import fr.umlv.symphonie.model.TeacherModel;
 import fr.umlv.symphonie.util.ComponentBuilder;
+import fr.umlv.symphonie.util.identification.IdentificationException;
+import fr.umlv.symphonie.util.identification.IdentificationStrategy;
 import fr.umlv.symphonie.util.wizard.Wizard;
 
 public class SymphonieActionFactory {
@@ -69,11 +71,20 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getPrintAction(Icon icon) {
+  /**
+   * Creates an action that prints the current symphonie view
+   * 
+   * @param icon
+   *          The action SMALL_ICON
+   * @param symph
+   *          The symphonie instance
+   * @return an AbstractAction
+   */
+  public static AbstractAction getPrintAction(Icon icon, final Symphonie symph) {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
-
+        symph.getCurrentView().print();
       }
     };
     a.putValue(Action.SMALL_ICON, icon);
@@ -166,36 +177,56 @@ public class SymphonieActionFactory {
     return a;
   }
 
+  /**
+   * Creates an action that prompts a login dialog
+   * 
+   * @param icon
+   *          The Action SMALL_ACTION
+   * @param builder
+   *          The builder for internationalization
+   * @param is
+   *          The loggin service
+   * @param s
+   *          The symphonie instance
+   * @return an AbstractAction
+   */
   public static AbstractAction getConnectAction(Icon icon,
-      final ComponentBuilder builder) {
+      final ComponentBuilder builder, final IdentificationStrategy is,
+      final Symphonie s) {
 
     AbstractAction a = new AbstractAction() {
 
+      private final Object[] message = { null, new JPasswordField() };
+      private final String option[] = new String[2];
+
       public void actionPerformed(ActionEvent event) {
         /* Datas */
-        Object[] message = new Object[2];
         message[0] = builder
             .getValue(SymphonieConstants.ADMIN_JOPTIONPANE_CONTENT);
-        message[1] = new JPasswordField();
 
         /* Options (buttons' names) */
-        String option[] = {
-            builder.getValue(SymphonieConstants.ADMIN_JOPTIONPANE_BCONNECT),
-            builder.getValue(SymphonieConstants.ADMIN_JOPTIONPANE_BCANCEL) };
+        option[0] = builder
+            .getValue(SymphonieConstants.ADMIN_JOPTIONPANE_BCONNECT);
+        option[1] = builder
+            .getValue(SymphonieConstants.ADMIN_JOPTIONPANE_BCANCEL);
 
-        int result = JOptionPane.showOptionDialog(null, // parent frame
-            message, (builder
-                .getValue(SymphonieConstants.ADMIN_JOPTIONPANE_TITLE)),// Title
+        int result = JOptionPane.showOptionDialog(s.getFrame(), message,
+            builder.getValue(SymphonieConstants.ADMIN_JOPTIONPANE_TITLE),
             JOptionPane.DEFAULT_OPTION, // type of dialog
             JOptionPane.QUESTION_MESSAGE, // type of icone
-            null, // optional icone
+            null, // optional icon
             option, // buttons
             message[1] // object with the default focus
             );
 
         if (result == 0) {
           String pwd = new String(((JPasswordField) message[1]).getPassword());
-          System.out.println(pwd);
+          try {
+            is.identify(pwd);
+          } catch (IdentificationException e) {
+            s.errDisplay.showException(e);
+          }
+          ((JPasswordField) message[1]).setText("");
         }
       }
     };
@@ -203,11 +234,21 @@ public class SymphonieActionFactory {
     return a;
   }
 
+  /**
+   * Creates an action that prompts a DB config dialog
+   * 
+   * @param icon
+   *          The SMALL_ICON property
+   * @param frame
+   *          The frame owner of the dialog
+   * @return an AbstractAction
+   */
   public static AbstractAction getDBAction(Icon icon, final JFrame frame) {
     AbstractAction a = new AbstractAction() {
 
+      private final DatabaseDialog dbd = new DatabaseDialog(frame);
+
       public void actionPerformed(ActionEvent event) {
-        DatabaseDialog dbd = new DatabaseDialog(frame);
         dbd.setVisible(true);
       }
     };
@@ -215,12 +256,24 @@ public class SymphonieActionFactory {
     return a;
   }
 
+  /**
+   * Creates an Action that prompts a password changing dialog
+   * 
+   * @param icon
+   *          The SMALL_ICON property
+   * @param frame
+   *          The frame owner of the dialog
+   * @param builder
+   *          The builder for internationalization
+   * @return an AbstractAction
+   */
   public static AbstractAction getPwdAction(Icon icon, final JFrame frame,
       final ComponentBuilder builder) {
     AbstractAction a = new AbstractAction() {
 
+      private final ChangePassDialog cpd = new ChangePassDialog(frame, builder);
+
       public void actionPerformed(ActionEvent event) {
-        ChangePassDialog cpd = new ChangePassDialog(frame, builder);
         cpd.setVisible(true);
       }
     };
@@ -228,48 +281,70 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  
   /* STUDENT VIEW ACTION *********************************** */
-  public static AbstractAction getStudentUpdateAction(Icon icon){
-    AbstractAction a = new AbstractAction(){
-      public void actionPerformed(ActionEvent e){
+  public static AbstractAction getStudentUpdateAction(Icon icon) {
+    AbstractAction a = new AbstractAction() {
+
+      public void actionPerformed(ActionEvent e) {
         StudentModel.getInstance(SQLDataManager.getInstance()).update();
       }
     };
-    
+
     a.putValue(Action.SMALL_ICON, icon);
     return a;
   }
-  
-  public static AbstractAction getStudentPrintAction(Icon icon, final JTable table){
-    AbstractAction a = new AbstractAction(){
-      public void actionPerformed(ActionEvent e) {
-        try {
-          table.print(JTable.PrintMode.FIT_WIDTH, ((StudentModel)table.getModel()).getHeaderMessageFormat(), null);
-        } catch (PrinterException e1) {
-          e1.printStackTrace();
+
+  /**
+   * Creates an action that prints the student view. This is a singleton action
+   * 
+   * @param icon
+   *          The action SMALL_ICON
+   * @param table
+   *          The student table
+   * @param s
+   *          The symphonie instance
+   * @return an AbstractAction
+   */
+  public static AbstractAction getStudentPrintAction(Icon icon,
+      final JTable table, final Symphonie s) {
+    if (studentPrintAction == null) {
+      studentPrintAction = new AbstractAction() {
+
+        public void actionPerformed(ActionEvent e) {
+          try {
+            table.print(JTable.PrintMode.FIT_WIDTH, ((StudentModel) table
+                .getModel()).getHeaderMessageFormat(), null);
+          } catch (PrinterException e1) {
+            s.errDisplay.showException(e1);
+          }
         }
-      }
-    };
-    
-    a.putValue(Action.SMALL_ICON, icon);
-    return a;
+      };
+
+      studentPrintAction.putValue(Action.SMALL_ICON, icon);
+    }
+    return studentPrintAction;
   }
-  
-  public static AbstractAction getStudentChartAction(Icon icon, final JFrame frame){
-    AbstractAction a = new AbstractAction(){
+
+  /** getStudentPrintAction singleton instance */
+  protected static AbstractAction studentPrintAction;
+
+  public static AbstractAction getStudentChartAction(Icon icon,
+      final JFrame frame) {
+    AbstractAction a = new AbstractAction() {
+
       private final StudentChartDialog dialog = new StudentChartDialog(frame);
+
       public void actionPerformed(ActionEvent e) {
         dialog.setChart();
         dialog.setModal(true);
-        dialog.setVisible(true); 
+        dialog.setVisible(true);
       }
     };
-    
+
     a.putValue(Action.SMALL_ICON, icon);
     return a;
   }
-  
+
   /* TEACHER VIEW ACTIONS ********************************** */
   public static AbstractAction getAddMarkAction(Icon icon, final JFrame frame,
       final ComponentBuilder builder) {
@@ -288,7 +363,8 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getTeacherAddFormulaAction(Icon icon, final JFrame frame, final ComponentBuilder builder) {
+  public static AbstractAction getTeacherAddFormulaAction(Icon icon,
+      final JFrame frame, final ComponentBuilder builder) {
     AbstractAction a = new AbstractAction() {
 
       private final FormulaDialog dialog = new FormulaDialog(frame, builder);
@@ -303,7 +379,8 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getRemoveTeacherColumnAction(Icon icon, final JTable table) {
+  public static AbstractAction getRemoveTeacherColumnAction(Icon icon,
+      final JTable table) {
     AbstractAction a = new AbstractAction() {
 
       private Point p;
@@ -339,34 +416,57 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getTeacherPrintAction(Icon icon, final JTable table){
-    AbstractAction a = new AbstractAction(){
-      public void actionPerformed(ActionEvent e) {
-        try {
-          table.print(JTable.PrintMode.FIT_WIDTH, ((TeacherModel)table.getModel()).getHeaderMessageFormat(), null);
-        } catch (PrinterException e1) {
-          e1.printStackTrace();
+  /**
+   * Creates an action that prints the teacher view. This is a singleton action
+   * 
+   * @param icon
+   *          The action SMALL_ICON
+   * @param table
+   *          The teacher table
+   * @param s
+   *          The symphonie instance
+   * @return an AbstractAction
+   */
+  public static AbstractAction getTeacherPrintAction(Icon icon,
+      final JTable table, final Symphonie s) {
+    if (teacherPrintAction == null) {
+      teacherPrintAction = new AbstractAction() {
+
+        public void actionPerformed(ActionEvent e) {
+          try {
+            table.print(JTable.PrintMode.FIT_WIDTH, ((TeacherModel) table
+                .getModel()).getHeaderMessageFormat(), null);
+          } catch (PrinterException e1) {
+            s.errDisplay.showException(e1);
+          }
         }
+      };
+
+      teacherPrintAction.putValue(Action.SMALL_ICON, icon);
+    }
+    return teacherPrintAction;
+  }
+
+  /** getTeacherPrintAction singleton instance */
+  protected static AbstractAction teacherPrintAction;
+
+  public static AbstractAction getTeacherChartAction(Icon icon,
+      final JFrame frame) {
+    AbstractAction a = new AbstractAction() {
+
+      private final TeacherChartDialog dialog = new TeacherChartDialog(frame);
+
+      public void actionPerformed(ActionEvent e) {
+        dialog.setChart();
+        dialog.setModal(true);
+        dialog.setVisible(true);
       }
     };
-    
+
     a.putValue(Action.SMALL_ICON, icon);
     return a;
   }
 
-  public static AbstractAction getTeacherChartAction(Icon icon, final JFrame frame){
-    AbstractAction a = new AbstractAction(){
-      private final TeacherChartDialog dialog = new TeacherChartDialog(frame);
-      public void actionPerformed(ActionEvent e) {
-        dialog.setChart();
-        dialog.setModal(true);
-        dialog.setVisible(true); 
-      }
-    };
-    
-    a.putValue(Action.SMALL_ICON, icon);
-    return a;
-  }
   /* JURY VIEW ACTIONS ************************************* */
   public static AbstractAction getJuryAddFormulaAction(Icon icon,
       final JFrame frame, final ComponentBuilder builder) {
@@ -422,31 +522,52 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getJuryPrintAction(Icon icon, final JTable table){
-    AbstractAction a = new AbstractAction(){
-      public void actionPerformed(ActionEvent e){
-        try {
-          table.print(JTable.PrintMode.FIT_WIDTH, ((JuryModel)table.getModel()).getHeaderMessageFormat(), null);
-        } catch (PrinterException e1) {
-          e1.printStackTrace();
+  /**
+   * Creates an action that prints the jury view. This is a singleton action
+   * 
+   * @param icon
+   *          The action SMALL_ICON
+   * @param table
+   *          The jury table
+   * @param s
+   *          The symphonie instance
+   * @return an AbstractAction
+   */
+  public static AbstractAction getJuryPrintAction(Icon icon,
+      final JTable table, final Symphonie s) {
+    if (juryPrintAction == null) {
+      juryPrintAction = new AbstractAction() {
+
+        public void actionPerformed(ActionEvent e) {
+          try {
+            table.print(JTable.PrintMode.FIT_WIDTH, ((JuryModel) table
+                .getModel()).getHeaderMessageFormat(), null);
+          } catch (PrinterException e1) {
+            s.errDisplay.showException(e1);
+          }
         }
-      }
-    };
-    
-    a.putValue(Action.SMALL_ICON, icon);
-    return a;
+      };
+
+      juryPrintAction.putValue(Action.SMALL_ICON, icon);
+    }
+    return juryPrintAction;
   }
 
-  public static AbstractAction getJuryChartAction(Icon icon, final JFrame frame){
-    AbstractAction a = new AbstractAction(){
+  /** getJuryPrintAction singleton instance */
+  protected static AbstractAction juryPrintAction;
+
+  public static AbstractAction getJuryChartAction(Icon icon, final JFrame frame) {
+    AbstractAction a = new AbstractAction() {
+
       private final JuryChartDialog dialog = new JuryChartDialog(frame);
+
       public void actionPerformed(ActionEvent e) {
         dialog.setChart();
         dialog.setModal(true);
-        dialog.setVisible(true); 
+        dialog.setVisible(true);
       }
     };
-    
+
     a.putValue(Action.SMALL_ICON, icon);
     return a;
   }
