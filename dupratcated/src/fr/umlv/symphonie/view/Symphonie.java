@@ -476,7 +476,7 @@ public class Symphonie {
     pop.add(builder.buildButton(actionFactory.getStudentUpdateAction(null),
         UPDATE, ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(actionFactory
-        .getStudentPrintAction(null, table), PRINT_MENU_ITEM,
+        .getStudentPrintAction(PRINTICON, table), PRINT_MENU_ITEM,
         ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(actionFactory.getStudentChartAction(null),
         DISPLAY_CHART, ButtonType.MENU_ITEM));
@@ -545,6 +545,7 @@ public class Symphonie {
     final AbstractButton addStudent = builder.buildButton(actionFactory
         .getAddStudentAction(null), SymphonieConstants.ADD_STUDENT_TITLE,
         ComponentBuilder.ButtonType.MENU_ITEM);
+    addStudent.setEnabled(false);
     treePop.add(addStudent);
     
     treePop.add(builder.buildButton(actionFactory.getUpdateStudentTreeAction(null), SymphonieConstants.UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
@@ -554,6 +555,7 @@ public class Symphonie {
         .getRemoveStudentAction(null, tree), SymphonieConstants.REMOVE_STUDENT,
         ComponentBuilder.ButtonType.MENU_ITEM);
     treePop.add(removeStudent);
+    removeStudent.setEnabled(false);
 
 
     // listener for popup
@@ -584,9 +586,9 @@ public class Symphonie {
       public void mousePressed(MouseEvent e) {
         if (SwingUtilities.isRightMouseButton(e)) {
           int n = tree.getRowForLocation(e.getX(), e.getY());
-
+          boolean r = removeStudent.isEnabled();
           if (n > 0)
-            removeStudent.setEnabled(true);
+            removeStudent.setEnabled(logger.isIdentified());
           
           else removeStudent.setEnabled(false);
         }
@@ -613,6 +615,7 @@ public class Symphonie {
         currentStudentModel = logger.isIdentified() ? adminStudentModel
             : studentModel;
         table.setModel(currentStudentModel);
+        addStudent.setEnabled(logger.isIdentified());
       }
     });
 
@@ -649,7 +652,7 @@ public class Symphonie {
     pop.add(builder.buildButton(actionFactory.getTeacherUpdateAction(null),
         UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(actionFactory
-        .getTeacherPrintAction(null, table), PRINT_MENU_ITEM,
+        .getTeacherPrintAction(PRINTICON, table), PRINT_MENU_ITEM,
         ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(actionFactory.getTeacherChartAction(null),
         DISPLAY_CHART, ComponentBuilder.ButtonType.MENU_ITEM));
@@ -740,6 +743,7 @@ public class Symphonie {
         .getAddCourseAction(null), SymphonieConstants.ADDCOURSE,
         ComponentBuilder.ButtonType.MENU_ITEM);
     treePop.add(addCourse);
+    addCourse.setEnabled(false);
 
     treePop.add(builder.buildButton(actionFactory
         .getUpdateCourseTreeAction(null), SymphonieConstants.UPDATE,
@@ -780,7 +784,7 @@ public class Symphonie {
           int n = tree.getRowForLocation(e.getX(), e.getY());
 
           if (n > 0)
-            removeCourse.setEnabled(true);
+            removeCourse.setEnabled(logger.isIdentified());
 
           else
             removeCourse.setEnabled(false);
@@ -811,6 +815,7 @@ public class Symphonie {
         currentTeacherModel = logger.isIdentified() ? adminTeacherModel
             : teacherModel;
         table.setModel(currentTeacherModel);
+        addCourse.setEnabled(logger.isIdentified());
       }
     });
     return split;
@@ -833,7 +838,7 @@ public class Symphonie {
         SymphonieConstants.ADD_FORMULA, ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(actionFactory.getJuryUpdateAction(null),
         SymphonieConstants.UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(actionFactory.getJuryPrintAction(null, table),
+    pop.add(builder.buildButton(actionFactory.getJuryPrintAction(PRINTICON, table),
         SymphonieConstants.PRINT_MENU_ITEM,
         ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder
@@ -1105,8 +1110,7 @@ public class Symphonie {
             .getResource("icons/export.png")), exportW), EXPORT_MENU_ITEM,
         ButtonType.MENU_ITEM);
     JMenuItem print = (JMenuItem) builder.buildButton(actionFactory
-        .getPrintAction(new ImageIcon(Symphonie.class
-            .getResource("icons/print.png"))), PRINT_MENU_ITEM,
+        .getPrintAction(PRINTICON), PRINT_MENU_ITEM,
         ButtonType.MENU_ITEM);
 
     JMenuItem exit = (JMenuItem) builder.buildButton(actionFactory
@@ -1329,6 +1333,10 @@ public class Symphonie {
   /** Chart 16x16 icon */
   public static final ImageIcon CHARTICON = new ImageIcon(Symphonie.class
       .getResource("icons/chart.png"));
+  
+  /** Printer 16x16 icon */
+  public static final ImageIcon PRINTICON = new ImageIcon(Symphonie.class
+      .getResource("icons/print.png"));
 
   /**
    * Enum defines languages supported by Symphonie.
