@@ -63,6 +63,8 @@ public class SymphonieConstants {
   // added by sus for teacher view
   public static final String TEACHERVIEWPOPUP_TITLE = "teacherviewpopup.title";
   public static final String ADDMARKDIALOG_DESC = "addmarkdialog.desc";
+  public static final String ADDCOURSE = "addcourse";
+  public static final String REMOVECOURSE = "removecourse";
   
   // general stuff
   public static final String UPDATE = "update";

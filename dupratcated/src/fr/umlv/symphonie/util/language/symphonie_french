@@ -103,3 +103,5 @@ addstudent.title=Ajouter un étudiant
 addstudent.name=Prénom :
 addstudent.lastname=Nom :
 removestudent=Effacer l'étudiant
+addcourse=Ajouter une Matière
+removecourse=Effacer la matière

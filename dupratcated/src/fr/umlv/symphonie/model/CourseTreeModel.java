@@ -176,6 +176,88 @@ public class CourseTreeModel extends DefaultTreeModel {
     return courseList.indexOf(child);
   }
 
+  
+  public void removeCourse(final Course c){
+    es.execute(new Runnable(){
+      public void run(){
+        synchronized (lock){
+          
+          final int n = courseList.indexOf(c);
+          
+          try{
+            manager.removeCourse(c);
+          }catch(DataManagerException e){
+            System.out.println(e.getMessage());
+          }
+          
+          try {
+            EventQueue.invokeAndWait(new Runnable() {
+              private Object source = root;
+              private Object[] path = new Object[1];
+              int[] childIndices = new int[1];
+              Object[] children = new Course[1];
+              
+              public void run() {
+                path[0] = source;
+                childIndices[0] = n;
+                children[0] = c;
+                CourseTreeModel.this.fireTreeNodesRemoved(source, path, childIndices, children);
+              }
+            });
+          } catch (InterruptedException e1) {
+            System.out.println("exception interrupted");
+            e1.printStackTrace();
+          } catch (InvocationTargetException e1) {
+            System.out.println("exception invocation");
+            e1.printStackTrace();
+          }
+        }
+      }
+    });
+  }
+
+  
+  public void addCourse(final String desc, final float coeff){
+    es.execute(new Runnable(){
+      public void run(){
+        
+        synchronized(lock){
+          Course c = null;
+          
+          try{
+            c = manager.addCourse(desc, coeff);
+          }catch(DataManagerException e){
+            System.out.println(e.getMessage());
+          }
+          
+          final Course course = c;
+          
+          try {
+            EventQueue.invokeAndWait(new Runnable() {
+              private Object source = root;
+              private Object[] path = new Object[1];
+              int[] childIndices = new int[1];
+              Object[] children = new Course[1];
+              
+              public void run() {
+                path[0] = source;
+                childIndices[0] = courseList.indexOf(course);
+                children[0] = course;
+                
+                CourseTreeModel.this.fireTreeNodesInserted(source, path, childIndices, children);
+              }
+            });
+          } catch (InterruptedException e1) {
+            System.out.println("exception interrupted");
+            e1.printStackTrace();
+          } catch (InvocationTargetException e1) {
+            System.out.println("exception invocation");
+            e1.printStackTrace();
+          }
+        }
+      }
+    });
+  }
 //  /* (non-Javadoc)
 //   * @see javax.swing.tree.TreeModel#addTreeModelListener(javax.swing.event.TreeModelListener)
 //   */

@@ -103,3 +103,5 @@ addstudent.title=Student add
 addstudent.name=Name :
 addstudent.lastname=Last Name :
 removestudent=Remove student
+addcourse=Add course
+removecourse=Remove course

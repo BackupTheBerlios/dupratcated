@@ -21,6 +21,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import fr.umlv.symphonie.data.ConnectionManager;
+import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.model.JuryModel;
 import fr.umlv.symphonie.model.StudentModel;
@@ -407,6 +408,18 @@ public class SymphonieActionFactory {
     a.putValue(Action.SMALL_ICON, icon);
     return a;
   }
+  
+  public AbstractAction getUpdateStudentTreeAction(Icon icon){
+    AbstractAction a = new AbstractAction(){
+      public void actionPerformed(ActionEvent e){
+        symphonie.getStudentTreeModel().update();
+      }
+    };
+    
+    a.putValue(Action.SMALL_ICON, icon);
+    
+    return a;
+  }
   /* TEACHER VIEW ACTIONS ********************************** */
 
   /**
@@ -570,6 +583,44 @@ public class SymphonieActionFactory {
   /** getTeacherChartAction singleton instance */
   protected AbstractAction teacherChartAction;
 
+  public AbstractAction getAddCourseAction(Icon icon){
+    AbstractAction a = new AbstractAction(){
+      private final AddCourseDialog dialog = new AddCourseDialog(symphonie, builder);
+      
+      public void actionPerformed(ActionEvent e){
+        dialog.setModal(true);
+        dialog.setVisible(true);
+      }
+    };
+    
+    a.putValue(Action.SMALL_ICON, icon);
+    return a;
+  }
+
+  public AbstractAction getRemoveCourseAction (Icon icon, final JTree tree){
+    AbstractAction a = new AbstractAction(){
+      public void actionPerformed(ActionEvent e) {
+        Object o = tree.getLastSelectedPathComponent();
+        
+        if (o instanceof Course)
+          symphonie.getCourseTreeModel().removeCourse((Course)o);
+      }
+    };
+    
+    a.putValue(Action.SMALL_ICON, icon);
+    return a;
+  }
+  
+  public AbstractAction getUpdateCourseTreeAction(Icon icon){
+    AbstractAction a = new AbstractAction(){
+      public void actionPerformed(ActionEvent e){
+        symphonie.getCourseTreeModel().update();
+      }
+    };
+    
+    a.putValue(Action.SMALL_ICON, icon);
+    return a;
+  }
   /* JURY VIEW ACTIONS ************************************* */
 
   /**
