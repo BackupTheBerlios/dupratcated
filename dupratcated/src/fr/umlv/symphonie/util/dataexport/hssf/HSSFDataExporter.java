@@ -27,13 +27,10 @@ import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
 import fr.umlv.symphonie.data.Mark;
-import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.data.formula.Formula;
-import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
 import fr.umlv.symphonie.util.ComponentBuilder;
-import fr.umlv.symphonie.util.ExceptionDisplayDialog;
 import fr.umlv.symphonie.util.Pair;
 import fr.umlv.symphonie.util.dataexport.DataExporter;
 import fr.umlv.symphonie.util.dataexport.DataExporterException;
@@ -616,35 +613,6 @@ public class HSSFDataExporter implements DataExporter {
         columns.add(f);
       else
         columns.add(formulaColumn - 1, f);
-    }
-  }
-
-  public static void main(String[] args) {
-    ComponentBuilder b = null;
-    try {
-      SymphonieFormulaFactory.parseFormula("fcuk", new String("${examen}*2"
-          .getBytes(), "ascii"), 45, 2);
-      DataManager dm = SQLDataManager.getInstance();
-      Course c = dm.getCoursesList().get(1);
-      HashMap<String, String> peuma = new HashMap<String, String>();
-      peuma.put(HSSFExportUtils.COEFF_KEY, "Coefficient");
-      peuma.put(HSSFExportUtils.AVERAGE_KEY, "Moyenne");
-      peuma.put(HSSFExportUtils.MARK_KEY, "Note");
-      peuma.put(HSSFExportUtils.MARK_TITLE_KEY, "Intitulé");
-      peuma.put(HSSFExportUtils.COURSE_TITLE_KEY, "Matière");
-      peuma.put(HSSFExportUtils.COMMENT_KEY, "Lâche tes comms");
-      peuma
-          .put("exceptiondialog.message", "Une erreur inopinée est survenue :");
-      peuma.put("exceptiondialog.hidedetail", "<< Détails");
-      peuma.put("exceptiondialog.showdetail", "Détails >>");
-      peuma.put("bok", "OK");
-      peuma.put("jury", "Petit Pois Grand-Jury");
-      b = new ComponentBuilder(peuma);
-      new HSSFDataExporter(b).exportJuryView("/home/mif001/spenasal/jury.xls",
-          dm);
-    } catch (Exception e) {
-      e.printStackTrace();
-      new ExceptionDisplayDialog(null, b).showException(e);
     }
   }
 }
