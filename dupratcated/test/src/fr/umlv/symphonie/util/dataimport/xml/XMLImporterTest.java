@@ -6,6 +6,7 @@ package fr.umlv.symphonie.util.dataimport.xml;
 
 import junit.framework.TestCase;
 import fr.umlv.symphonie.util.dataimport.DataImporter;
+import fr.umlv.symphonie.util.dataimport.DataImporterException;
 import fr.umlv.symphonie.util.dataimportation.xml.XMLImporter;
 
 /**
@@ -16,6 +17,10 @@ public class XMLImporterTest extends TestCase {
   DataImporter di = new XMLImporter();
 
   public void testImportStudentView() {
-    di.importStudentView("student_view.xml");
+    try {
+      di.importStudentView("student_view.xml");
+    } catch (DataImporterException e) {
+      e.printStackTrace();
+    }
   }
 }

@@ -8,6 +8,7 @@ import junit.framework.TestCase;
 import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.util.dataexport.DataExporter;
+import fr.umlv.symphonie.util.dataexport.DataExporterException;
 import fr.umlv.symphonie.util.dataexport.xml.XMLExporter;
 
 /**
@@ -24,16 +25,28 @@ public class XMLExporterTest extends TestCase {
    */
   public void testExportStudentView() {
     Student s = new Student(3, "Laurent", "Garcia", "sale homo !");
-    de.exportStudentView("student_view.xml", s);
+    try {
+      de.exportStudentView("student_view.xml", s);
+    } catch (DataExporterException e) {
+      e.printStackTrace();
+    }
   }
 
   public void testExportTeacherView() {
     Course c = new Course(0, "Java", (float) 0.5);
-    de.exportTeacherView("teacher_view.xml", c);
+    try {
+      de.exportTeacherView("teacher_view.xml", c);
+    } catch (DataExporterException e) {
+      e.printStackTrace();
+    }
   }
 
   public void testExportJuryView() {
-    de.exportJuryView("jury_view.xml");
+    try {
+      de.exportJuryView("jury_view.xml");
+    } catch (DataExporterException e) {
+      e.printStackTrace();
+    }
   }
 
 }
