@@ -1058,7 +1058,7 @@ public class Symphonie {
     try {
       jeep.setText(WelcomePage.getRenderableHTMLText(builder));
     } catch (IOException e1) {
-      return null;
+      return p;
     }
 
     // Listen builder changes
