@@ -23,6 +23,7 @@
 	<property name="classes" value="classes" />
 	<property name="lib" value="lib"/>
 	<property name="bin" value="bin"/>
+	<property name="tests" value="test"/>
 	<property name="docs" value="docs" />
 	<property name="api" value="api" />
 	
@@ -31,13 +32,15 @@
 	<property name="formula" value="${package}/data/formula"/>
 
 	<property name="symphonie.jar" value="symphonie.jar" />
-	<property name="Main" value="fr.umlv.symphonie.view.SymphonieLauncher"/>
+	<property name="manifest" value="etc/MANIFEST.MF"/>
 
+	<property name="language" value="${package}/util/language"/>
 	<property name="icon_dir" value="${package}/view/icons"/>
 	<property name="lexer.dat" value="${formula}/lexer/lexer.dat"/>
 	<property name="parser.dat" value="${formula}/parser/parser.dat"/>
 	<property name="welcomepage" value="${package}/view/readme.htm"/>
 	<property name="dtdxml" value="${package}/util/dataexport/xml/symphonie.dtd" />
+	
 	
 	<condition property="exec.message" value="  > run [--reset]">
 		<os family="windows" />
@@ -46,12 +49,14 @@
 		<os family="unix" />
 	</condition>
 	
-	<path id="extra_class_path">
+	
+	<path id="lib_classpath">
 		<pathelement location="${lib}/jfreechart-0.9.21.jar"/>
 		<pathelement location="${lib}/poi-2.5.1-final-20040804.jar"/>
 		<pathelement location="${lib}/rowset.jar"/>
 		<pathelement location="${lib}/jcommon-0.9.6.jar"/>
 		<pathelement location="${lib}/mysql-connector-java-3.2.0-alpha-bin.jar"/>
+		<pathelement location="${lib}/postgresql-8.0-310.jdbc3.jar"/>
 	</path>
 	
 	
@@ -88,10 +93,13 @@
 		<javac srcdir="${src}/${package}"
          destdir="${classes}"
          debug="on"
-		 classpathref="extra_class_path"
+		 classpathref="lib_classpath"
 		/>
 		<copy todir="${classes}/${icon_dir}">
 			<fileset dir="${src}/${icon_dir}"/>
+		</copy>
+		<copy todir="${classes}/${language}">
+			<fileset dir="${src}/${language}"/>
 		</copy>
 		<copy file="${src}/${lexer.dat}" tofile="${classes}/${lexer.dat}" />
 		<copy file="${src}/${parser.dat}" tofile="${classes}/${parser.dat}" />
@@ -106,9 +114,10 @@
          ================================= -->
     <target name="jar" depends="compile">
         <jar jarfile="${bin}/${symphonie.jar}" basedir="${classes}">
-        	<manifest>
-        		<attribute name="Main-Class" value="${Main}" />
-        	</manifest>
+        	<manifest file="${manifest}" mode="update">
+        	    <attribute name="Built-By" value="${user.name}"/>
+        		<attribute name="Build-date" value="${TODAY}"/>
+        	  </manifest>
     	</jar>
     	<chmod file="symphonie.sh" perm="ugo+rx" />
     </target>
@@ -120,14 +129,19 @@
          ================================= -->
     <target name="javadoc">
         <mkdir dir="${docs}/${api}"/>
-    	<javadoc access="private" author="true" classpath="classes" destdir="${docs}/${api}"
+    	<javadoc access="private" author="true" classpath="lib_classpath" destdir="${docs}/${api}"
     		doctitle="Symphonie Dupratcated"
     		bottom="Copyright © 2005 Skiimo, Snowman, Spraynasal, Susmab - Master 1 Informatique, Université de Marne la Vallée."
     		nodeprecated="false" nodeprecatedlist="false" verbose="false"
     		noindex="false" nonavbar="false" notree="false"
     		splitindex="true" use="true" version="true">
-    		
-    		<packageset dir="${src}" />
+    		<packageset dir="${src}" defaultexcludes="yes">
+   		      	<include name="${src}/**" />
+   		      	<exclude name="${formula}/lexer**"/>
+   		      	<exclude name="${formula}/parser**"/>
+   		      	<exclude name="${formula}/node**"/>
+   		      	<exclude name="${formula}/analysis**"/>
+   		    </packageset>
     	</javadoc>
     </target>
 	
@@ -142,7 +156,7 @@
     <!-- - - - - - - - - - - - - - - - - - 
           target: clean                      
          - - - - - - - - - - - - - - - - - -->
-    <target name="clean">
+    <target name="clean" depends="clean_test">
     	<delete dir="${classes}" />
     	<delete dir="${src}/${formula}/lexer" />
     	<delete dir="${src}/${formula}/parser" />
@@ -150,5 +164,28 @@
        	<delete dir="${src}/${formula}/node" />
         <delete file="${symphonie.jar}" />
     </target>
+
 	
+	<!-- ================================= 
+	          target: compile_test
+	          description: compile test source files              
+	         ================================= -->
+		<target name="compile_test" depends="sablecc">
+			<mkdir dir="${tests}/${classes}" />
+			<javac srcdir="${tests}/${src}/${package}"
+	         destdir="${classes}"
+	         debug="on"
+			 classpathref="lib_classpath"
+			/>
+			<copy file="${tests}/${src}/${lexer.dat}" tofile="${classes}/${lexer.dat}" />
+			<copy file="${tests}/${src}/${parser.dat}" tofile="${classes}/${parser.dat}" />
+			<copy file="${tests}/${src}/${dtdxml}" tofile="${classes}/${dtdxml}"/>
+		</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+	          target: clean_test                      
+	     - - - - - - - - - - - - - - - - - -->
+	<target name="clean_test">
+	   	<delete dir="${test}/${classes}" />
+	</target>
 </project>
