@@ -382,14 +382,16 @@ public class TeacherModel extends AbstractTableModel {
 //    /*******************************/
 //    
 //    
-//    /*
-//     * test des matieres
-//     */
-//    Map<Integer, Course> courseMap = dataManager.getCourses();
-//    System.out.println(courseMap.size() + " matieres");
-//    for (Course c : courseMap.values())
-//      System.out.println(c + " " + c.getCoeff());
-//    System.out.println("\n\n");
+//     /*
+//      * test des matieres
+//      */
+//     Map<Integer, Course> courseMap = dataManager.getCourses();
+//     System.out.println(courseMap.size() + " matieres");
+//     for (Course c : courseMap.values()){
+//       System.out.println(c + " " + c.getCoeff());
+//       System.out.println(c.getId());
+//     }
+//     System.out.println("\n\n");
 //    /***************************/
 //    
 //    /*
