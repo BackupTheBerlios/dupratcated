@@ -1,11 +1,11 @@
 /*
- * This file is part of Symphonie
- * Created : 13 févr. 2005 14:01:05
+ * This file is part of Symphonie Created : 13 févr. 2005 14:01:05
  */
 
 package fr.umlv.symphonie.view;
 
-public class SymphonieConstants {  
+public class SymphonieConstants {
+
   public static final String FRAME_TITLE = "titleFrame";
   public static final String FILE_MENU = "file";
   public static final String EXIT_MENU_ITEM = "quit";
@@ -19,10 +19,10 @@ public class SymphonieConstants {
   public static final String VIEW_JURY_MENU_ITEM = "jury";
   public static final String VIEW_TEACHER_MENU_ITEM = "teacher";
   public static final String LANGUAGE_MENU_ITEM = "language";
-  public static final String FORMAT_MENU = "format";  
+  public static final String FORMAT_MENU = "format";
   public static final String FORMULA_MENU_ITEM = "formula";
   public static final String CELL_MENU_ITEM = "cell";
-  public static final String INSERT_MENU= "insert";
+  public static final String INSERT_MENU = "insert";
   public static final String INSERT_COLUMN_MENU_ITEM = "insert_column";
   public static final String INSERT_LINE_MENU_ITEM = "insert_line";
   public static final String ADMIN_MENU = "admin";
@@ -31,5 +31,17 @@ public class SymphonieConstants {
   public static final String PWD_MENU_ITEM = "pwd";
   public static final String ENGLISH_MENU_ITEM = "english";
   public static final String FRENCH_MENU_ITEM = "french";
-  
+  public static final String ADMIN_JOPTIONPANE_TITLE = "admin.joptionpane.title";
+  public static final String ADMIN_JOPTIONPANE_CONTENT = "admin.joptionpane.content";
+  public static final String ADMIN_JOPTIONPANE_BCANCEL = "admin.joptionpane.BCancel";
+  public static final String ADMIN_JOPTIONPANE_BCONNECT = "admin.joptionpane.BConnect";
+  public static final String CELLDIALOG_TITRE = "celldialog.titre";
+  public static final String CELLDIALOG_CHOOSER_TITRE = "celldialog.chooser.titre";
+  public static final String CELLDIALOG_TITREAREA = "celldialog.titrearea";
+  public static final String CELLDIALOG_TEXTCOLOR = "celldialog.textcolor";
+  public static final String CELLDIALOG_BGCOLOR = "celldialog.bgcolor";
+  public static final String CELLDIALOG_PREVIEW = "celldialog.preview";
+  public static final String CELLDIALOG_SAMPLE = "celldialog.sample";
+  public static final String BUTTON_CANCEL = "bcancel";
+  public static final String BUTTON_OK = "bok";
 }
