@@ -188,11 +188,15 @@ public final class ExceptionDisplayDialog {
    *          <code>RuntimeException</code>
    */
   public static final void postException(final Throwable t) {
-    EventQueue.invokeLater(new Runnable() {
+    if (EventQueue.isDispatchThread()) {
+      throw new RuntimeException(t);
+    } else {
+      EventQueue.invokeLater(new Runnable() {
 
-      public void run() {
-        throw new RuntimeException(t);
-      }
-    });
+        public void run() {
+          throw new RuntimeException(t);
+        }
+      });
+    }
   }
 }
