@@ -168,6 +168,24 @@ public interface DataManager {
 	 */
 	public void changeStudentComment(Student s, String newComment)
 			throws DataManagerException;
+	
+	/**
+	 * to edit 
+	 * @param s
+	 * @param newname
+	 * @throws DataManagerException
+	 */
+	public void changeStudentName(Student s, String newName)
+			throws DataManagerException;
+	
+	/**
+	 * to edit 
+	 * @param s
+	 * @param newLastName
+	 * @throws DataManagerException
+	 */
+	public void changeStudentLastName(Student s, String newLastName)
+			throws DataManagerException;
 
 	/**
 	 * to edit 
