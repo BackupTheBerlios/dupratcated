@@ -33,9 +33,9 @@ public interface DataManager
   /* methodes pour l'admin */
 	public void addStudent(String name, String lastName) throws DataManagerException;
 	public void addStudents(List<String> listName, List<String> listLastName) throws SQLException, DataManagerException;
-	public void removeStudent(Student s) throws SQLException;
+	public void removeStudent(Student s) throws DataManagerException;
 	
-	public void addCourse(String title, float coeff) throws SQLException;
+	public void addCourse(String title, float coeff) throws DataManagerException;
 	public void addCourses(List<String> listTitle, List<Float> listCoeff) throws SQLException, DataManagerException;
 	public void removeCourse(Course c) throws SQLException;
 
