@@ -36,13 +36,13 @@ public class SQLDataManagerTest extends TestCase {
   public void testAddStudent() throws SQLException, DataManagerException {
     int count = 1;
     Student t1 = null;
-    ArrayList<Student> all = (ArrayList<Student>)dm.getStudents();
+    Map<Integer, Student> all = dm.getStudents();
    
     t1 = new Student(SQLDataManager.createPrimaryKey("student", "id_student"), "Laurent",
         "Baka");
     dm.addStudent(t1.getName(), t1.getLastName());
   
-    for (Student t : all) {    
+    for (Student t : all.values()) {    
       if (t.getId() == t1.getId() 
           && t.getName().equals(t1.getName())
           && t.getLastName().equals(t1.getLastName())) {
@@ -59,7 +59,7 @@ public class SQLDataManagerTest extends TestCase {
     int id = -1;
     Student t1 = null;
     Student t2 = null;
-    ArrayList<Student> all = null;
+    Map<Integer, Student> all = dm.getStudents();
     ArrayList<String> listName = new ArrayList<String>();
     ArrayList<String> listLastName = new ArrayList<String>();
 
@@ -73,11 +73,9 @@ public class SQLDataManagerTest extends TestCase {
     listLastName.add(t1.getLastName());
     listLastName.add(t2.getLastName());
 
-    dm.addStudents(listName, listLastName);
+    dm.addStudents(listName, listLastName);    
 
-    all = (ArrayList<Student>) dm.getStudents();
-
-    for (Student t : all) {
+    for (Student t : all.values()) {
       if (t.getId() == t1.getId()
           && t.getName().equals(t1.getName())
           && t.getLastName().equals(t1.getLastName())) {
@@ -96,16 +94,14 @@ public class SQLDataManagerTest extends TestCase {
 
   public void testRemoveStudent() throws SQLException, DataManagerException {
     Student t1 = null;
-    ArrayList<Student> all = null;
+    Map<Integer, Student> all = dm.getStudents();
 
     t1 = new Student(SQLDataManager.createPrimaryKey("student", "id_student"), "Laurent",
         "Baka");
     dm.addStudent(t1.getName(), t1.getLastName());
     dm.removeStudent(t1);
 
-    all = (ArrayList<Student>) dm.getStudents();
-
-    for (Student t : all) {
+    for (Student t : all.values()) {
       assertFalse(t.getId() == t1.getId());
     }
   }
@@ -116,15 +112,14 @@ public class SQLDataManagerTest extends TestCase {
   public void testAddCourse() throws SQLException, DataManagerException {
     int count = 1;
     Course t1 = null;
-    ArrayList<Course> all = null;
+    Map<Integer, Course> all = dm.getCourses();
 
     t1 = new Course(SQLDataManager.createPrimaryKey("course", "id_course"), "Java",
         (float) 6.0);
 
     dm.addCourse(t1.getTitle(), t1.getCoeff());
-    all = (ArrayList<Course>) dm.getCourses();
 
-    for (Course t : all) {
+    for (Course t : all.values()) {
       if (t.getId() == t1.getId()
           && t.getTitle().equals(t1.getTitle())
           && t.getCoeff() == t1.getCoeff()) {
@@ -141,7 +136,7 @@ public class SQLDataManagerTest extends TestCase {
     int id = -1;
     Course t1 = null;
     Course t2 = null;
-    ArrayList<Course> all = null;
+    Map<Integer, Course> all = dm.getCourses();
     ArrayList<String> listTitle = new ArrayList<String>();
     ArrayList<Float> listCoeff = new ArrayList<Float>();
 
@@ -157,9 +152,7 @@ public class SQLDataManagerTest extends TestCase {
 
     dm.addCourses(listTitle, listCoeff);
 
-    all = (ArrayList<Course>) dm.getCourses();
-
-    for (Course t : all) {
+    for (Course t : all.values()) {
       if (t.getId() == t1.getId() 
           && t.getTitle().equals(t1.getTitle())
           && t.getCoeff() == t1.getCoeff()) {
@@ -178,16 +171,14 @@ public class SQLDataManagerTest extends TestCase {
 
   public void testRemoveCourse() throws SQLException, DataManagerException {
     Course t1 = null;
-    ArrayList<Course> all = null;
+    Map<Integer, Course> all = dm.getCourses();
 
     t1 = new Course(SQLDataManager.createPrimaryKey("course", "id_course"), "Java",
         (float) 6.0);
     dm.addCourse(t1.getTitle(), t1.getCoeff());
     dm.removeCourse(t1);
 
-    all = (ArrayList<Course>) dm.getCourses();
-
-    for (Course t : all) {
+    for (Course t : all.values()) {
       assertFalse(t.getId() == t1.getId());
     }
   }
@@ -196,14 +187,13 @@ public class SQLDataManagerTest extends TestCase {
     int count = 1;
     Course c1 = null;
     Mark t1 = null;
-    Map<Integer, Mark> all = null;
+    Map<Integer, Mark> all = dm.getMarksByCourse(c1);
 
     c1 = new Course(SQLDataManager.createPrimaryKey("course", "id_course"), "Java",
         (float) 6.0);
     t1 = new Mark(SQLDataManager.createPrimaryKey("title", "id_title"), "Project", (float)0.5, c1);
 
     dm.addTitle(t1.getDesc());
-    all = dm.getMarksByCourse(c1);
 
     for (Mark t : all.values()) {
       if (t.getId() == t1.getId()
