@@ -106,23 +106,7 @@ public class XMLExporter implements DataExporter {
 	 * @param s
 	 *            the student object
 	 * @param comment
-	 *            if true we creat<name>Fabien</name>
-<last_name>Vallee</last_name>
-<student_mark id_examen="2">
-<mark>14.5</mark>
-</student_mark>
-<student_mark id_examen="1">
-<mark>15.5</mark>
-</student_mark>
-</student>
-<examen id_course="0" id_examen="2">
-<desc>examen</desc>
-<coeff_examen>0.5</coeff_examen>
-</examen>
-<examen id_course="0" id_examen="1">
-<desc>projet</desc>
-<coeff_examen>0.5</coeff_examen>
-</examen>e the comment node
+	 *            the comment node
 	 * @return the new student node
 	 */
 	private static Node addStudentNode(Node root, Student s, boolean comment) {
