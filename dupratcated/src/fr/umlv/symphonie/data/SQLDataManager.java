@@ -1457,8 +1457,25 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 	 */
 	public void changeStudentName(Student s, String newName)
 			throws DataManagerException {
-		// TODO Auto-generated method stub
+		s.setName(newName);
 
+		String request = "update " + TABLE_STUDENT + " " + "set "
+				+ COLUMN_NAME_FROM_TABLE_STUDENT + " = '" + newName
+				+ "' " + "where " + COLUMN_ID_FROM_TABLE_STUDENT + " = "
+				+ s.getId() + ";";
+
+		try {
+			connectAndUpdate(request);
+		} catch (SQLException e) {
+			throw new DataManagerException("unable to set comment for student "
+					+ s, e);
+		}
+
+		try {
+			updateStudentData(studentMapTimeStamp + 1);
+		} catch (DataManagerException e) {
+			throw new DataManagerException("error updating data.", e);
+		}
 	}
 
 	/*
@@ -1469,7 +1486,25 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 	 */
 	public void changeStudentLastName(Student s, String newLastName)
 			throws DataManagerException {
-		// TODO Auto-generated method stub
+		s.setLastName(newLastName);
+
+		String request = "update " + TABLE_STUDENT + " " + "set "
+				+ COLUMN_LAST_NAME_FROM_TABLE_STUDENT + " = '" + newLastName
+				+ "' " + "where " + COLUMN_ID_FROM_TABLE_STUDENT + " = "
+				+ s.getId() + ";";
+
+		try {
+			connectAndUpdate(request);
+		} catch (SQLException e) {
+			throw new DataManagerException("unable to set comment for student "
+					+ s, e);
+		}
+
+		try {
+			updateStudentData(studentMapTimeStamp + 1);
+		} catch (DataManagerException e) {
+			throw new DataManagerException("error updating data.", e);
+		}
 
 	}
 
