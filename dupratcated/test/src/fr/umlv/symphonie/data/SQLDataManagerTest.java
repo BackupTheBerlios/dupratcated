@@ -33,7 +33,7 @@ public class SQLDataManagerTest extends TestCase {
     assertEquals(key1, (key2 - 1));
   }
   
-  /*public void testAddStudent() throws SQLException, DataManagerException {
+  public void testAddStudent() throws SQLException, DataManagerException {
     int count = 1;
     Student t1 = null;
     Map<Integer, Student> all = dm.getStudents();
@@ -205,7 +205,7 @@ public class SQLDataManagerTest extends TestCase {
 
     assertEquals(0, count);
   }
-*/
+
   public void testAddMark() {
   }
 
