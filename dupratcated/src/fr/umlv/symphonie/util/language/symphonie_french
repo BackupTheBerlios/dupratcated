@@ -80,3 +80,6 @@ importexport.ereadyhelp=    Clickez sur le bouton Terminer pour exporter les don
 hssfdataexporter.coeff=Coefficient
 hssfdataexporter.mark=Note
 hssfdataexporter.average=Moyenne
+addmarkdialog.title=Ajout d'une épreuve
+addmarkdialog.desc=Nom
+addmarkdialog.coeff=Coefficient

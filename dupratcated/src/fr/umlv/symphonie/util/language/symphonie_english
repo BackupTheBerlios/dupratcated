@@ -80,3 +80,6 @@ importexport.ereadyhelp=    You can now click the finish button in order to expo
 hssfdataexporter.coeff=Coefficient
 hssfdataexporter.mark=Mark
 hssfdataexporter.average=Average Mark
+addmarkdialog.title=Add a new test
+addmarkdialog.desc=Name
+addmarkdialog.coeff=Coefficient
