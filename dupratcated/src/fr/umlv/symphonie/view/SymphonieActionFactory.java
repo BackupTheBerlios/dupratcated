@@ -438,36 +438,49 @@ public class SymphonieActionFactory {
   protected AbstractAction studentChartAction;
 
   public AbstractAction getRemoveStudentAction(Icon icon, final JTree tree) {
-    AbstractAction a = new AbstractAction() {
+    
+    if (removeStudentAction == null) {
 
-      public void actionPerformed(ActionEvent e) {
-        Object o = tree.getLastSelectedPathComponent();
+      removeStudentAction = new AbstractAction() {
 
-        if (o instanceof Student) {
-          symphonie.getStudentTreeModel().removeStudent((Student) o);
-          symphonie.getCurrentStudentModel().clear();
+        public void actionPerformed(ActionEvent e) {
+          Object o = tree.getLastSelectedPathComponent();
+
+          if (o instanceof Student) {
+            symphonie.getStudentTreeModel().removeStudent((Student) o);
+            symphonie.getCurrentStudentModel().clear();
+          }
         }
-      }
-    };
-
-    a.putValue(Action.SMALL_ICON, icon);
-    return a;
+      };
+    }
+    removeStudentAction.putValue(Action.SMALL_ICON, icon);
+    
+    return removeStudentAction;
   }
 
+  protected AbstractAction removeStudentAction = null;
+  
+  
   public AbstractAction getAddStudentAction(Icon icon) {
-    AbstractAction a = new AbstractAction() {
+    
+    if (addStudentAction == null) {
 
-      AddStudentDialog dialog = new AddStudentDialog(symphonie, builder);
+      addStudentAction = new AbstractAction() {
 
-      public void actionPerformed(ActionEvent e) {
-        dialog.setModal(true);
-        dialog.setVisible(true);
-      }
-    };
+        AddStudentDialog dialog = new AddStudentDialog(symphonie, builder);
 
-    a.putValue(Action.SMALL_ICON, icon);
-    return a;
+        public void actionPerformed(ActionEvent e) {
+          dialog.setModal(true);
+          dialog.setVisible(true);
+        }
+      };
+    }
+    addStudentAction.putValue(Action.SMALL_ICON, icon);
+
+    return addStudentAction;
   }
+  
+  protected AbstractAction addStudentAction = null;
 
   public AbstractAction getUpdateStudentTreeAction(Icon icon) {
     AbstractAction a = new AbstractAction() {

@@ -62,6 +62,8 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
+import com.sun.org.apache.bcel.internal.generic.LLOAD;
+
 import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
@@ -555,10 +557,13 @@ public class Symphonie {
     });
 
     final JPopupMenu treePop = builder.buildPopupMenu(STUDENTVIEWPOPUP_TITLE);
-
-    final AbstractButton addStudent = builder.buildButton(actionFactory
-        .getAddStudentAction(new ImageIcon(Symphonie.class
-            .getResource("icons/add_student.png"))), ADD_STUDENT_TITLE,
+    
+/***********************************************************************************************************************************/
+    // TODO
+    addStudentAction = actionFactory.getAddStudentAction(new ImageIcon(Symphonie.class.getResource("icons/add_student.png")));
+    
+    
+    final AbstractButton addStudent = builder.buildButton(addStudentAction, ADD_STUDENT_TITLE,
         ComponentBuilder.ButtonType.MENU_ITEM);
     addStudent.getAction().setEnabled(false);
     treePop.add(addStudent);
@@ -569,15 +574,17 @@ public class Symphonie {
         ComponentBuilder.ButtonType.MENU_ITEM));
 
     treePop.add(new JSeparator());
-    final AbstractButton removeStudent = builder.buildButton(actionFactory
-        .getRemoveStudentAction(new ImageIcon(Symphonie.class
-            .getResource("icons/remove_student.png")), tree), REMOVE_STUDENT,
+    
+    removeStudentAction = actionFactory.getRemoveStudentAction(new ImageIcon(Symphonie.class.getResource("icons/remove_student.png")), tree);
+    
+    
+    final AbstractButton removeStudent = builder.buildButton(removeStudentAction, REMOVE_STUDENT,
         ComponentBuilder.ButtonType.MENU_ITEM);
     removeStudent.getAction().setEnabled(false);
     treePop.add(removeStudent);
     toolbar.add(createToolbarButton(REMOVE_STUDENT, removeStudent, builder));
     toolbar.addSeparator();
-
+/************************************************************************************************************************************/
     // listener for popup
     tree.addMouseListener(new MouseAdapter() {
 
@@ -624,10 +631,10 @@ public class Symphonie {
           ((StudentModel) (table.getModel())).setStudent((Student) o);
           ((DefaultWizardModel) exportW.getModel()).getInterPanelData().put(
               SymphonieWizardConstants.STUDENT_DATA, o);
+          updateActions();
         } else
           currentStudentModel.clear();
 
-        dischart.setEnabled(value);
       }
     });
 
@@ -637,8 +644,7 @@ public class Symphonie {
         currentStudentModel = logger.isIdentified() ? adminStudentModel
             : studentModel;
         table.setModel(currentStudentModel);
-        addStudent.getAction().setEnabled(logger.isIdentified());
-        // removeStudent.getAction().setEnabled(logger.isIdentified());
+        updateActions();
       }
     });
 
@@ -858,10 +864,7 @@ public class Symphonie {
         } else
           currentTeacherModel.clear();
 
-        addColumn.setEnabled(value);
-        spinner.setEnabled(value);
-        addFormula.setEnabled(value);
-        dischart.setEnabled(value);
+        updateActions();
       }
     });
 
@@ -874,7 +877,7 @@ public class Symphonie {
         currentTeacherModel = logger.isIdentified() ? adminTeacherModel
             : teacherModel;
         table.setModel(currentTeacherModel);
-        addCourse.getAction().setEnabled(logger.isIdentified());
+        updateActions();
       }
     });
     return split;
@@ -975,6 +978,7 @@ public class Symphonie {
       public void stateChanged(ChangeEvent e) {
         currentJuryModel = logger.isIdentified() ? adminJuryModel : juryModel;
         table.setModel(currentJuryModel);
+        updateActions();        
       }
     });
 
@@ -1180,7 +1184,8 @@ public class Symphonie {
     addColumn = actionFactory.getAddMarkAction(new ImageIcon(Symphonie.class
         .getResource("icons/insert_column.png")));
     addColumn.setEnabled(false);
-
+    
+    
     // Content pane
     JMenu mode = getModeMenu();
     JMenuItem imp = (JMenuItem) builder.buildButton(actionFactory
@@ -1327,11 +1332,20 @@ public class Symphonie {
     ((DefaultWizardModel) importW.getModel()).getInterPanelData().put(
         SymphonieWizardConstants.DATA_VIEW, newView);
 
-    if (newView.equals(View.student)) {
+    updateActions();
+    /*if (newView.equals(View.student)) {
       addColumn.setEnabled(false);
       addFormula.setEnabled(false);
       dischart.setEnabled(!currentStudentModel.isEmpty());
       spinner.setEnabled(false);
+      
+      if (logger.isIdentified()){
+        addStudentAction.setEnabled(true);
+        if (currentStudentModel.isEmpty())
+          removeStudentAction.setEnabled(false);
+        else removeStudentAction.setEnabled(true);
+      }
+      
     }
 
     else if (newView.equals(View.teacher)) {
@@ -1341,6 +1355,8 @@ public class Symphonie {
       addFormula.setEnabled(value);
       dischart.setEnabled(value);
       spinner.setEnabled(value);
+      addStudentAction.setEnabled(false);
+      removeStudentAction.setEnabled(false);
     }
 
     else if (newView.equals(View.jury)) {
@@ -1348,7 +1364,23 @@ public class Symphonie {
       addFormula.setEnabled(true);
       dischart.setEnabled(true);
       spinner.setEnabled(true);
-    }
+      addStudentAction.setEnabled(false);
+      removeStudentAction.setEnabled(false);
+    }*/
+  }
+  
+  /**
+   * Updates symphonie actions
+   */
+  protected final void updateActions() {
+    boolean isStudentView = currentView.equals(View.student);
+    boolean isIdentified = logger.isIdentified();
+    addColumn.setEnabled(!isStudentView);
+    addFormula.setEnabled(!isStudentView);
+    dischart.setEnabled(isStudentView && !currentStudentModel.isEmpty());
+    spinner.setEnabled(!isStudentView);
+    addStudentAction.setEnabled(isStudentView && isIdentified);
+    removeStudentAction.setEnabled(isStudentView && isIdentified && !currentStudentModel.isEmpty());
   }
 
   /**
@@ -1817,6 +1849,13 @@ public class Symphonie {
 
   protected final JButton dischart;
 
+  
+  
+  /****** SUS POWA ******/
+  protected AbstractAction addStudentAction;
+  protected AbstractAction removeStudentAction;
+  
+  
   public CourseTreeModel getCourseTreeModel() {
     return courseTreeModel;
   }
