@@ -34,9 +34,12 @@ public final class HSSFExportUtils {
 
   /** Mark description key */
   public static final String MARK_KEY = "hssfdataexporter.mark";
-  
+
   /** Mark title description key */
   public static final String MARK_TITLE_KEY = "hssfdataexporter.marktitle";
+
+  /** Course title description key */
+  public static final String COURSE_TITLE_KEY = "hssfdataexporter.marktitletitle";
 
   /** Average mark description key */
   public static final String AVERAGE_KEY = "hssfdataexporter.average";
@@ -175,7 +178,7 @@ public final class HSSFExportUtils {
       String str) {
 
     int currWidth = sheet.getColumnWidth(column);
-    int desiredWidth = (str.length() + 2) * 256;
+    int desiredWidth = (str.length() + 1) * 256;
     if (currWidth < desiredWidth)
       sheet.setColumnWidth(column, (short) desiredWidth);
   }
