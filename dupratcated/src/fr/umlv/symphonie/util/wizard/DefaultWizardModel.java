@@ -42,6 +42,14 @@ public class DefaultWizardModel extends AbstractWizardModel {
     firstPanel.setData(interPanelData);
     currentPanel = 0;
   }
+  
+  /**
+   * Default constructor.<br>
+   * Can only be used by derived types.
+   */
+  protected DefaultWizardModel() {
+    currentPanel = -1;
+  }
 
   /**
    * Adds a panel to the model
