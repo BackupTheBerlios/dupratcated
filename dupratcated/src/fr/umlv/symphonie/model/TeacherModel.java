@@ -148,6 +148,31 @@ public class TeacherModel extends AbstractTableModel {
         
         columnList.addAll(markMap.values());
 
+        
+        List<Formula> formulaList;
+        
+        try {
+          formulaList = manager.getFormulasByCourse(course);
+        } catch (DataManagerException e2) {
+          formulaList = null;
+        }
+        
+        if (formulaList != null){
+          int column;
+          
+          for (Formula f : formulaList){
+            column = f.getColumn();
+            if (column < 0)
+              columnList.add(0, f);
+            
+            else if (column > columnList.size())
+              columnList.add(f);
+            
+            else columnList.add(column -1, f);
+          }
+            
+        }
+        
         studentList.addAll(studentMarkMap.keySet());
         
         try {
@@ -159,10 +184,8 @@ public class TeacherModel extends AbstractTableModel {
             
           });
         } catch (InterruptedException e1) {
-          // TODO Auto-generated catch block
           e1.printStackTrace();
         } catch (InvocationTargetException e1) {
-          // TODO Auto-generated catch block
           e1.printStackTrace();
         }
 
@@ -242,9 +265,9 @@ public class TeacherModel extends AbstractTableModel {
     Object o = columnList.get(columnIndex -1);
     
     if(o instanceof Formula){
-      /*
-       * blablah
-       */
+      Formula f = (Formula)o;
+      
+      
       return null;
     }
     
@@ -369,9 +392,9 @@ public class TeacherModel extends AbstractTableModel {
   }
   
   
-  public void addFormula(Formula f, int column){
+  public void addFormula(String expression, String desc, int column){
     try{
-      manager.addFormula(f, course, column);
+      manager.addTeacherFormula(expression, desc, course, column);
     }catch (DataManagerException e){
       System.out.println(e.getMessage());
     }

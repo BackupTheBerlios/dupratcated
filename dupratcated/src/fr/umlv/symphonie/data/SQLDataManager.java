@@ -1,5 +1,6 @@
 package fr.umlv.symphonie.data;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -15,10 +16,13 @@ import java.util.TreeMap;
 
 import javax.sql.rowset.CachedRowSet;
 
+import com.mysql.jdbc.UpdatableResultSet;
 import com.sun.rowset.CachedRowSetImpl;
 
 import fr.umlv.symphonie.data.formula.Formula;
 import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
+import fr.umlv.symphonie.data.formula.lexer.LexerException;
+import fr.umlv.symphonie.data.formula.parser.ParserException;
 import fr.umlv.symphonie.util.Pair;
 import static fr.umlv.symphonie.data.SQLDataManagerConstants.*;
 
@@ -48,8 +52,7 @@ public class SQLDataManager implements
   
   /*
    * ici
-   */
-                  //id_course //liste de formules
+   */            //id_course //liste de formules
   private final Map<Integer, List<Formula>> teacherFormulaMap = new HashMap<Integer, List<Formula>>();
   private int teacherFormulaMapTimeStamp = -1;
   
@@ -384,6 +387,7 @@ public class SQLDataManager implements
                      COLUMN_COLUMN_FROM_TABLE_FORMULA + " " +
                      "from " + TABLE_TEACHER_FORMULA + ", " + TABLE_TITLE + " " +
                      "where " + TABLE_TITLE + "." + COLUMN_ID_FROM_TABLE_TITLE + " = " + TABLE_TEACHER_FORMULA + "." + COLUMN_ID_COURSE_FROM_TABLE_TEACHER_FORMULA + " " +
+                     "sort by " + COLUMN_COLUMN_FROM_TABLE_FORMULA + " " +
                      ";";
     
     CachedRowSet result = null;
@@ -392,22 +396,33 @@ public class SQLDataManager implements
     try {
       result = connectAndQuery(request);
       
-      Formula f = SymphonieFormulaFactory.parseFormula(result.getString(COLUMN_DESC_FROM_TABLE_TITLE),
-                                                       result.getString(COLUMN_EXPRESSION_FROM_TABLE_FORMULA),
-                                                       result.getInt(COLUMN_ID_FORMULA_FROM_TABLE_FORMULA),
-                                                       result.getInt(COLUMN_COLUMN_FROM_TABLE_FORMULA));
+      while (result.next()){
       
-      courseKey = result.getInt(COLUMN_ID_COURSE_FROM_TABLE_TEACHER_FORMULA);
-      
-      List<Formula> list = tmpMap.get(courseKey);
-      
-      if (list == null){
-        list = new ArrayList<Formula>();
-        tmpMap.put(courseKey, list);
-      }
-      
-      list.add(f);
-      
+        Formula f;
+        try {
+          f = SymphonieFormulaFactory.parseFormula(result
+              .getString(COLUMN_DESC_FROM_TABLE_TITLE), result
+              .getString(COLUMN_EXPRESSION_FROM_TABLE_FORMULA), result
+              .getInt(COLUMN_ID_FORMULA_FROM_TABLE_FORMULA), result
+              .getInt(COLUMN_COLUMN_FROM_TABLE_FORMULA));
+        } catch (ParserException e1) {
+          continue;
+        } catch (LexerException e1) {
+          continue;
+        } catch (IOException e1) {
+          continue;
+        }
+
+        courseKey = result.getInt(COLUMN_ID_COURSE_FROM_TABLE_TEACHER_FORMULA);
+
+        List<Formula> list = tmpMap.get(courseKey);
+
+        if (list == null) {
+          list = new ArrayList<Formula>();
+          tmpMap.put(courseKey, list);
+        }
+        list.add(f);
+    }
     }catch(SQLException e){
       throw new DataManagerException("error getting teacher formulas from database", e);
     }
@@ -589,6 +604,10 @@ public class SQLDataManager implements
 		return studentMarkList;
 	}
 
+  
+  /*
+   * la
+   */
 	private Map<Integer, List<Formula>> getTeacherFormulas() throws DataManagerException {
     int n;
     
@@ -1512,39 +1531,43 @@ public class SQLDataManager implements
   /* (non-Javadoc)
    * @see fr.umlv.symphonie.data.DataManager#addFormula(fr.umlv.symphonie.data.formula.Formula, fr.umlv.symphonie.data.Course, int)
    */
-  public void addTeacherFormula(Formula f, Course course, int column) throws DataManagerException {
+  public void addTeacherFormula(String expression, String desc, Course course, int column) throws DataManagerException {
     
     int titleKey = -1;
     
+    // get key for the formula title
     try {
-      titleKey = getKeyForTitle(f.getDescription());
+      titleKey = getKeyForTitle(desc);
     } catch (SQLException e) {
       throw new DataManagerException("error getting key for title "
-          + f.getDescription(), e);
+          + desc, e);
     }
 
+    // if there's no key, create one
     if (titleKey < 0) {
       try {
-        titleKey = addTitle(f.getDescription());
+        titleKey = addTitle(desc);
       } catch (DataManagerException e) {
-        throw new DataManagerException("error adding new Formula " + f.getDescription()
+        throw new DataManagerException("error adding new Formula " + desc
             + " related to " + course, e);
       }
     }
 
     int formulaKey = -1;
 
+    // create new primary key for the new formula to add
     try {
       formulaKey = createPrimaryKey(TABLE_TEACHER_FORMULA, COLUMN_ID_FORMULA_FROM_TABLE_FORMULA);
     } catch (SQLException e) {
       throw new DataManagerException(
-          "error creating new primary key for formula " + f.getDescription()
+          "error creating new primary key for formula " + desc
               + " related to " + course, e);
     }
     
     
+    // insert into database
     String request = "insert into " + TABLE_TEACHER_FORMULA + " " +
-                     "values ( " + formulaKey + ", " + titleKey + ", " + course.getId() + ", '" + f.toString() + "', " + column + ")" +
+                     "values ( " + formulaKey + ", " + titleKey + ", " + course.getId() + ", '" + expression + "', " + column + ")" +
                      ";";
     
     try {
@@ -1553,9 +1576,46 @@ public class SQLDataManager implements
       throw new DataManagerException ("error inserting new formula", e);
     }
     
+    // add new formula into local data
+    Formula f;
+    try {
+      f = SymphonieFormulaFactory.parseFormula(desc, expression, formulaKey, column);
+    } catch (ParserException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    } catch (LexerException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    } catch (IOException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    }
+    
+    List<Formula> list = teacherFormulaMap.get(course.getId());
+    
+    if (list == null){
+      list = new ArrayList<Formula>();
+      teacherFormulaMap.put(course.getId(), list);
+    }
+    
+    list.add(f);
+    
+    // update data
+    try{
+      updateTeacherFormula(teacherFormulaMapTimeStamp + 1);
+    }catch (DataManagerException e){
+      throw new DataManagerException ("error updating data for teacher formulas.", e);
+    }
   }
   
   
+  /* (non-Javadoc)
+   * @see fr.umlv.symphonie.data.DataManager#addJuryFormula(fr.umlv.symphonie.data.formula.Formula, int)
+   */
+  public void addJuryFormula(String expression, String desc, int column) throws DataManagerException {
+    // TODO Auto-generated method stub
+    
+  }
   
   
 	/*
@@ -1928,15 +1988,6 @@ public class SQLDataManager implements
 		}
 
 	}
-
-  /* (non-Javadoc)
-   * @see fr.umlv.symphonie.data.DataManager#addJuryFormula(fr.umlv.symphonie.data.formula.Formula, int)
-   */
-  public void addJuryFormula(Formula f, int column) throws DataManagerException {
-    // TODO Auto-generated method stub
-    
-  }
-
 
 
 }
