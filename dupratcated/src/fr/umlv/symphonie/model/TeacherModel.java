@@ -236,9 +236,14 @@ public class TeacherModel extends AbstractTableModel {
           } catch (InvocationTargetException e1) {
             e1.printStackTrace();
           }
+		  
         }
       }
     });
+
+  
+  
+  
   }
   
   public void printCourse(){
@@ -361,7 +366,7 @@ public class TeacherModel extends AbstractTableModel {
 
     Object o = columnList.get(columnIndex - 1);
 
-    if (o instanceof Formula && rowIndex == 1) return false;
+    if (o instanceof Formula && rowIndex >= 1) return false;
 
 
     return true;
@@ -572,9 +577,10 @@ public class TeacherModel extends AbstractTableModel {
   public void removeColumn(int columnIndex){
     if (columnIndex == 0 || columnIndex == columnCount -1)
       return;
-    
+
     columnIndex--;
     
+	
     Object o = columnList.get(columnIndex);
     
     if (o instanceof Mark)
@@ -587,8 +593,32 @@ public class TeacherModel extends AbstractTableModel {
   /**
    * @param formula
    */
-  private void removeFormula(Formula formula) {
-    
+  private void removeFormula(final Formula formula) {
+	    es.execute(new Runnable() {
+
+		      public void run() {
+		        synchronized (lock) {
+		          try{
+		            manager.removeTeacherFormula(formula, course);
+		          }catch (DataManagerException e){
+		            System.out.println(e.getMessage());
+		          }
+		          
+		          try {
+		            EventQueue.invokeAndWait(new Runnable() {
+
+		              public void run() {
+		                TeacherModel.this.update();
+		              }
+		            });
+		          } catch (InterruptedException e1) {
+		            e1.printStackTrace();
+		          } catch (InvocationTargetException e1) {
+		            e1.printStackTrace();
+		          }
+		        }
+		      }
+		    });
     
   }
 
@@ -705,205 +735,205 @@ public class TeacherModel extends AbstractTableModel {
     return null;
   }
   
-  public static void main(String[] args) throws DataManagerException, IOException {
-    JFrame frame = new JFrame ("test TeacherModel");
-    frame.setSize(800,600);
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    
-    DataManager dataManager = SQLDataManager.getInstance();
-    
+//  public static void main(String[] args) throws DataManagerException, IOException {
+//    JFrame frame = new JFrame ("test TeacherModel");
+//    frame.setSize(800,600);
+//    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//    
+//    DataManager dataManager = SQLDataManager.getInstance();
+//    
+////    /*
+////     * test des etudiants
+////     */
+////    Map<Integer, Student> studentMap = dataManager.getStudents();
+////    System.out.println(studentMap.size() + " etudiants.");
+////    for (Student s : studentMap.values())
+////      System.out.println(s);
+////    System.out.println("\n\n");
+////    /*******************************/
+////    
+////    
+////     /*
+////      * test des matieres
+////      */
+////     Map<Integer, Course> courseMap = dataManager.getCourses();
+////     System.out.println(courseMap.size() + " matieres");
+////     for (Course c : courseMap.values()){
+////       System.out.println(c + " " + c.getCoeff());
+////       System.out.println(c.getId());
+////     }
+////     System.out.println("\n\n");
+////    /***************************/
+////    
+////    /*
+////     * test des epreuves
+////     */
+////    Map<Integer, Mark> markMap = dataManager.getMarks();
+////    System.out.println(markMap.size() + " epreuves");
+////    for (Mark m : markMap.values())
+////      System.out.println(m + " pour " + m.getCourse());
+////    System.out.println("\n\n");
+////    /******************************/
+////    
+////    /*
+////     * test des notes
+////     */
+////    List<StudentMark> list = dataManager.getStudentMarks();
+////    System.out.println(list.size() + " notes.");
+////    
+////    for (StudentMark sm : list){
+////      sm.printData();
+////    }
+////    
+////    System.out.println("\n\n");
+////    /******************************/
+//    
+//    
+//    JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+//    
+//    
+//    
 //    /*
-//     * test des etudiants
+//     * table
 //     */
-//    Map<Integer, Student> studentMap = dataManager.getStudents();
-//    System.out.println(studentMap.size() + " etudiants.");
-//    for (Student s : studentMap.values())
-//      System.out.println(s);
-//    System.out.println("\n\n");
-//    /*******************************/
+//    
+//    final TeacherModel teacherModel = TeacherModel.getInstance(dataManager);
+//    
+//    /*Course course = new Course (0, "java", 0.5f);
+//
+//    teacherModel.setCourse(course);*/
+//    
+//    final JTable table = new JTable(teacherModel);
+//    table.setTableHeader(null);
+//    
+//    HashMap<String, String> map = TextualResourcesLoader.getResourceMap("language/symphonie", new Locale(
+//    "french"), "ISO-8859-1");
+//    
+//    ComponentBuilder builder = new ComponentBuilder(map);
+//    
+//    // popup and buttons
+//    final JPopupMenu pop = builder.buildPopupMenu(SymphonieConstants.TEACHERVIEWPOPUP_TITLE);
+//    
+//    pop.add(builder.buildButton(SymphonieActionFactory.getAddMarkAction(null,frame, builder ), SymphonieConstants.ADDMARKDIALOG_TITLE, ComponentBuilder.ButtonType.MENU_ITEM));
+//    pop.add(builder.buildButton(SymphonieActionFactory.getTeacherAddFormulaAction(null, frame, builder), SymphonieConstants.ADD_FORMULA, ComponentBuilder.ButtonType.MENU_ITEM));
+//    pop.add(builder.buildButton(SymphonieActionFactory.getTeacherUpdateAction(null), SymphonieConstants.UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
+//    pop.add(builder.buildButton(SymphonieActionFactory.getTeacherPrintAction(null, table), SymphonieConstants.PRINT_MENU_ITEM, ComponentBuilder.ButtonType.MENU_ITEM));
+//    pop.add(builder.buildButton(SymphonieActionFactory.getTeacherChartAction(null, frame), SymphonieConstants.DISPLAY_CHART, ComponentBuilder.ButtonType.MENU_ITEM));
+//    
+//    final AbstractButton removeColumn = builder.buildButton(SymphonieActionFactory.getRemoveTeacherColumnAction(null, table), SymphonieConstants.REMOVE_COLUMN, ComponentBuilder.ButtonType.MENU_ITEM);
+//    pop.add(removeColumn);
+//    // end of popup
 //    
 //    
-//     /*
-//      * test des matieres
-//      */
-//     Map<Integer, Course> courseMap = dataManager.getCourses();
-//     System.out.println(courseMap.size() + " matieres");
-//     for (Course c : courseMap.values()){
-//       System.out.println(c + " " + c.getCoeff());
-//       System.out.println(c.getId());
-//     }
-//     System.out.println("\n\n");
-//    /***************************/
+//    
+//    
+//    
+//    // listener for popup
+//    table.addMouseListener(new MouseAdapter() {
+//
+//      public void mousePressed(MouseEvent e) {
+//        if (SwingUtilities.isRightMouseButton(e)) {
+//          pop.show(e.getComponent(), e.getX(), e.getY());
+//        }
+//      }
+//    });
+//    
+//    // listener which saves point location
+//    table.addMouseListener(new MouseAdapter() {
+//
+//      public void mousePressed(MouseEvent e) {
+//        if (SwingUtilities.isRightMouseButton(e)) {
+//          PointSaver.setPoint(e.getPoint());
+//        }
+//      }
+//    });
+//    
+//    // listener which disables buttons
+//    table.addMouseListener(new MouseAdapter() {
+//      private int column;
+//      public void mousePressed(MouseEvent e) {
+//        
+//        if (SwingUtilities.isRightMouseButton(e)) {
+//          column = table.columnAtPoint(e.getPoint());
+//          if (column != table.getColumnCount() -1 && column > 0)
+//            removeColumn.setEnabled(true);
+//          else removeColumn.setEnabled(false);
+//        }
+//      }
+//    });
+//    
+//    table.setDefaultRenderer(Object.class, CellRendererFactory.getTeacherModelCellRenderer(teacherModel.getFormattedObjects()));
+//    
+//    
+//    JScrollPane scroll1 = new JScrollPane(table);
+//    
+//    split.setRightComponent(scroll1);
+//    
+//    
 //    
 //    /*
-//     * test des epreuves
+//     * arbre
 //     */
-//    Map<Integer, Mark> markMap = dataManager.getMarks();
-//    System.out.println(markMap.size() + " epreuves");
-//    for (Mark m : markMap.values())
-//      System.out.println(m + " pour " + m.getCourse());
-//    System.out.println("\n\n");
-//    /******************************/
+//    CourseTreeModel courseModel = new CourseTreeModel(dataManager);
 //    
-//    /*
-//     * test des notes
-//     */
-//    List<StudentMark> list = dataManager.getStudentMarks();
-//    System.out.println(list.size() + " notes.");
+//    final JTree tree = new JTree(courseModel);
 //    
-//    for (StudentMark sm : list){
-//      sm.printData();
-//    }
+//    tree.setCellRenderer(new DefaultTreeCellRenderer(){
+//      
+//      private final Icon leafIcon = new ImageIcon(StudentTreeModel.class.getResource("../view/icons/course.png"));
+//      private final Icon rootIcon = new ImageIcon(StudentTreeModel.class.getResource("../view/icons/courses.png"));
+//      
+//      public java.awt.Component getTreeCellRendererComponent(JTree tree,Object value,boolean sel,boolean expanded,boolean leaf,int row,boolean hasFocus){
+//
+//        Font font = getFont();
+//        
+//        if (font != null){
+//          font = font.deriveFont(Font.BOLD);
+//          setFont(font);
+//        }
+//        
+//        if (leaf){
+//          setLeafIcon(leafIcon);
+//        }
+//        else {
+//          setClosedIcon(rootIcon);
+//          setOpenIcon(rootIcon);
+//        }
+//        
+//        super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+//        return this;
+//      }
+//    });
 //    
-//    System.out.println("\n\n");
-//    /******************************/
-    
-    
-    JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-    
-    
-    
-    /*
-     * table
-     */
-    
-    final TeacherModel teacherModel = TeacherModel.getInstance(dataManager);
-    
-    /*Course course = new Course (0, "java", 0.5f);
-
-    teacherModel.setCourse(course);*/
-    
-    final JTable table = new JTable(teacherModel);
-    table.setTableHeader(null);
-    
-    HashMap<String, String> map = TextualResourcesLoader.getResourceMap("language/symphonie", new Locale(
-    "french"), "ISO-8859-1");
-    
-    ComponentBuilder builder = new ComponentBuilder(map);
-    
-    // popup and buttons
-    final JPopupMenu pop = builder.buildPopupMenu(SymphonieConstants.TEACHERVIEWPOPUP_TITLE);
-    
-    pop.add(builder.buildButton(SymphonieActionFactory.getAddMarkAction(null,frame, builder ), SymphonieConstants.ADDMARKDIALOG_TITLE, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(SymphonieActionFactory.getTeacherAddFormulaAction(null, frame, builder), SymphonieConstants.ADD_FORMULA, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(SymphonieActionFactory.getTeacherUpdateAction(null), SymphonieConstants.UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(SymphonieActionFactory.getTeacherPrintAction(null, table), SymphonieConstants.PRINT_MENU_ITEM, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(SymphonieActionFactory.getTeacherChartAction(null, frame), SymphonieConstants.DISPLAY_CHART, ComponentBuilder.ButtonType.MENU_ITEM));
-    
-    final AbstractButton removeColumn = builder.buildButton(SymphonieActionFactory.getRemoveTeacherColumnAction(null, table), SymphonieConstants.REMOVE_COLUMN, ComponentBuilder.ButtonType.MENU_ITEM);
-    pop.add(removeColumn);
-    // end of popup
-    
-    
-    
-    
-    
-    // listener for popup
-    table.addMouseListener(new MouseAdapter() {
-
-      public void mousePressed(MouseEvent e) {
-        if (SwingUtilities.isRightMouseButton(e)) {
-          pop.show(e.getComponent(), e.getX(), e.getY());
-        }
-      }
-    });
-    
-    // listener which saves point location
-    table.addMouseListener(new MouseAdapter() {
-
-      public void mousePressed(MouseEvent e) {
-        if (SwingUtilities.isRightMouseButton(e)) {
-          PointSaver.setPoint(e.getPoint());
-        }
-      }
-    });
-    
-    // listener which disables buttons
-    table.addMouseListener(new MouseAdapter() {
-      private int column;
-      public void mousePressed(MouseEvent e) {
-        
-        if (SwingUtilities.isRightMouseButton(e)) {
-          column = table.columnAtPoint(e.getPoint());
-          if (column != table.getColumnCount() -1 && column > 0)
-            removeColumn.setEnabled(true);
-          else removeColumn.setEnabled(false);
-        }
-      }
-    });
-    
-    table.setDefaultRenderer(Object.class, CellRendererFactory.getTeacherModelCellRenderer(teacherModel.getFormattedObjects()));
-    
-    
-    JScrollPane scroll1 = new JScrollPane(table);
-    
-    split.setRightComponent(scroll1);
-    
-    
-    
-    /*
-     * arbre
-     */
-    CourseTreeModel courseModel = new CourseTreeModel(dataManager);
-    
-    final JTree tree = new JTree(courseModel);
-    
-    tree.setCellRenderer(new DefaultTreeCellRenderer(){
-      
-      private final Icon leafIcon = new ImageIcon(StudentTreeModel.class.getResource("../view/icons/course.png"));
-      private final Icon rootIcon = new ImageIcon(StudentTreeModel.class.getResource("../view/icons/courses.png"));
-      
-      public java.awt.Component getTreeCellRendererComponent(JTree tree,Object value,boolean sel,boolean expanded,boolean leaf,int row,boolean hasFocus){
-
-        Font font = getFont();
-        
-        if (font != null){
-          font = font.deriveFont(Font.BOLD);
-          setFont(font);
-        }
-        
-        if (leaf){
-          setLeafIcon(leafIcon);
-        }
-        else {
-          setClosedIcon(rootIcon);
-          setOpenIcon(rootIcon);
-        }
-        
-        super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-        return this;
-      }
-    });
-    
-    
-    tree.addTreeSelectionListener(new TreeSelectionListener(){
-      
-      private Object o;
-
-      public void valueChanged(TreeSelectionEvent e) {
-        o = tree.getLastSelectedPathComponent();
-        
-        if (o instanceof Course){
-          ((TeacherModel)table.getModel()).setCourse((Course)o);
-          /*((TeacherModel)table.getModel()).addMark("morpion", 0.0f);*/
-          /*CellFormat f = new CellFormat(BasicFormulaFactory.booleanInstance(true), Color.RED, Color.CYAN);
-          for (int i = 3; i < 7; i++) {
-            Object ob = teacherModel.getValueAt(i, 0);
-            teacherModel.getFormattedObjects().put(ob, f);
-          }*/
-        }
-      }
-      
-    });
-    
-    JScrollPane pane = new JScrollPane(tree);
-    
-    split.setLeftComponent(pane);
-    
-    frame.setContentPane(split);
-    
-    frame.setVisible(true);
-  }
+//    
+//    tree.addTreeSelectionListener(new TreeSelectionListener(){
+//      
+//      private Object o;
+//
+//      public void valueChanged(TreeSelectionEvent e) {
+//        o = tree.getLastSelectedPathComponent();
+//        
+//        if (o instanceof Course){
+//          ((TeacherModel)table.getModel()).setCourse((Course)o);
+//          /*((TeacherModel)table.getModel()).addMark("morpion", 0.0f);*/
+//          /*CellFormat f = new CellFormat(BasicFormulaFactory.booleanInstance(true), Color.RED, Color.CYAN);
+//          for (int i = 3; i < 7; i++) {
+//            Object ob = teacherModel.getValueAt(i, 0);
+//            teacherModel.getFormattedObjects().put(ob, f);
+//          }*/
+//        }
+//      }
+//      
+//    });
+//    
+//    JScrollPane pane = new JScrollPane(tree);
+//    
+//    split.setLeftComponent(pane);
+//    
+//    frame.setContentPane(split);
+//    
+//    frame.setVisible(true);
+//  }
   
   
 

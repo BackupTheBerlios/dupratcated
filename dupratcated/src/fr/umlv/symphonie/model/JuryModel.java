@@ -462,97 +462,97 @@ public class JuryModel extends AbstractTableModel {
   
   
   
-  /**
-   * @param args
-   * @throws IOException 
-   */
-  public static void main(String[] args) throws IOException {
-    JFrame frame = new JFrame ("test JuryModel");
-    frame.setSize(800,600);
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    
-    DataManager dataManager = SQLDataManager.getInstance();
-
-    final JuryModel model = JuryModel.getInstance(dataManager);
-    
-    final JTable table = new JTable(model);
-    table.setTableHeader(null);
-    
-    
-    HashMap<String, String> map = TextualResourcesLoader.getResourceMap("language/symphonie", new Locale(
-    "french"), "ISO-8859-1");
-    
-    ComponentBuilder builder = new ComponentBuilder(map);
-    
-    // popup and buttons
-    final JPopupMenu pop = builder.buildPopupMenu(SymphonieConstants.JURYVIEWPOPUP_TITLE);
-    
-    pop.add(builder.buildButton(SymphonieActionFactory.getJuryAddFormulaAction(null, frame, builder),SymphonieConstants.ADD_FORMULA, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(SymphonieActionFactory.getJuryUpdateAction(null), SymphonieConstants.UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(SymphonieActionFactory.getJuryPrintAction(null, table), SymphonieConstants.PRINT_MENU_ITEM, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(SymphonieActionFactory.getJuryChartAction(null, frame), SymphonieConstants.DISPLAY_CHART, ComponentBuilder.ButtonType.MENU_ITEM));
-    
-    final AbstractButton removeColumn = builder.buildButton(SymphonieActionFactory.getRemoveJuryColumnAction(null, table), SymphonieConstants.REMOVE_COLUMN, ComponentBuilder.ButtonType.MENU_ITEM);
-    pop.add(removeColumn);
-    
-    // listener which displays the popup
-    table.addMouseListener(new MouseAdapter() {
-
-      public void mousePressed(MouseEvent e) {
-        if (SwingUtilities.isRightMouseButton(e)) {
-          pop.show(e.getComponent(), e.getX(), e.getY());
-        }
-      }
-    });
-    
-    // listener which saves the cursor location
-    table.addMouseListener(new MouseAdapter() {
-
-      public void mousePressed(MouseEvent e) {
-        if (SwingUtilities.isRightMouseButton(e)) {
-          PointSaver.setPoint(e.getPoint());
-        }
-      }
-    });
-    
-    // listener which disables buttons
-    table.addMouseListener(new MouseAdapter() {
-
-      public void mousePressed(MouseEvent e) {
-        if (SwingUtilities.isRightMouseButton(e)) {
-          if (model.isColumnFormula(table.columnAtPoint(e.getPoint())))
-            removeColumn.setEnabled(true);
-          else removeColumn.setEnabled(false);
-        }
-      }
-    });
-    
-    
-    
-    
-    
-    
-    table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer(){
-      
-      public java.awt.Component getTableCellRendererComponent(JTable table,Object value,
-          boolean isSelected,boolean hasFocus,int row,int column){
-        JLabel label = (JLabel)super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        
-          label.setHorizontalAlignment(SwingConstants.CENTER);
-          
-          if (column == 0 || row == 0 || column == table.getModel().getColumnCount() - 2)
-            label.setFont(getFont().deriveFont(Font.BOLD));
-          
-          return label;
-      }
-    });
-    
-    
-    JScrollPane scroll = new JScrollPane(table);
-    
-    frame.setContentPane(scroll);
-    
-    frame.setVisible(true);
-  }
+//  /**
+//   * @param args
+//   * @throws IOException 
+//   */
+//  public static void main(String[] args) throws IOException {
+//    JFrame frame = new JFrame ("test JuryModel");
+//    frame.setSize(800,600);
+//    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//    
+//    DataManager dataManager = SQLDataManager.getInstance();
+//
+//    final JuryModel model = JuryModel.getInstance(dataManager);
+//    
+//    final JTable table = new JTable(model);
+//    table.setTableHeader(null);
+//    
+//    
+//    HashMap<String, String> map = TextualResourcesLoader.getResourceMap("language/symphonie", new Locale(
+//    "french"), "ISO-8859-1");
+//    
+//    ComponentBuilder builder = new ComponentBuilder(map);
+//    
+//    // popup and buttons
+//    final JPopupMenu pop = builder.buildPopupMenu(SymphonieConstants.JURYVIEWPOPUP_TITLE);
+//    
+//    pop.add(builder.buildButton(SymphonieActionFactory.getJuryAddFormulaAction(null, frame, builder),SymphonieConstants.ADD_FORMULA, ComponentBuilder.ButtonType.MENU_ITEM));
+//    pop.add(builder.buildButton(SymphonieActionFactory.getJuryUpdateAction(null), SymphonieConstants.UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
+//    pop.add(builder.buildButton(SymphonieActionFactory.getJuryPrintAction(null, table), SymphonieConstants.PRINT_MENU_ITEM, ComponentBuilder.ButtonType.MENU_ITEM));
+//    pop.add(builder.buildButton(SymphonieActionFactory.getJuryChartAction(null, frame), SymphonieConstants.DISPLAY_CHART, ComponentBuilder.ButtonType.MENU_ITEM));
+//    
+//    final AbstractButton removeColumn = builder.buildButton(SymphonieActionFactory.getRemoveJuryColumnAction(null, table), SymphonieConstants.REMOVE_COLUMN, ComponentBuilder.ButtonType.MENU_ITEM);
+//    pop.add(removeColumn);
+//    
+//    // listener which displays the popup
+//    table.addMouseListener(new MouseAdapter() {
+//
+//      public void mousePressed(MouseEvent e) {
+//        if (SwingUtilities.isRightMouseButton(e)) {
+//          pop.show(e.getComponent(), e.getX(), e.getY());
+//        }
+//      }
+//    });
+//    
+//    // listener which saves the cursor location
+//    table.addMouseListener(new MouseAdapter() {
+//
+//      public void mousePressed(MouseEvent e) {
+//        if (SwingUtilities.isRightMouseButton(e)) {
+//          PointSaver.setPoint(e.getPoint());
+//        }
+//      }
+//    });
+//    
+//    // listener which disables buttons
+//    table.addMouseListener(new MouseAdapter() {
+//
+//      public void mousePressed(MouseEvent e) {
+//        if (SwingUtilities.isRightMouseButton(e)) {
+//          if (model.isColumnFormula(table.columnAtPoint(e.getPoint())))
+//            removeColumn.setEnabled(true);
+//          else removeColumn.setEnabled(false);
+//        }
+//      }
+//    });
+//    
+//    
+//    
+//    
+//    
+//    
+//    table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer(){
+//      
+//      public java.awt.Component getTableCellRendererComponent(JTable table,Object value,
+//          boolean isSelected,boolean hasFocus,int row,int column){
+//        JLabel label = (JLabel)super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+//        
+//          label.setHorizontalAlignment(SwingConstants.CENTER);
+//          
+//          if (column == 0 || row == 0 || column == table.getModel().getColumnCount() - 2)
+//            label.setFont(getFont().deriveFont(Font.BOLD));
+//          
+//          return label;
+//      }
+//    });
+//    
+//    
+//    JScrollPane scroll = new JScrollPane(table);
+//    
+//    frame.setContentPane(scroll);
+//    
+//    frame.setVisible(true);
+//  }
 
 }
