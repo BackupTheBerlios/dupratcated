@@ -77,4 +77,7 @@ public class SymphonieConstants {
   
   // added by sus for student view
   public static final String STUDENTVIEWPOPUP_TITLE = "studentviewpopup.title";
+  public static final String ADD_STUDENT_TITLE = "addstudent.title";
+  public static final String ADD_STUDENT_NAME = "addstudent.name";
+  public static final String ADD_STUDENT_LASTNAME = "addstudent.lastname";
 }

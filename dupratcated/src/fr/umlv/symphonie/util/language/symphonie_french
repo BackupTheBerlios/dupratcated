@@ -99,3 +99,6 @@ addformula=Ajouter une formule
 displaychart=Afficher le graphique
 studentviewpopup.title=Vue Etudiant
 logout=Se déloguer
+addstudent.title=Ajout d'un étudiant
+addstudent.name=Prénom :
+addstudent.lastname=Nom :

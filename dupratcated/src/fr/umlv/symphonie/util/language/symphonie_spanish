@@ -100,3 +100,6 @@ update=Actualizar
 displaychart=Mostrar el gráfico
 studentviewpopup.title=Perspectiva estudiante
 logout=Desidentificarse
+addstudent.title=Student add
+addstudent.name=Name :
+addstudent.lastname=Last Name :

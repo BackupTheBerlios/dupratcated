@@ -511,7 +511,7 @@ public class SQLDataManager implements
     COLUMN_EXPRESSION_FROM_TABLE_FORMULA + ", " +
     COLUMN_COLUMN_FROM_TABLE_FORMULA + " " +
     "from " + TABLE_JURY_FORMULA + ", " + TABLE_TITLE + " " +
-    "where " + TABLE_TITLE + "." + COLUMN_ID_FROM_TABLE_TITLE + " = " + TABLE_TEACHER_FORMULA + "." + COLUMN_ID_COURSE_FROM_TABLE_TEACHER_FORMULA + " " +
+    "where " + TABLE_TITLE + "." + COLUMN_ID_FROM_TABLE_TITLE + " = " + TABLE_JURY_FORMULA + "." + COLUMN_ID_TITLE_FROM_TABLE_FORMULA + " " +
     "order by " + COLUMN_COLUMN_FROM_TABLE_FORMULA + " " +
     ";";
 
@@ -535,13 +535,18 @@ public class SQLDataManager implements
               .getInt(COLUMN_ID_FORMULA_FROM_TABLE_FORMULA), result
               .getInt(COLUMN_COLUMN_FROM_TABLE_FORMULA));
         } catch (ParserException e1) {
+          System.out.println("couille de parsing.");
           continue;
         } catch (LexerException e1) {
+          System.out.println("couille de sablecc.");
           continue;
         } catch (IOException e1) {
+          System.out.println("couille de IO.");
           continue;
         }
 
+        System.out.println("formule trouvee : " + f);
+        
         // add into tmp list
         tmpList.add(f);
     }
@@ -1885,8 +1890,9 @@ public class SQLDataManager implements
     
   }
   
+  
   public void removeJuryFormula(Formula f) throws DataManagerException{
-    String request = "remove from " + TABLE_JURY_FORMULA + " " +
+    String request = "delete from " + TABLE_JURY_FORMULA + " " +
                      "where " + COLUMN_ID_FORMULA_FROM_TABLE_FORMULA + " = " + f.getID() + " " +
                      ";";
     

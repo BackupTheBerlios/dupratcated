@@ -99,3 +99,6 @@ addformula=Add formula
 displaychart=Display chart
 studentviewpopup.title=StudentView
 logout=Logout
+addstudent.title=Student add
+addstudent.name=Name :
+addstudent.lastname=Last Name :

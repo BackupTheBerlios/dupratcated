@@ -4,23 +4,19 @@
  */
 package fr.umlv.symphonie.model;
 
-import java.awt.Font;
+import java.awt.EventQueue;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.JTree;
 import javax.swing.event.TreeModelListener;
-import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
-import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
 
 
@@ -34,8 +30,12 @@ public class StudentTreeModel implements TreeModel {
   private final List<TreeModelListener> listenerList = new ArrayList<TreeModelListener>();
   
   private final String root = "Etudiants"; // a changer pour l'internationalisation ?
-  private final DataManager manager;
-  private List<Student> studentList = null;
+  protected final DataManager manager;
+  protected List<Student> studentList = null;
+  
+  protected final ExecutorService es = Executors.newSingleThreadExecutor();
+  
+  protected final Object lock = new Object();
   
   public StudentTreeModel(DataManager manager){
     this.manager = manager;
@@ -48,21 +48,45 @@ public class StudentTreeModel implements TreeModel {
   
   
   public void update() {
-    if (studentList == null){
-      try {
-        studentList = manager.getStudentList();
-      } catch (DataManagerException e) {
-        System.out.println("error getting students list from database. Try updating the list.");
-      }
-    }
     
-    else {
-      try {
-        manager.getStudentList();
-      } catch (DataManagerException e) {
-        System.out.println("error getting students list from database. Try updating the list.");
+    es.execute(new Runnable(){
+      public void run(){
+        synchronized (lock){
+          
+          if (studentList == null){
+            try {
+              studentList = manager.getStudentList();
+            } catch (DataManagerException e) {
+              System.out.println("error getting students list from database. Try updating the list.");
+            }
+          }
+          
+          else {
+            try {
+              manager.getStudentList();
+            } catch (DataManagerException e) {
+              System.out.println("error getting students list from database. Try updating the list.");
+            }
+          }
+          
+          try {
+            EventQueue.invokeAndWait(new Runnable() {
+
+              public void run() {
+                JuryModel.this.fireTableStructureChanged();
+              }
+            });
+          } catch (InterruptedException e1) {
+            System.out.println("exception interrupted");
+            e1.printStackTrace();
+          } catch (InvocationTargetException e1) {
+            System.out.println("exception invocation");
+            e1.printStackTrace();
+          }
+        }
       }
-    }
+    });
+
   }
 
 
@@ -137,51 +161,55 @@ public class StudentTreeModel implements TreeModel {
     listenerList.remove(l);
   }
 
-  /**
-   * @param args
-   */
-  public static void main(String[] args) {
-    JFrame frame = new JFrame ("test StudentModel");
-    frame.setSize(800,600);
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+  public void addStudent(String name, String lastName){
     
-    DataManager dataManager = SQLDataManager.getInstance();
-    StudentTreeModel model = new StudentTreeModel(dataManager);
-    
-    JTree tree = new JTree(model);
-    
-    tree.setCellRenderer(new DefaultTreeCellRenderer(){
-      
-      private final Icon leafIcon = new ImageIcon(StudentTreeModel.class.getResource("../view/icons/student.png"));
-      private final Icon rootIcon = new ImageIcon(StudentTreeModel.class.getResource("../view/icons/students.png"));
-      
-      public java.awt.Component getTreeCellRendererComponent(JTree tree,Object value,boolean sel,boolean expanded,boolean leaf,int row,boolean hasFocus){
-
-        Font font = getFont();
-        
-        if (font != null){
-          font = font.deriveFont(Font.BOLD);
-          setFont(font);
-        }
-        
-        if (leaf){
-          setLeafIcon(leafIcon);
-        }
-        else {
-          setClosedIcon(rootIcon);
-          setOpenIcon(rootIcon);
-        }
-        
-        super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-        return this;
-      }
-    });
-    
-    JScrollPane pane = new JScrollPane(tree);
-    
-    frame.setContentPane(pane);
-    
-    frame.setVisible(true);
   }
+  
+//  /**
+//   * @param args
+//   */
+//  public static void main(String[] args) {
+//    JFrame frame = new JFrame ("test StudentModel");
+//    frame.setSize(800,600);
+//    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//    
+//    DataManager dataManager = SQLDataManager.getInstance();
+//    StudentTreeModel model = new StudentTreeModel(dataManager);
+//    
+//    JTree tree = new JTree(model);
+//    
+//    tree.setCellRenderer(new DefaultTreeCellRenderer(){
+//      
+//      private final Icon leafIcon = new ImageIcon(StudentTreeModel.class.getResource("../view/icons/student.png"));
+//      private final Icon rootIcon = new ImageIcon(StudentTreeModel.class.getResource("../view/icons/students.png"));
+//      
+//      public java.awt.Component getTreeCellRendererComponent(JTree tree,Object value,boolean sel,boolean expanded,boolean leaf,int row,boolean hasFocus){
+//
+//        Font font = getFont();
+//        
+//        if (font != null){
+//          font = font.deriveFont(Font.BOLD);
+//          setFont(font);
+//        }
+//        
+//        if (leaf){
+//          setLeafIcon(leafIcon);
+//        }
+//        else {
+//          setClosedIcon(rootIcon);
+//          setOpenIcon(rootIcon);
+//        }
+//        
+//        super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+//        return this;
+//      }
+//    });
+//    
+//    JScrollPane pane = new JScrollPane(tree);
+//    
+//    frame.setContentPane(pane);
+//    
+//    frame.setVisible(true);
+//  }
 
 }
