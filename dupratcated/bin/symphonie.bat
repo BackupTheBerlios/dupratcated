@@ -8,7 +8,7 @@ REM Check symphonie.jar has been built
 if not exist "symphonie.jar" goto noJar
 
 REM Run application
-java -jar symphonie.jar
+java -jar symphonie.jar %1
 goto fin
 
 :noJar

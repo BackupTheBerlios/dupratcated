@@ -11,4 +11,4 @@ if test ! -f "$JAR"; then
  exit 1
 fi
 # Run application
-java -jar $JAR
+java -jar $JAR $1
