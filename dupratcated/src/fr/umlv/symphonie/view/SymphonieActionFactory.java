@@ -12,11 +12,9 @@ import java.util.HashMap;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
-import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 
 import fr.umlv.symphonie.data.ConnectionManager;
@@ -24,10 +22,39 @@ import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.model.JuryModel;
 import fr.umlv.symphonie.model.TeacherModel;
 import fr.umlv.symphonie.util.ComponentBuilder;
+import fr.umlv.symphonie.util.wizard.Wizard;
 
 public class SymphonieActionFactory {
 
-  /* FILE ACTIONS ***************************************** */
+  /* FILE MENU ACTIONS ***************************************** */
+
+  /**
+   * Creates and action that starts a wizard
+   * 
+   * @param icon
+   *          The action SMALL_ICON
+   * @param wizard
+   *          The wizard to start
+   * @return an <code>AbstractAction</code>
+   */
+  public static AbstractAction getWizardAction(Icon icon, final Wizard wizard) {
+    AbstractAction a = new AbstractAction() {
+
+      public void actionPerformed(ActionEvent event) {
+        wizard.show();
+      }
+    };
+    a.putValue(Action.SMALL_ICON, icon);
+    return a;
+  }
+
+  /**
+   * Creates an action that exits the main program
+   * 
+   * @param icon
+   *          The action SMALL_ICON
+   * @return an <code>AbstractAction</code>
+   */
   public static AbstractAction getExitAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
@@ -52,77 +79,36 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getImportAction(Icon icon) {
-    AbstractAction a = new AbstractAction() {
-
-      public void actionPerformed(ActionEvent event) {
-        // Il ne faut surtout pas créer un wizard à chaque fois, ce sont des
-        // objets qui coûtent cher
-        /*
-         * WizardPanel wp = WizardPanelFactory.getImportPanel();
-         * DefaultWizardModel dwm = new DefaultWizardModel(wp); Wizard wiz = new
-         * Wizard(null, dwm, new Dimension(500, 400));
-         * System.out.println("wiz.show : " + wiz.show());
-         */
-      }
-
-    };
-    a.putValue(Action.SMALL_ICON, icon);
-    return a;
-  }
-
-  public static AbstractAction getExportAction(Icon icon) {
-    AbstractAction a = new AbstractAction() {
-
-      public void actionPerformed(ActionEvent event) {
-        /*
-         * WizardPanel wp = WizardPanelFactory.getExportFormatSelectionPanel();
-         * DefaultWizardModel dwm = new DefaultWizardModel(wp);
-         * dwm.addPanel(WizardPanelFactory.getExportFinishingPanel()); Wizard
-         * wiz = new Wizard(null, dwm, new Dimension(500, 400));
-         * System.out.println("wiz.show : " + wiz.show());
-         */
-      }
-    };
-    a.putValue(Action.SMALL_ICON, icon);
-    return a;
-  }
-
   /* WINDOW ACTIONS ***************************************** */
-  public static AbstractAction getModeAction(Icon icon) {
-    AbstractAction a = new AbstractAction() {
+
+  /**
+   * Creates an action that changes view
+   * 
+   * @param s
+   *          The <code>Symphonie</code> instance
+   * @param view
+   *          The view to se
+   * @return an <code>AbstractAction</code>
+   */
+  public static AbstractAction getModeChangeAction(final Symphonie s,
+      final Symphonie.View view) {
+    return new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
+        s.setCurrentView(view);
       }
     };
-    a.putValue(Action.SMALL_ICON, icon);
-    return a;
   }
 
-  public static AbstractAction getModeChangeAction(String view, ImageIcon icon,
-      final JTabbedPane tab, final int position) {
-    AbstractAction a = new AbstractAction() {
-
-      public void actionPerformed(ActionEvent event) {
-
-        System.out.println(tab.getTitleAt(position));
-        tab.setSelectedComponent(tab.getComponentAt(position));
-      }
-    };
-    a.putValue(Action.SMALL_ICON, icon);
-    return a;
-  }
-
-  public static AbstractAction getLanguageAction(Icon icon) {
-    AbstractAction a = new AbstractAction() {
-
-      public void actionPerformed(ActionEvent event) {
-      }
-    };
-    a.putValue(Action.SMALL_ICON, icon);
-    return a;
-  }
-
+  /**
+   * Creates an action that changes language
+   * 
+   * @param resources
+   *          The new language map
+   * @param builder
+   *          The builder a.k.a language manager
+   * @return an <code>AbstractAction</code>
+   */
   public static AbstractAction getLanguageChangeAction(
       final HashMap<String, String> resources, final ComponentBuilder builder) {
     return new AbstractAction() {
@@ -241,110 +227,129 @@ public class SymphonieActionFactory {
     a.putValue(Action.SMALL_ICON, icon);
     return a;
   }
-  
-  /* TEACHER VIEW ACTIONS ***********************************/
-  public static AbstractAction getAddMarkAction(Icon icon, final JFrame frame, final ComponentBuilder builder){
+
+  /* TEACHER VIEW ACTIONS ********************************** */
+  public static AbstractAction getAddMarkAction(Icon icon, final JFrame frame,
+      final ComponentBuilder builder) {
     AbstractAction a = new AbstractAction() {
+
       private final AddMarkDialog amd = new AddMarkDialog(frame, builder);
-      public void actionPerformed(ActionEvent e){
+
+      public void actionPerformed(ActionEvent e) {
         amd.setModal(true);
         amd.setVisible(true);
       }
     };
-    
+
     a.putValue(Action.SMALL_ICON, icon);
-    
+
     return a;
   }
-  
-  public static AbstractAction getTeacherAddFormulaAction(Icon icon, final JFrame frame, final ComponentBuilder builder){
-    AbstractAction a = new AbstractAction(){
+
+  public static AbstractAction getTeacherAddFormulaAction(Icon icon,
+      final JFrame frame, final ComponentBuilder builder) {
+    AbstractAction a = new AbstractAction() {
+
       private final FormulaDialog dialog = new FormulaDialog(frame, builder);
+
       public void actionPerformed(ActionEvent e) {
         dialog.setModal(true);
         dialog.setVisible(true);
       }
     };
-    
+
     a.putValue(Action.SMALL_ICON, icon);
     return a;
   }
-  
-  public static AbstractAction getRemoveTeacherColumnAction(Icon icon, final JTable table){
-    AbstractAction a = new AbstractAction(){
+
+  public static AbstractAction getRemoveTeacherColumnAction(Icon icon,
+      final JTable table) {
+    AbstractAction a = new AbstractAction() {
+
       private Point p;
       private int columnIndex;
-      public void actionPerformed(ActionEvent e){
+
+      public void actionPerformed(ActionEvent e) {
         p = PointSaver.getPoint();
-        
-        if (p != null){
+
+        if (p != null) {
           columnIndex = table.columnAtPoint(p);
-          TeacherModel.getInstance(SQLDataManager.getInstance()).removeColumn(columnIndex);
+          TeacherModel.getInstance(SQLDataManager.getInstance()).removeColumn(
+              columnIndex);
           PointSaver.reset();
         }
       }
     };
-    
+
     a.putValue(Action.SMALL_ICON, icon);
-    
+
     return a;
   }
-  
-  public static AbstractAction getTeacherUpdateAction(Icon icon){
-    AbstractAction a = new AbstractAction(){
-      public void actionPerformed(ActionEvent e){
+
+  public static AbstractAction getTeacherUpdateAction(Icon icon) {
+    AbstractAction a = new AbstractAction() {
+
+      public void actionPerformed(ActionEvent e) {
         TeacherModel.getInstance(SQLDataManager.getInstance()).update();
       }
     };
-    
+
     a.putValue(Action.SMALL_ICON, icon);
-    
+
     return a;
   }
-  
-  /* JURY VIEW ACTIONS **************************************/
-  public static AbstractAction getJuryAddFormulaAction(Icon icon, final JFrame frame, final ComponentBuilder builder){
-    AbstractAction a = new AbstractAction(){
-      private final JuryFormulaDialog dialog = new JuryFormulaDialog(frame, builder);
-      
-      public void actionPerformed(ActionEvent e){
+
+  /* JURY VIEW ACTIONS ************************************* */
+  public static AbstractAction getJuryAddFormulaAction(Icon icon,
+      final JFrame frame, final ComponentBuilder builder) {
+    AbstractAction a = new AbstractAction() {
+
+      private final JuryFormulaDialog dialog = new JuryFormulaDialog(frame,
+          builder);
+
+      public void actionPerformed(ActionEvent e) {
         dialog.setModal(true);
         dialog.setVisible(true);
       }
     };
-    
+
     a.putValue(Action.SMALL_ICON, icon);
-    
+
     return a;
   }
-  
-  public static AbstractAction getRemoveJuryColumnAction(Icon icon, final JTable table){
-    AbstractAction a = new AbstractAction(){
+
+  public static AbstractAction getRemoveJuryColumnAction(Icon icon,
+      final JTable table) {
+    AbstractAction a = new AbstractAction() {
+
       private Point p;
       private int columnIndex;
-      public void actionPerformed(ActionEvent e){
+
+      public void actionPerformed(ActionEvent e) {
         p = PointSaver.getPoint();
-        
-        if (p != null){
+
+        if (p != null) {
           columnIndex = table.columnAtPoint(p);
-          JuryModel.getInstance(SQLDataManager.getInstance()).removeColumn(columnIndex);
+          JuryModel.getInstance(SQLDataManager.getInstance()).removeColumn(
+              columnIndex);
           PointSaver.reset();
         }
       }
     };
-    
+
     a.putValue(Action.SMALL_ICON, icon);
-    
+
     return a;
   }
 
-  public static AbstractAction getJuryUpdateAction(Icon icon){
-    AbstractAction a = new AbstractAction(){
+  public static AbstractAction getJuryUpdateAction(Icon icon) {
+    AbstractAction a = new AbstractAction() {
+
       public void actionPerformed(ActionEvent e) {
         JuryModel.getInstance(SQLDataManager.getInstance()).update();
       }
     };
-    
+
     a.putValue(Action.SMALL_ICON, icon);
     return a;
   }
