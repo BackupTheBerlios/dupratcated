@@ -203,12 +203,11 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getDBAction(Icon icon, final JFrame frame,
-      final ComponentBuilder builder) {
+  public static AbstractAction getDBAction(Icon icon, final JFrame frame) {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
-        DatabaseDialog dbd = new DatabaseDialog(frame, builder);
+        DatabaseDialog dbd = new DatabaseDialog(frame);
         dbd.setVisible(true);
       }
     };
