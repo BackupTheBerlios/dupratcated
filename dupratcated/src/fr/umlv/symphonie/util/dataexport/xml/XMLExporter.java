@@ -6,9 +6,10 @@ package fr.umlv.symphonie.util.export.xml;
 
 import java.io.File;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -16,9 +17,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
-import org.w3c.dom.DocumentType;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -39,10 +38,10 @@ public abstract class XMLExporter {
 
   public abstract void export() throws  DataManagerException;
 
-  protected static void addCourseNode(Document d, Course c) {
-    Element e = d.createElement("course");
+  protected static void addCourseNode(Node root, Course c) {
+    Element e = root.getOwnerDocument().createElement("course");
     e.setAttribute("id_course", "" + c.getId());
-    Node course = d.appendChild(e);
+    Node course = root.appendChild(e);
 
     e  = course.getOwnerDocument().createElement("title");
     Node n = course.appendChild(e);
@@ -53,10 +52,10 @@ public abstract class XMLExporter {
     n.appendChild(n.getOwnerDocument().createTextNode("" + c.getCoeff()));
   }
 
-  protected static void addExamenNode(Document d, StudentMark sm) {
-    Element e = d.createElement("examen");
+  protected static void addExamenNode(Node root, StudentMark sm) {
+    Element e = root.getOwnerDocument().createElement("examen");
     e.setAttribute("id_examen", "" + sm.getMark().getId());
-    Node examen = d.appendChild(e);
+    Node examen = root.appendChild(e);
 
     e  = examen.getOwnerDocument().createElement("desc");
     Node n = examen.appendChild(e);
@@ -67,10 +66,10 @@ public abstract class XMLExporter {
     n.appendChild(n.getOwnerDocument().createTextNode("" + sm.getCoeff()));   
   }
 
-  protected static Node addStudentNode(Document d, Student s) {
-    Element e = d.createElement("student");
+  protected static Node addStudentNode(Node root, Student s) {
+    Element e = root.getOwnerDocument().createElement("student");
     e.setAttribute("id_student", "" + s.getId());
-    Node student = d.appendChild(e);
+    Node student = root.appendChild(e);
 
     e  = student.getOwnerDocument().createElement("name");
     Node n = student.appendChild(e);
@@ -87,11 +86,11 @@ public abstract class XMLExporter {
     return student;
   }
 
-  protected static void addMarkNode(Node student, StudentMark sm) {
-    Element e = student.getOwnerDocument().createElement("student_mark");
+  protected static void addMarkNode(Node root, StudentMark sm) {
+    Element e = root.getOwnerDocument().createElement("student_mark");
     e.setAttribute("id_course", "" + sm.getCourse().getId());
     e.setAttribute("id_examen", "" + sm.getMark().getId());
-    Node mark = student.appendChild(e);
+    Node mark = root.appendChild(e);
 
     e  = mark.getOwnerDocument().createElement("mark");
     Node n = mark.appendChild(e);
@@ -100,15 +99,7 @@ public abstract class XMLExporter {
   
   protected Document newDocument(){
     try {
-    
-     DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder(); 
-     DOMImplementation impl = db.getDOMImplementation(); 
-
-     DocumentType dt = impl.createDocumentType("symphonie", null, dtd);
-    
-     return db.newDocument();
-     //return impl.createDocument(null, null, null); 
-     //return impl.createDocument(null, "symphonie", dt); 
+     return DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
     } catch (ParserConfigurationException e) {
       System.out.println("Error during the creation of the document object : \n" + e + "\n");
       e.printStackTrace();
@@ -119,8 +110,12 @@ public abstract class XMLExporter {
   
   protected void makeDocument(Document document){
     try {
-      TransformerFactory.newInstance().newTransformer().transform(
-          new DOMSource(document), new StreamResult(new File(documentName)));
+
+      Transformer transformer = TransformerFactory.newInstance().newTransformer();
+      transformer.setOutputProperty(javax.xml.transform.OutputKeys.DOCTYPE_SYSTEM, dtd);
+      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+      transformer.transform(new DOMSource(document), new StreamResult(new File(documentName)));
+     
     } catch (TransformerConfigurationException e) {
       System.out.println("Error during the exportation : \n" + e + "\n");
       e.printStackTrace();
