@@ -80,8 +80,13 @@ public class SymphonieActionFactory {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
-        symphonie.getFrame().setVisible(false);
+        try {
+          symphonie.getIdentificationStrategy().logout();
+        } catch (IdentificationException e) {
+          System.out.println(e.getMessage());
+        }
         ConnectionManager.closeConnection();
+        System.exit(0);
       }
     };
     a.putValue(Action.SMALL_ICON, icon);

@@ -1,8 +1,10 @@
 /*
- * This file is part of Symphonie Created : 13 févr. 2005 14:01:05
+ * This file is part of Symphonie
+ * Created : 13 févr. 2005 14:01:05
  */
 
 package fr.umlv.symphonie.view;
+
 
 public class SymphonieConstants {
 
@@ -106,4 +108,6 @@ public class SymphonieConstants {
   
   public static final String JURY_CHART_STUDENTS_AVERAGES = "jurychart.studentsaverages";
   public static final String JURY_HEADER = "jury.header";
+  
+  public static final String REMOVE_CELL_FORMAT = "cellformat.delete";
 }
