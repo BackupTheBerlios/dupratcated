@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.swing.event.TreeModelListener;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
@@ -24,10 +25,10 @@ import fr.umlv.symphonie.data.Student;
  * @author susmab
  *
  */
-public class StudentTreeModel implements TreeModel {
+public class StudentTreeModel extends DefaultTreeModel {
 
   
-  private final List<TreeModelListener> listenerList = new ArrayList<TreeModelListener>();
+  /*private final List<TreeModelListener> listenerList = new ArrayList<TreeModelListener>();*/
   
   private final String root = "Etudiants"; // a changer pour l'internationalisation ?
   protected final DataManager manager;
@@ -38,6 +39,7 @@ public class StudentTreeModel implements TreeModel {
   protected final Object lock = new Object();
   
   public StudentTreeModel(DataManager manager){
+    super(null);
     this.manager = manager;
     try {
       studentList = manager.getStudentList();
@@ -73,7 +75,7 @@ public class StudentTreeModel implements TreeModel {
             EventQueue.invokeAndWait(new Runnable() {
 
               public void run() {
-                JuryModel.this.fireTableStructureChanged();
+                StudentTreeModel.this.reload();
               }
             });
           } catch (InterruptedException e1) {
@@ -131,10 +133,10 @@ public class StudentTreeModel implements TreeModel {
   /* (non-Javadoc)
    * @see javax.swing.tree.TreeModel#valueForPathChanged(javax.swing.tree.TreePath, java.lang.Object)
    */
-  public void valueForPathChanged(TreePath path, Object newValue) {
+  /*public void valueForPathChanged(TreePath path, Object newValue) {
     // TODO Auto-generated method stub
 
-  }
+  }*/
 
   /* (non-Javadoc)
    * @see javax.swing.tree.TreeModel#getIndexOfChild(java.lang.Object, java.lang.Object)
@@ -150,19 +152,45 @@ public class StudentTreeModel implements TreeModel {
   /* (non-Javadoc)
    * @see javax.swing.tree.TreeModel#addTreeModelListener(javax.swing.event.TreeModelListener)
    */
-  public void addTreeModelListener(TreeModelListener l) {
+  /*public void addTreeModelListener(TreeModelListener l) {
     listenerList.add(l);
-  }
+  }*/
 
   /* (non-Javadoc)
    * @see javax.swing.tree.TreeModel#removeTreeModelListener(javax.swing.event.TreeModelListener)
    */
-  public void removeTreeModelListener(TreeModelListener l) {
+  /*public void removeTreeModelListener(TreeModelListener l) {
     listenerList.remove(l);
-  }
+  }*/
 
-  public void addStudent(String name, String lastName){
-    
+  public void addStudent(final String name, final String lastName){
+    es.execute(new Runnable(){
+      public void run(){
+        
+        synchronized(lock){
+          try{
+            manager.addStudent(name, lastName);
+          }catch(DataManagerException e){
+            System.out.println(e.getMessage());
+          }
+          
+          try {
+            EventQueue.invokeAndWait(new Runnable() {
+
+              public void run() {
+                StudentTreeModel.this.reload();
+              }
+            });
+          } catch (InterruptedException e1) {
+            System.out.println("exception interrupted");
+            e1.printStackTrace();
+          } catch (InvocationTargetException e1) {
+            System.out.println("exception invocation");
+            e1.printStackTrace();
+          }
+        }
+      }
+    });
   }
   
 //  /**

@@ -5,26 +5,17 @@
 package fr.umlv.symphonie.model;
 
 import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.swing.AbstractButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -32,13 +23,15 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 
-import fr.umlv.symphonie.data.*;
+import fr.umlv.symphonie.data.Course;
+import fr.umlv.symphonie.data.DataManager;
+import fr.umlv.symphonie.data.DataManagerException;
+import fr.umlv.symphonie.data.Student;
+import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.data.formula.Formula;
 import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
-import fr.umlv.symphonie.util.*;
-import fr.umlv.symphonie.view.PointSaver;
-import fr.umlv.symphonie.view.SymphonieActionFactory;
-import fr.umlv.symphonie.view.SymphonieConstants;
+import fr.umlv.symphonie.util.Pair;
+import fr.umlv.symphonie.util.StudentAverage;
 
 
 /**
