@@ -403,11 +403,11 @@ public class Symphonie {
     final JPopupMenu pop = builder
         .buildPopupMenu(SymphonieConstants.STUDENTVIEWPOPUP_TITLE);
 
-    pop.add(builder.buildButton(getStudentUpdateAction(null), UPDATE,
+    pop.add(builder.buildButton(getStudentUpdateAction(null,studentModel), UPDATE,
         ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(getStudentPrintAction(null, table, this),
         PRINT_MENU_ITEM, ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(getStudentChartAction(null, frame),
+    pop.add(builder.buildButton(getStudentChartAction(null, frame, studentModel),
         DISPLAY_CHART, ButtonType.MENU_ITEM));
 
     // table listeners
@@ -524,20 +524,20 @@ public class Symphonie {
     final JPopupMenu pop = builder
         .buildPopupMenu(SymphonieConstants.TEACHERVIEWPOPUP_TITLE);
 
-    pop.add(builder.buildButton(getAddMarkAction(null, frame, builder),
+    pop.add(builder.buildButton(getAddMarkAction(null, frame, teacherModel, builder),
         ADDMARKDIALOG_TITLE, ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(
-        getTeacherAddFormulaAction(null, frame, builder), ADD_FORMULA,
+        getTeacherAddFormulaAction(null, frame, teacherModel,builder), ADD_FORMULA,
         ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(getTeacherUpdateAction(null), UPDATE,
+    pop.add(builder.buildButton(getTeacherUpdateAction(null,teacherModel), UPDATE,
         ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(getTeacherPrintAction(null, table, this),
         PRINT_MENU_ITEM, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(getTeacherChartAction(null, frame),
+    pop.add(builder.buildButton(getTeacherChartAction(null, frame, teacherModel),
         DISPLAY_CHART, ComponentBuilder.ButtonType.MENU_ITEM));
 
     final AbstractButton removeColumn = builder.buildButton(
-        getRemoveTeacherColumnAction(null, table), REMOVE_COLUMN,
+        getRemoveTeacherColumnAction(null, table, teacherModel), REMOVE_COLUMN,
         ComponentBuilder.ButtonType.MENU_ITEM);
     pop.add(removeColumn);
 
@@ -645,21 +645,21 @@ public class Symphonie {
         .buildPopupMenu(SymphonieConstants.JURYVIEWPOPUP_TITLE);
 
     pop.add(builder.buildButton(SymphonieActionFactory.getJuryAddFormulaAction(
-        null, frame, builder), SymphonieConstants.ADD_FORMULA,
+        null, frame, model, builder), SymphonieConstants.ADD_FORMULA,
         ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(SymphonieActionFactory
-        .getJuryUpdateAction(null), SymphonieConstants.UPDATE,
+        .getJuryUpdateAction(null, model), SymphonieConstants.UPDATE,
         ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(SymphonieActionFactory.getJuryPrintAction(null,
         table, this), SymphonieConstants.PRINT_MENU_ITEM,
         ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(SymphonieActionFactory.getJuryChartAction(null,
-        frame), SymphonieConstants.DISPLAY_CHART,
+        frame, model), SymphonieConstants.DISPLAY_CHART,
         ComponentBuilder.ButtonType.MENU_ITEM));
 
     final AbstractButton removeColumn = builder
         .buildButton(SymphonieActionFactory.getRemoveJuryColumnAction(null,
-            table), SymphonieConstants.REMOVE_COLUMN,
+            table, model), SymphonieConstants.REMOVE_COLUMN,
             ComponentBuilder.ButtonType.MENU_ITEM);
     pop.add(removeColumn);
 
