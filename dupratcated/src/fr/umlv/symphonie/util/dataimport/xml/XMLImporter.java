@@ -57,7 +57,7 @@ public class XMLImporter implements DataImporter {
       e = (Element) n;
 
       /** we get the attribute id_course from the element course */
-      id = new Integer(e.getAttribute("id_course"));
+      id = Integer.parseInt(e.getAttribute("id_course"));
 
       /** we create the course object */
       c = new Course(id, e.getElementsByTagName("title").item(0)
@@ -96,7 +96,7 @@ public class XMLImporter implements DataImporter {
       e = (Element) n;
 
       /** we get the attribute id_examen from the element examen */
-      id = new Integer(e.getAttribute("id_examen"));
+      id = Integer.parseInt(e.getAttribute("id_examen"));
 
       /** we create the mark object */
       m = new Mark(id, e.getElementsByTagName("desc").item(0).getTextContent(),
@@ -137,7 +137,7 @@ public class XMLImporter implements DataImporter {
       e = (Element) n;
 
       /** we get the attribute id_exmane from the element examen */
-      id = new Integer(e.getAttribute("id_student"));
+      id = Integer.parseInt(e.getAttribute("id_student"));
 
       /** if we want the comment attribute */
       if (comment) {
@@ -197,8 +197,8 @@ public class XMLImporter implements DataImporter {
       e = (Element) n;
 
       /** we get the attributes courseId and id_examen from the element examen */
-      courseId = new Integer(e.getAttribute("id_course"));
-      examenId = new Integer(e.getAttribute("id_examen"));
+      courseId = Integer.parseInt(e.getAttribute("id_course"));
+      examenId = Integer.parseInt(e.getAttribute("id_examen"));
 
       /** we create the mark object */
       sm = new StudentMark(s, markMap.get(examenId), Float.parseFloat(e
