@@ -14,6 +14,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.swing.AbstractButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
@@ -356,6 +357,19 @@ public class JuryModel extends AbstractTableModel {
 
   }
 
+  public boolean isColumnFormula(int columnIndex){
+    if (columnIndex == 0 
+        || columnIndex >= columnCount -3)
+      return false;
+    
+    Object o = columnList.get(columnIndex -1);
+    
+    if (o instanceof Formula)
+      return true;
+    
+    return false;
+  }
+  
   /**
    * @param args
    * @throws IOException 
@@ -367,9 +381,9 @@ public class JuryModel extends AbstractTableModel {
     
     DataManager dataManager = SQLDataManager.getInstance();
 
-    JuryModel model = JuryModel.getInstance(dataManager);
+    final JuryModel model = JuryModel.getInstance(dataManager);
     
-    JTable table = new JTable(model);
+    final JTable table = new JTable(model);
     table.setTableHeader(null);
     
     
@@ -378,10 +392,16 @@ public class JuryModel extends AbstractTableModel {
     
     ComponentBuilder builder = new ComponentBuilder(map);
     
+    // popup and buttons
     final JPopupMenu pop = builder.buildPopupMenu(SymphonieConstants.JURYVIEWPOPUP_TITLE);
     
-    pop.add(builder.buildButton(SymphonieActionFactory.getRemoveJuryColumnAction(null,table, builder), SymphonieConstants.REMOVE_COLUMN, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(SymphonieActionFactory.getJuryUpdateAction(null), SymphonieConstants.UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(SymphonieActionFactory.getJuryAddFormulaAction(null, frame, builder),SymphonieConstants.ADD_FORMULA, ComponentBuilder.ButtonType.MENU_ITEM));
     
+    final AbstractButton removeColumn = builder.buildButton(SymphonieActionFactory.getRemoveJuryColumnAction(null, table), SymphonieConstants.REMOVE_COLUMN, ComponentBuilder.ButtonType.MENU_ITEM);
+    pop.add(removeColumn);
+    
+    // listener which displays the popup
     table.addMouseListener(new MouseAdapter() {
 
       public void mousePressed(MouseEvent e) {
@@ -391,6 +411,7 @@ public class JuryModel extends AbstractTableModel {
       }
     });
     
+    // listener which saves the cursor location
     table.addMouseListener(new MouseAdapter() {
 
       public void mousePressed(MouseEvent e) {
@@ -400,7 +421,17 @@ public class JuryModel extends AbstractTableModel {
       }
     });
     
-    
+    // listener which disables buttons
+    table.addMouseListener(new MouseAdapter() {
+
+      public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)) {
+          if (model.isColumnFormula(table.columnAtPoint(e.getPoint())))
+            removeColumn.setEnabled(true);
+          else removeColumn.setEnabled(false);
+        }
+      }
+    });
     
     
     

@@ -64,7 +64,10 @@ public class SymphonieConstants {
   public static final String ADDMARKDIALOG_COEFF = "addmarkdialog.coeff";
   
   public static final String TEACHERVIEWPOPUP_TITLE = "teacherviewpopup.title";
+  
+  public static final String UPDATE = "update";
   public static final String REMOVE_COLUMN = "removecolumn";
+  public static final String ADD_FORMULA = "addformula";
   
   // added by sus for jury view
   public static final String JURYVIEWPOPUP_TITLE = "juryviewpopup.title";

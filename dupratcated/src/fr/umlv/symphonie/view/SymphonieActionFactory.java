@@ -247,6 +247,7 @@ public class SymphonieActionFactory {
     AbstractAction a = new AbstractAction() {
       private final AddMarkDialog amd = new AddMarkDialog(frame, builder);
       public void actionPerformed(ActionEvent e){
+        amd.setModal(true);
         amd.setVisible(true);
       }
     };
@@ -256,7 +257,20 @@ public class SymphonieActionFactory {
     return a;
   }
   
-  public static AbstractAction getRemoveTeacherColumnAction(Icon icon, final JTable table, final ComponentBuilder builder){
+  public static AbstractAction getTeacherAddFormulaAction(Icon icon, final JFrame frame, final ComponentBuilder builder){
+    AbstractAction a = new AbstractAction(){
+      private final FormulaDialog dialog = new FormulaDialog(frame, builder);
+      public void actionPerformed(ActionEvent e) {
+        dialog.setModal(true);
+        dialog.setVisible(true);
+      }
+    };
+    
+    a.putValue(Action.SMALL_ICON, icon);
+    return a;
+  }
+  
+  public static AbstractAction getRemoveTeacherColumnAction(Icon icon, final JTable table){
     AbstractAction a = new AbstractAction(){
       private Point p;
       private int columnIndex;
@@ -276,7 +290,35 @@ public class SymphonieActionFactory {
     return a;
   }
   
-  public static AbstractAction getRemoveJuryColumnAction(Icon icon, final JTable table, final ComponentBuilder builder){
+  public static AbstractAction getTeacherUpdateAction(Icon icon){
+    AbstractAction a = new AbstractAction(){
+      public void actionPerformed(ActionEvent e){
+        TeacherModel.getInstance(SQLDataManager.getInstance()).update();
+      }
+    };
+    
+    a.putValue(Action.SMALL_ICON, icon);
+    
+    return a;
+  }
+  
+  /* JURY VIEW ACTIONS **************************************/
+  public static AbstractAction getJuryAddFormulaAction(Icon icon, final JFrame frame, final ComponentBuilder builder){
+    AbstractAction a = new AbstractAction(){
+      private final JuryFormulaDialog dialog = new JuryFormulaDialog(frame, builder);
+      
+      public void actionPerformed(ActionEvent e){
+        dialog.setModal(true);
+        dialog.setVisible(true);
+      }
+    };
+    
+    a.putValue(Action.SMALL_ICON, icon);
+    
+    return a;
+  }
+  
+  public static AbstractAction getRemoveJuryColumnAction(Icon icon, final JTable table){
     AbstractAction a = new AbstractAction(){
       private Point p;
       private int columnIndex;
@@ -296,4 +338,14 @@ public class SymphonieActionFactory {
     return a;
   }
 
+  public static AbstractAction getJuryUpdateAction(Icon icon){
+    AbstractAction a = new AbstractAction(){
+      public void actionPerformed(ActionEvent e) {
+        JuryModel.getInstance(SQLDataManager.getInstance()).update();
+      }
+    };
+    
+    a.putValue(Action.SMALL_ICON, icon);
+    return a;
+  }
 }

@@ -22,6 +22,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -236,6 +237,7 @@ public class TeacherModel extends AbstractTableModel {
   
   public void update(){
     setCourse(course);
+    System.out.println("update lance.");
   }
   
   protected void clear() {
@@ -357,12 +359,11 @@ public class TeacherModel extends AbstractTableModel {
         columnIndex == columnCount -1 /*&& rowIndex <= 1*/ )
       return false;
     
-    else {
-      Object o = columnList.get(columnIndex - 1);
-      
-      if (o instanceof Formula && rowIndex == 1)
-        return false;
-    }
+
+    Object o = columnList.get(columnIndex - 1);
+
+    if (o instanceof Formula && rowIndex == 1) return false;
+
 
     return true;
   }
@@ -643,11 +644,22 @@ public class TeacherModel extends AbstractTableModel {
     
     ComponentBuilder builder = new ComponentBuilder(map);
     
+    // popup and buttons
     final JPopupMenu pop = builder.buildPopupMenu(SymphonieConstants.TEACHERVIEWPOPUP_TITLE);
     
     pop.add(builder.buildButton(SymphonieActionFactory.getAddMarkAction(null,frame, builder ), SymphonieConstants.ADDMARKDIALOG_TITLE, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(SymphonieActionFactory.getRemoveTeacherColumnAction(null,table, builder), SymphonieConstants.REMOVE_COLUMN, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(SymphonieActionFactory.getTeacherAddFormulaAction(null, frame, builder), SymphonieConstants.ADD_FORMULA, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(SymphonieActionFactory.getTeacherUpdateAction(null), SymphonieConstants.UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
     
+    final AbstractButton removeColumn = builder.buildButton(SymphonieActionFactory.getRemoveTeacherColumnAction(null, table), SymphonieConstants.REMOVE_COLUMN, ComponentBuilder.ButtonType.MENU_ITEM);
+    pop.add(removeColumn);
+    // end of popup
+    
+    
+    
+    
+    
+    // listener for popup
     table.addMouseListener(new MouseAdapter() {
 
       public void mousePressed(MouseEvent e) {
@@ -657,11 +669,26 @@ public class TeacherModel extends AbstractTableModel {
       }
     });
     
+    // listener which saves point location
     table.addMouseListener(new MouseAdapter() {
 
       public void mousePressed(MouseEvent e) {
         if (SwingUtilities.isRightMouseButton(e)) {
           PointSaver.setPoint(e.getPoint());
+        }
+      }
+    });
+    
+    // listener which disables buttons
+    table.addMouseListener(new MouseAdapter() {
+      private int column;
+      public void mousePressed(MouseEvent e) {
+        
+        if (SwingUtilities.isRightMouseButton(e)) {
+          column = table.columnAtPoint(e.getPoint());
+          if (column != table.getColumnCount() -1 && column > 0)
+            removeColumn.setEnabled(true);
+          else removeColumn.setEnabled(false);
         }
       }
     });
