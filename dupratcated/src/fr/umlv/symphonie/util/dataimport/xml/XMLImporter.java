@@ -22,7 +22,6 @@ import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
 import fr.umlv.symphonie.data.Mark;
-import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.util.dataimport.DataImporter;
@@ -33,25 +32,18 @@ import fr.umlv.symphonie.util.dataimport.DataImporterException;
  */
 public class XMLImporter implements DataImporter {
 
-	protected String documentName;
-
-	protected final DataManager dm = new SQLDataManager();
-
 	/**
 	 * @param root
 	 *            the root of the document
-	 * @param coeff
-	 *            if true we create the id_coeff attribute
 	 * @return a map with all the courses
 	 */
-	protected Map<Integer, Course> getCourseNodes(Element root, boolean coeff) {
+	protected Map<Integer, Course> getCourseNodes(Element root) {
 		final HashMap<Integer, Course> map = new HashMap<Integer, Course>();
 		final NodeList nodes = root.getElementsByTagName("course");
 		Course c;
 		Node n;
 		Element e;
 		int id;
-		float coeffCourse = -1;
 
 		/** for each course node */
 		for (int i = 0; i < nodes.getLength(); i++) {
@@ -63,15 +55,10 @@ public class XMLImporter implements DataImporter {
 
 			id = Integer.parseInt(e.getAttribute("id_course"));
 
-			/** if we need the coeff_course attribute */
-			if (coeff) {
-				/** we get the attribute id_course from the element course */
-				coeffCourse = Float.parseFloat(e.getElementsByTagName(
-						"coeff_course").item(0).getTextContent());
-			}
 			/** we create the course object */
 			c = new Course(id, e.getElementsByTagName("title").item(0)
-					.getTextContent(), coeffCourse);
+					.getTextContent(), Float.parseFloat(e.getElementsByTagName(
+					"coeff_course").item(0).getTextContent()));
 
 			/** we put the course object into the map */
 			map.put(id, c);
@@ -168,14 +155,9 @@ public class XMLImporter implements DataImporter {
 			}
 
 			/**
-			 * if we need the student arks, we get and put them in the map
+			 * we get the student marks for this student
 			 */
-			if (markMap != null) {
-				map.put(s, getStudentMarkNodes(e, s, markMap));
-			} else {
-				map.put(s, null);
-			}
-
+			map.put(s, getStudentMarkNodes(e, s, markMap));
 		}
 
 		return map;
@@ -232,7 +214,8 @@ public class XMLImporter implements DataImporter {
 	 * @return a new document object
 	 * @throws DataImporterException
 	 */
-	protected Document newDocument() throws DataImporterException {
+	protected Document newDocument(String documentName)
+			throws DataImporterException {
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
@@ -261,7 +244,7 @@ public class XMLImporter implements DataImporter {
 	 * 
 	 * @see fr.umlv.symphonie.util.dataimport.DataImporter#importStudentView(java.lang.String)
 	 */
-	public void importStudentView(String documentName)
+	public void importStudentView(String documentName, DataManager dm)
 			throws DataImporterException {
 
 		throw new DataImporterException(
@@ -273,10 +256,9 @@ public class XMLImporter implements DataImporter {
 	 * 
 	 * @see fr.umlv.symphonie.util.dataimport.DataImporter#importTeacherView(java.lang.String)
 	 */
-	public void importTeacherView(String documentName)
+	public void importTeacherView(String documentName, DataManager dm)
 			throws DataImporterException {
-		this.documentName = documentName;
-		Document d = newDocument();
+		Document d = newDocument(documentName);
 		Element root = d.getDocumentElement();
 
 		if (!root.getAttribute("view").equals("teacher")) {
@@ -284,7 +266,7 @@ public class XMLImporter implements DataImporter {
 		}
 
 		final Map<Integer, Mark> markMap = getMarkNodes(root, getCourseNodes(
-				root, false));
+				root));
 		final Map<Student, Map<Integer, StudentMark>> studentAndStudentMakMap = getStudentNodes(
 				root, false, markMap);
 
@@ -317,18 +299,23 @@ public class XMLImporter implements DataImporter {
 	 * 
 	 * @see fr.umlv.symphonie.util.dataimport.DataImporter#importJuryView(java.lang.String)
 	 */
-	public void importJuryView(String documentName)
+	public void importJuryView(String documentName, DataManager dm)
 			throws DataImporterException {
-		this.documentName = documentName;
-		Document d = newDocument();
+		Document d = newDocument(documentName);
 		Element root = d.getDocumentElement();
+		HashMap<Student, Map<Integer, StudentMark>> map = null;
 
 		if (!root.getAttribute("view").equals("jury")) {
 			throw new DataImporterException("the file isn't a jury view.\n");
 		}
 
-		final Map<Student, Map<Integer, StudentMark>> map = getStudentNodes(
-				root, true, null);
+		try {
+			map = (HashMap<Student, Map<Integer, StudentMark>>) getStudentNodes(
+					root, true, dm.getMarks());
+		} catch (DataManagerException e) {
+			throw new DataImporterException(
+					"Error during the importation with the bdd.\n", e);
+		}
 
 		/** we update the student data : comment */
 		for (Student s : map.keySet()) {

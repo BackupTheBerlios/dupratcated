@@ -50,11 +50,8 @@ public class XMLExporter implements DataExporter {
 	 *            node at the end of the root node
 	 * @param c
 	 *            the course object
-	 * @param coeff
-	 *            if true we create the id_coeff attribute
 	 */
-	private static void addCourseNode(Node root, Node before, Course c,
-			boolean coeff) {
+	private static void addCourseNode(Node root, Node before, Course c) {
 		final Node course;
 
 		/** <course id_course="?">... </course> */
@@ -73,14 +70,10 @@ public class XMLExporter implements DataExporter {
 		Node n = course.appendChild(e);
 		n.appendChild(n.getOwnerDocument().createTextNode(c.getTitle()));
 
-		/** if we need the coeff_course attribute */
-		if (coeff) {
-			/** <coeff_course>? </coeff_course> */
-			e = course.getOwnerDocument().createElement("coeff_course");
-			n = course.appendChild(e);
-			n.appendChild(n.getOwnerDocument()
-					.createTextNode("" + c.getCoeff()));
-		}
+		/** <coeff_course>? </coeff_course> */
+		e = course.getOwnerDocument().createElement("coeff_course");
+		n = course.appendChild(e);
+		n.appendChild(n.getOwnerDocument().createTextNode("" + c.getCoeff()));
 	}
 
 	/**
@@ -272,7 +265,7 @@ public class XMLExporter implements DataExporter {
 
 		/** we export all the courses */
 		for (Course c : map.keySet()) {
-			addCourseNode(root, null, c, false);
+			addCourseNode(root, null, c);
 		}
 
 		/** we export the student of the student view */
@@ -322,7 +315,7 @@ public class XMLExporter implements DataExporter {
 		final Node root = document.appendChild(e);
 
 		/** we export the course of the teacher view */
-		addCourseNode(root, null, c, false);
+		addCourseNode(root, null, c);
 
 		idLastStudent = sortedMap.lastKey().getId();
 
@@ -398,7 +391,7 @@ public class XMLExporter implements DataExporter {
 				 * the xml
 				 */
 				if (idFirstSudent == s.getId()) {
-					addCourseNode(root, studentNode, c, true);
+					addCourseNode(root, studentNode, c);
 				}
 			}
 		}

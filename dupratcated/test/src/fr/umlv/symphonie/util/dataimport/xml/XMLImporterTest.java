@@ -5,6 +5,8 @@
 package fr.umlv.symphonie.util.dataimport.xml;
 
 import junit.framework.TestCase;
+import fr.umlv.symphonie.data.DataManager;
+import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.util.dataimport.DataImporter;
 import fr.umlv.symphonie.util.dataimport.DataImporterException;
 import fr.umlv.symphonie.util.dataimport.xml.XMLImporter;
@@ -16,9 +18,11 @@ public class XMLImporterTest extends TestCase {
 
 	final DataImporter di = new XMLImporter();
 
+	final DataManager dm = new SQLDataManager();
+
 	public void testImportStudentView() {
 		try {
-			di.importStudentView("student_view.xml");
+			di.importStudentView("student_view.xml", dm);
 		} catch (DataImporterException e) {
 			;
 		}
@@ -26,7 +30,7 @@ public class XMLImporterTest extends TestCase {
 
 	public void testImportTeacherView() {
 		try {
-			di.importTeacherView("teacher_view.xml");
+			di.importTeacherView("teacher_view.xml", dm);
 		} catch (DataImporterException e) {
 			e.printStackTrace();
 		}
@@ -34,7 +38,7 @@ public class XMLImporterTest extends TestCase {
 
 	public void testImportJuryView() {
 		try {
-			di.importJuryView("jury_view.xml");
+			di.importJuryView("jury_view.xml", dm);
 		} catch (DataImporterException e) {
 			e.printStackTrace();
 		}

@@ -2,7 +2,7 @@
 <!ELEMENT symphonie (course*, student*, examen*)>
 	<!ATTLIST symphonie view (student|teacher|jury) #REQUIRED >
 
-<!ELEMENT course (title, coeff_course?)>
+<!ELEMENT course (title, coeff_course)>
 		<!ATTLIST course id_course CDATA #IMPLIED>
 		<!ELEMENT title (#PCDATA)>
 		<!ELEMENT coeff_course (#PCDATA)>
