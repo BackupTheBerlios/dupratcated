@@ -182,7 +182,7 @@ public class Symphonie {
 
   /** CourseTreeModel * */
   private final CourseTreeModel courseTreeModel;
-  
+
   /** Action Factory * */
   protected final SymphonieActionFactory actionFactory;
 
@@ -255,7 +255,7 @@ public class Symphonie {
    */
   private final JMenu getModeMenu() {
     JMenu mode = (JMenu) builder.buildButton(CHANGE_VIEW_MENU, ButtonType.MENU);
-    mode.setIcon(EMPTYICON);
+    mode.setIcon(EMPTY_ICON);
 
     ButtonGroup g = new ButtonGroup();
 
@@ -458,30 +458,38 @@ public class Symphonie {
     // Table
     final JTable table = new JTable(studentModel);
     table.setTableHeader(null);
-    table.setDefaultRenderer(Object.class, studentModel.getFormattableCellRenderer());
-    table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+    table.setDefaultRenderer(Object.class, studentModel
+        .getFormattableCellRenderer());
+    table.getSelectionModel().addListSelectionListener(
+        new ListSelectionListener() {
 
-      public void valueChanged(ListSelectionEvent e) {
-//        if (!e.getValueIsAdjusting()) {
-//         Object o = table.getValueAt(table.getSelectedRow(), e.getFirstIndex());
-//         System.out.println(o);
-//         selectedObjects.clear();
-//         selectedObjects.add(o);
-//        }        
-      }        
-    });
-    
+          public void valueChanged(ListSelectionEvent e) {
+            if (!e.getValueIsAdjusting()) {
+              int row = table.getSelectedRow();
+              int col = e.getFirstIndex();
+              if (row != -1 && col != -1) {
+                System.out.println("[" + row + ',' + col + "]");
+                Object o = table.getValueAt(table.getSelectedRow(), e
+                    .getFirstIndex());
+                System.out.println(o);
+                selectedObjects.clear();
+                selectedObjects.add(o);
+              }
+            }
+          }
+        });
+
     // pop up and actions
     final JPopupMenu pop = builder
         .buildPopupMenu(SymphonieConstants.STUDENTVIEWPOPUP_TITLE);
 
-    pop.add(builder.buildButton(actionFactory.getStudentUpdateAction(null),
+    pop.add(builder.buildButton(actionFactory.getStudentUpdateAction(REFRESH_ICON),
         UPDATE, ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(actionFactory
-        .getStudentPrintAction(PRINTICON, table), PRINT_MENU_ITEM,
+    pop.add(builder.buildButton(actionFactory.getStudentPrintAction(PRINT_ICON,
+        table), PRINT_MENU_ITEM, ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(
+        actionFactory.getStudentChartAction(CHART_ICON), DISPLAY_CHART,
         ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(actionFactory.getStudentChartAction(null),
-        DISPLAY_CHART, ButtonType.MENU_ITEM));
 
     // table listeners
 
@@ -545,20 +553,24 @@ public class Symphonie {
         .buildPopupMenu(SymphonieConstants.STUDENTVIEWPOPUP_TITLE);
 
     final AbstractButton addStudent = builder.buildButton(actionFactory
-        .getAddStudentAction(null), SymphonieConstants.ADD_STUDENT_TITLE,
+        .getAddStudentAction(new ImageIcon(Symphonie.class
+            .getResource("icons/add_student.png"))),
+        SymphonieConstants.ADD_STUDENT_TITLE,
         ComponentBuilder.ButtonType.MENU_ITEM);
     addStudent.setEnabled(false);
     treePop.add(addStudent);
-    
-    treePop.add(builder.buildButton(actionFactory.getUpdateStudentTreeAction(null), SymphonieConstants.UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
-    
-    
+
+    treePop.add(builder.buildButton(actionFactory
+        .getUpdateStudentTreeAction(REFRESH_ICON), SymphonieConstants.UPDATE,
+        ComponentBuilder.ButtonType.MENU_ITEM));
+
     final AbstractButton removeStudent = builder.buildButton(actionFactory
-        .getRemoveStudentAction(null, tree), SymphonieConstants.REMOVE_STUDENT,
+        .getRemoveStudentAction(new ImageIcon(Symphonie.class
+            .getResource("icons/remove_student.png")), tree),
+        SymphonieConstants.REMOVE_STUDENT,
         ComponentBuilder.ButtonType.MENU_ITEM);
     treePop.add(removeStudent);
     removeStudent.setEnabled(false);
-
 
     // listener for popup
     tree.addMouseListener(new MouseAdapter() {
@@ -591,12 +603,13 @@ public class Symphonie {
           boolean r = removeStudent.isEnabled();
           if (n > 0)
             removeStudent.setEnabled(logger.isIdentified());
-          
-          else removeStudent.setEnabled(false);
+
+          else
+            removeStudent.setEnabled(false);
         }
       }
     });
-    
+
     JScrollPane pane = new JScrollPane(tree);
     split.setLeftComponent(pane);
     tree.addTreeSelectionListener(new TreeSelectionListener() {
@@ -604,16 +617,15 @@ public class Symphonie {
       public void valueChanged(TreeSelectionEvent e) {
         Object o = tree.getLastSelectedPathComponent();
         boolean value = (o instanceof Student);
-        
+
         if (value) {
           ((StudentModel) (table.getModel())).setStudent((Student) o);
           ((DefaultWizardModel) exportW.getModel()).getInterPanelData().put(
               SymphonieWizardConstants.STUDENT_DATA, o);
-        }
-        else currentStudentModel.clear();
-        
+        } else
+          currentStudentModel.clear();
+
         dischart.setEnabled(value);
-        /*spinner.setEnabled(value);*/
       }
     });
 
@@ -640,10 +652,10 @@ public class Symphonie {
     JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
     // Table
-//    final TeacherModel teacherModel = TeacherModel.getInstance(manager);
     final JTable table = new JTable(teacherModel);
     table.setTableHeader(null);
-    table.setDefaultRenderer(Object.class, teacherModel.getFormattableCellRenderer());
+    table.setDefaultRenderer(Object.class, teacherModel
+        .getFormattableCellRenderer());
 
     JScrollPane scroll1 = new JScrollPane(table);
 
@@ -655,18 +667,19 @@ public class Symphonie {
 
     pop.add(builder.buildButton(actionFactory.getAddMarkAction(null),
         ADDMARKDIALOG_TITLE, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(actionFactory.getTeacherAddFormulaAction(null),
-        ADD_FORMULA, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(actionFactory.getTeacherUpdateAction(null),
-        UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(actionFactory
-        .getTeacherPrintAction(PRINTICON, table), PRINT_MENU_ITEM,
+        .getTeacherAddFormulaAction(FORMULA_ICON), ADD_FORMULA,
         ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(actionFactory.getTeacherChartAction(null),
-        DISPLAY_CHART, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(actionFactory.getTeacherUpdateAction(REFRESH_ICON),
+        UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(actionFactory.getTeacherPrintAction(PRINT_ICON,
+        table), PRINT_MENU_ITEM, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(
+        actionFactory.getTeacherChartAction(CHART_ICON), DISPLAY_CHART,
+        ComponentBuilder.ButtonType.MENU_ITEM));
 
     final AbstractButton removeColumn = builder.buildButton(actionFactory
-        .getRemoveTeacherColumnAction(null, table), REMOVE_COLUMN,
+        .getRemoveTeacherColumnAction(EMPTY_ICON, table), REMOVE_COLUMN,
         ComponentBuilder.ButtonType.MENU_ITEM);
     pop.add(removeColumn);
 
@@ -742,23 +755,21 @@ public class Symphonie {
       }
     });
 
-    
-    
     final JPopupMenu treePop = builder
         .buildPopupMenu(SymphonieConstants.TEACHERVIEWPOPUP_TITLE);
 
     final AbstractButton addCourse = builder.buildButton(actionFactory
-        .getAddCourseAction(null), SymphonieConstants.ADDCOURSE,
+        .getAddCourseAction(EMPTY_ICON), SymphonieConstants.ADDCOURSE,
         ComponentBuilder.ButtonType.MENU_ITEM);
     treePop.add(addCourse);
     addCourse.setEnabled(false);
 
     treePop.add(builder.buildButton(actionFactory
-        .getUpdateCourseTreeAction(null), SymphonieConstants.UPDATE,
+        .getUpdateCourseTreeAction(REFRESH_ICON), SymphonieConstants.UPDATE,
         ComponentBuilder.ButtonType.MENU_ITEM));
 
     final AbstractButton removeCourse = builder.buildButton(actionFactory
-        .getRemoveCourseAction(null, tree), SymphonieConstants.REMOVECOURSE,
+        .getRemoveCourseAction(EMPTY_ICON, tree), SymphonieConstants.REMOVECOURSE,
         ComponentBuilder.ButtonType.MENU_ITEM);
     treePop.add(removeCourse);
 
@@ -798,22 +809,21 @@ public class Symphonie {
             removeCourse.setEnabled(false);
         }
       }
-    });  
-    
-    
+    });
+
     tree.addTreeSelectionListener(new TreeSelectionListener() {
 
       public void valueChanged(TreeSelectionEvent e) {
         Object o = tree.getLastSelectedPathComponent();
         boolean value = (o instanceof Course);
-        
+
         if (value) {
           ((TeacherModel) table.getModel()).setCourse((Course) o);
           ((DefaultWizardModel) exportW.getModel()).getInterPanelData().put(
               SymphonieWizardConstants.TEACHER_DATA, o);
-        }
-        else currentTeacherModel.clear();
-        
+        } else
+          currentTeacherModel.clear();
+
         addColumn.setEnabled(value);
         spinner.setEnabled(value);
         addFormula.setEnabled(value);
@@ -849,20 +859,22 @@ public class Symphonie {
     final JPopupMenu pop = builder
         .buildPopupMenu(SymphonieConstants.JURYVIEWPOPUP_TITLE);
 
-    pop.add(builder.buildButton(actionFactory.getJuryAddFormulaAction(null),
-        SymphonieConstants.ADD_FORMULA, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(actionFactory.getJuryUpdateAction(null),
+    pop.add(builder.buildButton(actionFactory
+        .getJuryAddFormulaAction(FORMULA_ICON), SymphonieConstants.ADD_FORMULA,
+        ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(actionFactory.getJuryUpdateAction(REFRESH_ICON),
         SymphonieConstants.UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(actionFactory.getJuryPrintAction(PRINTICON, table),
-        SymphonieConstants.PRINT_MENU_ITEM,
+    pop.add(builder.buildButton(actionFactory.getJuryPrintAction(PRINT_ICON,
+        table), SymphonieConstants.PRINT_MENU_ITEM,
         ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder
-        .buildButton(actionFactory.getJuryChartAction(null),
+        .buildButton(actionFactory.getJuryChartAction(CHART_ICON),
             SymphonieConstants.DISPLAY_CHART,
             ComponentBuilder.ButtonType.MENU_ITEM));
 
     final AbstractButton removeColumn = builder
-        .buildButton(actionFactory.getRemoveJuryColumnAction(null, table),
+        .buildButton(
+            actionFactory.getRemoveJuryColumnAction(EMPTY_ICON, table),
             SymphonieConstants.REMOVE_COLUMN,
             ComponentBuilder.ButtonType.MENU_ITEM);
     pop.add(removeColumn);
@@ -1125,8 +1137,7 @@ public class Symphonie {
             .getResource("icons/export.png")), exportW), EXPORT_MENU_ITEM,
         ButtonType.MENU_ITEM);
     JMenuItem print = (JMenuItem) builder.buildButton(actionFactory
-        .getPrintAction(PRINTICON), PRINT_MENU_ITEM,
-        ButtonType.MENU_ITEM);
+        .getPrintAction(PRINT_ICON), PRINT_MENU_ITEM, ButtonType.MENU_ITEM);
 
     JMenuItem exit = (JMenuItem) builder.buildButton(actionFactory
         .getExitAction(new ImageIcon(Symphonie.class
@@ -1139,10 +1150,10 @@ public class Symphonie {
     toolbar.add(createToolbarButton(EXPORT_MENU_ITEM, exp, builder));
     toolbar.addSeparator();
 
-    dischart = new JButton(actionFactory.getChartDisplayAction(
-        CHARTICON, builder));
+    dischart = new JButton(actionFactory.getChartDisplayAction(CHART_ICON,
+        builder));
     dischart.setEnabled(false);
-    
+
     JPanel content = getContentPane();
     JPanel welcome = getWelcomePagePanel(content, toolbar, mode, imp, exp,
         print);
@@ -1172,21 +1183,23 @@ public class Symphonie {
     toolbar.add(createToolbarButton(ADDMARKDIALOG_TITLE, morfula, builder));
     toolbar.add(dischart);
     toolbar.addSeparator();
-    
+
     toolbar.add(builder.buildLabel(SymphonieConstants.SETSTEP));
-    
+
     spinner = new JSpinner(new SpinnerNumberModel(chartStep, 1, 20, 1));
-    spinner.setMaximumSize(new Dimension(48,32));
-    spinner.addChangeListener(new ChangeListener(){
+    spinner.setMaximumSize(new Dimension(48, 32));
+    spinner.addChangeListener(new ChangeListener() {
+
       public void stateChanged(ChangeEvent e) {
-        chartStep = ((SpinnerNumberModel)(spinner.getModel())).getNumber().intValue();
+        chartStep = ((SpinnerNumberModel) (spinner.getModel())).getNumber()
+            .intValue();
       }
     });
     spinner.setEnabled(false);
-    
+
     toolbar.add(spinner);
     toolbar.addSeparator();
-    
+
     toolbar.add(createToolbarButton(EXIT_MENU_ITEM, exit, builder));
 
     frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -1237,15 +1250,15 @@ public class Symphonie {
         SymphonieWizardConstants.DATA_VIEW, newView);
     ((DefaultWizardModel) importW.getModel()).getInterPanelData().put(
         SymphonieWizardConstants.DATA_VIEW, newView);
-    
-    if(newView.equals(View.student)){
+
+    if (newView.equals(View.student)) {
       addColumn.setEnabled(false);
       addFormula.setEnabled(false);
       dischart.setEnabled(!currentStudentModel.isEmpty());
       spinner.setEnabled(false);
     }
-    
-    else if(newView.equals(View.teacher)){
+
+    else if (newView.equals(View.teacher)) {
       boolean value = !currentTeacherModel.isEmpty();
 
       addColumn.setEnabled(value);
@@ -1253,8 +1266,8 @@ public class Symphonie {
       dischart.setEnabled(value);
       spinner.setEnabled(value);
     }
-    
-    else if(newView.equals(View.jury)){
+
+    else if (newView.equals(View.jury)) {
       addColumn.setEnabled(false);
       addFormula.setEnabled(true);
       dischart.setEnabled(true);
@@ -1380,16 +1393,24 @@ public class Symphonie {
   // ----------------------------------------------------------------------------
 
   /** A transparent 16x16 icon */
-  public static final ImageIcon EMPTYICON = new ImageIcon(Symphonie.class
+  public static final ImageIcon EMPTY_ICON = new ImageIcon(Symphonie.class
       .getResource("icons/empty.png"));
 
   /** Chart 16x16 icon */
-  public static final ImageIcon CHARTICON = new ImageIcon(Symphonie.class
+  public static final ImageIcon CHART_ICON = new ImageIcon(Symphonie.class
       .getResource("icons/chart.png"));
+
+  /** Printer 16x16 icon */
+  public static final ImageIcon PRINT_ICON = new ImageIcon(Symphonie.class
+      .getResource("icons/print.png"));
+
+  /** Printer 16x16 icon */
+  public static final ImageIcon FORMULA_ICON = new ImageIcon(Symphonie.class
+      .getResource("icons/formula.png"));
   
   /** Printer 16x16 icon */
-  public static final ImageIcon PRINTICON = new ImageIcon(Symphonie.class
-      .getResource("icons/print.png"));
+  public static final ImageIcon REFRESH_ICON = new ImageIcon(Symphonie.class
+      .getResource("icons/reload.png"));
 
   /**
    * Enum defines languages supported by Symphonie.
@@ -1672,7 +1693,7 @@ public class Symphonie {
 
   /** Global add formula action (depends on views) */
   protected final AbstractAction addFormula = new AbstractAction("erf",
-      new ImageIcon(Symphonie.class.getResource("icons/formula.png"))) {
+      FORMULA_ICON) {
 
     public void actionPerformed(ActionEvent e) {
       currentView.displayFormulaDialog(Symphonie.this, e);
@@ -1684,13 +1705,13 @@ public class Symphonie {
 
   /** List of selected objects in current view */
   protected final ArrayList<Object> selectedObjects = new ArrayList<Object>();
-  
+
   protected int chartStep = 5;
-  
+
   protected final JSpinner spinner;
-  
+
   protected final JButton dischart;
-  
+
   public CourseTreeModel getCourseTreeModel() {
     return courseTreeModel;
   }
@@ -1698,6 +1719,7 @@ public class Symphonie {
   public StudentTreeModel getStudentTreeModel() {
     return studentTreeModel;
   }
+
   /**
    * @return Returns the chartStep.
    */
