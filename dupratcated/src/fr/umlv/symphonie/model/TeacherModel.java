@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -37,6 +38,12 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
+
 import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
@@ -48,6 +55,7 @@ import fr.umlv.symphonie.data.formula.Formula;
 import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
 import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.Pair;
+import fr.umlv.symphonie.util.StudentAverage;
 import fr.umlv.symphonie.util.TextualResourcesLoader;
 import fr.umlv.symphonie.view.PointSaver;
 import fr.umlv.symphonie.view.SymphonieActionFactory;
@@ -252,19 +260,19 @@ public class TeacherModel extends AbstractTableModel {
     markMap.clear();
   }
 
-  /**
-   * @param list
-   * @return
-   */
-  private float getAverage(Collection<StudentMark> collection) {
-    
-    float result = 0;
-    
-    for (StudentMark studentMark : collection)
-      result += studentMark.getCoeff() * studentMark.getValue();
-    
-    return result;
-  }
+//  /**
+//   * @param list
+//   * @return
+//   */
+//  private float getAverage(Collection<StudentMark> collection) {
+//    
+//    float result = 0;
+//    
+//    for (StudentMark studentMark : collection)
+//      result += studentMark.getCoeff() * studentMark.getValue();
+//    
+//    return result;
+//  }
 
 
   public int getRowCount() {
@@ -303,7 +311,7 @@ public class TeacherModel extends AbstractTableModel {
       if (rowIndex == 1)
         return null;
       
-      return getAverage(studentMarkMap.get(studentList.get(rowIndex -3)).values());
+      return StudentAverage.getAverage(studentMarkMap.get(studentList.get(rowIndex -3)).values());
     }
     
     Object o = columnList.get(columnIndex -1);
@@ -537,6 +545,7 @@ public class TeacherModel extends AbstractTableModel {
     
   }
 
+  
   /**
    * @param mark
    */
@@ -568,6 +577,87 @@ public class TeacherModel extends AbstractTableModel {
     });
   }
 
+  public MessageFormat getHeaderMessageFormat() {
+    return new MessageFormat("Notes des etudiants pour la matiere " + course);
+  }  
+
+  
+  
+  /**
+   * @param dataTab
+   * @param first
+   */
+  private void initDataTab(Map<Integer, Integer>[] dataTab, Map<Integer, Mark> markMap) {
+    
+    for (int i = 0 ; i < dataTab.length ; i++)
+      dataTab[i] = new HashMap<Integer, Integer>();
+    
+    
+    for(Map<Integer, Integer> map : dataTab){
+      for (int i : markMap.keySet()){
+        map.put(i, new Integer(0));
+      }
+    }
+  }
+  
+  
+  public ChartPanel getChartPanel(int step){
+    
+    if (course != null) {
+      Map<Integer, Integer>[] dataTab;
+
+      // Pair<Map<Integer, Mark>,
+      // SortedMap<Student, Map<Integer, StudentMark>>> data =
+      // dataManager.getAllMarksByCourse(c);
+      //    
+      // Map<Integer, Mark> markMap = data.getFirst();
+      // SortedMap<Student, Map<Integer, StudentMark>> studentMarkMap =
+      // data.getSecond();
+
+      int size = (20 % step == 0 ? 20 / step : 20 / step + 1);
+
+      dataTab = new Map[size];
+
+      initDataTab(dataTab, markMap);
+
+      for (Map<Integer, StudentMark> map : studentMarkMap.values()) {
+        for (StudentMark sm : map.values()) {
+          int index = (int) sm.getValue() / step;
+
+          if (index >= size) index = size - 1;
+
+          int previousValue = dataTab[index].get(sm.getMark().getId());
+          dataTab[index].put(sm.getMark().getId(), previousValue + 1);
+        }
+      }
+
+      DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+      int low = 0;
+      int hi = step;
+
+      for (Map<Integer, Integer> map : dataTab) {
+        for (int markId : map.keySet()) {
+          dataset.addValue(map.get(markId), markMap.get(markId).getDesc(),
+              "de " + low + " a " + hi);
+        }
+
+        low += step;
+        hi += step;
+      }
+
+      JFreeChart barChart = ChartFactory.createBarChart3D(
+          "Notes pour la matiere " + course, "intervalles de notes",
+          "nombre d'eleves", dataset, PlotOrientation.VERTICAL, true, true,
+          false);
+      barChart.getPlot().setForegroundAlpha(0.65f);
+
+      return new ChartPanel(barChart);
+    }
+
+    return null;
+  }
+  
   public static void main(String[] args) throws DataManagerException, IOException {
     JFrame frame = new JFrame ("test TeacherModel");
     frame.setSize(800,600);
@@ -650,6 +740,8 @@ public class TeacherModel extends AbstractTableModel {
     pop.add(builder.buildButton(SymphonieActionFactory.getAddMarkAction(null,frame, builder ), SymphonieConstants.ADDMARKDIALOG_TITLE, ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(SymphonieActionFactory.getTeacherAddFormulaAction(null, frame, builder), SymphonieConstants.ADD_FORMULA, ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(SymphonieActionFactory.getTeacherUpdateAction(null), SymphonieConstants.UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(SymphonieActionFactory.getTeacherPrintAction(null, table), SymphonieConstants.PRINT_MENU_ITEM, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(SymphonieActionFactory.getTeacherChartAction(null, frame), SymphonieConstants.DISPLAY_CHART, ComponentBuilder.ButtonType.MENU_ITEM));
     
     final AbstractButton removeColumn = builder.buildButton(SymphonieActionFactory.getRemoveTeacherColumnAction(null, table), SymphonieConstants.REMOVE_COLUMN, ComponentBuilder.ButtonType.MENU_ITEM);
     pop.add(removeColumn);

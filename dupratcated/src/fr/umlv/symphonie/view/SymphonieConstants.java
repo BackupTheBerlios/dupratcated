@@ -68,6 +68,7 @@ public class SymphonieConstants {
   public static final String UPDATE = "update";
   public static final String REMOVE_COLUMN = "removecolumn";
   public static final String ADD_FORMULA = "addformula";
+  public static final String DISPLAY_CHART = "displaychart";
   
   // added by sus for jury view
   public static final String JURYVIEWPOPUP_TITLE = "juryviewpopup.title";

@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,6 +25,12 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
 
 import fr.umlv.symphonie.data.*;
 import fr.umlv.symphonie.data.formula.Formula;
@@ -51,7 +58,8 @@ public class JuryModel extends AbstractTableModel {
   protected final List<Student> studentList = new ArrayList<Student>();
   protected final Map<Student, Map<Course, Map<Integer, StudentMark>>> dataMap = new HashMap<Student, Map<Course, Map<Integer, StudentMark>>>();
   
-  
+  protected final Map<Integer, Course> courseMap = new HashMap<Integer, Course>();
+
   /**
    * Pool de threads qui n'en contient qu'un seul et qui sert pour le
    * rafraîchissement du canal courant.
@@ -90,6 +98,9 @@ public class JuryModel extends AbstractTableModel {
       public void run() {
         
         synchronized (lock) {
+          
+          clear();
+          
           Pair<Map<Integer, Course>, SortedMap<Student, Map<Course, Map<Integer, StudentMark>>>> allData = null;
           try {
             allData = manager.getAllStudentsMarks();
@@ -101,6 +112,7 @@ public class JuryModel extends AbstractTableModel {
           columnList.addAll(allData.getFirst().values());
           studentList.addAll(allData.getSecond().keySet());
           dataMap.putAll(allData.getSecond());
+          courseMap.putAll(allData.getFirst());
 
           /*
            * ici ajouter les formules de la vue jury
@@ -163,8 +175,13 @@ public class JuryModel extends AbstractTableModel {
   }
 
 
-
-
+  protected void clear(){
+    rowCount = 0;
+    columnCount = 0;
+    columnList.clear();
+    studentList.clear();
+    dataMap.clear();
+  }
   /* (non-Javadoc)
    * @see javax.swing.table.TableModel#getRowCount()
    */
@@ -305,6 +322,10 @@ public class JuryModel extends AbstractTableModel {
 
   
   public void setValueAt(Object aValue,int rowIndex,int columnIndex){
+    
+    if (columnIndex != columnCount -1)
+      return;
+    
     Student s = studentList.get(rowIndex - 3);
     
     try {
@@ -370,6 +391,77 @@ public class JuryModel extends AbstractTableModel {
     return false;
   }
   
+  public MessageFormat getHeaderMessageFormat(){
+    return new MessageFormat("Ensemble des moyennes des etudiants et deliberes");
+  }
+  
+  
+  /* (non-Javadoc)
+   * @see fr.umlv.symphonie.view.charts.SymphonieChartFactory#createJuryPanel()
+   */
+  public ChartPanel getChartPanel(int step){
+    
+    Map<Integer, Integer>[] dataTab;
+    
+    
+    int size = (20%step == 0 ? 20/step : 20/step + 1);
+    
+    dataTab = new Map[size];
+    
+    initDataTabForJury(dataTab, courseMap);
+    
+    for (Map<Course, Map<Integer, StudentMark>> map : dataMap.values()){
+      for (Course c : map.keySet()){
+        int index = (int)getAverage(map.get(c).values()) / step;
+        
+        if (index >= size)
+          index = size -1;
+        
+        int previousValue = dataTab[index].get(c.getId());
+        dataTab[index].put(c.getId(), previousValue + 1);
+      }
+    }
+    
+    DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+    
+    int low = 0;
+    int hi = step;
+    
+    for (Map<Integer, Integer> map : dataTab){
+      for (int courseId : map.keySet()){
+        dataset.addValue(map.get(courseId), courseMap.get(courseId).getTitle(), "de " + low + " a " + hi);
+      }
+      
+      low += step;
+      hi += step;
+    }
+    
+    JFreeChart barChart = ChartFactory.createBarChart3D("Moyennes des etudiants", "intervalles de notes", 
+        "nombre d'eleves", dataset, PlotOrientation.VERTICAL, true, true, true);
+    barChart.getPlot().setForegroundAlpha(0.65f);
+    
+    return new ChartPanel(barChart);
+  }
+
+  /**
+   * @param dataTab
+   * @param courseMap
+   */
+  private void initDataTabForJury(Map<Integer, Integer>[] dataTab, Map<Integer, Course> courseMap) {
+    
+    for (int i = 0 ; i < dataTab.length ; i++){
+      dataTab[i] = new HashMap<Integer, Integer>();
+    }
+    
+    for (Map<Integer, Integer> map : dataTab){
+      for (int i : courseMap.keySet()){
+        map.put(i, 0);
+      }
+    }
+  }
+  
+  
+  
   /**
    * @param args
    * @throws IOException 
@@ -395,8 +487,10 @@ public class JuryModel extends AbstractTableModel {
     // popup and buttons
     final JPopupMenu pop = builder.buildPopupMenu(SymphonieConstants.JURYVIEWPOPUP_TITLE);
     
-    pop.add(builder.buildButton(SymphonieActionFactory.getJuryUpdateAction(null), SymphonieConstants.UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(SymphonieActionFactory.getJuryAddFormulaAction(null, frame, builder),SymphonieConstants.ADD_FORMULA, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(SymphonieActionFactory.getJuryUpdateAction(null), SymphonieConstants.UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(SymphonieActionFactory.getJuryPrintAction(null, table), SymphonieConstants.PRINT_MENU_ITEM, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(SymphonieActionFactory.getJuryChartAction(null, frame), SymphonieConstants.DISPLAY_CHART, ComponentBuilder.ButtonType.MENU_ITEM));
     
     final AbstractButton removeColumn = builder.buildButton(SymphonieActionFactory.getRemoveJuryColumnAction(null, table), SymphonieConstants.REMOVE_COLUMN, ComponentBuilder.ButtonType.MENU_ITEM);
     pop.add(removeColumn);

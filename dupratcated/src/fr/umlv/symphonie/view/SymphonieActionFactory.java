@@ -7,6 +7,7 @@ package fr.umlv.symphonie.view;
 
 import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.awt.print.PrinterException;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -245,8 +246,7 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getTeacherAddFormulaAction(Icon icon,
-      final JFrame frame, final ComponentBuilder builder) {
+  public static AbstractAction getTeacherAddFormulaAction(Icon icon, final JFrame frame, final ComponentBuilder builder) {
     AbstractAction a = new AbstractAction() {
 
       private final FormulaDialog dialog = new FormulaDialog(frame, builder);
@@ -261,8 +261,7 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getRemoveTeacherColumnAction(Icon icon,
-      final JTable table) {
+  public static AbstractAction getRemoveTeacherColumnAction(Icon icon, final JTable table) {
     AbstractAction a = new AbstractAction() {
 
       private Point p;
@@ -298,6 +297,34 @@ public class SymphonieActionFactory {
     return a;
   }
 
+  public static AbstractAction getTeacherPrintAction(Icon icon, final JTable table){
+    AbstractAction a = new AbstractAction(){
+      public void actionPerformed(ActionEvent e) {
+        try {
+          table.print(JTable.PrintMode.FIT_WIDTH, ((TeacherModel)table.getModel()).getHeaderMessageFormat(), null);
+        } catch (PrinterException e1) {
+          e1.printStackTrace();
+        }
+      }
+    };
+    
+    a.putValue(Action.SMALL_ICON, icon);
+    return a;
+  }
+
+  public static AbstractAction getTeacherChartAction(Icon icon, final JFrame frame){
+    AbstractAction a = new AbstractAction(){
+      private final TeacherChartDialog dialog = new TeacherChartDialog(frame);
+      public void actionPerformed(ActionEvent e) {
+        dialog.setChart();
+        dialog.setModal(true);
+        dialog.setVisible(true); 
+      }
+    };
+    
+    a.putValue(Action.SMALL_ICON, icon);
+    return a;
+  }
   /* JURY VIEW ACTIONS ************************************* */
   public static AbstractAction getJuryAddFormulaAction(Icon icon,
       final JFrame frame, final ComponentBuilder builder) {
@@ -349,6 +376,35 @@ public class SymphonieActionFactory {
       }
     };
 
+    a.putValue(Action.SMALL_ICON, icon);
+    return a;
+  }
+
+  public static AbstractAction getJuryPrintAction(Icon icon, final JTable table){
+    AbstractAction a = new AbstractAction(){
+      public void actionPerformed(ActionEvent e){
+        try {
+          table.print(JTable.PrintMode.FIT_WIDTH, ((JuryModel)table.getModel()).getHeaderMessageFormat(), null);
+        } catch (PrinterException e1) {
+          e1.printStackTrace();
+        }
+      }
+    };
+    
+    a.putValue(Action.SMALL_ICON, icon);
+    return a;
+  }
+
+  public static AbstractAction getJuryChartAction(Icon icon, final JFrame frame){
+    AbstractAction a = new AbstractAction(){
+      private final JuryChartDialog dialog = new JuryChartDialog(frame);
+      public void actionPerformed(ActionEvent e) {
+        dialog.setChart();
+        dialog.setModal(true);
+        dialog.setVisible(true); 
+      }
+    };
+    
     a.putValue(Action.SMALL_ICON, icon);
     return a;
   }

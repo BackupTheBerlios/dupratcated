@@ -33,6 +33,7 @@ import fr.umlv.symphonie.data.DataManagerException;
 import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
+import fr.umlv.symphonie.util.StudentAverage;
 
 
 /**
@@ -43,11 +44,11 @@ import fr.umlv.symphonie.data.StudentMark;
  */
 public class StudentModel extends AbstractTableModel {
 
-	private final DataManager manager;
-  private Student student = null;
-  private int columnNumber = 0;
-  private int rowNumber = 0;
-  private Object[][] matrix = null;
+	protected final DataManager manager;
+  protected Student student = null;
+  protected int columnNumber = 0;
+  protected int rowNumber = 0;
+  protected Object[][] matrix = null;
   
   //private final Object lock = new Object();
   
@@ -146,7 +147,7 @@ public class StudentModel extends AbstractTableModel {
 
             matrix[row][columnNumber - 1] = "moyenne";
             matrix[row + 1][columnNumber - 1] = "";
-            matrix[row + 2][columnNumber - 1] = getAverage(collection);
+            matrix[row + 2][columnNumber - 1] = StudentAverage.getAverage(collection);
 
             row += 4;
 
@@ -178,26 +179,26 @@ public class StudentModel extends AbstractTableModel {
   }
 
 
-  /**
-   * @param list
-   * @return
-   */
-  private float getAverage(Collection<StudentMark> collection) {
-    
-    float result = 0;
-    
-    for (StudentMark studentMark : collection)
-      result += studentMark.getCoeff() * studentMark.getValue();
-    
-    return result;
-  }
+//  /**
+//   * @param list
+//   * @return
+//   */
+//  private float getAverage(Collection<StudentMark> collection) {
+//    
+//    float result = 0;
+//    
+//    for (StudentMark studentMark : collection)
+//      result += studentMark.getCoeff() * studentMark.getValue();
+//    
+//    return result;
+//  }
 
 
   /**
    * @param row
    * @param column
    */
-  private void blankRow(int row, int column) {
+  protected void blankRow(int row, int column) {
     for (;column < columnNumber-1 ; column++)
       matrix[row][column] = "";
     
