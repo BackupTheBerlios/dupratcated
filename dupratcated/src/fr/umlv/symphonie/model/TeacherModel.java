@@ -317,16 +317,17 @@ public class TeacherModel extends AbstractTableModel {
    * @see javax.swing.table.AbstractTableModel#setValueAt(java.lang.Object, int, int)
    */
   public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+
+    Object o = columnList.get(columnIndex - 1);
     
     /*
      * cas des intitules :
      */
-    
     if (rowIndex == 0){
-      Object o = columnList.get(columnIndex - 1);
+      
       
       if (o instanceof Formula)
-        return;
+        return; // changer ca
       
       try {
         manager.changeMarkDescription((Mark)o, (String)aValue);
@@ -336,10 +337,55 @@ public class TeacherModel extends AbstractTableModel {
       }
     }
     
+    /*
+     * cas des coeffs
+     */
     else if (rowIndex == 1){
+      if (o instanceof Formula)
+        return; // changer ca
       
+      
+      float newCoeff;
+      
+      try {
+        newCoeff = Float.parseFloat((String)aValue);
+      }catch (NumberFormatException e){
+        return;
+      }
+      
+      try {
+        manager.changeMarkCoeff((Mark)o, newCoeff);
+      }catch (SQLException e){
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      fireTableRowsUpdated(3, rowCount - 1);
     }
     
+    /*
+     * cas des notes
+     */
+    if (o instanceof Formula)
+      return;
+    
+    float newValue;
+    
+    try {
+      newValue = Float.parseFloat((String)aValue);
+    }catch (NumberFormatException e){
+      return;
+    }
+    
+    Mark m = (Mark)o;
+    
+    try {
+      manager.changeStudentMarkValue(studentMarkMap.get(studentList.get(rowIndex - 3)).get(m.getId()), newValue);
+    } catch (SQLException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    
+    fireTableRowsUpdated(rowIndex, rowIndex);
   }
   
   
