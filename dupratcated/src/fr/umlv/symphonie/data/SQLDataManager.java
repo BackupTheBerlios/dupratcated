@@ -416,8 +416,6 @@ public class SQLDataManager implements
       result = connectAndQuery(request);
       
       while (result.next()){
-      
-        System.out.println("traitement du resultat de la requete.");
         
         Formula f;
         try {
@@ -433,22 +431,16 @@ public class SQLDataManager implements
         } catch (IOException e1) {
           continue;
         }
-
-        System.out.println("formule cree : " + f);
         
         courseKey = result.getInt(COLUMN_ID_COURSE_FROM_TABLE_TEACHER_FORMULA);
-
-        System.out.println("associee a la course d'id " + courseKey);
         
         List<Formula> list = tmpMap.get(courseKey);
 
         if (list == null) {
-          System.out.println("pas encore de liste pour cette matiere.");
           list = new ArrayList<Formula>();
           tmpMap.put(courseKey, list);
         }
         list.add(f);
-        System.out.println("ajout de la formule dans sa liste correspondante");
     }
     }catch(SQLException e){
       throw new DataManagerException("error getting teacher formulas from database", e);
@@ -480,8 +472,6 @@ public class SQLDataManager implements
         }
       }
     }
-    
-    System.out.println("premiere boucle finie.");
     
     // for each list contained in local map
     for (int i : teacherFormulaMap.keySet()){
@@ -722,7 +712,6 @@ public class SQLDataManager implements
     }
     
     if (n > teacherFormulaMapTimeStamp) {
-      System.out.println("on va synchroniser les datas des formules teacher.");
       syncTeacherFormulaData();
       teacherFormulaMapTimeStamp = n;
     }
@@ -765,7 +754,7 @@ public class SQLDataManager implements
 	 */
 	public Map<Integer, Mark> getMarksByCourse(Course c)
 			throws DataManagerException {
-
+    
 		Map<Integer, Mark> markMap = getMarks();
 		Map<Integer, Mark> resultMap = new HashMap<Integer, Mark>();
 

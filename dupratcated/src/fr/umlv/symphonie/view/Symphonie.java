@@ -539,7 +539,7 @@ public class Symphonie {
    * @return JTable
    */
   private static JTable getJuryPane(DataManager dataManager) {
-    JuryModel model = new JuryModel(dataManager);
+    JuryModel model = JuryModel.getInstance(dataManager);
 
     JTable table = new JTable(model);
     table.setTableHeader(null);

@@ -60,7 +60,11 @@ public class SymphonieConstants {
   // added by sus for teacher view
   public static final String ADDMARKDIALOG_TITLE = "addmarkdialog.title";
   public static final String ADDMARKDIALOG_DESC = "addmarkdialog.desc";
-  public static final String ADDMARKDIALOG_COEFF = "addmarkdialog_coeff";
+  public static final String ADDMARKDIALOG_COEFF = "addmarkdialog.coeff";
   
   public static final String TEACHERVIEWPOPUP_TITLE = "teacherviewpopup.title";
+  public static final String REMOVE_COLUMN = "removecolumn";
+  
+  // added by sus for jury view
+  public static final String JURYVIEWPOPUP_TITLE = "juryviewpopup.title";
 }

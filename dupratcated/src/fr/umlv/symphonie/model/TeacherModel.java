@@ -48,6 +48,7 @@ import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
 import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.Pair;
 import fr.umlv.symphonie.util.TextualResourcesLoader;
+import fr.umlv.symphonie.view.PointSaver;
 import fr.umlv.symphonie.view.SymphonieActionFactory;
 import fr.umlv.symphonie.view.SymphonieConstants;
 import fr.umlv.symphonie.view.cells.CellFormat;
@@ -133,8 +134,6 @@ public class TeacherModel extends AbstractTableModel {
     return instance;
   }
   
-  
-  
   /**
    * @param manager The manager to set.
    */
@@ -146,7 +145,7 @@ public class TeacherModel extends AbstractTableModel {
     return formattedObjects;
   }
   
-  public void setCourse(final Course course) {
+  public void setCourse(final Course courseToAdd) {
     
     
     es.execute(new Runnable(){
@@ -158,9 +157,10 @@ public class TeacherModel extends AbstractTableModel {
         
         synchronized (lock) {
 
-          TeacherModel.this.clear();
-          TeacherModel.this.course = course;
-
+          clear();
+    
+          course = courseToAdd;
+          
           Pair<Map<Integer, Mark>, SortedMap<Student, Map<Integer, StudentMark>>> studentAndMarkMapPair = null;
           try {
             studentAndMarkMapPair = manager.getAllMarksByCourse(course);
@@ -185,8 +185,6 @@ public class TeacherModel extends AbstractTableModel {
 
           if (formulaList != null) {
             
-            System.out.println("taille de la liste des formules : " + formulaList.size());
-            
             int column;
 
             for (Formula f : formulaList) {
@@ -202,14 +200,12 @@ public class TeacherModel extends AbstractTableModel {
             }
 
           }
-          
-          else System.out.println("pas de formules pour " + course);
 
           columnCount = columnList.size() + 2;
           rowCount = studentMarkMap.size() + 3;
           
-          System.out.println("lignes : " + rowCount);
-          System.out.println("colonnes : " + columnCount);
+//          System.out.println("lignes : " + rowCount);
+//          System.out.println("colonnes : " + columnCount);
 
           studentList.addAll(studentMarkMap.keySet());
 
@@ -229,10 +225,13 @@ public class TeacherModel extends AbstractTableModel {
         }
       }
     });
-    
-    
   }
   
+  public void printCourse(){
+    System.out.println("*********");
+    System.out.println(course);
+    System.out.println("*********");
+  }
   
   public void update(){
     setCourse(course);
@@ -448,37 +447,69 @@ public class TeacherModel extends AbstractTableModel {
   }
   
   
-  public void addFormula(String expression, String desc, int column){
-    try{
-      manager.addTeacherFormula(expression, desc, course, column);
-    }catch (DataManagerException e){
-      System.out.println(e.getMessage());
-    }
-    
-    update();
-  }
-  
-  public void addMark(final String desc, final float coeff){
-    
-    final Course course = this.course;
+  public void addFormula(final String expression, final String desc, final int column){
     
     es.execute(new Runnable() {
 
       public void run() {
         synchronized (lock) {
 
+          try {
+            manager.addTeacherFormula(expression, desc, course, column);
+          } catch (DataManagerException e) {
+            System.out.println(e.getMessage());
+          }
+
+          try {
+            EventQueue.invokeAndWait(new Runnable() {
+
+              public void run() {
+                TeacherModel.this.update();
+              }
+            });
+          } catch (InterruptedException e1) {
+            e1.printStackTrace();
+          } catch (InvocationTargetException e1) {
+            e1.printStackTrace();
+          }
+        }
+      }
+    });
+  }
+  
+  public void addMark(final String desc, final float coeff){
+    
+    es.execute(new Runnable() {
+
+      public void run() {
+        synchronized (lock) {
+
+          printCourse();
+          
           if (course != null){
             try {
               manager.addMark(desc, coeff, course);
             } catch (DataManagerException e) {
               System.out.println(e.getMessage());
             }
+            
+            try {
+              EventQueue.invokeAndWait(new Runnable() {
+
+                public void run() {
+                  TeacherModel.this.update();
+                }
+
+              });
+            } catch (InterruptedException e1) {
+              e1.printStackTrace();
+            } catch (InvocationTargetException e1) {
+              e1.printStackTrace();
+            }
           }
         }
       }
     });
-    
-    update();
   }
   
   public void removeColumn(int columnIndex){
@@ -500,16 +531,39 @@ public class TeacherModel extends AbstractTableModel {
    * @param formula
    */
   private void removeFormula(Formula formula) {
-    // TODO Auto-generated method stub
+    
     
   }
 
   /**
    * @param mark
    */
-  private void removeMark(Mark mark) {
-    // TODO Auto-generated method stub
-    
+  private void removeMark(final Mark mark) {
+    es.execute(new Runnable() {
+
+      public void run() {
+        synchronized (lock) {
+          try{
+            manager.removeMark(mark);
+          }catch (DataManagerException e){
+            System.out.println(e.getMessage());
+          }
+          
+          try {
+            EventQueue.invokeAndWait(new Runnable() {
+
+              public void run() {
+                TeacherModel.this.update();
+              }
+            });
+          } catch (InterruptedException e1) {
+            e1.printStackTrace();
+          } catch (InvocationTargetException e1) {
+            e1.printStackTrace();
+          }
+        }
+      }
+    });
   }
 
   public static void main(String[] args) throws DataManagerException, IOException {
@@ -574,7 +628,7 @@ public class TeacherModel extends AbstractTableModel {
      * table
      */
     
-    final TeacherModel teacherModel = new TeacherModel(dataManager);
+    final TeacherModel teacherModel = TeacherModel.getInstance(dataManager);
     
     /*Course course = new Course (0, "java", 0.5f);
 
@@ -591,12 +645,22 @@ public class TeacherModel extends AbstractTableModel {
     final JPopupMenu pop = builder.buildPopupMenu(SymphonieConstants.TEACHERVIEWPOPUP_TITLE);
     
     pop.add(builder.buildButton(SymphonieActionFactory.getAddMarkAction(null,frame, builder ), SymphonieConstants.ADDMARKDIALOG_TITLE, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(SymphonieActionFactory.getRemoveTeacherColumnAction(null,table, builder), SymphonieConstants.REMOVE_COLUMN, ComponentBuilder.ButtonType.MENU_ITEM));
     
     table.addMouseListener(new MouseAdapter() {
 
       public void mousePressed(MouseEvent e) {
         if (SwingUtilities.isRightMouseButton(e)) {
           pop.show(e.getComponent(), e.getX(), e.getY());
+        }
+      }
+    });
+    
+    table.addMouseListener(new MouseAdapter() {
+
+      public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)) {
+          PointSaver.setPoint(e.getPoint());
         }
       }
     });
@@ -647,12 +711,10 @@ public class TeacherModel extends AbstractTableModel {
     
     tree.addTreeSelectionListener(new TreeSelectionListener(){
       
-      
-      /* (non-Javadoc)
-       * @see javax.swing.event.TreeSelectionListener#valueChanged(javax.swing.event.TreeSelectionEvent)
-       */
+      private Object o;
+
       public void valueChanged(TreeSelectionEvent e) {
-        Object o = tree.getLastSelectedPathComponent();
+        o = tree.getLastSelectedPathComponent();
         
         if (o instanceof Course){
           ((TeacherModel)table.getModel()).setCourse((Course)o);

@@ -5,6 +5,7 @@
 
 package fr.umlv.symphonie.view;
 
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.util.HashMap;
 
@@ -16,7 +17,11 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 
+import fr.umlv.symphonie.data.SQLDataManager;
+import fr.umlv.symphonie.model.JuryModel;
+import fr.umlv.symphonie.model.TeacherModel;
 import fr.umlv.symphonie.util.ComponentBuilder;
 
 public class SymphonieActionFactory {
@@ -248,10 +253,18 @@ public class SymphonieActionFactory {
     return a;
   }
   
-  public static AbstractAction getRemoveColumnAction(Icon icon, final JFrame frame, final ComponentBuilder builder){
+  public static AbstractAction getRemoveTeacherColumnAction(Icon icon, final JTable table, final ComponentBuilder builder){
     AbstractAction a = new AbstractAction(){
+      private Point p;
+      private int columnIndex;
       public void actionPerformed(ActionEvent e){
+        p = PointSaver.getPoint();
         
+        if (p != null){
+          columnIndex = table.columnAtPoint(p);
+          TeacherModel.getInstance(SQLDataManager.getInstance()).removeColumn(columnIndex);
+          PointSaver.reset();
+        }
       }
     };
     
@@ -260,6 +273,24 @@ public class SymphonieActionFactory {
     return a;
   }
   
-  
+  public static AbstractAction getRemoveJuryColumnAction(Icon icon, final JTable table, final ComponentBuilder builder){
+    AbstractAction a = new AbstractAction(){
+      private Point p;
+      private int columnIndex;
+      public void actionPerformed(ActionEvent e){
+        p = PointSaver.getPoint();
+        
+        if (p != null){
+          columnIndex = table.columnAtPoint(p);
+          JuryModel.getInstance(SQLDataManager.getInstance()).removeColumn(columnIndex);
+          PointSaver.reset();
+        }
+      }
+    };
+    
+    a.putValue(Action.SMALL_ICON, icon);
+    
+    return a;
+  }
 
 }

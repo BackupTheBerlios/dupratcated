@@ -6,6 +6,9 @@ package fr.umlv.symphonie.model;
 
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -13,15 +16,21 @@ import java.util.concurrent.Executors;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import fr.umlv.symphonie.data.*;
 import fr.umlv.symphonie.data.formula.Formula;
+import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
 import fr.umlv.symphonie.util.*;
+import fr.umlv.symphonie.view.PointSaver;
+import fr.umlv.symphonie.view.SymphonieActionFactory;
+import fr.umlv.symphonie.view.SymphonieConstants;
 
 
 /**
@@ -30,16 +39,16 @@ import fr.umlv.symphonie.util.*;
  */
 public class JuryModel extends AbstractTableModel {
 
-  private final DataManager manager;
+  protected DataManager manager;
   
-  private int rowCount    = 0;
-  private int columnCount = 0;
-  private int globalTimeStamp = -1; // le globalTimeStamp pourrait etre la somme de
+  protected int rowCount    = 0;
+  protected int columnCount = 0;
+  protected int globalTimeStamp = -1; // le globalTimeStamp pourrait etre la somme de
                                     // tous les timeStamp (a voir)
   
-  private final List<Object> columnList = new ArrayList<Object>();
-  private final List<Student> studentList = new ArrayList<Student>();
-  private final Map<Student, Map<Course, Map<Integer, StudentMark>>> dataMap = new HashMap<Student, Map<Course, Map<Integer, StudentMark>>>();
+  protected final List<Object> columnList = new ArrayList<Object>();
+  protected final List<Student> studentList = new ArrayList<Student>();
+  protected final Map<Student, Map<Course, Map<Integer, StudentMark>>> dataMap = new HashMap<Student, Map<Course, Map<Integer, StudentMark>>>();
   
   
   /**
@@ -48,13 +57,27 @@ public class JuryModel extends AbstractTableModel {
    */
   private final ExecutorService es = Executors.newSingleThreadExecutor();
   
-  public JuryModel(DataManager manager) {
+  protected final Object lock = new Object();
+  
+  private static JuryModel instance = null; 
+  
+  private JuryModel(DataManager manager) {
     this.manager = manager;
     update();
   }
   
+  private void setManager(DataManager manager){
+    this.manager = manager;
+  }
   
-  
+  public static JuryModel getInstance(DataManager manager){
+    if (instance == null)
+      instance = new JuryModel(manager);
+    
+    else instance.setManager(manager);
+    
+    return instance;
+  }
   
   public void update() {
     
@@ -65,45 +88,74 @@ public class JuryModel extends AbstractTableModel {
        */
       public void run() {
         
-        Pair<Map<Integer, Course>, SortedMap<Student, Map<Course, Map<Integer, StudentMark>>>> allData = null;
-        try {
-          allData = manager.getAllStudentsMarks();
-        } catch (DataManagerException e) {
-          System.out.println("Error getting data for Jury View");
-          e.printStackTrace();
-        }
-        
-        columnList.addAll(allData.getFirst().values());
-        studentList.addAll(allData.getSecond().keySet());
-        dataMap.putAll(allData.getSecond());
-        
-        /*
-         * ici ajouter les formules de la vue jury
-         */
-        
-        dataMap.putAll(allData.getSecond());
-        
-        JuryModel.this.columnCount = columnList.size() + 4;
-        JuryModel.this.rowCount = 3 + studentList.size();
-        
-        /*System.out.println("lignes : " + JuryModel.this.rowCount);
-        System.out.println("colonnes : " + JuryModel.this.columnCount);*/
-        
-        try {
-          EventQueue.invokeAndWait(new Runnable() {
-            public void run() {
-              JuryModel.this.fireTableStructureChanged();
+        synchronized (lock) {
+          Pair<Map<Integer, Course>, SortedMap<Student, Map<Course, Map<Integer, StudentMark>>>> allData = null;
+          try {
+            allData = manager.getAllStudentsMarks();
+          } catch (DataManagerException e) {
+            System.out.println("Error getting data for Jury View");
+            e.printStackTrace();
+          }
+
+          columnList.addAll(allData.getFirst().values());
+          studentList.addAll(allData.getSecond().keySet());
+          dataMap.putAll(allData.getSecond());
+
+          /*
+           * ici ajouter les formules de la vue jury
+           */
+          List<Formula> formulaList;
+
+          try {
+            formulaList = manager.getJuryFormulas();
+          } catch (DataManagerException e2) {
+            formulaList = null;
+          }
+
+          if (formulaList != null) {
+
+            int column;
+
+            for (Formula f : formulaList) {
+              column = f.getColumn();
+              if (column < 0)
+                columnList.add(0, f);
+
+              else if (column > columnList.size())
+                columnList.add(f);
+
+              else
+                columnList.add(column - 1, f);
             }
-          });
-        } catch (InterruptedException e1) {
-          System.out.println("exception interrupted");
-          e1.printStackTrace();
-        } catch (InvocationTargetException e1) {
-          System.out.println("exception invocation");
-          e1.printStackTrace();
+
+          }
+
+          dataMap.putAll(allData.getSecond());
+
+          columnCount = columnList.size() + 4;
+          rowCount = 3 + studentList.size();
+
+          /*
+           * System.out.println("lignes : " + JuryModel.this.rowCount);
+           * System.out.println("colonnes : " + JuryModel.this.columnCount);
+           */
+
+          try {
+            EventQueue.invokeAndWait(new Runnable() {
+
+              public void run() {
+                JuryModel.this.fireTableStructureChanged();
+              }
+            });
+          } catch (InterruptedException e1) {
+            System.out.println("exception interrupted");
+            e1.printStackTrace();
+          } catch (InvocationTargetException e1) {
+            System.out.println("exception invocation");
+            e1.printStackTrace();
+          }
         }
-        
-       /* System.out.println(("thread fini !"));*/
+        /* System.out.println(("thread fini !")); */
       }
     });
 
@@ -202,10 +254,23 @@ public class JuryModel extends AbstractTableModel {
     Object o = columnList.get(columnIndex - 1);
     
     if (o instanceof Formula){
-      /*
-       * blablah
-       */
-      return null;
+      Formula f = (Formula)o;
+      
+      if (rowIndex == 0)
+        return f.getDescription();
+      
+      if (rowIndex == 1)
+        return null;
+      
+      SymphonieFormulaFactory.clearMappedValues();
+      
+      Student s = studentList.get(rowIndex - 3);
+      
+      for (Course c : dataMap.get(s).keySet()){
+        SymphonieFormulaFactory.putMappedValue(c.getTitle(), getAverage(dataMap.get(s).get(c).values()));
+      }
+      
+      return f.getValue();
     }
     
     Course c = (Course)o;
@@ -249,22 +314,98 @@ public class JuryModel extends AbstractTableModel {
     }
   }
   
-  
+  public void removeColumn(int columnIndex){
+    
+    if (columnIndex >= columnCount - 3) return;
+
+    Object o = columnList.get(columnIndex - 1);
+
+    if (o instanceof Formula) {
+      es.execute(new Runnable() {
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Runnable#run()
+         */
+        public void run() {
+
+          synchronized (lock) {
+            
+            
+            
+            
+            try {
+              EventQueue.invokeAndWait(new Runnable() {
+
+                public void run() {
+                  JuryModel.this.fireTableStructureChanged();
+                }
+              });
+            } catch (InterruptedException e1) {
+              System.out.println("exception interrupted");
+              e1.printStackTrace();
+            } catch (InvocationTargetException e1) {
+              System.out.println("exception invocation");
+              e1.printStackTrace();
+            }
+          }
+        }
+      });
+    }
+
+  }
 
   /**
    * @param args
+   * @throws IOException 
    */
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     JFrame frame = new JFrame ("test JuryModel");
     frame.setSize(800,600);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     
     DataManager dataManager = SQLDataManager.getInstance();
 
-    JuryModel model = new JuryModel(dataManager);
+    JuryModel model = JuryModel.getInstance(dataManager);
     
     JTable table = new JTable(model);
     table.setTableHeader(null);
+    
+    
+    HashMap<String, String> map = TextualResourcesLoader.getResourceMap("language/symphonie", new Locale(
+    "french"), "ISO-8859-1");
+    
+    ComponentBuilder builder = new ComponentBuilder(map);
+    
+    final JPopupMenu pop = builder.buildPopupMenu(SymphonieConstants.JURYVIEWPOPUP_TITLE);
+    
+    pop.add(builder.buildButton(SymphonieActionFactory.getRemoveJuryColumnAction(null,table, builder), SymphonieConstants.REMOVE_COLUMN, ComponentBuilder.ButtonType.MENU_ITEM));
+    
+    table.addMouseListener(new MouseAdapter() {
+
+      public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)) {
+          pop.show(e.getComponent(), e.getX(), e.getY());
+        }
+      }
+    });
+    
+    table.addMouseListener(new MouseAdapter() {
+
+      public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)) {
+          PointSaver.setPoint(e.getPoint());
+        }
+      }
+    });
+    
+    
+    
+    
+    
+    
+    
     
     table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer(){
       
