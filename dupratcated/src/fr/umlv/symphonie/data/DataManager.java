@@ -10,9 +10,10 @@ import fr.umlv.symphonie.util.Pair;
 
 public interface DataManager
 {    
-	public List<Student> getStudents();
-	public List<Course> getCourses();
-	/*public Map<Integer, String> getTitles();*/
+	public Map<Integer, Student> getStudents();
+	public Map<Integer, Course> getCourses();
+	public Map<Integer, Mark> getMarks();
+  public List<StudentMark> getStudentMarks();
 	public Map<Integer, Mark> getMarksByCourse(Course c)throws DataManagerException;
 	
   /* methodes servant a la vue etudiant */
@@ -26,7 +27,7 @@ public interface DataManager
               SortedMap<Student, Map<Integer, StudentMark>>> getAllMarksByCourse(Course c)throws DataManagerException;
 	
   /* methodes servant a la vue jury */
-	public Map<Student, Map<Course, Map<Integer, StudentMark>>> getAllStudentsMarks()throws DataManagerException;
+	public Pair<Map<Integer, Course>, SortedMap<Student, Map<Course, Map<Integer, StudentMark>>>> getAllStudentsMarks()throws DataManagerException;
 	
 
   /* methodes pour l'admin */

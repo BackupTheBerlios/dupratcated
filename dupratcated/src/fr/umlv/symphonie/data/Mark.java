@@ -43,6 +43,15 @@ public class Mark {
     this.desc = desc;
   }
   
+  
+  public void update(Mark m){
+    desc = m.getDesc();
+    coeff = m.getCoeff();
+    course = m.getCourse(); // pas sur que cette ligne serve
+  }
+  
+  
+  
   /* (non-Javadoc)
    * @see java.lang.Object#toString()
    */

@@ -25,6 +25,11 @@ public class Course {
     return coeff;
   }
 
+  public void update(Course c){
+    title = c.getTitle();
+    coeff = c.getCoeff();
+  }
+  
   /* (non-Javadoc)
    * @see java.lang.Object#toString()
    */

@@ -268,8 +268,12 @@ public class TeacherModel extends AbstractTableModel {
     
     Object o = columnList.get(columnIndex -1);
     
-    if(o instanceof Formula)
+    if(o instanceof Formula){
+      /*
+       * blablah
+       */
       return null;
+    }
     
     else if (o instanceof Mark){
       Mark m = (Mark)o;

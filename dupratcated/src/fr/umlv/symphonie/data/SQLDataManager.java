@@ -12,6 +12,19 @@ import fr.umlv.symphonie.util.Pair;
 
 public class SQLDataManager extends SQLDataManagerConstants implements
     DataManager {
+  
+  
+  private final Map<Integer, Student> studentMap = new HashMap<Integer, Student>();
+  private int studentMapTimeStamp = -1;
+  
+  private final Map<Integer, Mark> markMap = new HashMap<Integer, Mark>();
+  private int markMapTimeStamp = -1;
+  
+  private final Map<Integer, Course> courseMap = new HashMap<Integer, Course>();  
+  private int courseMapTimeStamp = -1;
+  
+  private final List<StudentMark> studentMarkList = new ArrayList<StudentMark>();
+  private int studentMarkListTimeStamp = -1;
 
   /*
    * methodes internes
@@ -54,53 +67,170 @@ public class SQLDataManager extends SQLDataManagerConstants implements
    * methodes de base
    * 
    */
-  public List<Student> getStudents() {
-    ArrayList<Student> list = new ArrayList<Student>();
-    ResultSet results = null;
-    String request = "SELECT * FROM `" + TABLE_STUDENT + "`;";
+  public Map<Integer, Student> getStudents() {
+    
+    /*int n = getTimeStamp(TABLE_STUDENT);*/
+    
+    if (studentMapTimeStamp == -1 /*|| n > studentMapTimeStamp*/){
+      
+      ResultSet results = null;
+      String request = "SELECT * FROM `" + TABLE_STUDENT + "`;";
+      
+      try {
+        results = connectAndQuery(request);
 
-    try {
-      results = connectAndQuery(request);
-
-      while (results.next()) {
-        list.add(new Student(results.getInt(1), results.getString(2), results
-            .getString(3), results.getString(4)));
+        while (results.next()) {
+          Student s = new Student(results.getInt(1), results.getString(2),
+                                  results.getString(3), results.getString(4));
+          
+          if (studentMap.containsKey(s.getId()))
+            studentMap.get(s.getId()).update(s);
+          
+          else studentMap.put(s.getId(), s);
+        }
+        /*studentMapTimeStamp = n;*/
+        
+      } catch (SQLException e) {
+        System.out.println("Error with current query :\n" + request);
+        e.printStackTrace();
       }
-    } catch (SQLException e) {
-      System.out.println("Error with current query :\n" + request);
-      e.printStackTrace();
     }
-
-    return list;
+    
+    return studentMap;
   }
 
-  public List<Course> getCourses() {
-    ArrayList<Course> list = new ArrayList<Course>();
-    ResultSet results = null;
-    String request = "SELECT * FROM `" + TABLE_COURSE + "`;";
+  public Map<Integer, Course> getCourses() {
+    
+    /*int n = getTimeStamp(TABLE_COURSE);*/
+    
+    if (courseMapTimeStamp == -1 /*|| n > courseMapTimeStamp*/){
 
-    try {
-      results = connectAndQuery(request);
+      ResultSet results = null;
+      String request = "SELECT * FROM `" + TABLE_COURSE + "`;";
 
-      while (results.next()) {
-        list.add(new Course(results.getInt(1), results.getString(2), results
-            .getFloat(3)));
-      }
-    } catch (SQLException e) {
-      System.out.println("Error with current query :\n" + request);
-      e.printStackTrace();
+      try {
+        results = connectAndQuery(request);
+
+        while (results.next()) {
+          
+          Course c = new Course(results.getInt(1), results.getString(2), results.getFloat(3));
+          
+          if (courseMap.containsKey(c.getId()))
+            courseMap.get(c.getId()).update(c);
+          
+          else courseMap.put(c.getId(), c);
+        }
+        
+        /*courseMapTimeStamp = n;*/
+        
+      } catch (SQLException e) {
+        System.out.println("Error with current query :\n" + request);
+        e.printStackTrace();
+      } 
     }
-
-    return list;
+    
+    return courseMap;
   }
 
+  public Map<Integer, Mark> getMarks() {
+    /*int n = getTimeStamp(TABLE_TEST);*/
+    
+    if (markMapTimeStamp == -1 /*|| n > markMapTimeStamp*/){
+      
+      Map<Integer, Course> courseMap = getCourses();
+      
+      ResultSet results = null;
+      String request = "SELECT " + COLUMN_ID_FROM_TABLE_TEST + " , " + COLUMN_COEFF_FROM_TABLE_TEST + " , "
+                                 + COLUMN_DESC_FROM_TABLE_TITLE + " , " + COLUMN_ID_COURSE_FROM_TABLE_TEST + " "
+                     + "FROM " + TABLE_TEST + " , " + TABLE_TITLE + " "
+                     + "WHERE " + TABLE_TEST + "." + COLUMN_ID_TITLE_FROM_TABLE_TEST + " = " + TABLE_TITLE + "." + COLUMN_ID_FROM_TABLE_TITLE + " "
+                     + ";";
 
+      try {
+        results = connectAndQuery(request);
+
+        while (results.next()) {
+          
+          Mark m = new Mark(results.getInt(COLUMN_ID_FROM_TABLE_TEST), results.getString(COLUMN_DESC_FROM_TABLE_TITLE),
+                            results.getFloat(COLUMN_COEFF_FROM_TABLE_TEST), courseMap.get(results.getInt(COLUMN_ID_COURSE_FROM_TABLE_TEST)));
+          
+          if (markMap.containsKey(m.getId()))
+            markMap.get(m.getId()).update(m);
+          else markMap.put(m.getId(), m);
+        }
+        
+        /*markMapTimeStamp = n;*/
+        
+      } catch (SQLException e) {
+        System.out.println("Error with current query :\n" + request);
+        e.printStackTrace();
+      } 
+    }
+    
+    return markMap;
+
+  }
+  
+  public List<StudentMark> getStudentMarks(){
+    /*int n = getTimeStamp(TABLE_HAS_MARK);*/
+    
+    if (studentMarkListTimeStamp == -1 /*|| n > studentMarkListTimeStamp*/){
+      
+      Map<Integer, Mark> courseMap = getMarks();
+      Map<Integer, Student> studentMap = getStudents();
+      
+      ResultSet results = null;
+      String request = "SELECT * "
+                     + "FROM " + TABLE_HAS_MARK + " "
+                     + ";";
+
+      try {
+        results = connectAndQuery(request);
+
+        while (results.next()) {
+          
+          StudentMark sm = new StudentMark(studentMap.get(results.getInt(COLUMN_ID_STUDENT_FROM_TABLE_HAS_MARK)),
+                                        markMap.get(results.getInt(COLUMN_ID_TEST_FROM_TABLE_HAS_MARK)),
+                                        results.getFloat(COLUMN_MARK_FROM_TABLE_HAS_MARK));
+          
+          for(StudentMark sm2 : studentMarkList){                     //
+            if (sm.getStudent().getId() == sm2.getStudent().getId()   // alors ca
+             && sm.getMark().getId() == sm2.getMark().getId()         // c'est tres
+             && sm.getValue() != sm2.getValue()){                     // moche mais
+              sm2.setValue(sm.getValue());                            // bon
+              break;                                                  //
+            }
+          }
+        }
+        
+        /*studentMarkListTimeStamp = n;*/
+        
+      } catch (SQLException e) {
+        System.out.println("Error with current query :\n" + request);
+        e.printStackTrace();
+      } 
+    }
+    
+    return studentMarkList;
+    
+  }
+  
+  
+  
   public Map<Integer, Mark> getMarksByCourse(Course c)
       throws DataManagerException {
 
-    Map<Integer, Mark> map = new HashMap<Integer, Mark>();
+    Map<Integer, Mark> markMap = getMarks();
+    Map<Integer, Mark> resultMap = new HashMap<Integer, Mark>();
+    
+    for(Mark m : markMap.values()){
+      if (m.getCourse().getId() == c.getId())
+        resultMap.put(m.getId(), m);
+    }
 
-    ResultSet results = null;
+    return resultMap;
+    
+    /*ResultSet results = null;
 
     String request = "select distinct " + COLUMN_ID_FROM_TABLE_TEST + ", "
         + COLUMN_DESC_FROM_TABLE_TITLE + ", " + COLUMN_COEFF_FROM_TABLE_TEST
@@ -123,62 +253,42 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       throw new DataManagerException("Error with current query :\n" + request);
     }
 
-    return map;
+    return map;*/
   }
 
 
 
-  private Map<Integer, StudentMark> getMarksByStudentAndCourse(Student s,
+  /*private Map<Integer, StudentMark> getMarksByStudentAndCourse(Student s,
       Course c, Map<Integer, Mark> titleMap) throws DataManagerException {
 
-    Map<Integer, StudentMark> markMap = new HashMap<Integer, StudentMark>();
-
-    ResultSet results = null;
-
-    String request = "SELECT " + COLUMN_ID_TEST_FROM_TABLE_HAS_MARK + ", "
-        + COLUMN_MARK_FROM_TABLE_HAS_MARK + " " + "FROM " + TABLE_HAS_MARK
-        + ", " + TABLE_TEST + " " + "WHERE "
-        + COLUMN_ID_STUDENT_FROM_TABLE_HAS_MARK + " = " + s.getId() + " "
-        + "AND " + COLUMN_ID_TEST_FROM_TABLE_HAS_MARK + " = "
-        + COLUMN_ID_FROM_TABLE_TEST + " " + "AND "
-        + COLUMN_ID_COURSE_FROM_TABLE_TEST + " = " + c.getId() + ";";
-
-    try {
-      results = connectAndQuery(request);
-
-      while (results.next()) {
-        StudentMark studentMark = new StudentMark(s, titleMap.get(results
-            .getInt(COLUMN_ID_TEST_FROM_TABLE_HAS_MARK)), results
-            .getFloat(COLUMN_MARK_FROM_TABLE_HAS_MARK));
-
-        markMap.put(studentMark.getMark().getId(), studentMark);
-      }
-    } catch (SQLException e) {
-      throw new DataManagerException("Error with current query :\n" + request);
-    }
-
-    return markMap;
-  }
+    
+  }*/
 
   /*
    * methodes de la vue etudiant
    */
-  public Map<Integer, StudentMark> getMarksByStudentAndCourse(Student s,
-      Course c) throws DataManagerException {
+  public Map<Integer, StudentMark> getMarksByStudentAndCourse(Student s, Course c) throws DataManagerException {
 
-    /*HashMap<Integer, String> map = (HashMap<Integer, String>) getTitles();*/
-    Map<Integer, Mark> titleMap = getMarksByCourse(c);
+    /*Map<Integer, Mark> markMap = getMarksByCourse(c);*/
+    
+    List<StudentMark> studentMarkList = getStudentMarks();
+    Map<Integer, StudentMark> studentMarkMap = new HashMap<Integer, StudentMark>();
 
-    return getMarksByStudentAndCourse(s, c, titleMap);
+    for (StudentMark sm : studentMarkList){
+      if (sm.getCourse().getId() == c.getId())
+        studentMarkMap.put(sm.getMark().getId(), sm);
+    }
+
+    return studentMarkMap;
   }
 
   public Map<Course, Map<Integer, StudentMark>> getAllMarksByStudent(Student s)
       throws DataManagerException {
 
-    ArrayList<Course> list = (ArrayList<Course>) getCourses();
-    HashMap<Course, Map<Integer, StudentMark>> map = new HashMap<Course, Map<Integer, StudentMark>>();
+    Map<Integer, Course> courseMap = getCourses();
+    Map<Course, Map<Integer, StudentMark>> map = new HashMap<Course, Map<Integer, StudentMark>>();
 
-    for (Course c : list) {
+    for (Course c : courseMap.values()) {
       map.put(c, getMarksByStudentAndCourse(s, c));
     }
 
@@ -209,18 +319,18 @@ public class SQLDataManager extends SQLDataManagerConstants implements
         });
 
     // on recupere la liste des etudiants
-    List<Student> list = getStudents();
+    Map<Integer, Student> studentMap = getStudents();
 
     // on recupere la liste de chaque epreuve de la matiere
     Map<Integer, Mark> titleMap = getMarksByCourse(c);
 
     // pour chaque etudiant
-    for (Student s : list) {
+    for (Student s : studentMap.values()) {
 
       // on ajoute a la map les etudiants et leurs notes
       // (version toutes les notes liées a la meme epreuve
       // pour faciliter l'édition de coeff)
-      map.put(s, getMarksByStudentAndCourse(s, c, titleMap));
+      map.put(s, getMarksByStudentAndCourse(s, c));
     }
 
     // on renvoie la paire formee de la map et des intitules des epreuves
@@ -229,18 +339,36 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     return new Pair<Map<Integer, Mark>, SortedMap<Student, Map<Integer, StudentMark>>>(
         titleMap, map);
   }
-
-  public Map<Student, Map<Course, Map<Integer, StudentMark>>> getAllStudentsMarks()
+  
+  
+  /*
+   * methodes servant a la vue jury
+   */
+  public Pair<Map<Integer, Course>, SortedMap<Student, Map<Course, Map<Integer, StudentMark>>>> getAllStudentsMarks()
       throws DataManagerException {
 
-    ArrayList<Student> list = (ArrayList<Student>) getStudents();
-    HashMap<Student, Map<Course, Map<Integer, StudentMark>>> map = new HashMap<Student, Map<Course, Map<Integer, StudentMark>>>();
+    Map<Integer, Student> studentMap = getStudents();
+    Map<Integer, Course> courseMap = getCourses();
+    
+    SortedMap<Student, Map<Course, Map<Integer, StudentMark>>> sortedMap = new TreeMap<Student, Map<Course, Map<Integer, StudentMark>>>(
+        new Comparator<Student>(){
+          public int compare(Student arg0, Student arg1) {
+            int n = arg0.getLastName().compareToIgnoreCase(arg1.getLastName());
 
-    for (Student s : list) {
-      map.put(s, getAllMarksByStudent(s));
+            if (n == 0) n = arg0.getName().compareToIgnoreCase(arg1.getName());
+
+            if (n == 0) return arg0.getId() - arg1.getId();
+
+            return n;
+          }
+    });
+
+    for (Student s : studentMap.values()) {
+      sortedMap.put(s, getAllMarksByStudent(s));
     }
 
-    return map;
+    return new Pair<Map<Integer, Course>, SortedMap<Student, Map<Course, Map<Integer, StudentMark>>>>(
+        courseMap, sortedMap);
   }
 
   public void addStudent(String name, String lastName) throws SQLException {
@@ -520,7 +648,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
    * @param markKey
    */
   private void setDefaultMarkToAllStudents(int markKey) throws SQLException {
-    List<Student> studentList = getStudents();
+    Map<Integer, Student> studentMap = getStudents();
     PreparedStatement preparedStatement = null;
 
     String request = "insert into " + TABLE_HAS_MARK + "values (?, " + markKey
@@ -533,7 +661,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       e.printStackTrace();
     }
 
-    for (Student s : studentList) {
+    for (Student s : studentMap.values()) {
       try {
         preparedStatement.setInt(1, s.getId());
         preparedStatement.execute();

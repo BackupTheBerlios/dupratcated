@@ -43,6 +43,10 @@ public class Student {
 		return comment;	
 	}
   
+  public void update(Student s){
+    name = s.getName();
+    lastName = s.getLastName();
+  }
   
   /* (non-Javadoc)
    * @see java.lang.Object#toString()
