@@ -13,7 +13,7 @@ public class ConnectionManager {
     
     public static Connection createConnection() throws SQLException{
         
-        String url = "jdbc:mysql://localhost";
+      String url = "jdbc:mysql://localhost";
     	String base = "dupratcated";
     	String login = "susmab";
     	String password = "";

@@ -38,5 +38,5 @@ public abstract class SQLDataManagerConstants
   
   // attributs de la table timestamp
   static public final String COLUMN_TABLE_NAME_FROM_TABLE_TIMESTAMP = "table_name";
-  static public final String COLUMN_TIMESTAMP_FROM_TABLE_TIMESTAMP = "timestamp";
+  static public final String COLUMN_TIMESTAMP_FROM_TABLE_TIMESTAMP = "stamp";
 }
