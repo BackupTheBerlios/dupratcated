@@ -31,7 +31,7 @@ public interface DataManager
 	
 
   /* methodes pour l'admin */
-	public void addStudent(String name, String lastName) throws SQLException;
+	public void addStudent(String name, String lastName) throws DataManagerException;
 	public void addStudents(List<String> listName, List<String> listLastName) throws SQLException, DataManagerException;
 	public void removeStudent(Student s) throws SQLException;
 	
