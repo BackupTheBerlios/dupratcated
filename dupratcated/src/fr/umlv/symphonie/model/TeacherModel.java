@@ -383,8 +383,7 @@ public class TeacherModel extends AbstractTableModel implements
       Mark m = (Mark) o;
       if (rowIndex == 0) return m;
       if (rowIndex == 1) return m.getCoeff();
-      return studentMarkMap.get(studentList.get(rowIndex - 3)).get(m.getId())
-          .getValue();
+      return studentMarkMap.get(studentList.get(rowIndex - 3)).get(m.getId())/*.getValue()*/;
     }
 
     return null;
