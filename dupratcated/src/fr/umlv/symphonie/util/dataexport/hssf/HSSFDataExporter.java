@@ -10,7 +10,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +20,6 @@ import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
@@ -33,6 +31,7 @@ import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.data.formula.Formula;
+import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
 import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.ExceptionDisplayDialog;
 import fr.umlv.symphonie.util.Pair;
@@ -185,99 +184,118 @@ public class HSSFDataExporter implements DataExporter {
   public void exportTeacherView(String documentName, DataManager dm, Course c)
       throws DataExporterException {
 
-    // Try to retrieve data
-    Pair<Map<Integer, Mark>, SortedMap<Student, Map<Integer, StudentMark>>> studentAndMarkPair = null;
     try {
-      studentAndMarkPair = dm.getAllMarksByCourse(c);
+
+      // Retrieve data
+      Pair<Map<Integer, Mark>, SortedMap<Student, Map<Integer, StudentMark>>> studentAndMarkPair = dm
+          .getAllMarksByCourse(c);
+
+      HashMap<Integer, Mark> marx = new HashMap<Integer, Mark>();
+      marx.putAll(studentAndMarkPair.getFirst());
+      TreeMap<Student, Map<Integer, StudentMark>> studentMarx = new TreeMap<Student, Map<Integer, StudentMark>>(
+          HSSFExportUtils.STUDENT_COMPARATOR);
+      studentMarx.putAll(studentAndMarkPair.getSecond());
+
+      ArrayList<Object> columns = new ArrayList<Object>(marx.values());
+      List<Formula> formulas;
+      try {
+        formulas = dm.getFormulasByCourse(c);
+      } catch (DataManagerException e1) {
+        formulas = null;
+      }
+      
+      HSSFDataExporter.insertFormulaColumns(columns, formulas);
+
+      int rowCount = studentMarx.size() + 3;
+      short columnCount = (short) (marx.size() + 2 + formulas.size());
+
+      short[] formulaColumns = new short[formulas.size()];
+      short[] markColumns = new short[marx.values().size()];
+      int iFormula = 0;
+      int iMark = 0;
+      short iCol = 1;
+      for (Object o : columns) {
+        if (o instanceof Formula)
+          formulaColumns[iFormula++] = iCol;
+        else if (o instanceof Mark)
+          markColumns[iMark++] = iCol;
+        else
+          throw new DataExporterException(new IllegalStateException(
+              "Invalid column object"));
+        iCol++;
+      }
+
+      // Create workbook and sheet
+      HSSFWorkbook wkbook = new HSSFWorkbook();
+      HSSFSheet sheet = wkbook.createSheet(c.getTitle());
+
+      // Create cell styles
+      HSSFCellStyle twoDecimalsStyle = wkbook.createCellStyle();
+      twoDecimalsStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("0.00"));
+      HSSFCellStyle boldCell = wkbook.createCellStyle();
+      HSSFFont bold = wkbook.createFont();
+      bold.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+      boldCell.setFont(bold);
+      boldCell.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+
+      // Create header
+      String strValue = bu.getValue(HSSFExportUtils.MARK_TITLE_KEY);
+      HSSFExportUtils.getCell(sheet, 0, (short) 0, boldCell).setCellValue(
+          strValue);
+      HSSFExportUtils.setColumnWidth((short) 0, sheet, strValue);
+
+      strValue = bu.getValue(HSSFExportUtils.COEFF_KEY);
+      HSSFExportUtils.getCell(sheet, 1, (short) 0, boldCell).setCellValue(
+          strValue);
+      HSSFExportUtils.setColumnWidth((short) 0, sheet, strValue);
+
+      strValue = bu.getValue(HSSFExportUtils.AVERAGE_KEY);
+      HSSFExportUtils.getCell(sheet, 0, (short) (columnCount - 1), boldCell)
+          .setCellValue(strValue);
+      HSSFExportUtils.setColumnWidth((short) 0, sheet, strValue);
+
+      // Put students
+      int iRow = 3;
+      for (Student s : studentMarx.keySet()) {
+        strValue = s.getLastName() + ',' + s.getName();
+        HSSFExportUtils.getCell(sheet, iRow++, (short) 0, boldCell)
+            .setCellValue(strValue);
+        HSSFExportUtils.setColumnWidth((short) 0, sheet, strValue);
+      }
+
+      // Put marks
+      Mark m;
+      for (short col : markColumns) {
+        m = (Mark) columns.get(col - 1);
+
+        // Put mark title
+        HSSFExportUtils.getCell(sheet, 0, col, boldCell).setCellValue(
+            m.getDesc());
+        HSSFExportUtils.setColumnWidth(col, sheet, m.getDesc());
+        
+        // Put mark coeff
+        HSSFExportUtils.getCell(sheet, 1, col, twoDecimalsStyle).setCellValue(m.getCoeff());
+        
+        // Put values
+        iRow = 3;
+        for (Map<Integer, StudentMark> mism : studentMarx.values()) {
+          HSSFExportUtils.getCell(sheet, iRow++, col, twoDecimalsStyle).setCellValue(mism.get(m.getId()).getValue());
+        }
+      }
+
+      // Write workbook on disc
+      FileOutputStream fos = new FileOutputStream(documentName);
+      wkbook.write(fos);
+
+    } catch (FileNotFoundException e) {
+      throw new DataExporterException("Error while accessing file "
+          + documentName, e);
     } catch (DataManagerException e) {
       throw new DataExporterException(
           "Error while retrieving exportable data for course " + c, e);
-    }
-
-    HashMap<Integer, Mark> marx = new HashMap<Integer, Mark>(studentAndMarkPair
-        .getFirst());
-    TreeMap<Student, Map<Integer, StudentMark>> studentMarx = new TreeMap<Student, Map<Integer, StudentMark>>(
-        HSSFExportUtils.STUDENT_COMPARATOR);
-    studentMarx.putAll(studentAndMarkPair.getSecond());
-
-    ArrayList<Object> columns = new ArrayList<Object>(marx.values());
-
-    List<Formula> formulas;
-
-    try {
-      formulas = dm.getFormulasByCourse(c);
-    } catch (DataManagerException e2) {
-      formulas = null;
-    }
-
-    if (formulas != null) {
-
-      int formulaColumn;
-      for (Formula f : formulas) {
-        formulaColumn = f.getColumn();
-        if (formulaColumn < 0)
-          columns.add(0, f);
-        else if (formulaColumn > columns.size())
-          columns.add(f);
-        else
-          columns.add(formulaColumn - 1, f);
-      }
-    }
-
-    int rowCount = studentMarx.size() + 3;
-    short columnCount = (short) (marx.size() + 2 + formulas.size());
-
-    // Create workbook and sheet
-    HSSFWorkbook wkbook = new HSSFWorkbook();
-    HSSFSheet sheet = wkbook.createSheet(c.getTitle());
-
-    // Create cell styles
-    HSSFCellStyle twoDecimalsStyle = wkbook.createCellStyle();
-    twoDecimalsStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("0.00"));
-
-    HSSFCellStyle boldCell = wkbook.createCellStyle();
-    HSSFFont bold = wkbook.createFont();
-    bold.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
-    boldCell.setFont(bold);
-    boldCell.setAlignment(HSSFCellStyle.ALIGN_CENTER);
-
-    // Create header
-    HSSFExportUtils.getCell(sheet, 0, (short) 0, boldCell).setCellValue(
-        bu.getValue(HSSFExportUtils.MARK_TITLE_KEY));
-    HSSFExportUtils.getCell(sheet, 1, (short) 0, boldCell).setCellValue(
-        bu.getValue(HSSFExportUtils.COEFF_KEY));
-    HSSFExportUtils.getCell(sheet, 0, (short) (short) (columnCount - 1),
-        boldCell).setCellValue(bu.getValue(HSSFExportUtils.AVERAGE_KEY));
-
-    short i = 2;
-    for (Object o : columns) {
-      if (o instanceof Mark) {
-        Mark m = (Mark) o;
-
-        HSSFExportUtils.getCell(sheet, 0, i, boldCell)
-            .setCellValue(m.getDesc());
-        HSSFExportUtils.getCell(sheet, 1, i, twoDecimalsStyle).setCellValue(
-            m.getCoeff());
-
-        int j = 3;
-        for (Student s : studentMarx.keySet()) {
-          HSSFExportUtils.getCell(sheet, j++, (short) 0, boldCell)
-              .setCellValue(s.getLastName() + ", " + s.getName());
-        }
-
-      }
-    }
-
-    // Write workbook on disc
-    try {
-      FileOutputStream fos = new FileOutputStream(documentName);
-      wkbook.write(fos);
-    } catch (FileNotFoundException e1) {
-      throw new DataExporterException("Error while accessing file "
-          + documentName, e1);
-    } catch (IOException e1) {
+    } catch (IOException e) {
       throw new DataExporterException(
-          "Error while writting generated spreadsheet", e1);
+          "Error while writting generated spreadsheet", e);
     }
 
   }
@@ -293,13 +311,38 @@ public class HSSFDataExporter implements DataExporter {
    *          The marks map
    * @return the biggest index
    */
-  public static final int getMaxColumnIndex(
+  private static final int getMaxColumnIndex(
       Map<Course, Map<Integer, StudentMark>> marks) {
     int n = 0;
     int tmp = 0;
     for (Course c : marks.keySet())
       if ((n = marks.get(c).size()) > tmp) tmp = n;
     return n;
+  }
+
+  /**
+   * Insert formulas by column number in the given list of objects that
+   * represent columns
+   * 
+   * @param columns
+   *          The column list
+   * @param formulas
+   *          The formula list
+   */
+  private static final void insertFormulaColumns(ArrayList<Object> columns,
+      List<Formula> formulas) {
+    if (formulas != null) {
+      int formulaColumn;
+      for (Formula f : formulas) {
+        formulaColumn = f.getColumn();
+        if (formulaColumn < 0)
+          columns.add(0, f);
+        else if (formulaColumn > columns.size())
+          columns.add(f);
+        else
+          columns.add(formulaColumn - 1, f);
+      }
+    }
   }
 
   public void exportJuryView(String documentName, DataManager dm)
@@ -310,12 +353,14 @@ public class HSSFDataExporter implements DataExporter {
   public static void main(String[] args) {
     ComponentBuilder b = null;
     try {
+      SymphonieFormulaFactory.parseFormula("fcuk", new String("${examen}*2".getBytes(), "ascii"), 45, 2);
       DataManager dm = SQLDataManager.getInstance();
       Course c = dm.getCoursesList().get(1);
       HashMap<String, String> peuma = new HashMap<String, String>();
       peuma.put(HSSFExportUtils.COEFF_KEY, "Coefficient");
       peuma.put(HSSFExportUtils.AVERAGE_KEY, "Moyenne");
       peuma.put(HSSFExportUtils.MARK_KEY, "Note");
+      peuma.put(HSSFExportUtils.MARK_TITLE_KEY, "Intitulé");
       peuma
           .put("exceptiondialog.message", "Une erreur inopinée est survenue :");
       peuma.put("exceptiondialog.hidedetail", "<< Détails");
@@ -323,8 +368,9 @@ public class HSSFDataExporter implements DataExporter {
       peuma.put("bok", "OK");
       b = new ComponentBuilder(peuma);
       new HSSFDataExporter(b).exportTeacherView(
-          "/home/mif001/spenasal/jdgujr.xls", dm, c);
+          "C:\\jdgujr.xls", dm, c);
     } catch (Exception e) {
+      e.printStackTrace();
       new ExceptionDisplayDialog(null, b).showException(e);
     }
   }
