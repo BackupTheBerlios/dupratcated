@@ -6,6 +6,7 @@
 package fr.umlv.symphonie.util;
 
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -172,10 +173,26 @@ public final class ExceptionDisplayDialog {
   }
 
   // ----------------------------------------------------------------------------
-  // Static fields
+  // Static members
   // ---------------------------------------------------------------------------
 
   public static final String MESSAGE = "exceptiondialog.message";
   public static final String HIDE_DETAIL = "exceptiondialog.hidedetail";
   public static final String SHOW_DETAIL = "exceptiondialog.showdetail";
+
+  /**
+   * Throws an exception in the event dispatch thread.
+   * 
+   * @param t
+   *          The <code>Throwable</code> object, it will be wrapped in a
+   *          <code>RuntimeException</code>
+   */
+  public static final void postException(final Throwable t) {
+    EventQueue.invokeLater(new Runnable() {
+
+      public void run() {
+        throw new RuntimeException(t);
+      }
+    });
+  }
 }
