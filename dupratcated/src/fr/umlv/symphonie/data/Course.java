@@ -24,12 +24,25 @@ public class Course {
   public float getCoeff() {
     return coeff;
   }
+  
+  /**
+   * @param desc the title to set.
+   */
+  public void setTitle(String title) {
+    this.title = title;
+  }
+  
+  /**
+   * @param coeff the coeff to set.
+   */
+  public void setCoeff(float coeff) {
+    this.coeff = coeff;
+  }
 
   public void update(Course c){
     title = c.getTitle();
     coeff = c.getCoeff();
-  }
-  
+  }  
   
   public boolean equals(Object obj) {
     if (!(obj instanceof Course))
