@@ -35,7 +35,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -51,7 +50,6 @@ import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.SingleSelectionModel;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -60,7 +58,6 @@ import javax.swing.event.HyperlinkListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
@@ -468,7 +465,7 @@ public class Symphonie {
 
             int col = table.columnAtPoint(e.getPoint());
 
-            Object o = table.getValueAt(row, col);
+            Object o = table.getModel().getValueAt(row, col);
 
             selectedCell = new Pair<Object, Point>(table.getValueAt(row, col),
                 new Point(row, col));
@@ -673,7 +670,7 @@ public class Symphonie {
           int row = table.rowAtPoint(e.getPoint());
           if (row >= 3) {
             int col = table.columnAtPoint(e.getPoint());
-            Object o = table.getValueAt(row, col);
+            Object o = table.getModel().getValueAt(row, col);
             selectedCell = new Pair<Object, Point>(table.getValueAt(row, col),
                 new Point(row, col));
             formatCell.setEnabled(true);
@@ -901,7 +898,7 @@ public class Symphonie {
           int row = table.rowAtPoint(e.getPoint());
           if (row >= 3) {
             int col = table.columnAtPoint(e.getPoint());
-            Object o = table.getValueAt(row, col);
+            Object o = table.getModel().getValueAt(row, col);
             selectedCell = new Pair<Object, Point>(table.getValueAt(row, col),
                 new Point(row, col));
             formatCell.setEnabled(true);
@@ -969,24 +966,6 @@ public class Symphonie {
           else
             removeColumn.setEnabled(false);
         }
-      }
-    });
-
-    table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
-
-      public Component getTableCellRendererComponent(JTable table,
-          Object value, boolean isSelected, boolean hasFocus, int row,
-          int column) {
-        JLabel label = (JLabel) super.getTableCellRendererComponent(table,
-            value, isSelected, hasFocus, row, column);
-
-        label.setHorizontalAlignment(SwingConstants.CENTER);
-
-        if (column == 0 || row == 0
-            || column == table.getModel().getColumnCount() - 2)
-          label.setFont(getFont().deriveFont(Font.BOLD));
-
-        return label;
       }
     });
 

@@ -110,8 +110,6 @@ public class SymphonieActionFactory {
    * 
    * @param icon
    *          The action SMALL_ICON
-   * @param symph
-   *          The symphonie instance
    * @return an AbstractAction
    */
   public AbstractAction getPrintAction(Icon icon) {
@@ -130,8 +128,6 @@ public class SymphonieActionFactory {
   /**
    * Creates an action that changes view
    * 
-   * @param s
-   *          The <code>Symphonie</code> instance
    * @param view
    *          The view to se
    * @return an <code>AbstractAction</code>
@@ -148,8 +144,6 @@ public class SymphonieActionFactory {
   /**
    * Creates an action that changes language
    * 
-   * @param s
-   *          The <code>Symphonie</code> instance
    * @param langue
    *          The language to set
    * @return an <code>AbstractAction</code>
@@ -258,12 +252,8 @@ public class SymphonieActionFactory {
    * 
    * @param icon
    *          The Action SMALL_ACTION
-   * @param builder
-   *          The builder for internationalization
    * @param is
    *          The loggin service
-   * @param s
-   *          The symphonie instance
    * @return an AbstractAction
    */
   public AbstractAction getConnectAction(Icon icon,
@@ -337,8 +327,6 @@ public class SymphonieActionFactory {
    * 
    * @param icon
    *          The SMALL_ICON property
-   * @param frame
-   *          The frame owner of the dialog
    * @return an AbstractAction
    */
   public AbstractAction getDBAction(Icon icon) {
@@ -360,10 +348,6 @@ public class SymphonieActionFactory {
    * 
    * @param icon
    *          The SMALL_ICON property
-   * @param frame
-   *          The frame owner of the dialog
-   * @param builder
-   *          The builder for internationalization
    * @return an AbstractAction
    */
   public AbstractAction getPwdAction(Icon icon) {
@@ -400,8 +384,6 @@ public class SymphonieActionFactory {
    *          The action SMALL_ICON
    * @param table
    *          The student table
-   * @param s
-   *          The symphonie instance
    * @return an AbstractAction
    */
   public AbstractAction getStudentPrintAction(Icon icon, final JTable table) {
@@ -783,8 +765,6 @@ public class SymphonieActionFactory {
    *          The action SMALL_ICON
    * @param table
    *          The jury table
-   * @param s
-   *          The symphonie instance
    * @return an AbstractAction
    */
   public AbstractAction getJuryPrintAction(Icon icon, final JTable table) {
