@@ -76,6 +76,20 @@ public class TeacherModel extends AbstractTableModel {
   
   private static TeacherModel instance = null;
   
+  protected final Comparator<Student> StudentComparator = new Comparator<Student>(){
+    public int compare(Student o1, Student o2) {
+      int n = o1.getLastName().compareToIgnoreCase(o2.getLastName());
+      
+      if (n == 0)
+        n = o1.getName().compareToIgnoreCase(o2.getName());
+      
+      if (n == 0)
+        return o1.getId() - o2.getId();
+      
+      return n;
+    }
+  };
+  
   /*
    * le datamanager et
    * la matiere
@@ -103,19 +117,7 @@ public class TeacherModel extends AbstractTableModel {
    */
   protected final Map<Integer, Mark> markMap = new HashMap<Integer, Mark>();
   protected final SortedMap<Student, Map<Integer, StudentMark>> studentMarkMap =
-    new TreeMap<Student, Map<Integer, StudentMark>>(new Comparator<Student>(){
-      public int compare(Student o1, Student o2) {
-        int n = o1.getLastName().compareToIgnoreCase(o2.getLastName());
-        
-        if (n == 0)
-          n = o1.getName().compareToIgnoreCase(o2.getName());
-        
-        if (n == 0)
-          return o1.getId() - o2.getId();
-        
-        return n;
-      }
-    });
+    new TreeMap<Student, Map<Integer, StudentMark>>(StudentComparator);
   
   
   private final HashMap<Object, CellFormat> formattedObjects = new HashMap<Object, CellFormat>();
@@ -218,6 +220,8 @@ public class TeacherModel extends AbstractTableModel {
 //          System.out.println("colonnes : " + columnCount);
 
           studentList.addAll(studentMarkMap.keySet());
+
+          
 
           try {
             EventQueue.invokeAndWait(new Runnable() {

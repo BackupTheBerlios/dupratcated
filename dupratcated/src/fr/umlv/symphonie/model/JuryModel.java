@@ -64,18 +64,18 @@ public class JuryModel extends AbstractTableModel {
    * Pool de threads qui n'en contient qu'un seul et qui sert pour le
    * rafraîchissement du canal courant.
    */
-  private final ExecutorService es = Executors.newSingleThreadExecutor();
+  protected final ExecutorService es = Executors.newSingleThreadExecutor();
   
   protected final Object lock = new Object();
   
   private static JuryModel instance = null; 
   
-  private JuryModel(DataManager manager) {
+  protected JuryModel(DataManager manager) {
     this.manager = manager;
     update();
   }
   
-  private void setManager(DataManager manager){
+  protected void setManager(DataManager manager){
     this.manager = manager;
   }
   
