@@ -2,10 +2,13 @@
  * This file is part of Symphonie Created : 1 mars 2005 16:09:01
  */
 
-package fr.umlv.symphonie.util.export.xml;
+package fr.umlv.symphonie.util.dataexport.xml;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedMap;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -23,22 +26,25 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import fr.umlv.symphonie.data.Course;
+import fr.umlv.symphonie.data.DataManagerException;
+import fr.umlv.symphonie.data.Mark;
 import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
-import fr.umlv.symphonie.util.export.DataExporter;
+import fr.umlv.symphonie.util.Pair;
+import fr.umlv.symphonie.util.dataexport.DataExporter;
 
 /**
  * @author Laurent GARCIA
  */
-public abstract class XMLExporter implements DataExporter {
+public class XMLExporter implements DataExporter {
 
-	protected String documentName;
+	private String documentName;
 
-	protected final File dtd = new File(
-			"src/fr/umlv/symphonie/util/export/xml/symphonie.dtd");
+	private final File dtd = new File(
+			"src/fr/umlv/symphonie/util/dataexport/xml/symphonie.dtd");
 
-	protected final SQLDataManager dm = new SQLDataManager();
+	private final SQLDataManager dm = new SQLDataManager();
 
 	/**
 	 * add a course node
@@ -51,7 +57,7 @@ public abstract class XMLExporter implements DataExporter {
 	 * @param c
 	 *            the course object
 	 */
-	protected static void addCourseNode(Node root, Node before, Course c) {
+	private static void addCourseNode(Node root, Node before, Course c) {
 		final Node course;
 
 		/** <course id_course="?">... </course> */
@@ -84,7 +90,7 @@ public abstract class XMLExporter implements DataExporter {
 	 * @param sm
 	 *            the student mark object
 	 */
-	protected static void addExamenNode(Node root, StudentMark sm) {
+	private static void addExamenNode(Node root, StudentMark sm) {
 		final Node examen;
 
 		/** <examen id_examen="?">... </examen> */
@@ -116,7 +122,7 @@ public abstract class XMLExporter implements DataExporter {
 	 * 
 	 * @return the new student node
 	 */
-	protected static Node addStudentNode(Node root, Student s, boolean comment) {
+	private static Node addStudentNode(Node root, Student s, boolean comment) {
 		final Node student;
 
 		/** <student id_student="?">... </student> */
@@ -151,7 +157,7 @@ public abstract class XMLExporter implements DataExporter {
 	 * @param sm
 	 *            the student mark object
 	 */
-	protected static void addMarkNode(Node root, StudentMark sm) {
+	private static void addMarkNode(Node root, StudentMark sm) {
 		final Node mark;
 
 		/** <student_mark id_course="?" id_examen=?">... </student_mark> */
@@ -167,18 +173,21 @@ public abstract class XMLExporter implements DataExporter {
 	}
 
 	/**
-	 * create a new document object
+	 * createprivate final Course c; a new document object
 	 * 
 	 * @return a new document object
 	 */
-	protected Document newDocument() {
+	private Document newDocument() {
 		try {
-		      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		     
-		      /** the parser produced by this code will validate documents as they are parsed */
-		      dbf.setValidating(true);
-		
-		     return dbf.newDocumentBuilder().newDocument();
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+
+			/**
+			 * the parser produced by this code will validate documents as they
+			 * are parsed
+			 */
+			dbf.setValidating(true);
+
+			return dbf.newDocumentBuilder().newDocument();
 		} catch (ParserConfigurationException e) {
 			System.out
 					.println("Error during the creation of the document object : \n"
@@ -195,7 +204,7 @@ public abstract class XMLExporter implements DataExporter {
 	 * @param document
 	 *            the document object
 	 */
-	protected void writeDocument(Document document) {
+	private void writeDocument(Document document) {
 		try {
 			final Transformer transformer = TransformerFactory.newInstance()
 					.newTransformer();
@@ -233,6 +242,176 @@ public abstract class XMLExporter implements DataExporter {
 					+ e + "\n");
 			e.printStackTrace();
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see fr.umlv.symphonie.util.dataexport.DataExporter#exportStudentView(java.lang.String,
+	 *      fr.umlv.symphonie.data.Student)
+	 */
+	public void exportStudentView(String documentName, Student s) {
+		this.documentName = documentName;
+		final Document document = newDocument();
+		HashMap<Course, Map<Integer, StudentMark>> map = null;
+
+		try {
+			map = (HashMap<Course, Map<Integer, StudentMark>>) dm
+					.getAllMarksByStudent(s);
+		} catch (DataManagerException e1) {
+			e1.printStackTrace();
+		}
+
+		/** <symphonie view="student">... </symphonie> */
+		final Element e = document.createElement("symphonie");
+		e.setAttribute("view", "student");
+		final Node root = document.appendChild(e);
+
+		/** we export all the courses */
+		for (Course c : map.keySet()) {
+			addCourseNode(root, null, c);
+		}
+
+		/** we export the student of the student view */
+		final Node studentNode = addStudentNode(root, s, false);
+
+		/**
+		 * we export all the marks for the student of the student view and all
+		 * the examens
+		 */
+		for (Map<Integer, StudentMark> tmp : map.values()) {
+			for (StudentMark sm : tmp.values()) {
+				addExamenNode(root, sm);
+				addMarkNode(studentNode, sm);
+			}
+		}
+
+		writeDocument(document);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see fr.umlv.symphonie.util.dataexport.DataExporter#exportTeacherView(java.lang.String,
+	 *      fr.umlv.symphonie.data.Course)
+	 */
+	public void exportTeacherView(String documentName, Course c) {
+		this.documentName = documentName;
+		final Document document = newDocument();
+		Pair<Map<Integer, Mark>, SortedMap<Student, Map<Integer, StudentMark>>> pair = null;
+		Map<Integer, StudentMark> map;
+		Node studentNode;
+		final int idLastStudent;
+
+		try {
+			pair = dm.getAllMarksByCourse(c);
+		} catch (DataManagerException e) {
+			e.printStackTrace();
+		}
+
+		final SortedMap<Student, Map<Integer, StudentMark>> sortedMap = pair
+				.getSecond();
+
+		/** <symphonie view="teacher">... </symphonie> */
+		final Element e = document.createElement("symphonie");
+		e.setAttribute("view", "teacher");
+		final Node root = document.appendChild(e);
+
+		/** we export the course of the teacher view */
+		addCourseNode(root, null, c);
+
+		idLastStudent = sortedMap.lastKey().getId();
+
+		/** we export all the students */
+		for (Student s : sortedMap.keySet()) {
+			studentNode = addStudentNode(root, s, false);
+			map = sortedMap.get(s);
+
+			/** we export all the marks for one student and all the examens */
+			for (StudentMark sm : map.values()) {
+
+				/**
+				 * if it the last student node, we can create the examens nodes
+				 * since it has to be at the end of the xml
+				 */
+				if (idLastStudent == s.getId()) {
+					addExamenNode(root, sm);
+				}
+
+				addMarkNode(studentNode, sm);
+			}
+		}
+
+		/** we create the document */
+		writeDocument(document);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see fr.umlv.symphonie.util.dataexport.DataExporter#exportJuryView(java.lang.String)
+	 */
+	public void exportJuryView(String documentName) {
+		this.documentName = documentName;
+		final Document document = newDocument();
+		Pair<Map<Integer, Course>, SortedMap<Student, Map<Course, Map<Integer, StudentMark>>>> pair = null;
+		Map<Integer, StudentMark> map2;
+		Node studentNode;
+		final int idLastStudent;
+		final int idFirstSudent;
+
+		try {
+			pair = dm.getAllStudentsMarks();
+		} catch (DataManagerException e1) {
+			e1.printStackTrace();
+		}
+
+		final HashMap<Integer, Course> map = (HashMap<Integer, Course>) pair
+				.getFirst();
+		final SortedMap<Student, Map<Course, Map<Integer, StudentMark>>> sortedMap = pair
+				.getSecond();
+
+		/** <symphonie view="jury">... </symphonie> */
+		final Element e = document.createElement("symphonie");
+		e.setAttribute("view", "jury");
+		final Node root = document.appendChild(e);
+
+		idLastStudent = sortedMap.lastKey().getId();
+		idFirstSudent = sortedMap.firstKey().getId();
+
+		/** we export all the students */
+		for (Student s : sortedMap.keySet()) {
+			studentNode = addStudentNode(root, s, true);
+
+			/** for each course */
+			for (Course c : map.values()) {
+				map2 = sortedMap.get(s).get(c);
+
+				/**
+				 * if it the first student node, we can create the courses nodes
+				 * before the student node since it has to be at the begin of
+				 * the xml
+				 */
+				if (idFirstSudent == s.getId()) {
+					addCourseNode(root, studentNode, c);
+				}
+
+				/** we export all the marks for one student and all the examens */
+				for (StudentMark sm : map2.values()) {
+					/**
+					 * if it the last student node, we can create the examens
+					 * nodes since it has to be at the end of the xml
+					 */
+					if (idLastStudent == s.getId()) {
+						addExamenNode(root, sm);
+					}
+
+					addMarkNode(studentNode, sm);
+				}
+			}
+		}
+
+		writeDocument(document);
 	}
 
 }
