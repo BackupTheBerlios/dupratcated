@@ -1524,7 +1524,7 @@ public class SQLDataManager implements
 	/* (non-Javadoc)
 	 * @see fr.umlv.symphonie.data.DataManager#addMark(java.lang.String, float, fr.umlv.symphonie.data.Course)
 	 */
-	public void addMark(String desc, float coeff, Course c)
+	public Mark addMark(String desc, float coeff, Course c)
 			throws DataManagerException {
 		int titleKey = -1;
 
@@ -1583,6 +1583,8 @@ public class SQLDataManager implements
 					"error initializing marks for new test " + desc
 							+ "related to " + c, e);
 		}
+    
+    return m;
 
 	}
 

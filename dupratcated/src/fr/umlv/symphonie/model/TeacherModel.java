@@ -37,6 +37,7 @@ import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
 import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.Pair;
 import fr.umlv.symphonie.util.StudentAverage;
+import fr.umlv.symphonie.util.completion.CompletionDictionary;
 import fr.umlv.symphonie.view.cells.CellFormat;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
 import fr.umlv.symphonie.view.cells.FormattableCellRenderer;
@@ -105,9 +106,22 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
 
   private int lastRow = -1;
   
+  protected final CompletionDictionary dictionary = new CompletionDictionary();
+  
   public TeacherModel(DataManager manager, ComponentBuilder builder) {
     this.manager = manager;
-	this.builder = builder;
+    this.builder = builder;
+    
+    fillDefaultDictionary();
+  }
+
+/**
+   * 
+   */
+  private void fillDefaultDictionary() {
+    dictionary.add("average");
+    dictionary.add("min");
+    dictionary.add("max");
   }
 
 //  static public TeacherModel getInstance(final DataManager manager) {
@@ -233,7 +247,13 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
     studentList.clear();
 
     studentMarkMap.clear();
+    
+    for(Mark m : markMap.values()){
+      dictionary.remove(m.getDesc());
+    }
+    
     markMap.clear();
+    
     
     fireTableStructureChanged();
   }
@@ -352,8 +372,13 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
       es.execute(new Runnable() {
 
         public void run() {
+          
+          Mark m = (Mark)o;
+          
+          dictionary.remove(m.getDesc());
+          
           try {
-            manager.changeMarkDescription((Mark) o, (String) value);
+            manager.changeMarkDescription(m, (String) value);
           } catch (DataManagerException e) {
             System.out
                 .println("Error while attempting to modify the test name to "
@@ -361,6 +386,8 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
             e.printStackTrace();
           }
 
+          dictionary.add(m.getDesc());
+          
           try {
             EventQueue.invokeAndWait(new Runnable() {
 
@@ -508,12 +535,17 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
         synchronized (lock) {
 
           if (course != null) {
+            
+            Mark m = null;
+            
             try {
-              manager.addMark(desc, coeff, course);
+              m = manager.addMark(desc, coeff, course);
             } catch (DataManagerException e) {
               System.out.println(e.getMessage());
             }
 
+            dictionary.add(m.getDesc());
+            
             try {
               EventQueue.invokeAndWait(new Runnable() {
 
@@ -588,12 +620,15 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
 
       public void run() {
         synchronized (lock) {
+          
           try {
             manager.removeMark(mark);
           } catch (DataManagerException e) {
             System.out.println(e.getMessage());
           }
 
+          dictionary.remove(mark.getDesc());
+          
           try {
             EventQueue.invokeAndWait(new Runnable() {
 
@@ -611,6 +646,13 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
     });
   }
 
+  /**
+   * @return Returns the dictionary.
+   */
+  public CompletionDictionary getDictionary() {
+    return dictionary;
+  }
+  
   public MessageFormat getHeaderMessageFormat() {
     return new MessageFormat(builder.getValue(TEACHER_HEADER) + course);
   }
