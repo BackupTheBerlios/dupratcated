@@ -173,6 +173,8 @@ public interface DataManager {
    */
   public void addTeacherFormula(String expression, String desc, Course course, int column)throws DataManagerException;
   
+  public void removeTeacherFormula(Formula f, Course c) throws DataManagerException;
+  
   /**
    * @param f
    * @param column
@@ -180,6 +182,7 @@ public interface DataManager {
    */
   public void addJuryFormula(String expression, String desc, int column) throws DataManagerException;
     
+  public void removeJuryFormula(Formula f) throws DataManagerException;
   
 	/**
 	 * to edit 

@@ -129,7 +129,8 @@ public class TeacherModel extends AbstractTableModel {
     if (instance == null)
       instance = new TeacherModel(manager);
     
-    instance.setManager(manager);
+    else
+      instance.setManager(manager);
     
     return instance;
   }

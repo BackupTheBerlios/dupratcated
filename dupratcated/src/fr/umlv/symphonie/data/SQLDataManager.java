@@ -468,7 +468,8 @@ public class SQLDataManager implements
         // into local list
         else {
           for (Formula f : tmpList)
-            localList.add(f); // changer cette ligne
+            if (localList.indexOf(f) == -1)
+              localList.add(f); // changer cette ligne
         }
       }
     }
@@ -561,6 +562,7 @@ public class SQLDataManager implements
       }
       else {
         // mettre a jour les donnees
+        // mais je crois qu'on va pas le faire
       }
     }
     
@@ -575,7 +577,6 @@ public class SQLDataManager implements
         i--;
       }
     }
-    
   }
   
   
@@ -740,7 +741,7 @@ public class SQLDataManager implements
     }
     
     if (n > juryFormulaListTimeStamp) {
-      syncTeacherFormulaData();
+      syncJuryFormulaData();
       juryFormulaListTimeStamp = n;
     }
     
@@ -872,7 +873,7 @@ public class SQLDataManager implements
 		markMapTimeStamp = supposedTimestamp;
 	}
 
-	private void updateTeacherFormula(int supposedTimestamp) throws DataManagerException{
+	private void updateTeacherFormulaData(int supposedTimestamp) throws DataManagerException{
    int n;
    
    try {
@@ -893,6 +894,29 @@ public class SQLDataManager implements
    }
    
    teacherFormulaMapTimeStamp = supposedTimestamp;
+  }
+  
+  private void updateJuryFormulaData(int supposedTimestamp) throws DataManagerException{
+    int n;
+    
+    try {
+      n = getTimeStamp(TABLE_JURY_FORMULA);
+    }catch (SQLException e){
+      throw new DataManagerException("error getting timestamp for jury formulas.", e);
+    }
+    
+    if (n >= supposedTimestamp){
+      syncJuryFormulaData();
+      supposedTimestamp = n + 1;
+    }
+    
+    try {
+      setNewTimestamp(TABLE_JURY_FORMULA, supposedTimestamp);
+    } catch (SQLException e) {
+      throw new DataManagerException("error setting new timestamp for jury formulas.", e);
+    }
+    
+    juryFormulaListTimeStamp = supposedTimestamp;
   }
   
   /*
@@ -1408,6 +1432,12 @@ public class SQLDataManager implements
 			removeMark(m);
 		}
 
+    // on efface ensuite de la base de donnee
+    // toutes ses formules
+    removeAllFormulasForCourse(c);
+    
+    
+    
 		// on la retire ensuite de la map locale
 		/* Map <Integer, Course> courseMap = getCourses(); */
 		courseMap.remove(c.getId());
@@ -1432,7 +1462,32 @@ public class SQLDataManager implements
 		}
 	}
 
-	/* (non-Javadoc)
+	private void removeAllFormulasForCourse(Course c) throws DataManagerException{
+    
+    String request = "delete from " + TABLE_TEACHER_FORMULA + " " +
+                     "where " + COLUMN_ID_COURSE_FROM_TABLE_TEACHER_FORMULA + " = " + c.getId() +" " +
+                     ";";
+    
+    // delete from database
+    try{
+      connectAndUpdate(request);
+    }catch(SQLException e){
+      throw new DataManagerException ("error deleting formulas for course " + c, e);
+    }
+    
+    // delete from local map
+    teacherFormulaMap.remove(c.getId());
+    
+    // update data
+    try{
+      updateJuryFormulaData(juryFormulaListTimeStamp + 1);
+    }catch (DataManagerException e){
+      throw new DataManagerException("error updating data for teacher formulas.", e);
+    }
+    
+  }
+
+  /* (non-Javadoc)
 	 * @see fr.umlv.symphonie.data.DataManager#addTitle(java.lang.String)
 	 */
 	public int addTitle(String desc) throws DataManagerException {
@@ -1506,7 +1561,7 @@ public class SQLDataManager implements
 
 		Mark m = new Mark(markKey, desc, coeff, c);
 
-		Map<Integer, Mark> markMap = getMarks();
+		/*Map<Integer, Mark> markMap = getMarks();*/
 		markMap.put(m.getId(), m);
 
 		try {
@@ -1716,9 +1771,38 @@ public class SQLDataManager implements
     
     // update data
     try{
-      updateTeacherFormula(teacherFormulaMapTimeStamp + 1);
+      updateTeacherFormulaData(teacherFormulaMapTimeStamp + 1);
     }catch (DataManagerException e){
       throw new DataManagerException ("error updating data for teacher formulas.", e);
+    }
+  }
+  
+  
+  public void removeTeacherFormula(Formula f, Course c) throws DataManagerException{
+    String request = "remove from " + TABLE_TEACHER_FORMULA + " " +
+                     "where " + COLUMN_ID_FORMULA_FROM_TABLE_FORMULA + " = " + /*f.g*/
+                     ";";
+    
+    // delete from database
+    try{
+      connectAndUpdate(request);
+    }catch(SQLException e){
+      throw new DataManagerException("error deleting formula from database.", e);
+    }
+    
+    
+    // delete from local map
+    List<Formula> list = teacherFormulaMap.get(c.getId());
+    
+    if (list == null)
+      throw new DataManagerException("no such formula for course " + c);
+    
+    list.remove(f);
+    
+    try{
+      updateTeacherFormulaData(teacherFormulaMapTimeStamp + 1);
+    }catch (DataManagerException e){
+      throw new DataManagerException("error updating data for teacher formulas.");
     }
   }
   
@@ -1727,8 +1811,97 @@ public class SQLDataManager implements
    * @see fr.umlv.symphonie.data.DataManager#addJuryFormula(fr.umlv.symphonie.data.formula.Formula, int)
    */
   public void addJuryFormula(String expression, String desc, int column) throws DataManagerException {
-    // TODO Auto-generated method stub
+    int formulaKey = -1;
+
+    // create new primary key for the new formula to add
+    try {
+      formulaKey = createPrimaryKey(TABLE_JURY_FORMULA, COLUMN_ID_FORMULA_FROM_TABLE_FORMULA);
+    } catch (SQLException e) {
+      throw new DataManagerException(
+          "error creating new primary key for formula " + desc
+              , e);
+    }
     
+    
+    // create new formula
+    Formula f = null;
+    try {
+      f = SymphonieFormulaFactory.parseFormula(desc, expression, formulaKey, column);
+    } catch (ParserException e1) {
+      return;
+    } catch (LexerException e1) {
+      return;
+    } catch (IOException e1) {
+      return;
+    }
+    
+    
+    int titleKey = -1;
+    
+    // get key for the formula title
+    try {
+      titleKey = getKeyForTitle(desc);
+    } catch (SQLException e) {
+      throw new DataManagerException("error getting key for title "
+          + desc, e);
+    }
+
+    // if there's no key, create one
+    if (titleKey < 0) {
+      try {
+        titleKey = addTitle(desc);
+      } catch (DataManagerException e) {
+        throw new DataManagerException("error adding new Formula " + desc
+            , e);
+      }
+    }
+
+
+    // insert into database
+    String request = "insert into " + TABLE_JURY_FORMULA + " " +
+                     "values ( " + formulaKey + ", " + titleKey + ", '" + expression + "', " + column + ")" +
+                     ";";
+    
+    try {
+      connectAndUpdate(request);
+    }catch (SQLException e){
+      throw new DataManagerException ("error inserting new formula", e);
+    }
+    
+
+    // add formula into local data
+    juryFormulaList.add(f);
+    
+    // update data
+    try{
+      updateJuryFormulaData(juryFormulaListTimeStamp + 1);
+    }catch (DataManagerException e){
+      throw new DataManagerException ("error updating data for jury formulas.", e);
+    }
+    
+  }
+  
+  public void removeJuryFormula(Formula f) throws DataManagerException{
+    String request = "remove from " + TABLE_JURY_FORMULA + " " +
+                     "where " + COLUMN_ID_FORMULA_FROM_TABLE_FORMULA + " = " + /*f.g*/
+                     ";";
+    
+    // delete from database
+    try{
+      connectAndUpdate(request);
+    }catch(SQLException e){
+      throw new DataManagerException("error deleting formula from database.", e);
+    }
+    
+    
+    // delete from local map
+    juryFormulaList.remove(f);
+    
+    try{
+      updateJuryFormulaData(juryFormulaListTimeStamp + 1);
+    }catch (DataManagerException e){
+      throw new DataManagerException("error updating data for jury formulas.");
+    }
   }
   
   
