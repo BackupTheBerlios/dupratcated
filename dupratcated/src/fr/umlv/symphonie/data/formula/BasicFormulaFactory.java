@@ -1,7 +1,10 @@
 
 package fr.umlv.symphonie.data.formula;
 
+import java.util.List;
 import java.util.Map;
+
+import fr.umlv.symphonie.data.formula.function.FormulaFunction;
 
 /**
  * Factory class for vending standard <code>Formula</code> objects. <br>
@@ -106,6 +109,26 @@ public class BasicFormulaFactory {
 
       public Number getValue() {
         return op.operate(left, right);
+      }
+    };
+  }
+
+  /**
+   * Returns a formula whose value is given by a function.
+   * 
+   * @see FormulaFunction
+   * @param f
+   *          The function
+   * @param params
+   *          The parameters used by the function.
+   * @return a <code>NumericFormula</code> object.
+   */
+  public static NumericFormula functionInstance(final FormulaFunction f,
+      final List<NumericFormula> params) {
+    return new NumericFormula() {
+
+      public Number getValue() {
+        return f.calculate(params);
       }
     };
   }

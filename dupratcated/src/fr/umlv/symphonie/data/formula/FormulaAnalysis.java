@@ -1,10 +1,13 @@
 
 package fr.umlv.symphonie.data.formula;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import fr.umlv.symphonie.data.formula.analysis.AnalysisAdapter;
+import fr.umlv.symphonie.data.formula.function.FormulaFunction;
 import fr.umlv.symphonie.data.formula.node.AAdditionAdditiveExpression;
 import fr.umlv.symphonie.data.formula.node.ABooleanExpression;
 import fr.umlv.symphonie.data.formula.node.ACellBlockExpression;
@@ -55,6 +58,11 @@ public class FormulaAnalysis extends AnalysisAdapter {
   private Map<String, Number> mappedValues;
 
   /**
+   * The map used to store functions
+   */
+  private Map<String, FormulaFunction> functionMap;
+
+  /**
    * Creates a new formula analyser. <br>
    * 
    * @param mappedValues
@@ -65,9 +73,16 @@ public class FormulaAnalysis extends AnalysisAdapter {
    *          Anyway be sure to put the values in it when you are to call
    *          Formula#getValue(), if you don't do it you will probably get a
    *          <code>NullPointerException</code>.
+   * @param functionMap
+   *          The map for storing functions <br>
+   *          Parameter can be null if you formula doesn't contain functions.
+   *          The map cannot be empty, the function objects need to be known at
+   *          parse time.
    */
-  public FormulaAnalysis(Map<String, Number> mappedValues) {
+  public FormulaAnalysis(Map<String, Number> mappedValues,
+      Map<String, FormulaFunction> functionMap) {
     this.mappedValues = mappedValues;
+    this.functionMap = functionMap;
   }
 
   public Map<String, Number> getMappedValues() {
@@ -86,6 +101,29 @@ public class FormulaAnalysis extends AnalysisAdapter {
    */
   public void setMappedValues(Map<String, Number> mappedValues) {
     this.mappedValues = mappedValues;
+  }
+
+  /**
+   * Returns the function set used by current parser
+   * 
+   * @return a Map
+   */
+  public Map<String, FormulaFunction> getFunctionMap() {
+    return functionMap;
+  }
+
+  /**
+   * This method is provided for the user who wants to use a different set of
+   * functions for formulas parsed with the same <code>FormulaAnalysis</code>
+   * object. <br>
+   * Note that formulas parsed so far won't use the new map, they will use the
+   * map that was the current when they where created.
+   * 
+   * @param functionMap
+   *          The new function map
+   */
+  public void setFunctionMap(Map<String, FormulaFunction> functionMap) {
+    this.functionMap = functionMap;
   }
 
   public void caseStart(Start node) {
@@ -216,35 +254,46 @@ public class FormulaAnalysis extends AnalysisAdapter {
   }
 
   public void caseAFunctionEvaluatedExpression(AFunctionEvaluatedExpression node) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Fuck");
+    FormulaFunction func = functionMap.get(node.getIdentifier().getText());
+    node.getBlockExpression().apply(this);
+    List<NumericFormula> params = (List<NumericFormula>) getOut(node
+        .getBlockExpression());
+    setOut(node, BasicFormulaFactory.functionInstance(func, params));
   }
 
   public void caseACellEvaluatedExpression(ACellEvaluatedExpression node) {
-    setOut(node, BasicFormulaFactory.mappedInstance(node.getIdentifier().getText(), mappedValues));
+    setOut(node, BasicFormulaFactory.mappedInstance(node.getIdentifier()
+        .getText(), mappedValues));
   }
 
   public void caseADataBlockExpression(ADataBlockExpression node) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Fuck");
+    throw new UnsupportedOperationException(
+        "Data blocks aren't supported by current parser version, stay tunned for updates");
   }
 
   public void caseACellBlockExpression(ACellBlockExpression node) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Fuck");
+    node.getIdentifiers().apply(this);
+    setOut(node, getOut(node.getIdentifiers()));
   }
 
-  public void caseALineColumnIds(AIdentifiers node) {
-    // TODO Auto-generated method stub
-    LinkedList<PSeparatorSuffixedId> l = node.getSeparatorSuffixedId();
-    for (PSeparatorSuffixedId pssi : l)
-      pssi.apply(this);
-    node.getIdentifier().apply(this);
+  public void caseAIdentifiers(AIdentifiers node) {
+    LinkedList<PSeparatorSuffixedId> ids = node.getSeparatorSuffixedId();
+    ArrayList<NumericFormula> values = new ArrayList<NumericFormula>();
+
+    for (PSeparatorSuffixedId id : ids) {
+      setIn(id, values);
+      id.apply(this);
+      values.add((NumericFormula) getOut(id));
+    }
+    values.add(BasicFormulaFactory.mappedInstance(node.getIdentifier()
+        .getText(), mappedValues));
+
+    setOut(node, values);
   }
 
   public void caseASeparatorSuffixedId(ASeparatorSuffixedId node) {
-    // TODO Auto-generated method stub
-    node.getIdentifier().apply(this);
+    setOut(node, BasicFormulaFactory.mappedInstance(node.getIdentifier()
+        .getText(), mappedValues));
   }
 
   public void caseALogicalAndLogicalOrExpression(
