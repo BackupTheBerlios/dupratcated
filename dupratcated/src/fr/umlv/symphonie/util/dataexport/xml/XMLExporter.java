@@ -25,17 +25,16 @@ import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
+import fr.umlv.symphonie.util.export.DataExporter;
 
 /**
  * @author SnowMan
  */
-public abstract class XMLExporter {
+public abstract class XMLExporter implements DataExporter {
 
   protected String documentName;
   protected final String dtd = "symphonie.dtd";
   protected SQLDataManager dm = new SQLDataManager();
-
-  public abstract void export();
 
   protected static void addCourseNode(Node root, Course c) {
     Element e = root.getOwnerDocument().createElement("course");
