@@ -1718,11 +1718,11 @@ public class SQLDataManager implements
     try {
       f = SymphonieFormulaFactory.parseFormula(desc, expression, formulaKey, column);
     } catch (ParserException e1) {
-      return;
+      throw new DataManagerException("error parsing formula.");
     } catch (LexerException e1) {
-      return;
+      throw new DataManagerException("sablecc internal error.");
     } catch (IOException e1) {
-      return;
+      throw new DataManagerException("error accessing formula data.");
     }
     
     
@@ -1783,8 +1783,6 @@ public class SQLDataManager implements
                      "where " + COLUMN_ID_FORMULA_FROM_TABLE_FORMULA + " = " + f.getID() + " " +
                      ";";
     
-    System.out.println(request);
-    
     // delete from database
     try{
       connectAndUpdate(request);
@@ -1824,19 +1822,21 @@ public class SQLDataManager implements
               , e);
     }
     
+    System.out.println("expression : " + expression);
     
     // create new formula
     Formula f = null;
     try {
       f = SymphonieFormulaFactory.parseFormula(desc, expression, formulaKey, column);
     } catch (ParserException e1) {
-      return;
+      throw new DataManagerException("error parsing formula.");
     } catch (LexerException e1) {
-      return;
+      throw new DataManagerException("sablecc internal error.");
     } catch (IOException e1) {
-      return;
+      throw new DataManagerException("error accessing formula data.");
     }
     
+    System.out.println("bim !");
     
     int titleKey = -1;
     
@@ -1863,6 +1863,8 @@ public class SQLDataManager implements
     String request = "insert into " + TABLE_JURY_FORMULA + " " +
                      "values ( " + formulaKey + ", " + titleKey + ", '" + expression + "', " + column + ")" +
                      ";";
+    
+    System.out.println(request);
     
     try {
       connectAndUpdate(request);

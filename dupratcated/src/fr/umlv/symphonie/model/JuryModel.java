@@ -130,6 +130,8 @@ public class JuryModel extends AbstractTableModel {
             int column;
 
             for (Formula f : formulaList) {
+              System.out.println("formule : " + f.getDescription());
+              System.out.println(f);
               column = f.getColumn();
               if (column < 0)
                 columnList.add(0, f);
@@ -256,13 +258,7 @@ public class JuryModel extends AbstractTableModel {
       if (rowIndex <= 2)
         return null;
       
-      float result = 0;
-      
-      for (int i = 0; i < columnList.size() ; i++){
-        if (columnList.get(i) instanceof Course)
-          result += ((Course)columnList.get(i)).getCoeff() * (Float)getValueAt(rowIndex, i + 1);
-      }
-      return result;
+      return StudentAverage.getAnnualAverage(dataMap.get(studentList.get(rowIndex - 3)));
     }
     
     
@@ -285,7 +281,7 @@ public class JuryModel extends AbstractTableModel {
       Student s = studentList.get(rowIndex - 3);
       
       for (Course c : dataMap.get(s).keySet()){
-        SymphonieFormulaFactory.putMappedValue(c.getTitle(), getAverage(dataMap.get(s).get(c).values()));
+        SymphonieFormulaFactory.putMappedValue(c.getTitle(), StudentAverage.getAverage(dataMap.get(s).get(c).values()));
       }
       
       return f.getValue();
@@ -298,19 +294,19 @@ public class JuryModel extends AbstractTableModel {
     if(rowIndex == 1)
       return c.getCoeff();
     
-    return getAverage(dataMap.get(studentList.get(rowIndex - 3)).get(c).values());
+    return StudentAverage.getAverage(dataMap.get(studentList.get(rowIndex - 3)).get(c).values());
   }
 
-  private float getAverage(Collection<StudentMark> name) {
-    
-    float result = 0;
-    
-    for (StudentMark sm : name){
-      result += sm.getValue() * sm.getCoeff();
-    }
-    
-    return result;
-  }
+//  private float getAverage(Collection<StudentMark> name) {
+//    
+//    float result = 0;
+//    
+//    for (StudentMark sm : name){
+//      result += sm.getValue() * sm.getCoeff();
+//    }
+//    
+//    return result;
+//  }
 
   
   public boolean isCellEditable(int rowIndex,int columnIndex){
@@ -353,9 +349,6 @@ public class JuryModel extends AbstractTableModel {
         public void run() {
 
           synchronized (lock) {
-            
-            
-            
             
             try {
               EventQueue.invokeAndWait(new Runnable() {
@@ -412,7 +405,7 @@ public class JuryModel extends AbstractTableModel {
     
     for (Map<Course, Map<Integer, StudentMark>> map : dataMap.values()){
       for (Course c : map.keySet()){
-        int index = (int)getAverage(map.get(c).values()) / step;
+        int index = (int)StudentAverage.getAverage(map.get(c).values()) / step;
         
         if (index >= size)
           index = size -1;
@@ -460,7 +453,35 @@ public class JuryModel extends AbstractTableModel {
     }
   }
   
-  
+  public void addFormula(final String expression, final String desc, final int column){
+    es.execute(new Runnable() {
+
+      public void run() {
+        synchronized (lock) {
+          System.out.println("on y est !");
+
+          try {
+            manager.addJuryFormula(expression, desc, column);
+          } catch (DataManagerException e) {
+            System.out.println(e.getMessage());
+          }
+
+          try {
+            EventQueue.invokeAndWait(new Runnable() {
+
+              public void run() {
+                JuryModel.this.update();
+              }
+            });
+          } catch (InterruptedException e1) {
+            e1.printStackTrace();
+          } catch (InvocationTargetException e1) {
+            e1.printStackTrace();
+          }
+        }
+      }
+    });
+  }
   
 //  /**
 //   * @param args
