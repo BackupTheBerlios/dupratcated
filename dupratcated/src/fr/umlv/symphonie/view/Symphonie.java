@@ -431,9 +431,11 @@ public class Symphonie {
   /**
    * Builds a panel with the student view
    * 
+   * @param toolbar
+   *          A toolbar for adding some actions
    * @return a <code>JSplitPane</code>
    */
-  private final JSplitPane getStudentPane() {
+  private final JSplitPane getStudentPane(JToolBar toolbar) {
 
     JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
     split.setDividerSize(5);
@@ -542,8 +544,10 @@ public class Symphonie {
             .getResource("icons/add_student.png"))),
         SymphonieConstants.ADD_STUDENT_TITLE,
         ComponentBuilder.ButtonType.MENU_ITEM);
-    addStudent.setEnabled(false);
+    addStudent.getAction().setEnabled(false);
     treePop.add(addStudent);
+    toolbar.add(createToolbarButton(SymphonieConstants.ADD_STUDENT_TITLE,
+        addStudent, builder));
 
     treePop.add(builder.buildButton(actionFactory
         .getUpdateStudentTreeAction(REFRESH_ICON), SymphonieConstants.UPDATE,
@@ -555,8 +559,10 @@ public class Symphonie {
             .getResource("icons/remove_student.png")), tree),
         SymphonieConstants.REMOVE_STUDENT,
         ComponentBuilder.ButtonType.MENU_ITEM);
+    removeStudent.getAction().setEnabled(false);
     treePop.add(removeStudent);
-    removeStudent.setEnabled(false);
+    toolbar.add(createToolbarButton(SymphonieConstants.REMOVE_STUDENT,
+        removeStudent, builder));
 
     // listener for popup
     tree.addMouseListener(new MouseAdapter() {
@@ -586,12 +592,8 @@ public class Symphonie {
       public void mousePressed(MouseEvent e) {
         if (SwingUtilities.isRightMouseButton(e)) {
           int n = tree.getRowForLocation(e.getX(), e.getY());
-          boolean r = removeStudent.isEnabled();
-          if (n > 0)
-            removeStudent.setEnabled(logger.isIdentified());
-
-          else
-            removeStudent.setEnabled(false);
+          removeStudent.getAction()
+              .setEnabled((n > 0) && logger.isIdentified());
         }
       }
     });
@@ -621,7 +623,8 @@ public class Symphonie {
         currentStudentModel = logger.isIdentified() ? adminStudentModel
             : studentModel;
         table.setModel(currentStudentModel);
-        addStudent.setEnabled(logger.isIdentified());
+        addStudent.getAction().setEnabled(logger.isIdentified());
+        //removeStudent.getAction().setEnabled(logger.isIdentified());
       }
     });
 
@@ -630,10 +633,11 @@ public class Symphonie {
 
   /**
    * Builds a panel with the teacher view
+   * @param toolbar A toolbar to add some actions
    * 
    * @return a <code>JSplitPane</code>
    */
-  private final JSplitPane getTeacherPane() {
+  private final JSplitPane getTeacherPane(JToolBar toolbar) {
 
     JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
     split.setDividerSize(5);
@@ -772,8 +776,9 @@ public class Symphonie {
         .getAddCourseAction(new ImageIcon(Symphonie.class
             .getResource("icons/add_course.png"))),
         SymphonieConstants.ADDCOURSE, ComponentBuilder.ButtonType.MENU_ITEM);
+    addCourse.getAction().setEnabled(false);
     treePop.add(addCourse);
-    addCourse.setEnabled(false);
+    toolbar.add(createToolbarButton(SymphonieConstants.ADDCOURSE, addCourse, builder));
 
     treePop.add(builder.buildButton(actionFactory
         .getUpdateCourseTreeAction(REFRESH_ICON), SymphonieConstants.UPDATE,
@@ -783,7 +788,9 @@ public class Symphonie {
         .getRemoveCourseAction(new ImageIcon(Symphonie.class
             .getResource("icons/delete_course.png")), tree),
         SymphonieConstants.REMOVECOURSE, ComponentBuilder.ButtonType.MENU_ITEM);
+    removeCourse.getAction().setEnabled(false);
     treePop.add(removeCourse);
+    toolbar.add(createToolbarButton(SymphonieConstants.REMOVECOURSE, removeCourse, builder));
 
     // listener for popup
     tree.addMouseListener(new MouseAdapter() {
@@ -813,12 +820,7 @@ public class Symphonie {
       public void mousePressed(MouseEvent e) {
         if (SwingUtilities.isRightMouseButton(e)) {
           int n = tree.getRowForLocation(e.getX(), e.getY());
-
-          if (n > 0)
-            removeCourse.setEnabled(logger.isIdentified());
-
-          else
-            removeCourse.setEnabled(false);
+            removeCourse.getAction().setEnabled((n > 0) && logger.isIdentified());
         }
       }
     });
@@ -852,7 +854,7 @@ public class Symphonie {
         currentTeacherModel = logger.isIdentified() ? adminTeacherModel
             : teacherModel;
         table.setModel(currentTeacherModel);
-        addCourse.setEnabled(logger.isIdentified());
+        addCourse.getAction().setEnabled(logger.isIdentified());
       }
     });
     return split;
@@ -1053,23 +1055,27 @@ public class Symphonie {
   /**
    * Builds the main panel that contains all program views
    * 
+   * @param toolbar
+   *          Toolbar for adding some actions
    * @return JPanel
    */
-  private final JPanel getContentPane() {
+  private final JPanel getContentPane(JToolBar toolbar) {
 
     JPanel panel = new JPanel(new BorderLayout());
 
     /* Student JTabbedPane */
-    JScrollPane jsp = new JScrollPane(getStudentPane());
+    JScrollPane jsp = new JScrollPane(getStudentPane(toolbar));
     tab.add(builder.getValue(VIEW_STUDENT_MENU_ITEM), jsp);
     builder.addChangeListener(jsp, makeTabChangeListener(tab, View.student,
         builder));
+    toolbar.add(new JSeparator());
 
     /* Teacher JTabbedPane */
-    jsp = new JScrollPane(getTeacherPane());
+    jsp = new JScrollPane(getTeacherPane(toolbar));
     tab.add(builder.getValue(VIEW_TEACHER_MENU_ITEM), jsp);
     builder.addChangeListener(jsp, makeTabChangeListener(tab, View.teacher,
         builder));
+    toolbar.add(new JSeparator());
 
     /* Jury JTabbedPane */
     jsp = new JScrollPane(getJuryPane());
@@ -1191,8 +1197,10 @@ public class Symphonie {
     dischart = new JButton(actionFactory.getChartDisplayAction(CHART_ICON,
         builder));
     dischart.setEnabled(false);
-
-    JPanel content = getContentPane();
+    
+    JMenu admenu = getAdminMenu(toolbar);
+    
+    JPanel content = getContentPane(toolbar);
     JPanel welcome = getWelcomePagePanel(content, toolbar, mode, imp, exp,
         print);
     frame.setContentPane((welcome != null) ? welcome : content);
@@ -1201,7 +1209,6 @@ public class Symphonie {
     addFormula.setEnabled(false);
     JMenuItem morfula = (JMenuItem) builder.buildButton(addFormula,
         FORMULA_MENU_ITEM, ButtonType.MENU_ITEM);
-    JMenu admenu = getAdminMenu(toolbar);
     frame.setJMenuBar(getMenubar(getFileMenu(exp, imp, print, exit),
         getWindowMenu(mode, getLangMenu()), getInsertMenu(morfula, toolbar),
         admenu));
@@ -1219,11 +1226,11 @@ public class Symphonie {
     currentStudentModel = studentModel;
 
     toolbar.add(createToolbarButton(ADDMARKDIALOG_TITLE, morfula, builder));
+    toolbar.addSeparator();
+    
     toolbar.add(dischart);
     toolbar.addSeparator();
-
     toolbar.add(builder.buildLabel(SymphonieConstants.SETSTEP));
-
     spinner = new JSpinner(new SpinnerNumberModel(chartStep, 1, 20, 1));
     spinner.setMaximumSize(new Dimension(48, 32));
     spinner.addChangeListener(new ChangeListener() {

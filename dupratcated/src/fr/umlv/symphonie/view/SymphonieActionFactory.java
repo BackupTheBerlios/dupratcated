@@ -321,7 +321,11 @@ public class SymphonieActionFactory {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
-        symphonie.getIdentificationStrategy().logout();
+        try {
+          symphonie.getIdentificationStrategy().logout();
+        } catch (IdentificationException e) {
+          symphonie.errDisplay.showException(e);
+        }
       }
     };
     a.putValue(Action.SMALL_ICON, icon);
@@ -382,7 +386,6 @@ public class SymphonieActionFactory {
 
       public void actionPerformed(ActionEvent e) {
         symphonie.getCurrentStudentModel().update();
-        throw new RuntimeException("fcuk");
       }
     };
 
