@@ -38,7 +38,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     return statement.executeQuery(request);
   }
 
-  private static int createPrimaryKey(String table, String id)
+  public static int createPrimaryKey(String table, String id)
       throws SQLException {
 
     ResultSet results = null;
@@ -330,7 +330,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
    * @param studentId
    * @throws SQLException 
    */
-  private void removeAllStudentMarksForStudent(int studentId)
+  public void removeAllStudentMarksForStudent(int studentId)
       throws SQLException {
     String request = "delete from " + TABLE_HAS_MARK + " " + "where "
         + COLUMN_ID_STUDENT_FROM_TABLE_HAS_MARK + " = " + studentId + ";";
@@ -565,7 +565,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
   /**
    * @param id
    */
-  private void removeAllStudentMarksForMark(int markId) throws SQLException {
+  public void removeAllStudentMarksForMark(int markId) throws SQLException {
     String request = "delete from " + TABLE_HAS_MARK + " " + "where "
         + COLUMN_ID_TEST_FROM_TABLE_HAS_MARK + " = " + markId + ";";
 
