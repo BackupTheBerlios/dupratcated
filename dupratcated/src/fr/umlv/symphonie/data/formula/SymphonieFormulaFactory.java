@@ -132,7 +132,7 @@ public final class SymphonieFormulaFactory {
    *           this exception is never thrown, unless there's in i/o error while
    *           reading RAM.
    */
-  public BooleanFormula parseBooleanFormula(String unparsedFormula)
+  public static BooleanFormula parseBooleanFormula(String unparsedFormula)
       throws ParserException, LexerException, IOException {
     synchronized (analyzer) {
       // Parse formula
