@@ -174,7 +174,7 @@ public class XMLImporterAdmin extends XMLImporter {
 				/** if we need to add */
 				if (s.getId() == -1) {
 					dm.addStudent(s.getName(), s.getLastName());
-					//
+					dm.changeStudentComment(s, s.getComment());
 				} else {
 					/** else we update */
 					dm.changeStudentComment(s, s.getComment());
