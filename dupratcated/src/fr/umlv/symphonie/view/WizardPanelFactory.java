@@ -54,7 +54,6 @@ import fr.umlv.symphonie.util.wizard.WizardModel;
 import fr.umlv.symphonie.util.wizard.WizardPanel;
 import fr.umlv.symphonie.util.wizard.event.WizardEvent;
 import fr.umlv.symphonie.util.wizard.event.WizardListenerAdapter;
-import static fr.umlv.symphonie.view.SymphonieWizardConstants.DATA_EXPORTABLE;
 import static fr.umlv.symphonie.view.SymphonieWizardConstants.DATA_EXPORTER;
 import static fr.umlv.symphonie.view.SymphonieWizardConstants.DATA_EXPORT_TYPE;
 import static fr.umlv.symphonie.view.SymphonieWizardConstants.DATA_EX_DIALOG;
@@ -562,7 +561,6 @@ public class WizardPanelFactory {
         final DataManager dm = (DataManager) data.get(DATA_MANAGER);
         final DataExporter exp = (DataExporter) data.get(DATA_EXPORTER);
         final String file = ((File) data.get(DATA_FILE)).getAbsolutePath();
-        final Object o = data.get(DATA_EXPORTABLE);
         prog.setValue(15);
         new Thread() {
 
@@ -570,7 +568,7 @@ public class WizardPanelFactory {
             try {
               Symphonie.View view = (View) data.get(DATA_VIEW);
 
-              view.exportView(exp, dm, o, file);
+              view.exportView(exp, dm, data, file);
             } catch (Throwable t) {
               if (dialog != null)
                 dialog.showException(t);

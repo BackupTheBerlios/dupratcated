@@ -78,7 +78,8 @@ public final class SymphonieWizardConstants {
   public static final String DATA_FILE = "file";
   public static final String DATA_EXPORT_TYPE = "exportType";
   public static final String DATA_VIEW = "view";
-  public static final String DATA_EXPORTABLE = "exportableData";
+  public static final String STUDENT_DATA = "studentData";
+  public static final String TEACHER_DATA = "teacherData";
   public static final String DATA_IMPORTABLE = "importableData";
   public static final String DATA_EX_DIALOG = "exceptionDialog";
   public static final String DATA_EXPORTER = "exporter";

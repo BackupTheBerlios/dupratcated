@@ -21,6 +21,7 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.swing.AbstractButton;
 import javax.swing.Action;
@@ -44,6 +45,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
+import javax.swing.SingleSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
@@ -161,10 +163,12 @@ public class Symphonie {
    *          The import menu item
    * @param print
    *          The print menu item
-   *          @param exit The exit menu item
+   * @param exit
+   *          The exit menu item
    * @return a <code>JMenu</code>
    */
-  private final JMenu getFileMenu(JMenuItem exp, JMenuItem imp, JMenuItem print, JMenuItem exit) {
+  private final JMenu getFileMenu(JMenuItem exp, JMenuItem imp,
+      JMenuItem print, JMenuItem exit) {
     JMenu file = (JMenu) builder.buildButton(FILE_MENU, ButtonType.MENU);
 
     file.add(print);
@@ -251,14 +255,8 @@ public class Symphonie {
   private final JMenu getFormatMenu() {
     JMenu format = (JMenu) builder.buildButton(FORMAT_MENU, ButtonType.MENU);
 
-    /* Actions ******************************************************* */
-    Action formula = actionFactory.getFormulaAction(new ImageIcon(
-        Symphonie.class.getResource("icons/formula.png")));
     Action f_cell = actionFactory.getFormulaCellAction(EMPTYICON);
 
-    /* Items********************************************************* */
-    format.add(builder.buildButton(formula, FORMULA_MENU_ITEM,
-        ButtonType.MENU_ITEM));
     format.add(builder
         .buildButton(f_cell, CELL_MENU_ITEM, ButtonType.MENU_ITEM));
 
@@ -272,7 +270,10 @@ public class Symphonie {
    */
   private final JMenu getInsertMenu() {
     JMenu insert = (JMenu) builder.buildButton(INSERT_MENU, ButtonType.MENU);
+
     /* Actions ******************************************************* */
+    Action formula = actionFactory.getFormulaAction(new ImageIcon(
+        Symphonie.class.getResource("icons/formula.png")));
     Action column = actionFactory.getColumnAction(new ImageIcon(Symphonie.class
         .getResource("icons/insert_column.png")));
     Action line = actionFactory.getLineAction(new ImageIcon(Symphonie.class
@@ -282,6 +283,8 @@ public class Symphonie {
     insert.add(builder.buildButton(column, INSERT_COLUMN_MENU_ITEM,
         ButtonType.MENU_ITEM));
     insert.add(builder.buildButton(line, INSERT_LINE_MENU_ITEM,
+        ButtonType.MENU_ITEM));
+    insert.add(builder.buildButton(formula, FORMULA_MENU_ITEM,
         ButtonType.MENU_ITEM));
     return insert;
   }
@@ -294,13 +297,14 @@ public class Symphonie {
    * @return a <code>JMenu</code>
    */
   private final JMenu getAdminMenu(JToolBar toolbar) {
-    
+
     JMenu admin = (JMenu) builder.buildButton(ADMIN_MENU, ButtonType.MENU);
-    
+
     /* Actions ******************************************************* */
     final Action connect = actionFactory.getConnectAction(new ImageIcon(
         Symphonie.class.getResource("icons/admin.png")), logger);
-    final Action logout = actionFactory.getLogoutAction(new ImageIcon(Symphonie.class.getResource("icons/logout.png")));
+    final Action logout = actionFactory.getLogoutAction(new ImageIcon(
+        Symphonie.class.getResource("icons/logout.png")));
     logout.setEnabled(false);
     final Action db = actionFactory.getDBAction(new ImageIcon(Symphonie.class
         .getResource("icons/db.png")));
@@ -308,7 +312,7 @@ public class Symphonie {
     final Action pwd = actionFactory.getPwdAction(new ImageIcon(Symphonie.class
         .getResource("icons/pwd.png")));
     pwd.setEnabled(false);
-    
+
     logger.addChangeListener(new ChangeListener() {
 
       public void stateChanged(ChangeEvent e) {
@@ -325,7 +329,7 @@ public class Symphonie {
         ButtonType.MENU_ITEM);
     admin.add(b);
     toolbar.add(createToolbarButton(CONNECT_MENU_ITEM, b, builder));
-    
+
     b = builder.buildButton(logout, LOGOUT_MENU_ITEM, ButtonType.MENU_ITEM);
     admin.add(b);
     toolbar.add(createToolbarButton(LOGOUT_MENU_ITEM, b, builder));
@@ -512,7 +516,7 @@ public class Symphonie {
         if (o instanceof Student) {
           ((StudentModel) (table.getModel())).setStudent((Student) o);
           ((DefaultWizardModel) exportW.getModel()).getInterPanelData().put(
-              SymphonieWizardConstants.DATA_EXPORTABLE, o);
+              SymphonieWizardConstants.STUDENT_DATA, o);
         }
       }
     });
@@ -650,7 +654,7 @@ public class Symphonie {
         if (o instanceof Course) {
           ((TeacherModel) table.getModel()).setCourse((Course) o);
           ((DefaultWizardModel) exportW.getModel()).getInterPanelData().put(
-              SymphonieWizardConstants.DATA_EXPORTABLE, o);
+              SymphonieWizardConstants.TEACHER_DATA, o);
         }
       }
     });
@@ -865,16 +869,25 @@ public class Symphonie {
 
     panel.add(tab);
 
-    /*
-     * tab.getModel().addChangeListener(new ChangeListener() {
-     * 
-     * public void stateChanged(ChangeEvent e) { SingleSelectionModel ssm =
-     * (SingleSelectionModel) e.getSource(); switch (ssm.getSelectedIndex()) {
-     * case 0: setCurrentView(View.student); break; case 1:
-     * setCurrentView(View.teacher); break; case 2: setCurrentView(View.jury);
-     * break; default: throw new IllegalStateException("Invalid tab index"); } }
-     * });
-     */
+    tab.getModel().addChangeListener(new ChangeListener() {
+
+      public void stateChanged(ChangeEvent e) {
+        SingleSelectionModel ssm = (SingleSelectionModel) e.getSource();
+        switch (ssm.getSelectedIndex()) {
+          case 0:
+            setCurrentView(View.student);
+            break;
+          case 1:
+            setCurrentView(View.teacher);
+            break;
+          case 2:
+            setCurrentView(View.jury);
+            break;
+          default:
+            throw new IllegalStateException("Invalid tab index");
+        }
+      }
+    });
 
     return panel;
   }
@@ -948,9 +961,10 @@ public class Symphonie {
         .getPrintAction(new ImageIcon(Symphonie.class
             .getResource("icons/print.png"))), PRINT_MENU_ITEM,
         ButtonType.MENU_ITEM);
-    
-    JMenuItem exit = (JMenuItem) builder.buildButton(actionFactory.getExitAction(new ImageIcon(
-        Symphonie.class.getResource("icons/exit.png"))), EXIT_MENU_ITEM,
+
+    JMenuItem exit = (JMenuItem) builder.buildButton(actionFactory
+        .getExitAction(new ImageIcon(Symphonie.class
+            .getResource("icons/exit.png"))), EXIT_MENU_ITEM,
         ButtonType.MENU_ITEM);
 
     toolbar.add(createToolbarButton(PRINT_MENU_ITEM, print, builder));
@@ -965,8 +979,8 @@ public class Symphonie {
     frame.setContentPane((welcome != null) ? welcome : content);
 
     // Menu bar
-    frame.setJMenuBar(getMenubar(getFileMenu(exp, imp, print, exit), getWindowMenu(
-        mode, getLangMenu()), getFormatMenu(), getInsertMenu(),
+    frame.setJMenuBar(getMenubar(getFileMenu(exp, imp, print, exit),
+        getWindowMenu(mode, getLangMenu()), getFormatMenu(), getInsertMenu(),
         getAdminMenu(toolbar)));
 
     // Listen changes in builder for frame title
@@ -980,7 +994,9 @@ public class Symphonie {
     currentJuryModel = juryModel;
     currentTeacherModel = teacherModel;
     currentStudentModel = studentModel;
-    
+
+    toolbar.add(actionFactory.getChartDisplayAction(CHARTICON, builder));
+    toolbar.addSeparator();
     toolbar.add(createToolbarButton(EXIT_MENU_ITEM, exit, builder));
 
     frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -1031,9 +1047,6 @@ public class Symphonie {
         SymphonieWizardConstants.DATA_VIEW, newView);
     ((DefaultWizardModel) importW.getModel()).getInterPanelData().put(
         SymphonieWizardConstants.DATA_VIEW, newView);
-    if (newView.equals(View.jury))
-      ((DefaultWizardModel) exportW.getModel()).getInterPanelData().remove(
-          SymphonieWizardConstants.DATA_EXPORTABLE);
   }
 
   /**
@@ -1157,6 +1170,10 @@ public class Symphonie {
   private static final ImageIcon EMPTYICON = new ImageIcon(Symphonie.class
       .getResource("icons/empty.png"));
 
+  /** Chart 16x16 icon */
+  private static final ImageIcon CHARTICON = new ImageIcon(Symphonie.class
+      .getResource("icons/chart.png"));
+
   /**
    * Enum defines languages supported by Symphonie.
    */
@@ -1268,9 +1285,10 @@ public class Symphonie {
         return VIEW_STUDENT_MENU_ITEM;
       }
 
-      void exportView(DataExporter exporter, DataManager manager, Object data,
-          String output) throws DataExporterException {
-        exporter.exportStudentView(output, manager, (Student) data);
+      void exportView(DataExporter exporter, DataManager manager,
+          Map<Object, Object> data, String output) throws DataExporterException {
+        exporter.exportStudentView(output, manager, (Student) data
+            .get(SymphonieWizardConstants.STUDENT_DATA));
       }
 
       void importView(DataImporter importer, DataManager manager, Object input)
@@ -1278,8 +1296,12 @@ public class Symphonie {
         importer.importStudentView((String) input, manager);
       }
 
-      void print(Symphonie s) {
+      void print(Symphonie s, ActionEvent event) {
         s.actionFactory.studentPrintAction.actionPerformed(null);
+      }
+
+      void displayChart(Symphonie s, ActionEvent event) {
+        s.actionFactory.studentChartAction.actionPerformed(null);
       }
     },
     teacher {
@@ -1288,9 +1310,10 @@ public class Symphonie {
         return VIEW_TEACHER_MENU_ITEM;
       }
 
-      void exportView(DataExporter exporter, DataManager manager, Object data,
-          String output) throws DataExporterException {
-        exporter.exportTeacherView(output, manager, (Course) data);
+      void exportView(DataExporter exporter, DataManager manager,
+          Map<Object, Object> data, String output) throws DataExporterException {
+        exporter.exportTeacherView(output, manager, (Course) data
+            .get(SymphonieWizardConstants.TEACHER_DATA));
       }
 
       void importView(DataImporter importer, DataManager manager, Object input)
@@ -1298,8 +1321,12 @@ public class Symphonie {
         importer.importTeacherView((String) input, manager);
       }
 
-      void print(Symphonie s) {
+      void print(Symphonie s, ActionEvent event) {
         s.actionFactory.teacherPrintAction.actionPerformed(null);
+      }
+
+      void displayChart(Symphonie s, ActionEvent event) {
+        s.actionFactory.teacherChartAction.actionPerformed(null);
       }
     },
     jury {
@@ -1308,8 +1335,8 @@ public class Symphonie {
         return VIEW_JURY_MENU_ITEM;
       }
 
-      void exportView(DataExporter exporter, DataManager manager, Object data,
-          String output) throws DataExporterException {
+      void exportView(DataExporter exporter, DataManager manager,
+          Map<Object, Object> data, String output) throws DataExporterException {
         exporter.exportJuryView(output, manager);
       }
 
@@ -1318,8 +1345,12 @@ public class Symphonie {
         importer.importJuryView((String) input, manager);
       }
 
-      void print(Symphonie s) {
-        s.actionFactory.juryPrintAction.actionPerformed(null);
+      void print(Symphonie s, ActionEvent event) {
+        s.actionFactory.juryPrintAction.actionPerformed(event);
+      }
+
+      void displayChart(Symphonie s, ActionEvent event) {
+        s.actionFactory.juryChartAction.actionPerformed(event);
       }
     };
 
@@ -1347,7 +1378,7 @@ public class Symphonie {
      *           If the exporter reports a problem
      */
     abstract void exportView(DataExporter exporter, DataManager manager,
-        Object data, String output) throws DataExporterException;
+        Map<Object, Object> data, String output) throws DataExporterException;
 
     /**
      * Imports view using the given importer
@@ -1367,7 +1398,22 @@ public class Symphonie {
 
     /**
      * Prints the view
+     * 
+     * @param s
+     *          The symphonie instance
+     * @param event
+     *          The event that started the action
      */
-    abstract void print(Symphonie s);
+    abstract void print(Symphonie s, ActionEvent event);
+
+    /**
+     * Displays the chart's view
+     * 
+     * @param s
+     *          The symphonie instance
+     * @param e
+     *          Event that started the action
+     */
+    abstract void displayChart(Symphonie s, ActionEvent e);
   }
 }

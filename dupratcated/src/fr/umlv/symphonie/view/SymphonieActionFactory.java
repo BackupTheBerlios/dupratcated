@@ -12,9 +12,12 @@ import java.awt.print.PrinterException;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Icon;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTable;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import fr.umlv.symphonie.data.ConnectionManager;
 import fr.umlv.symphonie.model.JuryModel;
@@ -90,7 +93,7 @@ public class SymphonieActionFactory {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
-        symphonie.getCurrentView().print(symphonie);
+        symphonie.getCurrentView().print(symphonie, event);
       }
     };
     a.putValue(Action.SMALL_ICON, icon);
@@ -133,6 +136,35 @@ public class SymphonieActionFactory {
         symphonie.setCurrentLanguage(langue);
       }
     };
+  }
+
+  /**
+   * Creates an action that displays the current symphonie view chart
+   * 
+   * @param icon
+   *          An icon for the action
+   * @param builder
+   *          The builder for internationalization
+   * @return an AbstractAction
+   */
+  public AbstractAction getChartDisplayAction(Icon icon,
+      final ComponentBuilder builder) {
+    final AbstractAction a = new AbstractAction(null, icon) {
+
+      public void actionPerformed(ActionEvent e) {
+        symphonie.getCurrentView().displayChart(symphonie, e);
+      }
+    };
+    a.putValue(Action.SHORT_DESCRIPTION, builder
+        .getValue(SymphonieConstants.DISPLAY_CHART));
+    builder.addChangeListener(new JLabel(), new ChangeListener() {
+
+      public void stateChanged(ChangeEvent e) {
+        a.putValue(Action.SHORT_DESCRIPTION, builder
+            .getValue(SymphonieConstants.DISPLAY_CHART));
+      }
+    });
+    return a;
   }
 
   public AbstractAction getFormulaAction(Icon icon) {
@@ -348,22 +380,34 @@ public class SymphonieActionFactory {
   /** getStudentPrintAction singleton instance */
   protected AbstractAction studentPrintAction;
 
+  /**
+   * Creates an action that displays the student view chart. This is a singleton
+   * action.
+   * 
+   * @param icon
+   *          The action SMALL_ICON
+   * @return an AbstractAction
+   */
   public AbstractAction getStudentChartAction(Icon icon) {
-    AbstractAction a = new AbstractAction() {
+    if (studentChartAction == null) {
+      studentChartAction = new AbstractAction() {
 
-      private final StudentChartDialog dialog = new StudentChartDialog(
-          symphonie);
+        private final StudentChartDialog dialog = new StudentChartDialog(
+            symphonie);
 
-      public void actionPerformed(ActionEvent e) {
-        dialog.setChart(symphonie.getCurrentStudentModel());
-        dialog.setModal(true);
-        dialog.setVisible(true);
-      }
-    };
-
-    a.putValue(Action.SMALL_ICON, icon);
-    return a;
+        public void actionPerformed(ActionEvent e) {
+          dialog.setChart(symphonie.getCurrentStudentModel());
+          dialog.setModal(true);
+          dialog.setVisible(true);
+        }
+      };
+      studentChartAction.putValue(Action.SMALL_ICON, icon);
+    }
+    return studentChartAction;
   }
+
+  /** getStudentChartAction singleton instance */
+  protected AbstractAction studentChartAction;
 
   /* TEACHER VIEW ACTIONS ********************************** */
   public AbstractAction getAddMarkAction(Icon icon) {
@@ -440,8 +484,6 @@ public class SymphonieActionFactory {
    *          The action SMALL_ICON
    * @param table
    *          The teacher table
-   * @param s
-   *          The symphonie instance
    * @return an AbstractAction
    */
   public AbstractAction getTeacherPrintAction(Icon icon, final JTable table) {
@@ -466,22 +508,37 @@ public class SymphonieActionFactory {
   /** getTeacherPrintAction singleton instance */
   protected AbstractAction teacherPrintAction;
 
+  /**
+   * Creates an action that displays the teacher view chart. This is a singleton
+   * action.
+   * 
+   * @param icon
+   *          The action SMALL_ICON
+   * @return an AbstractAction
+   */
   public AbstractAction getTeacherChartAction(Icon icon) {
-    AbstractAction a = new AbstractAction() {
 
-      private final TeacherChartDialog dialog = new TeacherChartDialog(
-          symphonie);
+    if (teacherChartAction == null) {
+      teacherChartAction = new AbstractAction() {
 
-      public void actionPerformed(ActionEvent e) {
-        dialog.setChart(symphonie.getCurrentTeacherModel());
-        dialog.setModal(true);
-        dialog.setVisible(true);
-      }
-    };
+        private final TeacherChartDialog dialog = new TeacherChartDialog(
+            symphonie);
 
-    a.putValue(Action.SMALL_ICON, icon);
-    return a;
+        public void actionPerformed(ActionEvent e) {
+          dialog.setChart(symphonie.getCurrentTeacherModel());
+          dialog.setModal(true);
+          dialog.setVisible(true);
+        }
+      };
+
+      teacherChartAction.putValue(Action.SMALL_ICON, icon);
+    }
+
+    return teacherChartAction;
   }
+
+  /** getTeacherChartAction singleton instance */
+  protected AbstractAction teacherChartAction;
 
   /* JURY VIEW ACTIONS ************************************* */
   public AbstractAction getJuryAddFormulaAction(Icon icon) {
@@ -497,7 +554,6 @@ public class SymphonieActionFactory {
     };
 
     a.putValue(Action.SMALL_ICON, icon);
-
     return a;
   }
 
@@ -568,19 +624,31 @@ public class SymphonieActionFactory {
   /** getJuryPrintAction singleton instance */
   protected AbstractAction juryPrintAction;
 
+  /**
+   * Creates an action that displays the jury view chart. This is a singleton
+   * action.
+   * 
+   * @param icon
+   *          The action SMALL_ICON
+   * @return an AbstractAction
+   */
   public AbstractAction getJuryChartAction(Icon icon) {
-    AbstractAction a = new AbstractAction() {
+    if (juryChartAction == null) {
+      juryChartAction = new AbstractAction() {
 
-      private final JuryChartDialog dialog = new JuryChartDialog(symphonie);
+        private final JuryChartDialog dialog = new JuryChartDialog(symphonie);
 
-      public void actionPerformed(ActionEvent e) {
-        dialog.setChart(symphonie.getCurrentJuryModel());
-        dialog.setModal(true);
-        dialog.setVisible(true);
-      }
-    };
-
-    a.putValue(Action.SMALL_ICON, icon);
-    return a;
+        public void actionPerformed(ActionEvent e) {
+          dialog.setChart(symphonie.getCurrentJuryModel());
+          dialog.setModal(true);
+          dialog.setVisible(true);
+        }
+      };
+      juryChartAction.putValue(Action.SMALL_ICON, icon);
+    }
+    return juryChartAction;
   }
+
+  /** getJuryChartAction singleton instance */
+  protected AbstractAction juryChartAction;
 }
