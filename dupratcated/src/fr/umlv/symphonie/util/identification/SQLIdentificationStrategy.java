@@ -169,7 +169,9 @@ public final class SQLIdentificationStrategy extends
   public void identify(String password) throws IdentificationException {
     if (!isValidPassword(password))
       throw new IdentificationException("Invalid password");
-    loggedIn = getLock();
+    if (!getLock())
+      throw new IdentificationException("Root user already logged !");
+    loggedIn = true;
     fireStateChanged();
   }
 
