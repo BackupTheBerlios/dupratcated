@@ -3,7 +3,6 @@ package fr.umlv.symphonie.data;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
-import java.sql.SQLException;
 
 import fr.umlv.symphonie.util.Pair;
 

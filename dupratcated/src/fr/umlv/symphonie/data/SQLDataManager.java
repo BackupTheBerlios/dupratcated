@@ -1,17 +1,21 @@
 
 package fr.umlv.symphonie.data;
 
-import java.util.*;
-import java.sql.SQLException;
-import java.sql.ResultSet;
 import java.sql.Connection;
-import java.sql.Statement;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
-import javax.sql.RowSet;
 import javax.sql.rowset.CachedRowSet;
 
-import com.mysql.jdbc.UpdatableResultSet;
 import com.sun.rowset.CachedRowSetImpl;
 
 import fr.umlv.symphonie.util.Pair;
