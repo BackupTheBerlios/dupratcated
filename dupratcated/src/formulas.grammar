@@ -46,7 +46,7 @@ Tokens
   block_end = '}';
 
   {id_state}
-  identifier = id_character (id_character | sp)*;
+  identifier = id_character (id_character | sp | '+' | '-')*;
   id_separator = ',';
 
   {normal_state}
