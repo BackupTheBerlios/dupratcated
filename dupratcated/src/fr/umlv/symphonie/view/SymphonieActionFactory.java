@@ -35,25 +35,25 @@ public class SymphonieActionFactory {
   protected final Symphonie symphonie;
   protected final ComponentBuilder builder;
   
-  protected final TeacherModel teacherModel;
-  protected final StudentModel studentModel;
-  protected final JuryModel juryModel;
-  
-  protected final AdminTeacherModel adminTeacherModel;
-  protected final AdminStudentModel adminStudentModel;
-  protected final AdminJuryModel adminJuryModel;
+//  protected final TeacherModel teacherModel;
+//  protected final StudentModel studentModel;
+//  protected final JuryModel juryModel;
+//  
+//  protected final AdminTeacherModel adminTeacherModel;
+//  protected final AdminStudentModel adminStudentModel;
+//  protected final AdminJuryModel adminJuryModel;
   
   public SymphonieActionFactory(Symphonie symphonie,ComponentBuilder builder,
       StudentModel studentModel, TeacherModel teacherModel, JuryModel juryModel, AdminStudentModel adminStudentModel, AdminTeacherModel adminTeacherModel, AdminJuryModel adminJuryModel){
     
     this.symphonie=symphonie;
     this.builder=builder;
-    this.teacherModel=teacherModel;
-    this.studentModel=studentModel;
-    this.juryModel=juryModel;
-    this.adminTeacherModel=adminTeacherModel;
-    this.adminStudentModel=adminStudentModel;
-    this.adminJuryModel=adminJuryModel;
+//    this.teacherModel=teacherModel;
+//    this.studentModel=studentModel;
+//    this.juryModel=juryModel;
+//    this.adminTeacherModel=adminTeacherModel;
+//    this.adminStudentModel=adminStudentModel;
+//    this.adminJuryModel=adminJuryModel;
   }
   
   
@@ -308,7 +308,7 @@ public class SymphonieActionFactory {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent e) {
-        studentModel.update();
+        symphonie.getCurrentStudentModel().update();
       }
     };
 
@@ -352,10 +352,10 @@ public class SymphonieActionFactory {
   public AbstractAction getStudentChartAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
-      private final StudentChartDialog dialog = new StudentChartDialog(symphonie.getFrame(), studentModel);
+      private final StudentChartDialog dialog = new StudentChartDialog(symphonie);
 
       public void actionPerformed(ActionEvent e) {
-        dialog.setChart();
+        dialog.setChart(symphonie.getCurrentStudentModel());
         dialog.setModal(true);
         dialog.setVisible(true);
       }
@@ -369,7 +369,7 @@ public class SymphonieActionFactory {
   public AbstractAction getAddMarkAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
-      private final AddMarkDialog amd = new AddMarkDialog(symphonie.getFrame(), teacherModel, builder);
+      private final AddMarkDialog amd = new AddMarkDialog(symphonie, builder);
 
       public void actionPerformed(ActionEvent e) {
         amd.setModal(true);
@@ -385,7 +385,7 @@ public class SymphonieActionFactory {
   public AbstractAction getTeacherAddFormulaAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
-      private final FormulaDialog dialog = new FormulaDialog(symphonie.getFrame(), teacherModel, builder);
+      private final FormulaDialog dialog = new FormulaDialog(symphonie, builder);
 
       public void actionPerformed(ActionEvent e) {
         dialog.setModal(true);
@@ -408,7 +408,7 @@ public class SymphonieActionFactory {
 
         if (p != null) {
           columnIndex = table.columnAtPoint(p);
-          teacherModel.removeColumn(columnIndex);
+          symphonie.getCurrentTeacherModel().removeColumn(columnIndex);
           PointSaver.reset();
         }
       }
@@ -423,7 +423,7 @@ public class SymphonieActionFactory {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent e) {
-        teacherModel.update();
+        symphonie.getCurrentTeacherModel().update();
       }
     };
 
@@ -468,10 +468,10 @@ public class SymphonieActionFactory {
   public AbstractAction getTeacherChartAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
-      private final TeacherChartDialog dialog = new TeacherChartDialog(symphonie.getFrame(), teacherModel);
+      private final TeacherChartDialog dialog = new TeacherChartDialog(symphonie);
 
       public void actionPerformed(ActionEvent e) {
-        dialog.setChart();
+        dialog.setChart(symphonie.getCurrentTeacherModel());
         dialog.setModal(true);
         dialog.setVisible(true);
       }
@@ -485,7 +485,7 @@ public class SymphonieActionFactory {
   public AbstractAction getJuryAddFormulaAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
-      private final JuryFormulaDialog dialog = new JuryFormulaDialog(symphonie.getFrame(), juryModel, builder);
+      private final JuryFormulaDialog dialog = new JuryFormulaDialog(symphonie, builder);
 
       public void actionPerformed(ActionEvent e) {
         dialog.setModal(true);
@@ -509,7 +509,7 @@ public class SymphonieActionFactory {
 
         if (p != null) {
           columnIndex = table.columnAtPoint(p);
-          juryModel.removeColumn(columnIndex);
+          symphonie.getCurrentJuryModel().removeColumn(columnIndex);
           PointSaver.reset();
         }
       }
@@ -524,7 +524,7 @@ public class SymphonieActionFactory {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent e) {
-        juryModel.update();
+        symphonie.getCurrentJuryModel().update();
       }
     };
 
@@ -568,10 +568,10 @@ public class SymphonieActionFactory {
   public AbstractAction getJuryChartAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
-      private final JuryChartDialog dialog = new JuryChartDialog(symphonie.getFrame(), juryModel);
+      private final JuryChartDialog dialog = new JuryChartDialog(symphonie);
 
       public void actionPerformed(ActionEvent e) {
-        dialog.setChart();
+        dialog.setChart(symphonie.getCurrentJuryModel());
         dialog.setModal(true);
         dialog.setVisible(true);
       }

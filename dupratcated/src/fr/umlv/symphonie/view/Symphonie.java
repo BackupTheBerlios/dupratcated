@@ -1061,21 +1061,21 @@ public class Symphonie {
   /**
    * @return Returns the currrentJuryModel.
    */
-  public JuryModel getCurrrentJuryModel() {
+  public JuryModel getCurrentJuryModel() {
     return currentJuryModel;
   }
 
   /**
    * @return Returns the currrentStudentModel.
    */
-  public StudentModel getCurrrentStudentModel() {
+  public StudentModel getCurrentStudentModel() {
     return currentStudentModel;
   }
 
   /**
    * @return Returns the currrentTeacherModel.
    */
-  public TeacherModel getCurrrentTeacherModel() {
+  public TeacherModel getCurrentTeacherModel() {
     return currentTeacherModel;
   }
 
