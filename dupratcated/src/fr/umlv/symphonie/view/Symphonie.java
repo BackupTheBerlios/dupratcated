@@ -63,10 +63,13 @@ import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.ExceptionDisplayDialog;
 import fr.umlv.symphonie.util.TextualResourcesLoader;
 import fr.umlv.symphonie.util.ComponentBuilder.ButtonType;
+import fr.umlv.symphonie.util.SymphoniePreferencesManager;
 import fr.umlv.symphonie.util.dataexport.DataExporter;
 import fr.umlv.symphonie.util.dataexport.DataExporterException;
 import fr.umlv.symphonie.util.dataimport.DataImporter;
 import fr.umlv.symphonie.util.dataimport.DataImporterException;
+import fr.umlv.symphonie.util.identification.IdentificationStrategy;
+import fr.umlv.symphonie.util.identification.SQLIdentificationStrategy;
 import fr.umlv.symphonie.util.wizard.DefaultWizardModel;
 import fr.umlv.symphonie.util.wizard.Wizard;
 import static fr.umlv.symphonie.view.SymphonieConstants.ADMIN_MENU;
@@ -94,10 +97,8 @@ import static fr.umlv.symphonie.view.SymphonieConstants.WINDOW_MENU;
 import static fr.umlv.symphonie.view.SymphonieConstants.ADDMARKDIALOG_TITLE;
 import static fr.umlv.symphonie.view.SymphonieConstants.ADD_FORMULA;
 import static fr.umlv.symphonie.view.SymphonieConstants.UPDATE;
-import static fr.umlv.symphonie.view.SymphonieConstants.PRINT_MENU_ITEM;
 import static fr.umlv.symphonie.view.SymphonieConstants.DISPLAY_CHART;
 import static fr.umlv.symphonie.view.SymphonieConstants.REMOVE_COLUMN;
-import static fr.umlv.symphonie.view.SymphonieConstants.STUDENTVIEWPOPUP_TITLE;
 import static fr.umlv.symphonie.view.SymphonieActionFactory.*;
 import static fr.umlv.symphonie.util.ComponentBuilder.ButtonType;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
@@ -111,7 +112,7 @@ public class Symphonie {
   private ComponentBuilder builder;
 
   /** The default language */
-  private Language currentLanguage = Language.valueOf("FRENCH");
+  private Language currentLanguage = SymphoniePreferencesManager.getLanguage();
 
   /** The main frame */
   private JFrame frame;
@@ -338,7 +339,7 @@ public class Symphonie {
     toolbar.add(SymphonieActionFactory.getConnectAction(new ImageIcon(
         Symphonie.class.getResource("icons/connect.png")), builder));
     toolbar.add(SymphonieActionFactory.getDBAction(new ImageIcon(
-        Symphonie.class.getResource("icons/db.png")), frame, builder));
+        Symphonie.class.getResource("icons/db.png")), frame));
 
     toolbar.setFloatable(false);
 
@@ -798,17 +799,18 @@ public class Symphonie {
   // ----------------------------------------------------------------------------
 
   /**
-   * Sets up the main application
-   * 
+   * Sets up the application with the given parameters
+   * @param manager The data manager to use
+   * @param rootLogger The login service
    * @throws DataManagerException
    *           If there's a problem while dealing DB
    * @throws IOException
    *           If there's any i/o error
    */
-  public Symphonie() throws DataManagerException, IOException {
+  public Symphonie(DataManager manager, IdentificationStrategy rootLogger) throws DataManagerException, IOException {
 
     // Data source
-    manager = SQLDataManager.getInstance();
+    this.manager = manager;
 
     // Language tools
     builder = new ComponentBuilder(currentLanguage.getMap());
@@ -840,6 +842,18 @@ public class Symphonie {
         frame.setTitle(builder.getValue(FRAME_TITLE));
       }
     });
+  }
+  
+  /**
+   * Sets up the main application with the default data manager and login strategy
+   * @see #Symphonie(DataManager, IdentificationStrategy)
+   * @throws DataManagerException
+   *           If there's a problem while dealing DB
+   * @throws IOException
+   *           If there's any i/o error
+   */
+  public Symphonie() throws DataManagerException, IOException {
+    this(SQLDataManager.getInstance(), new SQLIdentificationStrategy());
   }
 
   /**
@@ -895,6 +909,7 @@ public class Symphonie {
    */
   public void setCurrentLanguage(Language newLanguage) {
     this.currentLanguage = newLanguage;
+    SymphoniePreferencesManager.setLanguage(newLanguage);
     try {
       builder.setNameMap(newLanguage.getMap());
     } catch (IOException e) {
