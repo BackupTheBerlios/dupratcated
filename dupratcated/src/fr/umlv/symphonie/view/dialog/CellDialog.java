@@ -196,6 +196,7 @@ public class CellDialog implements IDictionarySupport {
         area.setText("");
         sample.setForeground(Color.BLACK);
         prevBgColor.setBackground(Color.WHITE);
+        format = null;
       }
     }, SymphonieConstants.BUTTON_CANCEL, ComponentBuilder.ButtonType.BUTTON);
 
