@@ -301,11 +301,11 @@ public class FormulaAnalysis extends AnalysisAdapter {
   }
 
   public void caseAFunctionEvaluatedExpression(AFunctionEvaluatedExpression node) {
-    FormulaFunction func = functionMap.get(node.getIdentifier().getText());
+    FormulaFunction func = functionMap.get(node.getFuncId().getText());
     node.getBlockExpression().apply(this);
     List<NumericFormula> params = (List<NumericFormula>) getOut(node
         .getBlockExpression());
-    setOut(node, BasicFormulaFactory.functionInstance(node.getIdentifier()
+    setOut(node, BasicFormulaFactory.functionInstance(node.getFuncId()
         .getText(), func, params));
   }
 
