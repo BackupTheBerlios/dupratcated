@@ -58,7 +58,7 @@ public final class SymphonieFormulaFactory {
 
   /**
    * Parses a <code>Formula</code> and returns it. <br>
-   * This classe statically stocks already parsed formulas so that they don't
+   * This class statically stocks already parsed formulas so that they don't
    * need to be reparsed each time a user asks for them. <br>
    * The formulas that use variable mapped values are created using the internal
    * map. We do not ensure the integrity of the data that you put in it. Users
@@ -80,7 +80,8 @@ public final class SymphonieFormulaFactory {
    * @throws LexerException
    *           if formula is misformatted
    * @throws IOException
-   *           this exception is never thrown
+   *           this exception is never thrown, unless there's in i/o error while
+   *           reading RAM.
    */
   public static final Formula parseFormula(String name, String unparsedFormula,
       int id, int column) throws ParserException, LexerException, IOException {
@@ -107,6 +108,47 @@ public final class SymphonieFormulaFactory {
       }
 
       return f;
+    }
+  }
+
+  /**
+   * Parses a <code>BooleanFormula</code> and returns it. <br>
+   * The formulas aren't stocked, calling two times this routine with the same
+   * arguments with parse and return two different formula objects. <br>
+   * The formulas that use variable mapped values are created using the internal
+   * map. We do not ensure the integrity of the data that you put in it. Users
+   * are encouraged to put the values in the map each time you are to call the
+   * <code>getValue()</code> method in a formula.
+   * 
+   * @param unparsedFormula
+   *          The formula string to parse
+   * @return a <code>BooleanFormula</code>
+   * @see #putMappedValue(String, Number)
+   * @throws ParserException
+   *           if formula syntax is not correct
+   * @throws LexerException
+   *           if formula is misformatted
+   * @throws IOException
+   *           this exception is never thrown, unless there's in i/o error while
+   *           reading RAM.
+   */
+  public BooleanFormula parseBooleanFormula(String unparsedFormula)
+      throws ParserException, LexerException, IOException {
+    synchronized (analyzer) {
+      // Parse formula
+      Lexer lexer = new Lexer(new PushbackReader(new StringReader(
+          unparsedFormula)));
+      Parser parser = new Parser(lexer);
+      Start formula = parser.parse();
+
+      // Set up analyzer
+      analyzer.setDescription("boolean");
+      analyzer.setColumn(-1);
+      analyzer.setID(-1);
+      formula.apply(analyzer);
+
+      // return the built formula
+      return (BooleanFormula) analyzer.getOut(formula);
     }
   }
 
