@@ -187,6 +187,16 @@ public class SQLDataManager implements DataManager {
     return instance;
   }
 
+  
+  public int sizeOfTable(String tableName) throws SQLException{
+    String request = "select * from " + tableName + ";";
+    
+    CachedRowSet result = connectAndQuery(request);
+    
+    return result.size();
+  }
+  
+  
   /**
    * Connects to the database, prepare a given request, and return the resulting
    * <code>PreparedStatement</code>. Used to execute mass request.
