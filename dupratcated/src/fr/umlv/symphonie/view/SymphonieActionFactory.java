@@ -606,7 +606,7 @@ public class SymphonieActionFactory {
             symphonie);
 
         public void actionPerformed(ActionEvent e) {
-          dialog.setChart(symphonie.getCurrentTeacherModel());
+          dialog.setChart(symphonie.getCurrentTeacherModel(), symphonie.getChartStep());
           dialog.setModal(true);
           dialog.setVisible(true);
         }
@@ -778,7 +778,7 @@ public class SymphonieActionFactory {
         private final JuryChartDialog dialog = new JuryChartDialog(symphonie);
 
         public void actionPerformed(ActionEvent e) {
-          dialog.setChart(symphonie.getCurrentJuryModel());
+          dialog.setChart(symphonie.getCurrentJuryModel(), symphonie.getChartStep());
           dialog.setModal(true);
           dialog.setVisible(true);
         }

@@ -105,3 +105,4 @@ addstudent.lastname=Last Name :
 removestudent=Remove student
 addcourse=Add course
 removecourse=Remove course
+setstep=Set chart step :  

@@ -105,3 +105,4 @@ addstudent.lastname=Nom :
 removestudent=Effacer l'étudiant
 addcourse=Ajouter une Matière
 removecourse=Effacer la matière
+setstep=Ajuster le pas du diagramme :  

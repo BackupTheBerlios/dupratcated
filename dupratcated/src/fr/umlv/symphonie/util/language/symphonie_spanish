@@ -106,3 +106,4 @@ addstudent.lastname=Apellido :
 removestudent=Eliminar estudiante
 addcourse=Añadir materia
 removecourse=Eliminar materia
+setstep=Ajustar te slippo :  

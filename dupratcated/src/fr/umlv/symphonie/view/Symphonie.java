@@ -42,12 +42,14 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.SingleSelectionModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
@@ -181,6 +183,8 @@ public class Symphonie {
   /** CourseTreeModel * */
   private final CourseTreeModel courseTreeModel;
 
+  protected int chartStep = 5;
+  
   /** Action Factory * */
   protected final SymphonieActionFactory actionFactory;
 
@@ -1155,6 +1159,21 @@ public class Symphonie {
     toolbar.add(createToolbarButton(ADDMARKDIALOG_TITLE, morfula, builder));
     toolbar.add(dischart);
     toolbar.addSeparator();
+    
+    toolbar.add(builder.buildLabel(SymphonieConstants.SETSTEP));
+    
+    final JSpinner spinner = new JSpinner(new SpinnerNumberModel(chartStep, 1, 20, 1));
+    spinner.setMaximumSize(new Dimension(48,32));
+    spinner.addChangeListener(new ChangeListener(){
+      public void stateChanged(ChangeEvent e) {
+        chartStep = ((SpinnerNumberModel)(spinner.getModel())).getNumber().intValue();
+      }
+    });
+    
+    
+    toolbar.add(spinner);
+    toolbar.addSeparator();
+    
     toolbar.add(createToolbarButton(EXIT_MENU_ITEM, exit, builder));
 
     frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -1638,5 +1657,11 @@ public class Symphonie {
 
   public StudentTreeModel getStudentTreeModel() {
     return studentTreeModel;
+  }
+  /**
+   * @return Returns the chartStep.
+   */
+  public int getChartStep() {
+    return chartStep;
   }
 }
