@@ -91,4 +91,19 @@ public class SymphonieConstants {
   public static final String ADD_STUDENT_NAME = "addstudent.name";
   public static final String ADD_STUDENT_LASTNAME = "addstudent.lastname";
   public static final String REMOVE_STUDENT = "removestudent";
+  
+  // chart constants
+  public static final String STUDENT_CHART_SENTENCE_1 = "studentchart.sentence1";
+  public static final String STUDENT_CHART_SENTENCE_2 = "studentchart.sentence2";
+  public static final String STUDENT_HEADER = "student.header";
+  
+  public static final String CHART_FROM = "chart.from";
+  public static final String CHART_TO = "chart.to";
+  public static final String CHART_MARK_INTERVAL = "chart.markinterval";
+  public static final String CHART_STUDENT_NUMBER = "chart.studentnumber";
+  public static final String TEACHER_CHART_MARK_FOR_COURSE = "teacherchart.markforcourse";
+  public static final String TEACHER_HEADER = "teacher.header";
+  
+  public static final String JURY_CHART_STUDENTS_AVERAGES = "jurychart.studentsaverages";
+  public static final String JURY_HEADER = "jury.header";
 }

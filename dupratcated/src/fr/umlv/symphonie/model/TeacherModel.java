@@ -612,7 +612,7 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
   }
 
   public MessageFormat getHeaderMessageFormat() {
-    return new MessageFormat("Notes des etudiants pour la matiere " + course);
+    return new MessageFormat(builder.getValue(TEACHER_HEADER) + course);
   }
 
   /**
@@ -662,16 +662,19 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
       for (Map<Integer, Integer> map : dataTab) {
         for (int markId : map.keySet()) {
           dataset.addValue(map.get(markId), markMap.get(markId).getDesc(),
-              "de " + low + " a " + hi);
+              /*builder.getValue(CHART_FROM) +*/ low + builder.getValue(CHART_TO) + hi);
         }
 
         low += step;
         hi += step;
+        
+        if (hi > 20)
+          hi = 20;
       }
 
       JFreeChart barChart = ChartFactory.createBarChart3D(
-          "Notes pour la matiere " + course, "intervalles de notes",
-          "nombre d'eleves", dataset, PlotOrientation.VERTICAL, true, true,
+          builder.getValue(TEACHER_CHART_MARK_FOR_COURSE) + course, builder.getValue(CHART_MARK_INTERVAL),
+          builder.getValue(CHART_STUDENT_NUMBER), dataset, PlotOrientation.VERTICAL, true, true,
           false);
       barChart.getPlot().setForegroundAlpha(0.65f);
 

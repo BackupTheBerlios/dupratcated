@@ -245,8 +245,8 @@ public class StudentModel extends AbstractTableModel implements
 							.getCoeff() / div));
 				}
 
-			JFreeChart pieChart = ChartFactory.createPieChart3D("Notes de "
-					+ student + " - Moyenne générale : "
+			JFreeChart pieChart = ChartFactory.createPieChart3D(builder.getValue(STUDENT_CHART_SENTENCE_1)
+					+ student + builder.getValue(STUDENT_CHART_SENTENCE_2)
 					+ StudentAverage.getAnnualAverage(markMap), pieDataset,
 					false, false, false);
 			pieChart.getPlot().setForegroundAlpha(0.35f);
@@ -258,7 +258,7 @@ public class StudentModel extends AbstractTableModel implements
   }
 
   public MessageFormat getHeaderMessageFormat() {
-    return new MessageFormat("Notes de " + student);
+    return new MessageFormat(builder.getValue(STUDENT_HEADER) + student);
   }
 
   // ----------------------------------------------------------------------------

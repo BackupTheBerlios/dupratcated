@@ -374,7 +374,7 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
   }
 
   public MessageFormat getHeaderMessageFormat() {
-    return new MessageFormat("Ensemble des moyennes des etudiants et deliberes");
+    return new MessageFormat(builder.getValue(JURY_HEADER));
   }
 
   /*
@@ -411,15 +411,18 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
     for (Map<Integer, Integer> map : dataTab) {
       for (int courseId : map.keySet()) {
         dataset.addValue(map.get(courseId), courseMap.get(courseId).getTitle(),
-            "de " + low + " a " + hi);
+            /*builder.getValue(CHART_FROM) +*/ low + builder.getValue(CHART_TO) + hi);
       }
 
       low += step;
       hi += step;
+      
+      if (hi > 20)
+        hi = 20;
     }
 
     JFreeChart barChart = ChartFactory.createBarChart3D(
-        "Moyennes des etudiants", "intervalles de notes", "nombre d'eleves",
+        builder.getValue(JURY_CHART_STUDENTS_AVERAGES), builder.getValue(CHART_MARK_INTERVAL), builder.getValue(CHART_STUDENT_NUMBER),
         dataset, PlotOrientation.VERTICAL, true, true, true);
     barChart.getPlot().setForegroundAlpha(0.65f);
 
@@ -450,7 +453,6 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
 
       public void run() {
         synchronized (lock) {
-          System.out.println("on y est !");
 
           try {
             manager.addJuryFormula(expression, desc, column);
