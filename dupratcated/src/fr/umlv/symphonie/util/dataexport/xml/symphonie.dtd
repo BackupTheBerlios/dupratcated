@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!ELEMENT symphonie (course*, student*, examen*)>
+	<!ATTLIST symphonie view (student|teacher|jury) #REQUIRED >
+
+<!ELEMENT course (title, coeff_course)>
+		<!ATTLIST course id_course CDATA #REQUIRED>
+		<!ELEMENT title (#PCDATA)>
+		<!ELEMENT coeff_course (#PCDATA)>
+			
+<!ELEMENT examen (desc, coeff_examen)>
+		<!ATTLIST examen id_examen CDATA #REQUIRED>
+		<!ELEMENT desc (#PCDATA)>
+		<!ELEMENT coeff_examen (#PCDATA)>
+		
+<!ELEMENT student (name, last_name, comment?, student_mark*)>
+	<!ATTLIST student id_student CDATA #REQUIRED>
+	<!ELEMENT name (#PCDATA)>
+	<!ELEMENT last_name (#PCDATA)>		
+	<!ELEMENT student_mark (mark)>		
+		<!ATTLIST student_mark id_course CDATA #REQUIRED>
+		<!ATTLIST student_mark id_examen CDATA #REQUIRED>
+		<!ELEMENT mark (#PCDATA)>			
+	<!ELEMENT comment (#PCDATA)>
+	
