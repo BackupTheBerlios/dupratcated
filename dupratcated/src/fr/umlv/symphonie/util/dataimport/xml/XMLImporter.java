@@ -40,15 +40,18 @@ public class XMLImporter implements DataImporter {
 	/**
 	 * @param root
 	 *            the root of the document
+	 * @param coeff
+	 *            if true we create the id_coeff attribute
 	 * @return a map with all the courses
 	 */
-	protected Map<Integer, Course> getCourseNodes(Element root) {
+	protected Map<Integer, Course> getCourseNodes(Element root, boolean coeff) {
 		final HashMap<Integer, Course> map = new HashMap<Integer, Course>();
 		final NodeList nodes = root.getElementsByTagName("course");
 		Course c;
 		Node n;
 		Element e;
 		int id;
+		float coeffCourse = -1;
 
 		/** for each course node */
 		for (int i = 0; i < nodes.getLength(); i++) {
@@ -58,13 +61,17 @@ public class XMLImporter implements DataImporter {
 			/** we create an element by using the course node */
 			e = (Element) n;
 
-			/** we get the attribute id_course from the element course */
 			id = Integer.parseInt(e.getAttribute("id_course"));
 
+			/** if we need the coeff_course attribute */
+			if (coeff) {
+				/** we get the attribute id_course from the element course */
+				coeffCourse = Float.parseFloat(e.getElementsByTagName(
+						"coeff_course").item(0).getTextContent());
+			}
 			/** we create the course object */
 			c = new Course(id, e.getElementsByTagName("title").item(0)
-					.getTextContent(), Float.parseFloat(e.getElementsByTagName(
-					"coeff_course").item(0).getTextContent()));
+					.getTextContent(), coeffCourse);
 
 			/** we put the course object into the map */
 			map.put(id, c);
@@ -122,7 +129,7 @@ public class XMLImporter implements DataImporter {
 	 * @param root
 	 *            the root of the document
 	 * @param comment
-	 *            if we need the comment attribute of the student node
+	 *            if true we create the comment node
 	 * @param markMap
 	 *            a map with all the marks
 	 * @return a map with all the students
@@ -161,10 +168,14 @@ public class XMLImporter implements DataImporter {
 			}
 
 			/**
-			 * we get all the student marks for this student and we put the
-			 * student and his marks in the map
+			 * if we need the student arks, we get and put them in the map
 			 */
-			map.put(s, getStudentMarkNodes(e, s, markMap));
+			if (markMap != null) {
+				map.put(s, getStudentMarkNodes(e, s, markMap));
+			} else {
+				map.put(s, null);
+			}
+
 		}
 
 		return map;
@@ -271,9 +282,9 @@ public class XMLImporter implements DataImporter {
 		if (!root.getAttribute("view").equals("teacher")) {
 			throw new DataImporterException("the file isn't a teacher view.\n");
 		}
-		
-		final Map<Integer, Mark> markMap = getMarkNodes(root,
-				getCourseNodes(root));
+
+		final Map<Integer, Mark> markMap = getMarkNodes(root, getCourseNodes(
+				root, false));
 		final Map<Student, Map<Integer, StudentMark>> studentAndStudentMakMap = getStudentNodes(
 				root, false, markMap);
 
@@ -317,7 +328,7 @@ public class XMLImporter implements DataImporter {
 		}
 
 		final Map<Student, Map<Integer, StudentMark>> map = getStudentNodes(
-				root, true, getMarkNodes(root, getCourseNodes(root)));
+				root, true, null);
 
 		for (Student s : map.keySet()) {
 			try {
@@ -326,7 +337,6 @@ public class XMLImporter implements DataImporter {
 				throw new DataImporterException(
 						"Error during the importation with the bdd.\n", e);
 			}
-
 		}
 	}
 }
