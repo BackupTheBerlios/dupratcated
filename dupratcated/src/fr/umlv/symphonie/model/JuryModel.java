@@ -4,8 +4,12 @@
  */
 package fr.umlv.symphonie.model;
 
+import java.awt.EventQueue;
 import java.awt.Font;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -38,6 +42,12 @@ public class JuryModel extends AbstractTableModel {
   private final Map<Student, Map<Course, Map<Integer, StudentMark>>> dataMap = new HashMap<Student, Map<Course, Map<Integer, StudentMark>>>();
   
   
+  /**
+   * Pool de threads qui n'en contient qu'un seul et qui sert pour le
+   * rafraîchissement du canal courant.
+   */
+  private final ExecutorService es = Executors.newSingleThreadExecutor();
+  
   public JuryModel(DataManager manager) {
     this.manager = manager;
     update();
@@ -47,26 +57,56 @@ public class JuryModel extends AbstractTableModel {
   
   
   public void update() {
-    Pair<Map<Integer, Course>, SortedMap<Student, Map<Course, Map<Integer, StudentMark>>>> allData = null;
-    try {
-      allData = manager.getAllStudentsMarks();
-    } catch (DataManagerException e) {
-      System.out.println("Error getting data for Jury View");
-      e.printStackTrace();
-    }
     
-    columnList.addAll(allData.getFirst().values());
-    studentList.addAll(allData.getSecond().keySet());
-    dataMap.putAll(allData.getSecond());
-    
-    /*
-     * ici ajouter les formules de la vue jury
-     */
-    
-    dataMap.putAll(allData.getSecond());
-    
-    columnCount = columnList.size() + 4;
-    rowCount = 3 + studentList.size();
+    es.execute(new Runnable(){
+      
+      /* (non-Javadoc)
+       * @see java.lang.Runnable#run()
+       */
+      public void run() {
+        
+        Pair<Map<Integer, Course>, SortedMap<Student, Map<Course, Map<Integer, StudentMark>>>> allData = null;
+        try {
+          allData = manager.getAllStudentsMarks();
+        } catch (DataManagerException e) {
+          System.out.println("Error getting data for Jury View");
+          e.printStackTrace();
+        }
+        
+        columnList.addAll(allData.getFirst().values());
+        studentList.addAll(allData.getSecond().keySet());
+        dataMap.putAll(allData.getSecond());
+        
+        /*
+         * ici ajouter les formules de la vue jury
+         */
+        
+        dataMap.putAll(allData.getSecond());
+        
+        JuryModel.this.columnCount = columnList.size() + 4;
+        JuryModel.this.rowCount = 3 + studentList.size();
+        
+        /*System.out.println("lignes : " + JuryModel.this.rowCount);
+        System.out.println("colonnes : " + JuryModel.this.columnCount);*/
+        
+        try {
+          EventQueue.invokeAndWait(new Runnable() {
+            public void run() {
+              JuryModel.this.fireTableStructureChanged();
+            }
+          });
+        } catch (InterruptedException e1) {
+          System.out.println("exception interrupted");
+          e1.printStackTrace();
+        } catch (InvocationTargetException e1) {
+          System.out.println("exception invocation");
+          e1.printStackTrace();
+        }
+        
+       /* System.out.println(("thread fini !"));*/
+      }
+    });
+
   }
 
 

@@ -49,6 +49,8 @@ public class StudentModel extends AbstractTableModel {
   private int rowNumber = 0;
   private Object[][] matrix = null;
   
+  //private final Object lock = new Object();
+  
   /**
    * Pool de threads qui n'en contient qu'un seul et qui sert pour le
    * rafraîchissement du canal courant.
@@ -62,102 +64,115 @@ public class StudentModel extends AbstractTableModel {
   
   public void setStudent (Student s){
     
-    clear();
+      clear();
+
+      student = s;
     
-    student = s;
+    //notifyAll();
+    
+    System.out.println("on passe a update");
     
     update();
+
+    
   }
   
   
   public void update() {
     
-    es.execute(new Runnable(){
-      
-      public void run(){
-      
-      Map<Course, Map<Integer, StudentMark>> markMap = null;
-        try {
-          markMap = manager.getAllMarksByStudent(student);
-        } catch (DataManagerException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-          return;
-        }
+    
+    es.execute(new Runnable() {
 
-        int n;
-        for (Course c : markMap.keySet()) {
-          if ((n = markMap.get(c).size()) > columnNumber) columnNumber = n;
-        }
+      public void run() {
 
-        columnNumber += 2;
-        rowNumber = 4 * markMap.size();
-
-        matrix = new Object[rowNumber][columnNumber];
-
-        int row = 0;
-        int column;
-        Collection<StudentMark> collection = null;
-
-        for (Course c : markMap.keySet()) {
-
-          column = 0;
-          collection = markMap.get(c).values();
-
-          /*
-           * On met les donnees dans la premiere colonne (matiere, coeff, note)
-           */
-          matrix[row][column] = c;
-          matrix[row + 1][column] = "coeff";
-          matrix[row + 2][column] = "note";
-
-          column++;
-
-          /*
-           * On remplit les cases de la matrice avec les notes
-           */
-          for (StudentMark mark : collection) {
-            matrix[row][column] = mark.getMark();
-            matrix[row + 1][column] = mark.getCoeff();
-            matrix[row + 2][column] = mark;
-            column++;
+        /*StudentModel.this.clear();*/
+        
+          Map<Course, Map<Integer, StudentMark>> markMap = null;
+          try {
+            markMap = manager.getAllMarksByStudent(student);
+          } catch (DataManagerException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return;
           }
 
-          /*
-           * On remplit le reste des cases de bon gros vide
-           */
-          blankRow(row, column);
-          blankRow(row + 1, column);
-          blankRow(row + 2, column);
-          blankRow(row + 3, 0);
+          int n;
+          int tmp = 0;
+          for (Course c : markMap.keySet()) {
+            if ((n = markMap.get(c).size()) > tmp) tmp = n;
+          }
 
-          matrix[row][columnNumber - 1] = "moyenne";
-          matrix[row + 1][columnNumber - 1] = "";
-          matrix[row + 2][columnNumber - 1] = getAverage(collection);
+          columnNumber = tmp + 2;
+          rowNumber = 4 * markMap.size();
 
-          row += 4;
+          matrix = new Object[rowNumber][columnNumber];
 
-        }
-        
-        try {
-          EventQueue.invokeAndWait(new Runnable() {
+          int row = 0;
+          int column;
+          Collection<StudentMark> collection = null;
 
-            public void run() {
-              StudentModel.this.fireTableStructureChanged();
+          for (Course c : markMap.keySet()) {
+
+            column = 0;
+            collection = markMap.get(c).values();
+
+            /*
+             * On met les donnees dans la premiere colonne (matiere, coeff,
+             * note)
+             */
+            matrix[row][column] = c;
+            matrix[row + 1][column] = "coeff";
+            matrix[row + 2][column] = "note";
+
+            column++;
+
+            /*
+             * On remplit les cases de la matrice avec les notes
+             */
+            for (StudentMark mark : collection) {
+              matrix[row][column] = mark.getMark();
+              matrix[row + 1][column] = mark.getCoeff();
+              matrix[row + 2][column] = mark;
+              column++;
             }
-            
-          });
-        } catch (InterruptedException e1) {
-          // TODO Auto-generated catch block
-          e1.printStackTrace();
-        } catch (InvocationTargetException e1) {
-          // TODO Auto-generated catch block
-          e1.printStackTrace();
-        }
-        
+
+            /*
+             * On remplit le reste des cases de bon gros vide
+             */
+            blankRow(row, column);
+            blankRow(row + 1, column);
+            blankRow(row + 2, column);
+            blankRow(row + 3, 0);
+
+            matrix[row][columnNumber - 1] = "moyenne";
+            matrix[row + 1][columnNumber - 1] = "";
+            matrix[row + 2][columnNumber - 1] = getAverage(collection);
+
+            row += 4;
+
+          }
+
+          try {
+            EventQueue.invokeAndWait(new Runnable() {
+
+              public void run() {
+                StudentModel.this.fireTableStructureChanged();
+              }
+
+            });
+          } catch (InterruptedException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+          } catch (InvocationTargetException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+          }
+          
+          
+         //lock.notifyAll();
+         
       }
     });
-    
 
     
   }
