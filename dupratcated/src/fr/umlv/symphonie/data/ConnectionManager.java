@@ -23,7 +23,6 @@ public class ConnectionManager {
    */
   private static final Properties openDialog() {
     DatabaseDialog dbd = new DatabaseDialog(null);
-    JOptionPane.showMessageDialog(null, "This seem to be the first time you use Symphonie.\nBefore starting please fill the DB info, it will be only asked once.");
     dbd.setVisible(true);
     return dbd.getUserInput();
   }
@@ -33,21 +32,27 @@ public class ConnectionManager {
     DriverLoader.loadDrivers();
 
     Properties conProps = SymphoniePreferencesManager.getDBProperties();
-    if (conProps == null)
+    if (conProps == null) {
+      JOptionPane
+          .showMessageDialog(
+              null,
+              "This seem to be the first time you use Symphonie.\nBefore starting please fill the DB info, it will be only asked once.");
       conProps = openDialog();
-         
+    }
+
     if (conProps.isEmpty()) {
       System.out
           .println("Cannot start main program without a database connection");
       System.exit(1);
     }
-    
+
     if (connection == null) {
       try {
         connection = DriverManager.getConnection(conProps.getProperty("url"),
             conProps);
       } catch (SQLException e) {
-        System.out.println("Error while connecting to database : \n" + e.getMessage());
+        System.out.println("Error while connecting to database : \n"
+            + e.getMessage());
         System.out.println(e.getSQLState());
         System.exit(1);
       }
