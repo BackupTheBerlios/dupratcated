@@ -170,12 +170,17 @@ public class SymphonieActionFactory {
     return a;
   }
 
+  /**
+   * Actions that displays a dialog that allows user to conditionally format cells
+   * @param icon the action SMALL_ICON
+   * @return an AbstractAction
+   */
   public AbstractAction getFormulaCellAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
-
+        private final CellDialog cd = new CellDialog(symphonie, builder);
       public void actionPerformed(ActionEvent event) {
-        CellDialog cd = new CellDialog(symphonie.getFrame(), builder);
         cd.setVisible(true);
+        
       }
     };
     a.putValue(Action.SMALL_ICON, icon);
@@ -385,8 +390,10 @@ public class SymphonieActionFactory {
       public void actionPerformed(ActionEvent e) {
         Object o = tree.getLastSelectedPathComponent();
         
-        if (o instanceof Student)
+        if (o instanceof Student) {
           symphonie.getStudentTreeModel().removeStudent((Student)o);
+          //symphonie.getCurrentTeacherModel().clear();
+        }
       }
     };
     
