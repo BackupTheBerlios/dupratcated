@@ -35,7 +35,7 @@ public class XMLImporter implements DataImporter {
 
 	protected String documentName;
 
-	private final DataManager dm = new SQLDataManager();
+	protected final DataManager dm = new SQLDataManager();
 
 	/**
 	 * @param root
@@ -330,6 +330,7 @@ public class XMLImporter implements DataImporter {
 		final Map<Student, Map<Integer, StudentMark>> map = getStudentNodes(
 				root, true, null);
 
+		/** we update the student data : comment */
 		for (Student s : map.keySet()) {
 			try {
 				dm.changeStudentComment(s, s.getComment());

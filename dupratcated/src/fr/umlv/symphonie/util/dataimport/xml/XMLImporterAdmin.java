@@ -10,6 +10,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import fr.umlv.symphonie.data.Course;
+import fr.umlv.symphonie.data.DataManagerException;
+import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.util.dataimport.DataImporterException;
 
@@ -67,5 +69,18 @@ public class XMLImporterAdmin extends XMLImporter {
 		if (!root.getAttribute("view").equals("jury")) {
 			throw new DataImporterException("the file isn't a jury view.\n");
 		}
+		
+		final Map<Student, Map<Integer, StudentMark>> map = getStudentNodes(
+				root, true, null);
+
+		/** we update the student data : comment 
+		for (Student s : map.keySet()) {
+			try {
+				dm.changeStudentComment(s, s.getComment());
+			} catch (DataManagerException e) {
+				throw new DataImporterException(
+						"Error during the importation with the bdd.\n", e);
+			}
+		}*/
 	}
 }
