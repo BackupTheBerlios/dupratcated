@@ -6,12 +6,16 @@ package fr.umlv.symphonie.model;
 
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -21,10 +25,12 @@ import java.util.concurrent.Executors;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.AbstractTableModel;
@@ -39,7 +45,11 @@ import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.data.formula.Formula;
 import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
+import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.Pair;
+import fr.umlv.symphonie.util.TextualResourcesLoader;
+import fr.umlv.symphonie.view.SymphonieActionFactory;
+import fr.umlv.symphonie.view.SymphonieConstants;
 import fr.umlv.symphonie.view.cells.CellFormat;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
 
@@ -483,6 +493,7 @@ public class TeacherModel extends AbstractTableModel {
       removeMark((Mark)o);
     
     else removeFormula((Formula)o);
+    
   }
   
   /**
@@ -501,7 +512,7 @@ public class TeacherModel extends AbstractTableModel {
     
   }
 
-  public static void main(String[] args) throws DataManagerException {
+  public static void main(String[] args) throws DataManagerException, IOException {
     JFrame frame = new JFrame ("test TeacherModel");
     frame.setSize(800,600);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -572,6 +583,23 @@ public class TeacherModel extends AbstractTableModel {
     final JTable table = new JTable(teacherModel);
     table.setTableHeader(null);
     
+    HashMap<String, String> map = TextualResourcesLoader.getResourceMap("language/symphonie", new Locale(
+    "french"), "ISO-8859-1");
+    
+    ComponentBuilder builder = new ComponentBuilder(map);
+    
+    final JPopupMenu pop = builder.buildPopupMenu(SymphonieConstants.TEACHERVIEWPOPUP_TITLE);
+    
+    pop.add(builder.buildButton(SymphonieActionFactory.getAddMarkAction(null,frame, builder ), SymphonieConstants.ADDMARKDIALOG_TITLE, ComponentBuilder.ButtonType.MENU_ITEM));
+    
+    table.addMouseListener(new MouseAdapter() {
+
+      public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)) {
+          pop.show(e.getComponent(), e.getX(), e.getY());
+        }
+      }
+    });
     
     table.setDefaultRenderer(Object.class, CellRendererFactory.getTeacherModelCellRenderer(teacherModel.getFormattedObjects()));
     
