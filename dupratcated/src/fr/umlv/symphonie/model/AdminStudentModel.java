@@ -19,19 +19,25 @@ import fr.umlv.symphonie.util.ExceptionDisplayDialog;
 
 
 /**
+ * Suitable data model for a table displaying a Student view in admin mode.
  * @author susmab
  *
  */
 public class AdminStudentModel extends StudentModel {
-
-//  private static AdminStudentModel instance = null;
-  private final ExecutorService es = Executors.newSingleThreadExecutor();
   
+  /**
+   * Constructs an empty <code>AdminStudentModel</code>.
+   * @param manager the <code>DataManager</code> which will handle database.
+   * @param builder the <code>ComponentBuilder</code> which will provide internationalization.
+   */
   public AdminStudentModel(DataManager manager, ComponentBuilder builder){
     super(manager, builder);
   }
   
   
+  /* (non-Javadoc)
+   * @see javax.swing.table.TableModel#isCellEditable(int, int)
+   */
   public boolean isCellEditable(int rowIndex,int columnIndex){
     
     if (columnIndex == columnCount - 1)
@@ -64,6 +70,9 @@ public class AdminStudentModel extends StudentModel {
     return true;
   }
   
+  /* (non-Javadoc)
+   * @see javax.swing.table.TableModel#setValueAt(java.lang.Object, int, int)
+   */
   public void setValueAt(Object aValue,int rowIndex,int columnIndex){
 
     final int row = rowIndex;

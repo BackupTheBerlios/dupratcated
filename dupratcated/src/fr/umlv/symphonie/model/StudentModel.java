@@ -46,35 +46,76 @@ import fr.umlv.symphonie.view.cells.FormattableCellRenderer;
 import fr.umlv.symphonie.view.cells.ObjectFormattingSupport;
 
 /**
- * Suitable data model for a table displaying a Student Courses
+ * Suitable data model for a table displaying a Student view
  * 
  * @author fvallee
  */
 public class StudentModel extends AbstractTableModel implements
     ObjectFormattingSupport, IDictionarySupport {
 
+  /**
+   * The DataManager which handles database
+   */
   protected final DataManager manager;
+  
+  /**
+   * The ComponentBuilder, used to internationalize the current model.
+   */
   protected final ComponentBuilder builder;
+  
+  /**
+   * The student being represented, null if the model is empty
+   */
   protected Student student = null;
+  
+  /**
+   * Number of rows currently in the model
+   */
   protected int columnCount = 0;
+  
+  /**
+   * Number of column currently in the model
+   */
   protected int rowCount = 0;
+  
+  /**
+   * A <code>Map</code> containing all courses and marks related to,
+   * associated with the represented student.
+   */
   protected Map<Course, Map<Integer, StudentMark>> markMap = null;
+  
+  /**
+   * A <code>List</code> of all courses available in the database.
+   */
   protected List<Course> courseList = new ArrayList<Course>();
-  // private static StudentModel instance = null;
-//  protected Object[][] matrix = null;
 
+  /**
+   * A <code>CompletionDictionary</code> used in order to provide auto-completion with this model.
+   */
   protected final CompletionDictionary dictionary = new CompletionDictionary();
 
+  /**
+   * An object used to be locked by each thread launched,
+   * in order not to generate errors while interacting with the database.
+   */
   protected final Object lock = new Object();
 
   /**
-   * Pool de threads qui n'en contient qu'un seul et qui sert pour le
-   * rafraîchissement du canal courant.
+   * Pool of one thread. Used each time interacting with the database,
+   * in order not to freeze the application.
    */
-  private final ExecutorService es = Executors.newSingleThreadExecutor();
+  protected final ExecutorService es = Executors.newSingleThreadExecutor();
 
+  /**
+   * Used for the filling of the dictionary.
+   */
   private int lastRow = -1;
 
+  /**
+   * Creates an empty <code>StudentModel</code>
+   * @param manager
+   * @param builder
+   */
   public StudentModel(DataManager manager, ComponentBuilder builder) {
     this.manager = manager;
     this.builder = builder;
@@ -83,7 +124,7 @@ public class StudentModel extends AbstractTableModel implements
   }
 
   /**
-   * 
+   * Fill the dictionary with default key words for autocompletion.
    */
   private void fillDefaultDictionnary() {
     dictionary.add("average");
@@ -92,6 +133,10 @@ public class StudentModel extends AbstractTableModel implements
   }
 
 
+  /**
+   * Sets the student to represent in the model.
+   * @param s the <code>Student</code> to represent.
+   */
   public void setStudent(final Student s) {
 
     es.execute(new Runnable() {
@@ -101,89 +146,44 @@ public class StudentModel extends AbstractTableModel implements
         synchronized (lock) {
           clear();
           student = s;
-          try {
-            markMap = manager.getAllMarksByStudent(student);
-          } catch (DataManagerException e) {
-            ExceptionDisplayDialog.postException(e);
-            return;
-          }
 
-          int n;
-          int tmp = 0;
-          for (Course c : markMap.keySet()) {
-            
-            if ((n = markMap.get(c).size()) > tmp) tmp = n;
-            
-            courseList.add(c);
-            
-            for (StudentMark sm : markMap.get(c).values())
-              if (dictionary.contains(sm.getMark().getDesc()) == false)
-                dictionary.add(sm.getMark().getDesc());
-          }
+          if (student != null) {
+            try {
+              markMap = manager.getAllMarksByStudent(student);
+            } catch (DataManagerException e) {
+              ExceptionDisplayDialog.postException(e);
+              return;
+            }
 
-          columnCount = tmp + 2;
-          rowCount = 4 * markMap.size();
+            int n;
+            int tmp = 0;
+            for (Course c : markMap.keySet()) {
 
-//          matrix = new Object[rowCount][columnCount];
-//
-//          int row = 0;
-//          int column;
-//          Collection<StudentMark> collection = null;
-//
-//          for (Course c : markMap.keySet()) {
-//
-//            column = 0;
-//            collection = markMap.get(c).values();
-//
-//            /*
-//             * On met les donnees dans la premiere colonne (matiere, coeff,
-//             * note)
-//             */
-//            matrix[row][column] = c;
-//            matrix[row + 1][column] = builder.getValue(COEFF);
-//            matrix[row + 2][column] = builder.getValue(MARK);
-//
-//            column++;
-//
-//            /*
-//             * On remplit les cases de la matrice avec les notes
-//             */
-//            for (StudentMark sm : collection) {
-//              matrix[row][column] = sm.getMark();
-//              matrix[row + 1][column] = sm.getCoeff();
-//              matrix[row + 2][column] = sm;
-//              column++;
-//            }
-//
-//            /*
-//             * On remplit le reste des cases de bon gros vide
-//             */
-//            blankRow(row, column);
-//            blankRow(row + 1, column);
-//            blankRow(row + 2, column);
-//            blankRow(row + 3, 0);
-//
-//            matrix[row][columnCount - 1] = builder.getValue(AVERAGE);
-//            matrix[row + 1][columnCount - 1] = null;
-//            matrix[row + 2][columnCount - 1] = StudentAverage
-//                .getAverage(collection);
-//
-//            row += 4;
-//
-//          }
+              if ((n = markMap.get(c).size()) > tmp) tmp = n;
 
-          try {
-            EventQueue.invokeAndWait(new Runnable() {
+              courseList.add(c);
 
-              public void run() {
-                StudentModel.this.fireTableStructureChanged();
-              }
+              for (StudentMark sm : markMap.get(c).values())
+                if (dictionary.contains(sm.getMark().getDesc()) == false)
+                  dictionary.add(sm.getMark().getDesc());
+            }
 
-            });
-          } catch (InterruptedException e1) {
-            ExceptionDisplayDialog.postException(e1);
-          } catch (InvocationTargetException e1) {
-            ExceptionDisplayDialog.postException(e1);
+            columnCount = tmp + 2;
+            rowCount = 4 * markMap.size();
+
+            try {
+              EventQueue.invokeAndWait(new Runnable() {
+
+                public void run() {
+                  StudentModel.this.fireTableStructureChanged();
+                }
+
+              });
+            } catch (InterruptedException e1) {
+              ExceptionDisplayDialog.postException(e1);
+            } catch (InvocationTargetException e1) {
+              ExceptionDisplayDialog.postException(e1);
+            }
           }
         }
       }
@@ -191,26 +191,21 @@ public class StudentModel extends AbstractTableModel implements
 
   }
 
+  /**
+   * Updates the data in the model.
+   */
   public void update() {
 
-    if (student != null) setStudent(student);
+    setStudent(student);
   }
 
-//  /**
-//   * @param row
-//   * @param column
-//   */
-//  protected void blankRow(int row, int column) {
-//    for (; column < columnCount - 1; column++)
-//      matrix[row][column] = null;
-//
-//  }
-
+  /**
+   * Clears all data in the model.
+   */
   public void clear() {
     columnCount = 0;
     rowCount = 0;
     student = null;
-//    matrix = null;
     courseList.clear();
     
     if (markMap != null){
@@ -320,6 +315,11 @@ public class StudentModel extends AbstractTableModel implements
     return null;
   }
 
+  /**
+   * Constructs a <code>ChartPanel</code> representing the percentage of all courses
+   * in golbal average.
+   * @return the <code>ChartPanel</code> generated.
+   */
   public ChartPanel getChartPanel() {
 
     if (student != null) {
@@ -359,23 +359,37 @@ public class StudentModel extends AbstractTableModel implements
   // Implement the ObjectFormattingSupport interface
   // ----------------------------------------------------------------------------
 
+  /**
+   * 
+   */
   private final FormattableCellRenderer formatter = CellRendererFactory
       .getStudentModelCellRenderer();
 
+  /* (non-Javadoc)
+   * @see fr.umlv.symphonie.view.cells.ObjectFormattingSupport#getFormattableCellRenderer()
+   */
   public FormattableCellRenderer getFormattableCellRenderer() {
     return formatter;
   }
 
+  /**
+   * Tells if the model is empty or not.
+   * @return <code>true</code> if the model is empty, <code>false</code> otherwise.
+   */
   public boolean isEmpty() {
     return (student == null);
   }
 
+  /**
+   * Fills the <code>Map</code> of values in <code>SymphonieFormulaFactory</code> with
+   * all marks from all tests at a given row int the model.
+   * @param rowIndex the row which will determine the data to put in the map. 
+   */
   public void fillFormulaMap(int rowIndex) {
     int row = rowIndex / 4;
 
     if (lastRow != row) {
       lastRow = row;
-//      row *= 4;
 
       SymphonieFormulaFactory.clearMappedValues();
 
@@ -384,6 +398,9 @@ public class StudentModel extends AbstractTableModel implements
     }
   }
 
+  /* (non-Javadoc)
+   * @see fr.umlv.symphonie.util.completion.IDictionarySupport#getDictionary()
+   */
   public LookableCollection<String> getDictionary() {
     return dictionary;
   }
