@@ -141,5 +141,6 @@ public final class SQLIdentificationStrategy extends
       }
     } else
       throw new IdentificationException("Invalid old password :" + oldPassword);
+    logout();
   }
 }
