@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -36,7 +37,6 @@ import fr.umlv.symphonie.util.ExceptionDisplayDialog;
 import fr.umlv.symphonie.util.Pair;
 import fr.umlv.symphonie.util.dataexport.DataExporter;
 import fr.umlv.symphonie.util.dataexport.DataExporterException;
-import fr.umlv.symphonie.view.SymphonieConstants;
 
 /**
  * Implementation of a <code>DataExporter</code> that writes Excel horrible
@@ -377,8 +377,7 @@ public class HSSFDataExporter implements DataExporter {
 
       // Create workbook and sheet
       HSSFWorkbook wkbook = new HSSFWorkbook();
-      HSSFSheet sheet = wkbook.createSheet(bu
-          .getValue("jury"));
+      HSSFSheet sheet = wkbook.createSheet(bu.getValue("jury"));
 
       // Create cell styles
       HSSFCellStyle twoDecimalsStyle = wkbook.createCellStyle();
@@ -392,6 +391,7 @@ public class HSSFDataExporter implements DataExporter {
       // Set up necessary data
       short[] formulaColumns = new short[formulas.size()];
       HashMap<Course, Short> courseColumns = new HashMap<Course, Short>();
+      ArrayList<Pair<String, Short>> columNames = new ArrayList<Pair<String, Short>>();
 
       int iFormula = 0;
       short iCol = 1;
@@ -408,6 +408,8 @@ public class HSSFDataExporter implements DataExporter {
         } else
           throw new DataExporterException(new IllegalStateException(
               "Invalid column object"));
+
+        columNames.add(new Pair<String, Short>(strValue, iCol));
 
         // Put headers at the same time
         HSSFExportUtils.getCell(sheet, 0, iCol, boldCell)
@@ -431,10 +433,25 @@ public class HSSFDataExporter implements DataExporter {
           strValue);
       HSSFExportUtils.setColumnWidth((short) 0, sheet, strValue);
 
+      strValue = bu.getValue(HSSFExportUtils.AVERAGE_KEY);
+      HSSFExportUtils.getCell(sheet, 0, (short) (columnCount - 3), boldCell)
+          .setCellValue(strValue);
+      HSSFExportUtils
+          .setColumnWidth((short) (columnCount - 3), sheet, strValue);
+      
+      strValue = bu.getValue(HSSFExportUtils.COMMENT_KEY);
+      HSSFExportUtils.getCell(sheet, 0, (short) (columnCount - 1), boldCell)
+          .setCellValue(strValue);
+      HSSFExportUtils
+          .setColumnWidth((short) (columnCount - 1), sheet, strValue);
+
       // Put students columns
       int iRow = 3;
       Map<Course, Map<Integer, StudentMark>> sData;
       float average;
+      StringBuilder globalAverage;
+      int courseCount;
+      Set<Course> courseSet;
       for (Student s : students) {
 
         strValue = s.getLastName() + ", " + s.getName();
@@ -446,17 +463,66 @@ public class HSSFDataExporter implements DataExporter {
         HSSFExportUtils.setColumnWidth((short) (columnCount - 2), sheet,
             strValue);
 
+        strValue = s.getComment();
+        HSSFExportUtils.getCell(sheet, iRow, (short) (columnCount - 1))
+            .setCellValue(strValue);
+        HSSFExportUtils.setColumnWidth((short) (columnCount - 1), sheet,
+            strValue);
+
         // Put average marks
         sData = data.get(s);
-        for (Course c : courseColumns.keySet()) {
+        globalAverage = new StringBuilder();
+        courseSet = courseColumns.keySet();
+        courseCount = courseSet.size();
+        for (Course c : courseSet) {
+          courseCount--;
+          iCol = courseColumns.get(c).shortValue();
+          globalAverage.append('(');
           average = HSSFDataExporter.getAverageValue(sData.get(c).values());
-          HSSFExportUtils.getCell(sheet, iRow,
-              courseColumns.get(c).shortValue(), twoDecimalsStyle)
+          globalAverage.append(HSSFExportUtils.getCellReference(iRow, iCol));
+          HSSFExportUtils.getCell(sheet, iRow, iCol, twoDecimalsStyle)
               .setCellValue(average);
+          globalAverage.append('*');
+          globalAverage.append(HSSFExportUtils.getCellReference(1, iCol));
+          globalAverage.append(')');
+          if (courseCount != 0) globalAverage.append('+');
         }
+
+        HSSFExportUtils.getCell(sheet, iRow, (short) (columnCount - 3),
+            twoDecimalsStyle).setCellFormula(globalAverage.toString());
 
         iRow++;
       }
+
+      // Put formulas
+      HashMap<String, String> referenceMap = new HashMap<String, String>();
+      iRow = 3;
+      String excelFormula;
+      Formula f;
+      for (short col : formulaColumns) {
+
+        f = (Formula) columns.get(col - 1);
+
+        // Fill cells
+        for (; iRow < rowCount; iRow++) {
+
+          // Put excel references in a map
+          referenceMap.clear();
+          for (Pair<String, Short> p : columNames) {
+            referenceMap.put(p.getFirst(), HSSFExportUtils.getCellReference(
+                iRow, p.getSecond().shortValue()));
+          }
+
+          // Convert formula
+          excelFormula = FormulaConverter.toExcelString(f, referenceMap);
+
+          // Put the formula
+          HSSFExportUtils.getCell(sheet, iRow, col, twoDecimalsStyle)
+              .setCellFormula(excelFormula);
+        }
+      }
+
+      // Put comments
 
       // Write workbook on disc
       FileOutputStream fos = new FileOutputStream(documentName);
@@ -568,6 +634,7 @@ public class HSSFDataExporter implements DataExporter {
       peuma.put(HSSFExportUtils.MARK_KEY, "Note");
       peuma.put(HSSFExportUtils.MARK_TITLE_KEY, "Intitulé");
       peuma.put(HSSFExportUtils.COURSE_TITLE_KEY, "Matière");
+      peuma.put(HSSFExportUtils.COMMENT_KEY, "Lâche tes comms");
       peuma
           .put("exceptiondialog.message", "Une erreur inopinée est survenue :");
       peuma.put("exceptiondialog.hidedetail", "<< Détails");
@@ -575,8 +642,8 @@ public class HSSFDataExporter implements DataExporter {
       peuma.put("bok", "OK");
       peuma.put("jury", "Petit Pois Grand-Jury");
       b = new ComponentBuilder(peuma);
-      new HSSFDataExporter(b).exportJuryView(
-          "/home/mif001/spenasal/jury.xls", dm);
+      new HSSFDataExporter(b).exportJuryView("/home/mif001/spenasal/jury.xls",
+          dm);
     } catch (Exception e) {
       e.printStackTrace();
       new ExceptionDisplayDialog(null, b).showException(e);

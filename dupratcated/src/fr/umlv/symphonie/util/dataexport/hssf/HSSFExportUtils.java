@@ -43,6 +43,9 @@ public final class HSSFExportUtils {
 
   /** Average mark description key */
   public static final String AVERAGE_KEY = "hssfdataexporter.average";
+  
+  /** Average mark description key */
+  public static final String COMMENT_KEY = "hssfdataexporter.comment";
 
   /** <code>Comparator</code> instance that compares <code>Students</code> */
   public static final Comparator<Student> STUDENT_COMPARATOR = new Comparator<Student>() {
