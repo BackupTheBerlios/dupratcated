@@ -32,15 +32,15 @@ import fr.umlv.symphonie.util.dataimport.DataImporterException;
  */
 public class XMLImporter implements DataImporter {
 
-  protected String documentName;
-  protected final DataManager dm = new SQLDataManager();
+  private String documentName;
+  private final DataManager dm = new SQLDataManager();
 
   /**
    * @param root
    *          the root of the document
    * @return a map with all the courses
    */
-  protected Map<Integer, Course> getCourseNodes(Element root) {
+  private Map<Integer, Course> getCourseNodes(Element root) {
     final HashMap<Integer, Course> map = new HashMap<Integer, Course>();
     final NodeList nodes = root.getElementsByTagName("course");
     Course c;
@@ -78,7 +78,7 @@ public class XMLImporter implements DataImporter {
    *          a map with all the courses
    * @return a map with all the marks
    */
-  protected Map<Integer, Mark> getMarkNodes(Element root,
+  private Map<Integer, Mark> getMarkNodes(Element root,
       Map<Integer, Course> courseMap) {
     final HashMap<Integer, Mark> map = new HashMap<Integer, Mark>();
     final NodeList nodes = root.getElementsByTagName("examen");
@@ -119,7 +119,7 @@ public class XMLImporter implements DataImporter {
    *          a map with all the marks
    * @return a map with all the students
    */
-  protected Map<Integer, Student> getStudentNodes(Element root,
+  private Map<Integer, Student> getStudentNodes(Element root,
       boolean comment, Map<Integer, Mark> markMap) {
     final HashMap<Integer, Student> map = new HashMap<Integer, Student>();
     final NodeList nodes = root.getElementsByTagName("student");
@@ -178,7 +178,7 @@ public class XMLImporter implements DataImporter {
    *          a map with all the marks
    * @return a map with all the student marks
    */
-  protected Map<Integer, StudentMark> getStudentMarkNodes(Element root,
+  private Map<Integer, StudentMark> getStudentMarkNodes(Element root,
       Student s, Map<Integer, Mark> markMap) {
     final HashMap<Integer, StudentMark> map = new HashMap<Integer, StudentMark>();
     final NodeList nodes = root.getElementsByTagName("student_mark");
@@ -217,7 +217,7 @@ public class XMLImporter implements DataImporter {
    * @return a new document object
    * @throws DataImporterException
    */
-  protected Document newDocument() throws DataImporterException {
+  private Document newDocument() throws DataImporterException {
     try {
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 

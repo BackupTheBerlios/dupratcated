@@ -251,8 +251,8 @@ public class XMLExporter implements DataExporter {
     try {
       map = (HashMap<Course, Map<Integer, StudentMark>>) dm
           .getAllMarksByStudent(s);
-    } catch (DataManagerException e1) {
-      e1.printStackTrace();
+    } catch (DataManagerException e) {
+      throw new DataExporterException("Error exporting the student view with the bdd\n", e);
     }
 
     /** <symphonie view="student">... </symphonie> */
@@ -300,7 +300,7 @@ public class XMLExporter implements DataExporter {
     try {
       pair = dm.getAllMarksByCourse(c);
     } catch (DataManagerException e) {
-      e.printStackTrace();
+      throw new DataExporterException("Error exporting the teacher view with the bdd\n", e);
     }
 
     final SortedMap<Student, Map<Integer, StudentMark>> sortedMap = pair
@@ -356,8 +356,8 @@ public class XMLExporter implements DataExporter {
 
     try {
       pair = dm.getAllStudentsMarks();
-    } catch (DataManagerException e1) {
-      e1.printStackTrace();
+    } catch (DataManagerException e) {
+      throw new DataExporterException("Error exporting the student view with the bdd\n", e);
     }
 
     final HashMap<Integer, Course> map = (HashMap<Integer, Course>) pair
