@@ -1240,7 +1240,7 @@ public class Symphonie {
 
   /** Chart 16x16 icon */
   public static final ImageIcon CHARTICON = new ImageIcon(Symphonie.class
-      .getResource("icons/empty.png"));
+      .getResource("icons/chart.png"));
 
   /**
    * Enum defines languages supported by Symphonie.
@@ -1270,9 +1270,7 @@ public class Symphonie {
       String getCharset() {
         return UTF8;
       }
-    }/*
-       * , JAPANESE { }
-       */;
+    };
 
     /** Language locale */
     private final Locale locale;
