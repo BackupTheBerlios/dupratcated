@@ -1,14 +1,16 @@
-/*
- * This file is part of Symphonie
- * Created : 26-févr.-2005 15:15:28
- */
+
 package fr.umlv.symphonie.data.formula;
 
-
 /**
- * @author susmab
- *
+ * Interface defines a simple expression whose return value type can be
+ * parametrized.
  */
-public class Formula {
+public interface Formula<T> {
 
+  /**
+   * Evaluate this formula.
+   * 
+   * @return This formula's value of type T
+   */
+  public T getValue();
 }
