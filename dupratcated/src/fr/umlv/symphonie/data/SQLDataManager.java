@@ -593,7 +593,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
         + title + "', '" + coeff + "');";
 
     try {
-      connectAndQuery(request);
+      connectAndUpdate(request);
     } catch (SQLException e) {
       System.out.println("Error with current query :\n" + request);
       e.printStackTrace();
@@ -647,7 +647,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
         + COLUMN_ID_FROM_TABLE_COURSE + "`=" + c.getId() + ";";
 
     try {
-      connectAndQuery(request);
+      connectAndUpdate(request);
     } catch (SQLException e) {
       System.out.println("Error with current query :\n" + request);
       e.printStackTrace();
