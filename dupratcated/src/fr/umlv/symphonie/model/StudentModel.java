@@ -273,7 +273,7 @@ public class StudentModel extends AbstractTableModel implements
       SymphonieFormulaFactory.clearMappedValues();
       
       for (int i = 1 ; matrix[row][i] != null ; i++)
-        SymphonieFormulaFactory.putMappedValue( ((Mark)(matrix[row][i])).getDesc(), ((StudentMark)(matrix[row][i+2])).getValue() );
+        SymphonieFormulaFactory.putMappedValue( ((Mark)(matrix[row][i])).getDesc(), ((StudentMark)(matrix[row+2][i])).getValue() );
 
     }
   }
