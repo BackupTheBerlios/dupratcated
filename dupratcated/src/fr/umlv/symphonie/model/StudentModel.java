@@ -172,11 +172,14 @@ public class StudentModel extends AbstractTableModel {
     frame.setSize(800,600);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     
-    DataManager dataManager = new SgainDataManager();
+    DataManager dataManager = new SQLDataManager();
     StudentModel model = new StudentModel(dataManager);
     
-    Student student = new Student(1, "Fabien", "Vallee");
+    Map<Integer, Student> studentMap = dataManager.getStudents();
     
+    Student student = studentMap.get(0);
+    
+
     
     
     model.setStudent(student);

@@ -186,6 +186,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
       try {
         results = connectAndQuery(request);
+        /*System.out.println("apres la requete : " + results.getFetchSize());*/
 
         while (results.next()) {
           
@@ -193,14 +194,20 @@ public class SQLDataManager extends SQLDataManagerConstants implements
                                         markMap.get(results.getInt(COLUMN_ID_TEST_FROM_TABLE_HAS_MARK)),
                                         results.getFloat(COLUMN_MARK_FROM_TABLE_HAS_MARK));
           
+          boolean isInList = false;
+          
           for(StudentMark sm2 : studentMarkList){                     //
             if (sm.getStudent().getId() == sm2.getStudent().getId()   // alors ca
              && sm.getMark().getId() == sm2.getMark().getId()         // c'est tres
              && sm.getValue() != sm2.getValue()){                     // moche mais
               sm2.setValue(sm.getValue());                            // bon
+              isInList = true;                                        //
               break;                                                  //
             }
           }
+          
+          if (isInList == false)
+            studentMarkList.add(sm);
         }
         
         /*studentMarkListTimeStamp = n;*/
@@ -275,7 +282,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     Map<Integer, StudentMark> studentMarkMap = new HashMap<Integer, StudentMark>();
 
     for (StudentMark sm : studentMarkList){
-      if (sm.getCourse().getId() == c.getId())
+      if (sm.getCourse().getId() == c.getId() && sm.getStudent().getId() == s.getId())
         studentMarkMap.put(sm.getMark().getId(), sm);
     }
 
@@ -285,10 +292,17 @@ public class SQLDataManager extends SQLDataManagerConstants implements
   public Map<Course, Map<Integer, StudentMark>> getAllMarksByStudent(Student s)
       throws DataManagerException {
 
+    System.out.println("etudiant a charger :");
+    System.out.println(s);
+    System.out.println("id = " + s.getId());
+    
+    
+    
     Map<Integer, Course> courseMap = getCourses();
     Map<Course, Map<Integer, StudentMark>> map = new HashMap<Course, Map<Integer, StudentMark>>();
 
     for (Course c : courseMap.values()) {
+      System.out.println("on va chercher les notes de " + c);
       map.put(c, getMarksByStudentAndCourse(s, c));
     }
 

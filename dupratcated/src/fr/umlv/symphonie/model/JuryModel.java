@@ -39,7 +39,7 @@ public class JuryModel extends AbstractTableModel {
   
   
   
-  private void update() {
+  public void update() {
     Pair<Map<Integer, Course>, SortedMap<Student, Map<Course, Map<Integer, StudentMark>>>> allData = null;
     try {
       allData = manager.getAllStudentsMarks();

@@ -48,4 +48,8 @@ public class StudentMark {
     
     return "" + value;
   }
+  
+  public void printData(){
+    System.out.println(getStudent() + " " + getValue() + " " + getMark() + " " + getCoeff() + " " + getCourse() + " " + getCourse().getCoeff());
+  }
 }

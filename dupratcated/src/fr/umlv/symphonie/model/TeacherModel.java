@@ -20,6 +20,7 @@ import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
 import fr.umlv.symphonie.data.Mark;
+import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.SgainDataManager;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
@@ -114,7 +115,7 @@ public class TeacherModel extends AbstractTableModel {
     
     
     columnCount = markMap.size() + 2;
-    rowCount = studentAndMarkMapPair.getSecond().size() + 3;
+    rowCount = studentMarkMap.size() + 3;
     
     System.out.println("lignes : " + rowCount);
     System.out.println("colonnes : " + columnCount);
@@ -398,10 +399,55 @@ public class TeacherModel extends AbstractTableModel {
     frame.setSize(800,600);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     
-    DataManager dataManager = new SgainDataManager();
+    DataManager dataManager = new SQLDataManager();
+    
+    /*
+     * test des etudiants
+     */
+    Map<Integer, Student> studentMap = dataManager.getStudents();
+    System.out.println(studentMap.size() + " etudiants.");
+    for (Student s : studentMap.values())
+      System.out.println(s);
+    System.out.println("\n\n");
+    /*******************************/
+    
+    
+    /*
+     * test des matieres
+     */
+    Map<Integer, Course> courseMap = dataManager.getCourses();
+    System.out.println(courseMap.size() + " matieres");
+    for (Course c : courseMap.values())
+      System.out.println(c + " " + c.getCoeff());
+    System.out.println("\n\n");
+    /***************************/
+    
+    /*
+     * test des epreuves
+     */
+    Map<Integer, Mark> markMap = dataManager.getMarks();
+    System.out.println(markMap.size() + " epreuves");
+    for (Mark m : markMap.values())
+      System.out.println(m + " pour " + m.getCourse());
+    System.out.println("\n\n");
+    /******************************/
+    
+    /*
+     * test des notes
+     */
+    List<StudentMark> list = dataManager.getStudentMarks();
+    System.out.println(list.size() + " notes.");
+    
+    for (StudentMark sm : list){
+      sm.printData();
+    }
+    
+    System.out.println("\n\n");
+    /******************************/
+    
     TeacherModel model = new TeacherModel(dataManager);
     
-    Course course = new Course(1, "Java", 0.25f);
+    Course course = new Course (0, "java", 0.5f);
 
     model.setCourse(course);
     
