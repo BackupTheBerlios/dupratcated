@@ -55,7 +55,7 @@ public final class SQLIdentificationStrategy extends
 
   /** Request that releases the lock */
   private static final String LOCK_RELEASE = "DELETE FROM " + LOCK_TABLE
-      + " WHERE " + LOCK_COLUMN + "= 1;";
+      + " WHERE " + LOCK_COLUMN + " = 1 ;";
 
   // ----------------------------------------------------------------------------
   // Constructors
