@@ -36,13 +36,13 @@ public interface DataManager
 	public void removeStudent(Student s) throws DataManagerException;
 	
 	public void addCourse(String title, float coeff) throws DataManagerException;
-	public void addCourses(List<String> listTitle, List<Float> listCoeff) throws SQLException, DataManagerException;
-	public void removeCourse(Course c) throws SQLException;
+	public void addCourses(List<Pair<String, Float>> courseList) throws DataManagerException;
+	public void removeCourse(Course c) throws DataManagerException;
 
   public int addTitle(String desc) throws DataManagerException;
   
 	public void addMark(String desc, float coeff, Course c) throws DataManagerException;
-	public void removeMark(Mark m) throws SQLException;
+	public void removeMark(Mark m) throws DataManagerException;
   
   
   /* methodes d'edition */

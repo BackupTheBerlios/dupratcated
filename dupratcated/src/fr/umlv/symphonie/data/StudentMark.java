@@ -49,6 +49,23 @@ public class StudentMark {
     return "" + value;
   }
   
+  
+
+  public boolean equals(Object obj) {
+    if (!(obj instanceof StudentMark))
+      return false;
+    
+    StudentMark sm = (StudentMark)obj;
+    
+    if (student.getId() != sm.student.getId())
+      return false;
+    
+    if (mark.getId() != sm.mark.getId())
+      return false;
+    
+    return true;
+  }
+  
   public void printData(){
     System.out.println(getStudent() + " " + getValue() + " " + getMark() + " " + getCoeff() + " " + getCourse() + " " + getCourse().getCoeff());
   }
