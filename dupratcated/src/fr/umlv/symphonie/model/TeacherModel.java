@@ -49,11 +49,14 @@ import fr.umlv.symphonie.view.cells.CellRendererFactory;
 
 public class TeacherModel extends AbstractTableModel {
 
+  private final Map<String, Number> mappedValues = new HashMap<String, Number>();
+  
+  
   /*
    * le datamanager et
    * la matiere
    */
-  private DataManager manager;
+  private final DataManager manager;
   private Course course = null;
   
   /*
