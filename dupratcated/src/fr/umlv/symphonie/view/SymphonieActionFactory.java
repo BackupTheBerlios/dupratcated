@@ -1,10 +1,10 @@
 /*
- * This file is part of Symphonie Created : 17 févr. 2005 22:35:15
+ * This file is part of Symphonie
+ * Created : 17 févr. 2005 22:35:15
  */
 
 package fr.umlv.symphonie.view;
 
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.util.HashMap;
 
@@ -18,9 +18,6 @@ import javax.swing.JPasswordField;
 import javax.swing.JTabbedPane;
 
 import fr.umlv.symphonie.util.ComponentBuilder;
-import fr.umlv.symphonie.util.wizard.DefaultWizardModel;
-import fr.umlv.symphonie.util.wizard.Wizard;
-import fr.umlv.symphonie.util.wizard.WizardPanel;
 
 public class SymphonieActionFactory {
 
@@ -51,10 +48,14 @@ public class SymphonieActionFactory {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
-        WizardPanel wp = WizardPanelFactory.getImportPanel();
-        DefaultWizardModel dwm = new DefaultWizardModel(wp);
-        Wizard wiz = new Wizard(null, dwm, new Dimension(500, 400));
-        System.out.println("wiz.show : " + wiz.show());
+        // Il ne faut surtout pas créer un wizard à chaque fois, ce sont des
+        // objets qui coûtent cher
+        /*
+         * WizardPanel wp = WizardPanelFactory.getImportPanel();
+         * DefaultWizardModel dwm = new DefaultWizardModel(wp); Wizard wiz = new
+         * Wizard(null, dwm, new Dimension(500, 400));
+         * System.out.println("wiz.show : " + wiz.show());
+         */
       }
 
     };
@@ -66,12 +67,13 @@ public class SymphonieActionFactory {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
-        WizardPanel wp = WizardPanelFactory.getExportPanel();
-        DefaultWizardModel dwm = new DefaultWizardModel(wp);
-        dwm.addPanel(WizardPanelFactory.getLastExportPanel());
-        Wizard wiz = new Wizard(null, dwm, new Dimension(500, 400));
-        System.out.println("wiz.show : " + wiz.show());
-
+        /*
+         * WizardPanel wp = WizardPanelFactory.getExportFormatSelectionPanel();
+         * DefaultWizardModel dwm = new DefaultWizardModel(wp);
+         * dwm.addPanel(WizardPanelFactory.getExportFinishingPanel()); Wizard
+         * wiz = new Wizard(null, dwm, new Dimension(500, 400));
+         * System.out.println("wiz.show : " + wiz.show());
+         */
       }
     };
     a.putValue(Action.SMALL_ICON, icon);
@@ -89,13 +91,14 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getModeChangeAction(String view, ImageIcon icon,final JTabbedPane tab,final int position) {
+  public static AbstractAction getModeChangeAction(String view, ImageIcon icon,
+      final JTabbedPane tab, final int position) {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
-        
+
         System.out.println(tab.getTitleAt(position));
-        tab.setSelectedComponent(tab.getComponentAt(position)); 
+        tab.setSelectedComponent(tab.getComponentAt(position));
       }
     };
     a.putValue(Action.SMALL_ICON, icon);
@@ -113,8 +116,7 @@ public class SymphonieActionFactory {
   }
 
   public static AbstractAction getLanguageChangeAction(
-      final HashMap<String, String> resources,
-      final ComponentBuilder builder) {
+      final HashMap<String, String> resources, final ComponentBuilder builder) {
     return new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
@@ -206,8 +208,10 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getDBAction(Icon icon,final JFrame frame, final ComponentBuilder builder ) {
+  public static AbstractAction getDBAction(Icon icon, final JFrame frame,
+      final ComponentBuilder builder) {
     AbstractAction a = new AbstractAction() {
+
       public void actionPerformed(ActionEvent event) {
         DatabaseDialog dbd = new DatabaseDialog(frame, builder);
         dbd.setVisible(true);
@@ -217,7 +221,8 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getPwdAction(Icon icon,final JFrame frame, final ComponentBuilder builder ) {
+  public static AbstractAction getPwdAction(Icon icon, final JFrame frame,
+      final ComponentBuilder builder) {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
