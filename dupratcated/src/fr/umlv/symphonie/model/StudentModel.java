@@ -173,7 +173,7 @@ public class StudentModel extends AbstractTableModel {
   }
 
   
-  public static void main(String[] args) {
+  public static void main(String[] args) throws DataManagerException {
     JFrame frame = new JFrame ("test StudentModel");
     frame.setSize(800,600);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -189,9 +189,11 @@ public class StudentModel extends AbstractTableModel {
       return;
     }
     
-    Student student = studentMap.get(0);
+    Student student = new Student(0, "Fabien", "Vallee");
     
-
+    Map<Course, Map<Integer, StudentMark>> map = dataManager.getAllMarksByStudent(student);
+    
+    System.out.println("taille de la map : " + map.size());
     
     
     model.setStudent(student);
