@@ -205,6 +205,8 @@ public class XMLExporter implements DataExporter {
 	 * 
 	 * @return a new document object
 	 * @throws DataExporterException
+	 *             if a DocumentBuilder cannot be created which satisfies the
+	 *             configuration requested
 	 */
 	private Document newDocument() throws DataExporterException {
 		try {
@@ -232,6 +234,10 @@ public class XMLExporter implements DataExporter {
 	 * @param documentName
 	 *            the name of the document
 	 * @throws DataExporterException
+	 *             if it is not possible to create a Transformer instance, or if
+	 *             an unrecoverable error occurs during the course of the
+	 *             transformation, or if the documentName cannot be parsed as a
+	 *             URL.
 	 */
 	private void writeDocument(Document document, String documentName)
 			throws DataExporterException {
