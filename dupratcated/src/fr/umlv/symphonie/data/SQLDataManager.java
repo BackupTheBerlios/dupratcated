@@ -367,6 +367,7 @@ public class SQLDataManager implements
 
 		List<StudentMark> tmpList = new ArrayList<StudentMark>();
 		Map<Integer, Student> studentMap = getStudents();
+    Map<Integer, Mark> markMap = getMarks();
 
 		CachedRowSet results = null;
 		String request = "SELECT * " + "FROM " + TABLE_HAS_MARK + " " + ";";
@@ -1833,7 +1834,7 @@ public class SQLDataManager implements
 		}
 
 		Map<Integer, Student> studentMap = getStudents();
-//		List<StudentMark> studentMarkList = getStudentMarks();
+		List<StudentMark> studentMarkList = getStudentMarks();
 		for (Student s : studentMap.values()) {
 			try {
 				preparedStatement.setInt(1, s.getId());
