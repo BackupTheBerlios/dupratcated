@@ -530,10 +530,8 @@ public class Symphonie {
     final JTree tree = new JTree(studentTreeModel);
     tree.setCellRenderer(new DefaultTreeCellRenderer() {
 
-      private final Icon leafIcon = new ImageIcon(StudentTreeModel.class
-          .getResource("../view/icons/student.png"));
-      private final Icon rootIcon = new ImageIcon(StudentTreeModel.class
-          .getResource("../view/icons/students.png"));
+      private final ImageIcon leafIcon = new ImageIcon(Symphonie.class.getResource("icons/student.png"));
+      private final ImageIcon rootIcon = new ImageIcon(Symphonie.class.getResource("icons/students.png"));
 
       public Component getTreeCellRendererComponent(JTree tree, Object value,
           boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
