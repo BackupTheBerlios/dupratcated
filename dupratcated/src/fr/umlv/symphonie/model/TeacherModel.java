@@ -39,6 +39,7 @@ import fr.umlv.symphonie.util.StudentAverage;
 import fr.umlv.symphonie.view.cells.CellFormat;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
 import fr.umlv.symphonie.view.cells.FormattableCellRenderer;
+import fr.umlv.symphonie.view.cells.ObjectFormattingSupport;
 
 /*
  * par convention il est decide que la derniere colonne est toujours la moyenne
@@ -46,7 +47,7 @@ import fr.umlv.symphonie.view.cells.FormattableCellRenderer;
  * moyenne a la fin
  */
 
-public class TeacherModel extends AbstractTableModel {
+public class TeacherModel extends AbstractTableModel implements ObjectFormattingSupport {
 
   private final Map<String, Number> mappedValues = new HashMap<String, Number>();
 

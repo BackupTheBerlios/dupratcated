@@ -35,12 +35,13 @@ import fr.umlv.symphonie.util.Pair;
 import fr.umlv.symphonie.util.StudentAverage;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
 import fr.umlv.symphonie.view.cells.FormattableCellRenderer;
+import fr.umlv.symphonie.view.cells.ObjectFormattingSupport;
 
 /**
  * @author susmab
  * 
  */
-public class JuryModel extends AbstractTableModel {
+public class JuryModel extends AbstractTableModel implements ObjectFormattingSupport {
 
   protected DataManager manager;
 
