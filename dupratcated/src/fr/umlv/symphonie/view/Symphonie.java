@@ -15,12 +15,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
 
@@ -65,19 +63,19 @@ import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
 import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
+import fr.umlv.symphonie.model.AdminJuryModel;
+import fr.umlv.symphonie.model.AdminStudentModel;
+import fr.umlv.symphonie.model.AdminTeacherModel;
 import fr.umlv.symphonie.model.CourseTreeModel;
 import fr.umlv.symphonie.model.JuryModel;
 import fr.umlv.symphonie.model.StudentModel;
 import fr.umlv.symphonie.model.StudentTreeModel;
 import fr.umlv.symphonie.model.TeacherModel;
-import fr.umlv.symphonie.model.AdminStudentModel;
-import fr.umlv.symphonie.model.AdminTeacherModel;
-import fr.umlv.symphonie.model.AdminJuryModel;
 import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.ExceptionDisplayDialog;
+import fr.umlv.symphonie.util.SymphoniePreferencesManager;
 import fr.umlv.symphonie.util.TextualResourcesLoader;
 import fr.umlv.symphonie.util.ComponentBuilder.ButtonType;
-import fr.umlv.symphonie.util.SymphoniePreferencesManager;
 import fr.umlv.symphonie.util.dataexport.DataExporter;
 import fr.umlv.symphonie.util.dataexport.DataExporterException;
 import fr.umlv.symphonie.util.dataimport.DataImporter;
@@ -86,11 +84,33 @@ import fr.umlv.symphonie.util.identification.IdentificationStrategy;
 import fr.umlv.symphonie.util.identification.SQLIdentificationStrategy;
 import fr.umlv.symphonie.util.wizard.DefaultWizardModel;
 import fr.umlv.symphonie.util.wizard.Wizard;
-import static fr.umlv.symphonie.view.SymphonieConstants.*;
-import static fr.umlv.symphonie.util.ComponentBuilder.ButtonType;
-import fr.umlv.symphonie.view.cells.CellFormat;
+import static fr.umlv.symphonie.view.SymphonieConstants.ADDMARKDIALOG_TITLE;
+import static fr.umlv.symphonie.view.SymphonieConstants.ADD_FORMULA;
+import static fr.umlv.symphonie.view.SymphonieConstants.ADMIN_MENU;
+import static fr.umlv.symphonie.view.SymphonieConstants.CELL_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.CHANGE_VIEW_MENU;
+import static fr.umlv.symphonie.view.SymphonieConstants.CONNECT_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.DB_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.DISPLAY_CHART;
+import static fr.umlv.symphonie.view.SymphonieConstants.EXIT_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.EXPORT_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.FILE_MENU;
+import static fr.umlv.symphonie.view.SymphonieConstants.FORMAT_MENU;
+import static fr.umlv.symphonie.view.SymphonieConstants.FORMULA_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.FRAME_TITLE;
+import static fr.umlv.symphonie.view.SymphonieConstants.IMPORT_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.INSERT_MENU;
+import static fr.umlv.symphonie.view.SymphonieConstants.LANGUAGE_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.LOGOUT_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.PRINT_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.PWD_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.REMOVE_COLUMN;
+import static fr.umlv.symphonie.view.SymphonieConstants.UPDATE;
+import static fr.umlv.symphonie.view.SymphonieConstants.VIEW_JURY_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.VIEW_STUDENT_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.VIEW_TEACHER_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.WINDOW_MENU;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
-import fr.umlv.symphonie.view.cells.FormattableCellRenderer;
 
 public class Symphonie {
 
@@ -428,12 +448,13 @@ public class Symphonie {
    */
   private final JSplitPane getStudentPane() {
 
-    final StudentModel studentModel = StudentModel.getInstance(manager);
+//    studentModel = StudentModel.getInstance(manager);
     JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
     // Table
     final JTable table = new JTable(studentModel);
     table.setTableHeader(null);
+    table.setDefaultRenderer(Object.class, studentModel.getFormattableCellRenderer());
 
     // pop up and actions
     final JPopupMenu pop = builder
@@ -468,8 +489,6 @@ public class Symphonie {
         }
       }
     });
-
-    table.setDefaultRenderer(Object.class, CellRendererFactory.getStudentModelCellRenderer(studentModel));
 
     JScrollPane scroll1 = new JScrollPane(table);
     split.setRightComponent(scroll1);
@@ -587,11 +606,10 @@ public class Symphonie {
     JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
     // Table
-    final TeacherModel teacherModel = TeacherModel.getInstance(manager);
+//    final TeacherModel teacherModel = TeacherModel.getInstance(manager);
     final JTable table = new JTable(teacherModel);
     table.setTableHeader(null);
-    table.setDefaultRenderer(Object.class, CellRendererFactory
-        .getTeacherModelCellRenderer(teacherModel.getFormattedObjects()));
+    table.setDefaultRenderer(Object.class, teacherModel.getFormattableCellRenderer());
 
     JScrollPane scroll1 = new JScrollPane(table);
 
