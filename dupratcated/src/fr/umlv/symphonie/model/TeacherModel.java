@@ -7,13 +7,20 @@ package fr.umlv.symphonie.model;
 import java.awt.Font;
 import java.util.*;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
+import javax.swing.JTree;
 import javax.swing.SwingConstants;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.tree.DefaultTreeCellRenderer;
 
 import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManager;
@@ -190,6 +197,8 @@ public class TeacherModel extends AbstractTableModel {
 //      
 //      row++;
 //    }
+    
+    fireTableStructureChanged();
   }
   
   
@@ -446,13 +455,22 @@ public class TeacherModel extends AbstractTableModel {
 //    System.out.println("\n\n");
 //    /******************************/
     
-    TeacherModel model = new TeacherModel(dataManager);
     
-    Course course = new Course (0, "java", 0.5f);
+    JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+    
+    
+    
+    /*
+     * table
+     */
+    
+    TeacherModel teacherModel = new TeacherModel(dataManager);
+    
+    /*Course course = new Course (0, "java", 0.5f);
 
-    model.setCourse(course);
+    teacherModel.setCourse(course);*/
     
-    JTable table = new JTable(model);
+    final JTable table = new JTable(teacherModel);
     table.setTableHeader(null);
     
     
@@ -472,9 +490,69 @@ public class TeacherModel extends AbstractTableModel {
     });
     
     
-    JScrollPane scroll = new JScrollPane(table);
+    JScrollPane scroll1 = new JScrollPane(table);
     
-    frame.setContentPane(scroll);
+    split.setRightComponent(scroll1);
+    
+    
+    
+    /*
+     * arbre
+     */
+    CourseTreeModel courseModel = new CourseTreeModel(dataManager);
+    
+    final JTree tree = new JTree(courseModel);
+    
+    tree.setCellRenderer(new DefaultTreeCellRenderer(){
+      
+      private final Icon leafIcon = new ImageIcon(StudentTreeModel.class.getResource("../view/icons/course.png"));
+      private final Icon rootIcon = new ImageIcon(StudentTreeModel.class.getResource("../view/icons/courses.png"));
+      
+      public java.awt.Component getTreeCellRendererComponent(JTree tree,Object value,boolean sel,boolean expanded,boolean leaf,int row,boolean hasFocus){
+
+        Font font = getFont();
+        
+        if (font != null){
+          font = font.deriveFont(Font.BOLD);
+          setFont(font);
+        }
+        
+        if (leaf){
+          setLeafIcon(leafIcon);
+        }
+        else {
+          setClosedIcon(rootIcon);
+          setOpenIcon(rootIcon);
+        }
+        
+        super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+        return this;
+      }
+    });
+    
+    
+    tree.addTreeSelectionListener(new TreeSelectionListener(){
+      
+      
+      /* (non-Javadoc)
+       * @see javax.swing.event.TreeSelectionListener#valueChanged(javax.swing.event.TreeSelectionEvent)
+       */
+      public void valueChanged(TreeSelectionEvent e) {
+        Object o = tree.getLastSelectedPathComponent();
+        
+        if (o instanceof Course){
+          System.out.println("on a selectionne une matiere !");
+          ((TeacherModel)table.getModel()).setCourse((Course)o);
+        }
+      }
+      
+    });
+    
+    JScrollPane pane = new JScrollPane(tree);
+    
+    split.setLeftComponent(pane);
+    
+    frame.setContentPane(split);
     
     frame.setVisible(true);
   }
