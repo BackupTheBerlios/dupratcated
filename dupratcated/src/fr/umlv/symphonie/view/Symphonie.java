@@ -117,26 +117,35 @@ public class Symphonie {
 
   /** Identification service */
   private IdentificationStrategy logger;
-  
-  /** Student Table Model **/
+
+  /** Student Table Model * */
   private final StudentModel studentModel;
-  
-  /** Teacher Table Model **/
-  private final TeacherModel teacherModel;
-  
-  /** Jury Table Model **/
-  private final JuryModel juryModel;
-  
-  /** Admin Student Table Model **/
+
+  /** Admin Student Table Model * */
   private final AdminStudentModel adminStudentModel;
-  
-  /** Admin Teacher Table Model **/
+
+  /** Current Student Table Model */
+  private StudentModel currentStudentModel;
+
+  /** Teacher Table Model * */
+  private final TeacherModel teacherModel;
+
+  /** Admin Teacher Table Model * */
   private final AdminTeacherModel adminTeacherModel;
-  
-  /** Admin Jury Table Model **/
+
+  /** Current Teacher Table Model */
+  private TeacherModel currentTeacherModel;
+
+  /** Jury Table Model * */
+  private final JuryModel juryModel;
+
+  /** Admin Jury Table Model * */
   private final AdminJuryModel adminJuryModel;
-  
-  /** Action Factory **/
+
+  /** Current Jury Table Model */
+  private JuryModel currentJuryModel;
+
+  /** Action Factory * */
   protected final SymphonieActionFactory actionFactory;
 
   // ----------------------------------------------------------------------------
@@ -166,8 +175,8 @@ public class Symphonie {
 
     file.add(new JSeparator());
 
-    file.add(builder.buildButton(actionFactory.getExitAction(new ImageIcon(Symphonie.class
-            .getResource("icons/exit.png"))), EXIT_MENU_ITEM,
+    file.add(builder.buildButton(actionFactory.getExitAction(new ImageIcon(
+        Symphonie.class.getResource("icons/exit.png"))), EXIT_MENU_ITEM,
         ButtonType.MENU_ITEM));
 
     return file;
@@ -192,8 +201,7 @@ public class Symphonie {
             + " Skipping");
         continue;
       }
-      lBox = new JCheckBoxMenuItem(actionFactory
-          .getLanguageChangeAction(l));
+      lBox = new JCheckBoxMenuItem(actionFactory.getLanguageChangeAction(l));
       lBox.setText(lMap.get(Language.LANGUAGE_NAME));
       lang.add(lBox);
       g.add(lBox);
@@ -269,10 +277,10 @@ public class Symphonie {
   private final JMenu getInsertMenu() {
     JMenu insert = (JMenu) builder.buildButton(INSERT_MENU, ButtonType.MENU);
     /* Actions ******************************************************* */
-    Action column = actionFactory.getColumnAction(new ImageIcon(
-        Symphonie.class.getResource("icons/insert_column.png")));
-    Action line = actionFactory.getLineAction(new ImageIcon(
-        Symphonie.class.getResource("icons/insert_line.png")));
+    Action column = actionFactory.getColumnAction(new ImageIcon(Symphonie.class
+        .getResource("icons/insert_column.png")));
+    Action line = actionFactory.getLineAction(new ImageIcon(Symphonie.class
+        .getResource("icons/insert_line.png")));
 
     /* Items********************************************************* */
     insert.add(builder.buildButton(column, INSERT_COLUMN_MENU_ITEM,
@@ -292,17 +300,16 @@ public class Symphonie {
   private final JMenu getAdminMenu(JToolBar toolbar) {
     JMenu admin = (JMenu) builder.buildButton(ADMIN_MENU, ButtonType.MENU);
     /* Actions ******************************************************* */
-    final Action connect = actionFactory.getConnectAction(
-        new ImageIcon(Symphonie.class.getResource("icons/admin.png")),
-        logger);
+    final Action connect = actionFactory.getConnectAction(new ImageIcon(
+        Symphonie.class.getResource("icons/admin.png")), logger);
     logger.addChangeListener(new ChangeListener() {
 
       public void stateChanged(ChangeEvent e) {
         connect.setEnabled(!logger.isIdentified());
       }
     });
-    final Action db = actionFactory.getDBAction(new ImageIcon(
-        Symphonie.class.getResource("icons/db.png")));
+    final Action db = actionFactory.getDBAction(new ImageIcon(Symphonie.class
+        .getResource("icons/db.png")));
     db.setEnabled(false);
     logger.addChangeListener(new ChangeListener() {
 
@@ -310,8 +317,8 @@ public class Symphonie {
         db.setEnabled(logger.isIdentified());
       }
     });
-    final Action pwd = actionFactory.getPwdAction(new ImageIcon(
-        Symphonie.class.getResource("icons/pwd.png")));
+    final Action pwd = actionFactory.getPwdAction(new ImageIcon(Symphonie.class
+        .getResource("icons/pwd.png")));
     pwd.setEnabled(false);
     logger.addChangeListener(new ChangeListener() {
 
@@ -333,6 +340,7 @@ public class Symphonie {
     b = builder.buildButton(pwd, PWD_MENU_ITEM, ButtonType.MENU_ITEM);
     admin.add(b);
     toolbar.add(createToolbarButton(PWD_MENU_ITEM, b, builder));
+    toolbar.addSeparator();
 
     return admin;
   }
@@ -418,11 +426,11 @@ public class Symphonie {
 
     pop.add(builder.buildButton(actionFactory.getStudentUpdateAction(null),
         UPDATE, ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(actionFactory.getStudentPrintAction(null, table),
-        PRINT_MENU_ITEM, ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(
-        actionFactory.getStudentChartAction(null), DISPLAY_CHART,
+    pop.add(builder.buildButton(actionFactory
+        .getStudentPrintAction(null, table), PRINT_MENU_ITEM,
         ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(actionFactory.getStudentChartAction(null),
+        DISPLAY_CHART, ButtonType.MENU_ITEM));
 
     // table listeners
 
@@ -511,6 +519,15 @@ public class Symphonie {
         }
       }
     });
+    
+    logger.addChangeListener(new ChangeListener() {
+
+      public void stateChanged(ChangeEvent e) {
+        currentStudentModel = logger.isIdentified() ? adminStudentModel : studentModel;
+        table.setModel(currentStudentModel);        
+      }
+    });
+    
     return split;
   }
 
@@ -538,18 +555,20 @@ public class Symphonie {
     final JPopupMenu pop = builder
         .buildPopupMenu(SymphonieConstants.TEACHERVIEWPOPUP_TITLE);
 
-    pop.add(builder.buildButton(actionFactory.getAddMarkAction(null), ADDMARKDIALOG_TITLE, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(actionFactory.getTeacherAddFormulaAction(null), ADD_FORMULA,
-        ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(actionFactory.getAddMarkAction(null),
+        ADDMARKDIALOG_TITLE, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(actionFactory.getTeacherAddFormulaAction(null),
+        ADD_FORMULA, ComponentBuilder.ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(actionFactory.getTeacherUpdateAction(null),
         UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(actionFactory.getTeacherPrintAction(null,table),
-        PRINT_MENU_ITEM, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(actionFactory.getTeacherChartAction(null), DISPLAY_CHART,
+    pop.add(builder.buildButton(actionFactory
+        .getTeacherPrintAction(null, table), PRINT_MENU_ITEM,
         ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(actionFactory.getTeacherChartAction(null),
+        DISPLAY_CHART, ComponentBuilder.ButtonType.MENU_ITEM));
 
-    final AbstractButton removeColumn = builder.buildButton(
-        actionFactory.getRemoveTeacherColumnAction(null, table), REMOVE_COLUMN,
+    final AbstractButton removeColumn = builder.buildButton(actionFactory
+        .getRemoveTeacherColumnAction(null, table), REMOVE_COLUMN,
         ComponentBuilder.ButtonType.MENU_ITEM);
     pop.add(removeColumn);
 
@@ -640,6 +659,14 @@ public class Symphonie {
 
     JScrollPane pane = new JScrollPane(tree);
     split.setLeftComponent(pane);
+    
+    logger.addChangeListener(new ChangeListener() {
+
+      public void stateChanged(ChangeEvent e) {
+        currentTeacherModel = logger.isIdentified() ? adminTeacherModel : teacherModel;
+        table.setModel(currentTeacherModel);        
+      }
+    });
     return split;
   }
 
@@ -649,25 +676,28 @@ public class Symphonie {
    * @return a <code>JScrollPane</code>
    */
   private final JScrollPane getJuryPane() {
-    final JuryModel model = JuryModel.getInstance(manager);
-    final JTable table = new JTable(model);
+
+    final JTable table = new JTable(juryModel);
     table.setTableHeader(null);
 
     final JPopupMenu pop = builder
         .buildPopupMenu(SymphonieConstants.JURYVIEWPOPUP_TITLE);
 
-    pop.add(builder.buildButton(actionFactory.getJuryAddFormulaAction(
-        null), SymphonieConstants.ADD_FORMULA,
+    pop.add(builder.buildButton(actionFactory.getJuryAddFormulaAction(null),
+        SymphonieConstants.ADD_FORMULA, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(actionFactory.getJuryUpdateAction(null),
+        SymphonieConstants.UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(actionFactory.getJuryPrintAction(null, table),
+        SymphonieConstants.PRINT_MENU_ITEM,
         ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(actionFactory.getJuryUpdateAction(null), SymphonieConstants.UPDATE,
-        ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(actionFactory.getJuryPrintAction(null, table), SymphonieConstants.PRINT_MENU_ITEM,
-        ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(actionFactory.getJuryChartAction(null), SymphonieConstants.DISPLAY_CHART,
-        ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder
+        .buildButton(actionFactory.getJuryChartAction(null),
+            SymphonieConstants.DISPLAY_CHART,
+            ComponentBuilder.ButtonType.MENU_ITEM));
 
     final AbstractButton removeColumn = builder
-        .buildButton(actionFactory.getRemoveJuryColumnAction(null, table), SymphonieConstants.REMOVE_COLUMN,
+        .buildButton(actionFactory.getRemoveJuryColumnAction(null, table),
+            SymphonieConstants.REMOVE_COLUMN,
             ComponentBuilder.ButtonType.MENU_ITEM);
     pop.add(removeColumn);
 
@@ -696,7 +726,8 @@ public class Symphonie {
 
       public void mousePressed(MouseEvent e) {
         if (SwingUtilities.isRightMouseButton(e)) {
-          if (model.isColumnFormula(table.columnAtPoint(e.getPoint())))
+          // JuryModel jm = table.getModel();
+          if (juryModel.isColumnFormula(table.columnAtPoint(e.getPoint())))
             removeColumn.setEnabled(true);
           else
             removeColumn.setEnabled(false);
@@ -721,6 +752,15 @@ public class Symphonie {
         return label;
       }
     });
+
+    logger.addChangeListener(new ChangeListener() {
+
+      public void stateChanged(ChangeEvent e) {
+        currentJuryModel = logger.isIdentified() ? adminJuryModel : juryModel;
+        table.setModel(currentJuryModel);        
+      }
+    });
+
     return new JScrollPane(table);
   }
 
@@ -826,6 +866,17 @@ public class Symphonie {
 
     panel.add(tab);
 
+    /*
+     * tab.getModel().addChangeListener(new ChangeListener() {
+     * 
+     * public void stateChanged(ChangeEvent e) { SingleSelectionModel ssm =
+     * (SingleSelectionModel) e.getSource(); switch (ssm.getSelectedIndex()) {
+     * case 0: setCurrentView(View.student); break; case 1:
+     * setCurrentView(View.teacher); break; case 2: setCurrentView(View.jury);
+     * break; default: throw new IllegalStateException("Invalid tab index"); } }
+     * });
+     */
+
     return panel;
   }
 
@@ -863,6 +914,7 @@ public class Symphonie {
     // Toolbar
     JToolBar toolbar = new JToolBar();
     toolbar.setFloatable(false);
+    toolbar.addSeparator();
 
     // Exception dialog
     errDisplay = new ExceptionDisplayDialog(frame, builder);
@@ -870,19 +922,20 @@ public class Symphonie {
     // Wizards
     importW = getImportWizard();
     exportW = getExportWizard();
-    
+
     // models
     studentModel = StudentModel.getInstance(manager);
     teacherModel = TeacherModel.getInstance(manager);
     juryModel = JuryModel.getInstance(manager);
-    
+
     adminStudentModel = AdminStudentModel.getInstance(manager);
     adminTeacherModel = AdminTeacherModel.getInstance(manager);
     adminJuryModel = AdminJuryModel.getInstance(manager);
-    
+
     // Action factory
-    actionFactory = new SymphonieActionFactory(this, builder, studentModel, teacherModel, juryModel,
-        adminStudentModel, adminTeacherModel, adminJuryModel);
+    actionFactory = new SymphonieActionFactory(this, builder, studentModel,
+        teacherModel, juryModel, adminStudentModel, adminTeacherModel,
+        adminJuryModel);
 
     // Content pane
     JMenu mode = getModeMenu();
@@ -898,6 +951,12 @@ public class Symphonie {
         .getPrintAction(new ImageIcon(Symphonie.class
             .getResource("icons/print.png"))), PRINT_MENU_ITEM,
         ButtonType.MENU_ITEM);
+
+    toolbar.add(createToolbarButton(PRINT_MENU_ITEM, print, builder));
+    toolbar.addSeparator();
+    toolbar.add(createToolbarButton(IMPORT_MENU_ITEM, imp, builder));
+    toolbar.add(createToolbarButton(EXPORT_MENU_ITEM, exp, builder));
+    toolbar.addSeparator();
 
     JPanel content = getContentPane();
     JPanel welcome = getWelcomePagePanel(content, toolbar, mode, imp, exp,
@@ -916,6 +975,10 @@ public class Symphonie {
         frame.setTitle(builder.getValue(FRAME_TITLE));
       }
     });
+
+    currentJuryModel = juryModel;
+    currentTeacherModel = teacherModel;
+    currentStudentModel = studentModel;
 
     frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
   }
@@ -995,6 +1058,27 @@ public class Symphonie {
     }
   }
 
+  /**
+   * @return Returns the currrentJuryModel.
+   */
+  public JuryModel getCurrrentJuryModel() {
+    return currentJuryModel;
+  }
+
+  /**
+   * @return Returns the currrentStudentModel.
+   */
+  public StudentModel getCurrrentStudentModel() {
+    return currentStudentModel;
+  }
+
+  /**
+   * @return Returns the currrentTeacherModel.
+   */
+  public TeacherModel getCurrrentTeacherModel() {
+    return currentTeacherModel;
+  }
+
   // ----------------------------------------------------------------------------
   // Static methods
   // ----------------------------------------------------------------------------
@@ -1039,11 +1123,13 @@ public class Symphonie {
     a.addPropertyChangeListener(new PropertyChangeListener() {
 
       public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getPropertyName().equals(Action.NAME))
+          tb.setToolTipText((String) evt.getNewValue());
         tb.setEnabled(a.isEnabled());
       }
     });
     tb.setIcon((Icon) a.getValue(Action.SMALL_ICON));
-    builder.buildToolTip(key, tb);
+    tb.setToolTipText((String) a.getValue(Action.NAME));
     tb.addActionListener(new ActionListener() {
 
       public void actionPerformed(ActionEvent e) {
