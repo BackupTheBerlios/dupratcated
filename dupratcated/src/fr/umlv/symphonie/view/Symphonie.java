@@ -11,10 +11,13 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 
+import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
@@ -26,6 +29,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
@@ -34,6 +38,7 @@ import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.HyperlinkEvent;
@@ -86,6 +91,14 @@ import static fr.umlv.symphonie.view.SymphonieConstants.VIEW_JURY_MENU_ITEM;
 import static fr.umlv.symphonie.view.SymphonieConstants.VIEW_STUDENT_MENU_ITEM;
 import static fr.umlv.symphonie.view.SymphonieConstants.VIEW_TEACHER_MENU_ITEM;
 import static fr.umlv.symphonie.view.SymphonieConstants.WINDOW_MENU;
+import static fr.umlv.symphonie.view.SymphonieConstants.ADDMARKDIALOG_TITLE;
+import static fr.umlv.symphonie.view.SymphonieConstants.ADD_FORMULA;
+import static fr.umlv.symphonie.view.SymphonieConstants.UPDATE;
+import static fr.umlv.symphonie.view.SymphonieConstants.PRINT_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.DISPLAY_CHART;
+import static fr.umlv.symphonie.view.SymphonieConstants.REMOVE_COLUMN;
+import static fr.umlv.symphonie.view.SymphonieActionFactory.*;
+import static fr.umlv.symphonie.util.ComponentBuilder.ButtonType;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
 
 public class Symphonie {
@@ -479,6 +492,56 @@ public class Symphonie {
 
     split.setRightComponent(scroll1);
 
+    
+    // popup menu and actions
+    final JPopupMenu pop = builder.buildPopupMenu(SymphonieConstants.TEACHERVIEWPOPUP_TITLE);
+    
+    pop.add(builder.buildButton(getAddMarkAction(null,frame, builder ), ADDMARKDIALOG_TITLE, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(getTeacherAddFormulaAction(null, frame, builder), ADD_FORMULA, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(getTeacherUpdateAction(null), UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(getTeacherPrintAction(null, table), PRINT_MENU_ITEM, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(getTeacherChartAction(null, frame), DISPLAY_CHART, ComponentBuilder.ButtonType.MENU_ITEM));
+    
+    final AbstractButton removeColumn = builder.buildButton(getRemoveTeacherColumnAction(null, table), REMOVE_COLUMN, ComponentBuilder.ButtonType.MENU_ITEM);
+    pop.add(removeColumn);
+    
+    // table listeners
+    
+    // listener for popup
+    table.addMouseListener(new MouseAdapter() {
+
+      public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)) {
+          pop.show(e.getComponent(), e.getX(), e.getY());
+        }
+      }
+    });
+    
+    // listener which saves point location
+    table.addMouseListener(new MouseAdapter() {
+
+      public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)) {
+          PointSaver.setPoint(e.getPoint());
+        }
+      }
+    });
+    
+    // listener which disables buttons
+    table.addMouseListener(new MouseAdapter() {
+      private int column;
+      public void mousePressed(MouseEvent e) {
+        
+        if (SwingUtilities.isRightMouseButton(e)) {
+          column = table.columnAtPoint(e.getPoint());
+          if (column != table.getColumnCount() -1 && column > 0)
+            removeColumn.setEnabled(true);
+          else removeColumn.setEnabled(false);
+        }
+      }
+    });
+    
+    
     // Tree
     CourseTreeModel courseModel = new CourseTreeModel(manager);
     final JTree tree = new JTree(courseModel);
