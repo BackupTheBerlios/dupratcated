@@ -77,3 +77,6 @@ importexport.ehelp=    Use the Browse button to select a destination file from t
 importexport.edestfile=Select the file where the view is to be exported :
 importexport.ereadytogo=Data is now ready to be exported
 importexport.ereadyhelp=    You can now click the finish button in order to export data. This operation may take a few moments.
+hssfdataexporter.coeff=Coefficient
+hssfdataexporter.mark=Mark
+hssfdataexporter.average=Average Mark

@@ -77,3 +77,6 @@ importexport.ehelp=    Utilisez le bouton Parcourir pour choisir un fichier de l
 importexport.edestfile=Choisissez le fichier de destination :
 importexport.ereadytogo=Les données vont maintenant être exportées
 importexport.ereadyhelp=    Clickez sur le bouton Terminer pour exporter les données et terminer l'assistant. Cette opération peut prendre quelques instants.
+hssfdataexporter.coeff=Coefficient
+hssfdataexporter.mark=Note
+hssfdataexporter.average=Moyenne
