@@ -26,39 +26,100 @@ import fr.umlv.symphonie.data.formula.parser.ParserException;
 import fr.umlv.symphonie.util.Pair;
 import static fr.umlv.symphonie.data.SQLDataManagerConstants.*;
 
+/**
+ * Classe implementing the <code>DataManager</code> interface for a
+ * SQL type database.
+ * No doublons are created in this class, so if several views involves the same type of data,
+ * manipulated objects are the same instances.
+ * For example, jury and teacher view display students in their tables. These students are
+ * the same instances, so modifying one in a view will modify the same in the other view.
+ * @author susmab
+ */
+/**
+ * @author susmab
+ *
+ */
+/**
+ * @author susmab
+ *
+ */
 public class SQLDataManager implements
 		DataManager {
 
+	/**
+	 * Internal map of all students.
+	 */
 	private final Map<Integer, Student> studentMap = new HashMap<Integer, Student>();
 
+	/**
+	 * Internal list of all students.
+	 */
 	private final List<Student> studentList = new ArrayList<Student>();
 
+	/**
+	 * timestamp for student data.
+	 */
 	private int studentMapTimeStamp = -1;
 
+	/**
+	 * internal map of all tests.
+	 */
 	private final Map<Integer, Mark> markMap = new HashMap<Integer, Mark>();
 
+	/**
+	 * timestamp for tests data.
+	 */
 	private int markMapTimeStamp = -1;
 
+	/**
+	 * internal map for all courses.
+	 */
 	private final Map<Integer, Course> courseMap = new HashMap<Integer, Course>();
 
+	/**
+	 * internal list of all courses.
+	 */
 	private final List<Course> courseList = new ArrayList<Course>();
 
+	/**
+	 * timestamp for courses data.
+	 */
 	private int courseMapTimeStamp = -1;
 
+	/**
+	 * internal list of all marks.
+	 */
 	private final List<StudentMark> studentMarkList = new ArrayList<StudentMark>();
 
+	/**
+	 * timestamp for marks data.
+	 */
 	private int studentMarkListTimeStamp = -1;
 
-  
-  /*
-   * ici
-   */            //id_course //liste de formules
+  /**
+   * internal map of all formulas for the teacher's view,
+   * keyed with courses' ids.
+   */
   private final Map<Integer, List<Formula>> teacherFormulaMap = new HashMap<Integer, List<Formula>>();
+  
+  /**
+   * timestamp for teacher's view formulas. 
+   */
   private int teacherFormulaMapTimeStamp = -1;
   
+  /**
+   * internal list of all formulas for the jury's view.
+   */
   private final List<Formula> juryFormulaList = new ArrayList<Formula>();
+  
+  /**
+   * timestamp for the jury's view formulas.
+   */
   private int juryFormulaListTimeStamp = 1;
   
+	/**
+	 * a comparator for students.
+	 */
 	private final Comparator<Student> studentComparator = new Comparator<Student>() {
 		public int compare(Student arg0, Student arg1) {
 			int n = arg0.getLastName().compareToIgnoreCase(arg1.getLastName());
@@ -73,18 +134,32 @@ public class SQLDataManager implements
 		}
 	};
 
+	/**
+	 * a comparator for courses.
+	 */
 	private final Comparator<Course> courseComparator = new Comparator<Course>() {
 		public int compare(Course o1, Course o2) {
 			return o1.getTitle().compareToIgnoreCase(o2.getTitle());
 		}
 	};
 
+  /**
+   * the instance of <code>SQLDataManager</code>.
+   */
   private static SQLDataManager instance = null;
   
   
+  /**
+   * Private constructor.
+   * Constructs a ready-to-use <code>SQLDataManager</code>.
+   */
   private SQLDataManager (){
   }
   
+  /**
+   * Used to get an instance of SQLDataManager.
+   * @return the instance of SQLDataManager
+   */
   public static SQLDataManager getInstance(){
     if (instance == null)
       instance = new SQLDataManager();
@@ -97,8 +172,14 @@ public class SQLDataManager implements
   
   
   
-	/*
-	 * methodes internes
+
+	/**
+   * Connects to the database, prepare a given request,
+   * and return the resulting <code>PreparedStatement</code>.
+   * Used to execute mass request.
+	 * @param request the request to prepare.
+	 * @return the <code>PreparedStatement</code> resulting from the request.
+	 * @throws SQLException
 	 */
 	private static PreparedStatement connectAndPrepare(String request)
 			throws SQLException {
@@ -111,6 +192,12 @@ public class SQLDataManager implements
 		return preparedStatement;
 	}
 
+	/**
+   * Connects and execute SELECT type requests on the database.
+	 * @param request the request to execute.
+	 * @return a <code>CachedRowSet</code> resulting from the request.
+	 * @throws SQLException
+	 */
 	private static CachedRowSet connectAndQuery(String request)
 			throws SQLException {
 		Connection connection = null;
@@ -124,6 +211,12 @@ public class SQLDataManager implements
 		return rowSet;
 	}
 
+	/**
+   * Connects and execute modifucating requests on the database,
+   * such as DELETE or INSERT.
+	 * @param request the request to execute.
+	 * @throws SQLException
+	 */
 	private static void connectAndUpdate(String request) throws SQLException {
 		Connection connection = null;
 		Statement statement = null;
@@ -134,6 +227,14 @@ public class SQLDataManager implements
 		statement.executeUpdate(request);
 	}
 
+	/**
+   * Creates a primary key in a given table, based on a given column name.
+	 * @param table the name of the table to create a primary key for.
+	 * @param id the column name in the table on which the method will
+   * create the key.
+	 * @return the created key.
+	 * @throws SQLException
+	 */
 	public static int createPrimaryKey(String table, String id)
 			throws SQLException {
 
@@ -146,6 +247,12 @@ public class SQLDataManager implements
 		return results.getInt(1);
 	}
 
+	/**
+   * Gets the timestamp for a given table.
+	 * @param tableName the name of the table which the timestamp is requested.
+	 * @return a value representing the timestamp.
+	 * @throws SQLException
+	 */
 	public static int getTimeStamp(String tableName) throws SQLException {
 		String request = "select " + COLUMN_TABLE_NAME_FROM_TABLE_TIMESTAMP
 				+ ", " + COLUMN_TIMESTAMP_FROM_TABLE_TIMESTAMP + " " + "from "
@@ -164,6 +271,12 @@ public class SQLDataManager implements
 				.findColumn(COLUMN_TIMESTAMP_FROM_TABLE_TIMESTAMP));
 	}
 
+	/**
+   * Sets a new timestamp for a given table.
+	 * @param columnName the name of the table which is going to have a new timestamp.
+	 * @param newTimeStamp the value of the new timestamp.
+	 * @throws SQLException
+	 */
 	public void setNewTimestamp(String columnName, int newTimeStamp)
 			throws SQLException {
 		String request = "update " + TABLE_TIMESTAMP + " " + "set "
@@ -174,6 +287,12 @@ public class SQLDataManager implements
 		connectAndUpdate(request);
 	}
 
+	/**
+   * Searches in the title table the key related to a given title.
+	 * @param desc the title which the key is requested.
+	 * @return the value of the key if it is in the table, -1 else.
+	 * @throws SQLException
+	 */
 	private int getKeyForTitle(String desc) throws SQLException {
 		String request = "select " + COLUMN_ID_FROM_TABLE_TITLE + " " + "from "
 				+ TABLE_TITLE + " " + "where " + COLUMN_DESC_FROM_TABLE_TITLE
@@ -187,8 +306,12 @@ public class SQLDataManager implements
 		return result.getInt(COLUMN_ID_FROM_TABLE_TITLE);
 	}
 
-	/*
-	 * methodes de base
+	
+	/**
+   * Synchronizes the students data from the database with local data.
+   * If students have been deleted from the database, they will be deleted from local data.
+   * If students have been added in the database, they will be added in the local data too.
+	 * @throws DataManagerException
 	 */
 	private void syncStudentData() throws DataManagerException {
 		CachedRowSet results = null;
@@ -234,10 +357,15 @@ public class SQLDataManager implements
 		}
 	}
 
+	/**
+   * Synchronizes the marks data from the database with local data.
+   * If marks have been deleted from the database, they will be deleted from local data.
+   * If marks have been added in the database, they will be added in the local data too.
+	 * @throws DataManagerException
+	 */
 	private void syncStudentMarksData() throws DataManagerException {
 
 		List<StudentMark> tmpList = new ArrayList<StudentMark>();
-		Map<Integer, Mark> courseMap = getMarks();
 		Map<Integer, Student> studentMap = getStudents();
 
 		CachedRowSet results = null;
@@ -256,21 +384,6 @@ public class SQLDataManager implements
 
 				tmpList.add(sm);
 
-				// boolean isInList = false;
-				//
-				// for (StudentMark sm2 : studentMarkList) { //
-				// if (sm.getStudent().getId() == sm2.getStudent().getId() //
-				// alors ca
-				// && sm.getMark().getId() == sm2.getMark().getId() // c'est
-				// tres
-				// && sm.getValue() != sm2.getValue()) { // moche mais
-				// sm2.setValue(sm.getValue()); // bon
-				// isInList = true; //
-				// break; //
-				// }
-				// }
-				//
-				// if (isInList == false) studentMarkList.add(sm);
 			}
 		} catch (SQLException e) {
 			throw new DataManagerException(
@@ -298,6 +411,13 @@ public class SQLDataManager implements
 
 	}
 
+  
+	/**
+   * Synchronizes the courses data from the database with local data.
+   * If courses have been deleted from the database, they will be deleted from local data.
+   * If courses have been added in the database, they will be added in the local data too.
+	 * @throws DataManagerException
+	 */
 	private void syncCourseData() throws DataManagerException {
 
 		CachedRowSet results = null;
@@ -343,6 +463,12 @@ public class SQLDataManager implements
 		}
 	}
 
+	/**
+   * Synchronizes the tests data from the database with local data.
+   * If tests have been deleted from the database, they will be deleted from local data.
+   * If tests have been added in the database, they will be added in the local data too.
+	 * @throws DataManagerException
+	 */
 	private void syncMarkData() throws DataManagerException {
 
 		Map<Integer, Course> courseMap = getCourses();
@@ -393,8 +519,12 @@ public class SQLDataManager implements
 		}
 	}
 
-  /*
-   * ici
+
+  /**
+   * Synchronizes the teacher's formulas data from the database with local data.
+   * If formulas have been deleted from the database, they will be deleted from local data.
+   * If formulas have been added in the database, they will be added in the local data too.
+   * @throws DataManagerException
    */
   private void syncTeacherFormulaData() throws DataManagerException{
     Map<Integer, List<Formula>> tmpMap = new HashMap<Integer, List<Formula>>();
@@ -504,6 +634,12 @@ public class SQLDataManager implements
   }
   
   
+  /**
+   * Synchronizes the jury's formulas data from the database with local data.
+   * If formulas have been deleted from the database, they will be deleted from local data.
+   * If formulas have been added in the database, they will be added in the local data too.
+   * @throws DataManagerException
+   */
   private void syncJuryFormulaData() throws DataManagerException{
     
     String request = "select " + COLUMN_ID_FORMULA_FROM_TABLE_FORMULA + ", " + 
@@ -583,7 +719,7 @@ public class SQLDataManager implements
   }
   
   
-	/* (non-Javadoc)
+	/*
 	 * @see fr.umlv.symphonie.data.DataManager#getStudents()
 	 */
 	public Map<Integer, Student> getStudents() throws DataManagerException {
@@ -603,7 +739,7 @@ public class SQLDataManager implements
 		return studentMap;
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see fr.umlv.symphonie.data.DataManager#getStudentList()
 	 */
 	public List<Student> getStudentList() throws DataManagerException {
@@ -703,9 +839,12 @@ public class SQLDataManager implements
 	}
 
   
-  /*
-   * la
-   */
+
+	/**
+   * Used to get get all teacher's formulas.
+	 * @return a <code>Map</code> of all teacher's formulas, keyed with their id.
+	 * @throws DataManagerException
+	 */
 	private Map<Integer, List<Formula>> getTeacherFormulas() throws DataManagerException {
     int n;
     
@@ -724,8 +863,9 @@ public class SQLDataManager implements
   }
   
   
-  /*
-   * la
+
+  /* (non-Javadoc)
+   * @see fr.umlv.symphonie.data.DataManager#getFormulasByCourse(fr.umlv.symphonie.data.Course)
    */
   public List<Formula> getFormulasByCourse(Course c) throws DataManagerException{
     Map<Integer, List<Formula>> tmpMap = getTeacherFormulas();
@@ -734,6 +874,9 @@ public class SQLDataManager implements
   }
   
   
+  /* (non-Javadoc)
+   * @see fr.umlv.symphonie.data.DataManager#getJuryFormulas()
+   */
   public List<Formula> getJuryFormulas() throws DataManagerException{
     int n;
     
@@ -770,6 +913,14 @@ public class SQLDataManager implements
 		return resultMap;
 	}
 
+	/**
+   * Used when the <code>SQLDataManager</code> changed values about students in the database.
+   * It will check if other changes have been made, synchronize data if so, and set a new timestamp
+   * for the student data.
+	 * @param supposedTimestamp the timestamp which SHOULD be the one to set. May increase if other changes
+   * have been made by another process/app.
+	 * @throws DataManagerException
+	 */
 	private void updateStudentData(int supposedTimestamp)
 			throws DataManagerException {
 		/*
@@ -801,6 +952,14 @@ public class SQLDataManager implements
 		studentMapTimeStamp = supposedTimestamp;
 	}
 
+	/**
+   * Used when the <code>SQLDataManager</code> changed values about marks in the database.
+   * It will check if other changes have been made, synchronize data if so, and set a new timestamp
+   * for the marks data.
+	 * @param supposedTimestamp the timestamp which SHOULD be the one to set. May increase if other changes
+   * have been made by another process/app.
+	 * @throws DataManagerException
+	 */
 	private void updateStudentMarksData(int supposedTimestamp)
 			throws DataManagerException {
 		int n;
@@ -826,6 +985,14 @@ public class SQLDataManager implements
 		studentMarkListTimeStamp = supposedTimestamp;
 	}
 
+	/**
+   * Used when the <code>SQLDataManager</code> changed values about courses in the database.
+   * It will check if other changes have been made, synchronize data if so, and set a new timestamp
+   * for the courses data.
+   * @param supposedTimestamp the timestamp which SHOULD be the one to set. May increase if other changes
+   * have been made by another process/app.
+	 * @throws DataManagerException
+	 */
 	private void updateCourseData(int supposedTimestamp)
 			throws DataManagerException {
 		int n;
@@ -851,6 +1018,14 @@ public class SQLDataManager implements
 		courseMapTimeStamp = supposedTimestamp;
 	}
 
+	/**
+   * Used when the <code>SQLDataManager</code> changed values about tests in the database.
+   * It will check if other changes have been made, synchronize data if so, and set a new timestamp
+   * for the tests data.
+   * @param supposedTimestamp the timestamp which SHOULD be the one to set. May increase if other changes
+   * have been made by another process/app.
+	 * @throws DataManagerException
+	 */
 	private void updateMarkData(int supposedTimestamp)
 			throws DataManagerException {
 		int n;
@@ -876,6 +1051,14 @@ public class SQLDataManager implements
 		markMapTimeStamp = supposedTimestamp;
 	}
 
+	/**
+   * Used when the <code>SQLDataManager</code> changed values about teacher's formulas in the database.
+   * It will check if other changes have been made, synchronize data if so, and set a new timestamp
+   * for the teacher's formulas data.
+   * @param supposedTimestamp the timestamp which SHOULD be the one to set. May increase if other changes
+   * have been made by another process/app.
+	 * @throws DataManagerException
+	 */
 	private void updateTeacherFormulaData(int supposedTimestamp) throws DataManagerException{
    int n;
    
@@ -899,6 +1082,14 @@ public class SQLDataManager implements
    teacherFormulaMapTimeStamp = supposedTimestamp;
   }
   
+  /**
+   * Used when the <code>SQLDataManager</code> changed values about jury's formulas in the database.
+   * It will check if other changes have been made, synchronize data if so, and set a new timestamp
+   * for the jury's formulas data.
+   * @param supposedTimestamp the timestamp which SHOULD be the one to set. May increase if other changes
+   * have been made by another process/app.
+   * @throws DataManagerException
+   */
   private void updateJuryFormulaData(int supposedTimestamp) throws DataManagerException{
     int n;
     
@@ -922,8 +1113,9 @@ public class SQLDataManager implements
     juryFormulaListTimeStamp = supposedTimestamp;
   }
   
-  /*
-	 * methodes de la vue etudiant
+
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#getMarksByStudentAndCourse(fr.umlv.symphonie.data.Student, fr.umlv.symphonie.data.Course)
 	 */
 	public Map<Integer, StudentMark> getMarksByStudentAndCourse(Student s,
 			Course c) throws DataManagerException {
@@ -942,6 +1134,9 @@ public class SQLDataManager implements
 		return studentMarkMap;
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#getAllMarksByStudent(fr.umlv.symphonie.data.Student)
+	 */
 	public Map<Course, Map<Integer, StudentMark>> getAllMarksByStudent(Student s)
 			throws DataManagerException {
 
@@ -955,8 +1150,9 @@ public class SQLDataManager implements
 		return map;
 	}
 
-	/*
-	 * methodes de la vue professeur
+
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#getAllMarksByCourse(fr.umlv.symphonie.data.Course)
 	 */
 	public Pair<Map<Integer, Mark>, SortedMap<Student, Map<Integer, StudentMark>>> getAllMarksByCourse(
 			Course c) throws DataManagerException {
@@ -998,8 +1194,9 @@ public class SQLDataManager implements
 				titleMap, map);
 	}
 
-	/*
-	 * methodes servant a la vue jury
+
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#getAllStudentsMarks()
 	 */
 	public Pair<Map<Integer, Course>, SortedMap<Student, Map<Course, Map<Integer, StudentMark>>>> getAllStudentsMarks()
 			throws DataManagerException {
@@ -1029,8 +1226,9 @@ public class SQLDataManager implements
 				courseMap, sortedMap);
 	}
 
-	/*
-	 * methodes servant a l'admin
+
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#addStudent(java.lang.String, java.lang.String)
 	 */
 	public Student addStudent(String name, String lastName)
 			throws DataManagerException {
@@ -1088,6 +1286,12 @@ public class SQLDataManager implements
     return s;
 	}
 
+	/**
+   * Used when a new student is added.
+   * Adds 0's to the given student in every tests contained in the database. 
+	 * @param s
+	 * @throws DataManagerException
+	 */
 	private void addDefaultMarksForStudent(Student s)
 			throws DataManagerException {
 		Map<Integer, Mark> markMap = getMarks();
@@ -1122,6 +1326,9 @@ public class SQLDataManager implements
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#addStudents(java.util.List)
+	 */
 	public void addStudents(List<Pair<String, String>> namesList)
 			throws DataManagerException {
 
@@ -1200,6 +1407,12 @@ public class SQLDataManager implements
 		}
 	}
 
+	/**
+   * Used when several students are inserted in the database at a time.
+   * Adds 0's to every student added in every tests in the database.
+	 * @param studentList the list of all students to add default marks.
+	 * @throws DataManagerException
+	 */
 	private void addDefaultMarksForStudents(List<Student> studentList)
 			throws DataManagerException {
 		Map<Integer, Mark> markMap = getMarks();
@@ -1238,6 +1451,9 @@ public class SQLDataManager implements
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#removeStudent(fr.umlv.symphonie.data.Student)
+	 */
 	public void removeStudent(Student s) throws DataManagerException {
 
 		/*
@@ -1284,7 +1500,9 @@ public class SQLDataManager implements
 	}
 
 	/**
-	 * @param studentId
+   * Used when a student has been deleted from the database.
+   * Removes all his marks.
+	 * @param studentId the id of the student who has been deleted.
 	 * @throws SQLException
 	 */
 	private void removeAllStudentMarksForStudent(int studentId)
@@ -1468,6 +1686,12 @@ public class SQLDataManager implements
 		}
 	}
 
+	/**
+   * Used when a course has been deleted from the database.
+   * Removes all the formulas related to the deleted course.
+	 * @param c the <code>Course</code> which has been deleted.
+	 * @throws DataManagerException
+	 */
 	private void removeAllFormulasForCourse(Course c) throws DataManagerException{
     
     String request = "delete from " + TABLE_TEACHER_FORMULA + " " +
@@ -1589,7 +1813,9 @@ public class SQLDataManager implements
 	}
 
 	/**
-	 * @param markKey
+   * Used when a test has been added in the database.
+   * Adds 0's to all students in this test.
+	 * @param markKey the id of the test which has been added.
 	 */
 	private void setDefaultMarkToAllStudents(int markKey)
 			throws DataManagerException {
@@ -1607,7 +1833,7 @@ public class SQLDataManager implements
 		}
 
 		Map<Integer, Student> studentMap = getStudents();
-		List<StudentMark> studentMarkList = getStudentMarks();
+//		List<StudentMark> studentMarkList = getStudentMarks();
 		for (Student s : studentMap.values()) {
 			try {
 				preparedStatement.setInt(1, s.getId());
@@ -1665,7 +1891,9 @@ public class SQLDataManager implements
 
 
 	/**
-	 * @param markId
+   * Used when a test has been removed from the database.
+   * Removes all marks related to the removed test.
+	 * @param markId the id of the test which has been removed.
 	 * @throws DataManagerException
 	 */
 	public void removeAllStudentMarksForMark(int markId)
@@ -1786,6 +2014,9 @@ public class SQLDataManager implements
   }
   
   
+  /* (non-Javadoc)
+   * @see fr.umlv.symphonie.data.DataManager#removeTeacherFormula(fr.umlv.symphonie.data.formula.Formula, fr.umlv.symphonie.data.Course)
+   */
   public void removeTeacherFormula(Formula f, Course c) throws DataManagerException{
     String request = "delete from " + TABLE_TEACHER_FORMULA + " " +
                      "where " + COLUMN_ID_FORMULA_FROM_TABLE_FORMULA + " = " + f.getID() + " " +
@@ -1894,6 +2125,9 @@ public class SQLDataManager implements
   }
   
   
+  /* (non-Javadoc)
+   * @see fr.umlv.symphonie.data.DataManager#removeJuryFormula(fr.umlv.symphonie.data.formula.Formula)
+   */
   public void removeJuryFormula(Formula f) throws DataManagerException{
     String request = "delete from " + TABLE_JURY_FORMULA + " " +
                      "where " + COLUMN_ID_FORMULA_FROM_TABLE_FORMULA + " = " + f.getID() + " " +
@@ -2201,6 +2435,9 @@ public class SQLDataManager implements
 
 	}
 	
+  /* (non-Javadoc)
+   * @see fr.umlv.symphonie.data.DataManager#changeStudentNameAndLastName(fr.umlv.symphonie.data.Student, java.lang.String, java.lang.String)
+   */
   public void changeStudentNameAndLastName(Student s, String newName, String newLastName) throws DataManagerException{
     String request = "update " + TABLE_STUDENT + " set "
                    + COLUMN_NAME_FROM_TABLE_STUDENT + " = '" + newName + "', "
@@ -2311,6 +2548,4 @@ public class SQLDataManager implements
 		}
 
 	}
-
-
 }
