@@ -38,6 +38,7 @@ import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.data.formula.Formula;
+import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
 import fr.umlv.symphonie.util.Pair;
 import fr.umlv.symphonie.view.cells.CellFormat;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
@@ -106,6 +107,8 @@ public class TeacherModel extends AbstractTableModel {
   private final ExecutorService es = Executors.newSingleThreadExecutor();
   
   
+  private final Object lock = new Object();
+  
   public TeacherModel(DataManager manager) {
     this.manager = manager;
   }
@@ -123,6 +126,8 @@ public class TeacherModel extends AbstractTableModel {
        * @see java.lang.Runnable#run()
        */
       public void run() {
+        
+        synchronized (lock){
         
         TeacherModel.this.clear();
         TeacherModel.this.course = course;
@@ -188,13 +193,17 @@ public class TeacherModel extends AbstractTableModel {
         } catch (InvocationTargetException e1) {
           e1.printStackTrace();
         }
-
+        }
       }
     });
     
     
   }
   
+  
+  public void update(){
+    setCourse(course);
+  }
   
   private void clear() {
     course = null;
@@ -267,8 +276,14 @@ public class TeacherModel extends AbstractTableModel {
     if(o instanceof Formula){
       Formula f = (Formula)o;
       
+      Student s = studentList.get(rowIndex - 3);
       
-      return null;
+      SymphonieFormulaFactory.clearMappedValues();
+      
+      for (StudentMark sm : studentMarkMap.get(s.getId()).values())
+        SymphonieFormulaFactory.putMappedValue(sm.getMark().getDesc(), sm.getValue());
+      
+      return f.getValue();
     }
     
     else if (o instanceof Mark){
@@ -398,6 +413,28 @@ public class TeacherModel extends AbstractTableModel {
     }catch (DataManagerException e){
       System.out.println(e.getMessage());
     }
+    
+    update();
+  }
+  
+  
+  public void addMark(final String desc, final float coeff){
+    
+    final Course course = this.course;
+    
+    es.execute(new Runnable(){
+      public void run() {
+        synchronized (lock){
+          try{
+            manager.addMark(desc, coeff, course);
+          }catch (DataManagerException e){
+            System.out.println(e.getMessage());
+          }
+        }
+      }
+    });
+    
+    update();
   }
   
   public static void main(String[] args) throws DataManagerException {
@@ -526,8 +563,8 @@ public class TeacherModel extends AbstractTableModel {
         Object o = tree.getLastSelectedPathComponent();
         
         if (o instanceof Course){
-          System.out.println("on a selectionne une matiere !");
           ((TeacherModel)table.getModel()).setCourse((Course)o);
+          ((TeacherModel)table.getModel()).addMark("morpion", 0.0f);
           /*CellFormat f = new CellFormat(BasicFormulaFactory.booleanInstance(true), Color.RED, Color.CYAN);
           for (int i = 3; i < 7; i++) {
             Object ob = teacherModel.getValueAt(i, 0);
