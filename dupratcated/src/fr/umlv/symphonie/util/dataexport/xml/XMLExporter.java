@@ -29,7 +29,6 @@ import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
 import fr.umlv.symphonie.data.Mark;
-import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.util.Pair;
@@ -40,13 +39,6 @@ import fr.umlv.symphonie.util.dataexport.DataExporterException;
  * @author Laurent GARCIA
  */
 public class XMLExporter implements DataExporter {
-
-	private String documentName;
-
-	private final File dtd = new File(
-			"src/fr/umlv/symphonie/util/dataexport/xml/symphonie.dtd");
-
-	private final DataManager dm = new SQLDataManager();
 
 	/**
 	 * add a course node
@@ -212,15 +204,19 @@ public class XMLExporter implements DataExporter {
 	 *            the document object
 	 * @throws DataExporterException
 	 */
-	private void writeDocument(Document document) throws DataExporterException {
+	private void writeDocument(Document document, String documentName)
+			throws DataExporterException {
 		try {
 			final Transformer transformer = TransformerFactory.newInstance()
 					.newTransformer();
 
 			/** <!DOCTYPE symphonie SYSTEM "file:?"> */
-			transformer.setOutputProperty(
-					javax.xml.transform.OutputKeys.DOCTYPE_SYSTEM, dtd.toURL()
-							.toString());
+			transformer
+					.setOutputProperty(
+							javax.xml.transform.OutputKeys.DOCTYPE_SYSTEM,
+							new File(
+									"src/fr/umlv/symphonie/util/dataexport/xml/symphonie.dtd")
+									.toURL().toString());
 
 			/** indention of the tags */
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -256,9 +252,8 @@ public class XMLExporter implements DataExporter {
 	 * @see fr.umlv.symphonie.util.dataexport.DataExporter#exportStudentView(java.lang.String,
 	 *      fr.umlv.symphonie.data.Student)
 	 */
-	public void exportStudentView(String documentName, Student s)
+	public void exportStudentView(String documentName, DataManager dm, Student s)
 			throws DataExporterException {
-		this.documentName = documentName;
 		final Document document = newDocument();
 		HashMap<Course, Map<Integer, StudentMark>> map = null;
 
@@ -294,7 +289,7 @@ public class XMLExporter implements DataExporter {
 			}
 		}
 
-		writeDocument(document);
+		writeDocument(document, documentName);
 	}
 
 	/*
@@ -303,9 +298,8 @@ public class XMLExporter implements DataExporter {
 	 * @see fr.umlv.symphonie.util.dataexport.DataExporter#exportTeacherView(java.lang.String,
 	 *      fr.umlv.symphonie.data.Course)
 	 */
-	public void exportTeacherView(String documentName, Course c)
+	public void exportTeacherView(String documentName, DataManager dm, Course c)
 			throws DataExporterException {
-		this.documentName = documentName;
 		final Document document = newDocument();
 		Pair<Map<Integer, Mark>, SortedMap<Student, Map<Integer, StudentMark>>> pair = null;
 		Map<Integer, StudentMark> map;
@@ -353,7 +347,7 @@ public class XMLExporter implements DataExporter {
 		}
 
 		/** we create the document */
-		writeDocument(document);
+		writeDocument(document, documentName);
 	}
 
 	/*
@@ -361,9 +355,8 @@ public class XMLExporter implements DataExporter {
 	 * 
 	 * @see fr.umlv.symphonie.util.dataexport.DataExporter#exportJuryView(java.lang.String)
 	 */
-	public void exportJuryView(String documentName)
+	public void exportJuryView(String documentName, DataManager dm)
 			throws DataExporterException {
-		this.documentName = documentName;
 		final Document document = newDocument();
 		Pair<Map<Integer, Course>, SortedMap<Student, Map<Course, Map<Integer, StudentMark>>>> pair = null;
 		Map<Integer, StudentMark> map2;
@@ -410,7 +403,7 @@ public class XMLExporter implements DataExporter {
 			}
 		}
 
-		writeDocument(document);
+		writeDocument(document, documentName);
 	}
 
 }

@@ -6,6 +6,8 @@ package fr.umlv.symphonie.util.dataexport.xml;
 
 import junit.framework.TestCase;
 import fr.umlv.symphonie.data.Course;
+import fr.umlv.symphonie.data.DataManager;
+import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.util.dataexport.DataExporter;
 import fr.umlv.symphonie.util.dataexport.DataExporterException;
@@ -17,6 +19,7 @@ import fr.umlv.symphonie.util.dataexport.xml.XMLExporter;
 public class XMLExporterTest extends TestCase {
 
   DataExporter de = new XMLExporter();
+  DataManager dm = new SQLDataManager();
 
   /**
    * A SUPRIMER c'est juste pour tester pour nous. Mettre la dtd à la racine
@@ -26,7 +29,7 @@ public class XMLExporterTest extends TestCase {
   public void testExportStudentView() {
     Student s = new Student(3, "Laurent", "Garcia", "sale homo !");
     try {
-      de.exportStudentView("student_view.xml", s);
+      de.exportStudentView("student_view.xml", dm, s);
     } catch (DataExporterException e) {
       e.printStackTrace();
     }
@@ -35,7 +38,7 @@ public class XMLExporterTest extends TestCase {
   public void testExportTeacherView() {
     Course c = new Course(0, "Java", (float) 0.5);
     try {
-      de.exportTeacherView("teacher_view.xml", c);
+      de.exportTeacherView("teacher_view.xml", dm, c);
     } catch (DataExporterException e) {
       e.printStackTrace();
     }
@@ -43,7 +46,7 @@ public class XMLExporterTest extends TestCase {
 
   public void testExportJuryView() {
     try {
-      de.exportJuryView("jury_view.xml");
+      de.exportJuryView("jury_view.xml", dm);
     } catch (DataExporterException e) {
       e.printStackTrace();
     }
