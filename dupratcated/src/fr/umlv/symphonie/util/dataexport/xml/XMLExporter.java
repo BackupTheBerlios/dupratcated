@@ -341,6 +341,7 @@ public class XMLExporter implements DataExporter {
 		Map<Integer, StudentMark> map;
 		Node studentNode;
 		final int idLastStudent;
+    int i = 0;
 
 		try {
 			pair = dm.getAllMarksByCourse(c);
@@ -361,7 +362,7 @@ public class XMLExporter implements DataExporter {
 		/** we export the course of the teacher view */
 		addCourseNode(root, null, c);
 
-		idLastStudent = sortedMap.lastKey().getId();
+		idLastStudent = sortedMap.size();
 
 		/** we export all the students */
 		for (Student s : sortedMap.keySet()) {
@@ -375,12 +376,13 @@ public class XMLExporter implements DataExporter {
 				 * if it the last student node, we can create the examens nodes
 				 * since it has to be at the end of the xml
 				 */
-				if (idLastStudent == s.getId()) {
+				if (idLastStudent == i) {
 					addExamenNode(root, sm);
 				}
 
 				addMarkNode(studentNode, sm);
 			}
+      i++;
 		}
 
 		if (list != null) {
@@ -406,8 +408,7 @@ public class XMLExporter implements DataExporter {
 		ArrayList<Formula> list = null;
 		Map<Integer, StudentMark> map2;
 		Node studentNode;
-		final int idLastStudent;
-		final int idFirstSudent;
+		int i = 0;
 
 		try {
 			pair = dm.getAllStudentsMarks();
@@ -427,9 +428,6 @@ public class XMLExporter implements DataExporter {
 		e.setAttribute("view", "jury");
 		final Node root = document.appendChild(e);
 
-		idLastStudent = sortedMap.lastKey().getId();
-		idFirstSudent = sortedMap.firstKey().getId();
-
 		/** we export all the students */
 		for (Student s : sortedMap.keySet()) {
 			studentNode = addStudentNode(root, s, true);
@@ -443,10 +441,11 @@ public class XMLExporter implements DataExporter {
 				 * before the student node since it has to be at the begin of
 				 * the xml
 				 */
-				if (idFirstSudent == s.getId()) {
+				if (i == 0) {
 					addCourseNode(root, studentNode, c);
 				}
 			}
+      i++;
 		}
 
 		if (list != null) {
