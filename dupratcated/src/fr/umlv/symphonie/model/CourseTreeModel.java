@@ -5,24 +5,18 @@
 package fr.umlv.symphonie.model;
 
 import java.awt.EventQueue;
-import java.awt.Font;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.JTree;
 import javax.swing.event.TreeModelListener;
-import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreePath;
 
-import fr.umlv.symphonie.data.*;
+import fr.umlv.symphonie.data.Course;
+import fr.umlv.symphonie.data.DataManager;
+import fr.umlv.symphonie.data.DataManagerException;
 
 
 /**
