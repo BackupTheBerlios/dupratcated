@@ -46,27 +46,26 @@ import fr.umlv.symphonie.view.cells.CellRendererFactory;
 
 
 /**
+ * The admin's model to represent teacher's view.
  * @author susmab
- *
  */
 public class AdminTeacherModel extends TeacherModel {
-
-//  private static AdminTeacherModel instance = null;
   
   
+  /**
+   * @param manager
+   * @param builder
+   */
   public AdminTeacherModel (DataManager manager, ComponentBuilder builder){
     super(manager, builder);
   }
   
-//  public static AdminTeacherModel getInstance(DataManager manager){
-//    if (instance == null)
-//      instance = new AdminTeacherModel(manager);
-//    
-//    else instance.setManager(manager);
-//    
-//    return instance;
-//  }
   
+  /**
+   * Same role as <code>TeacherModel</code>'s method, but allows to modify
+   * students' names.
+   * @see javax.swing.table.TableModel#isCellEditable(int, int)
+   */
   public boolean isCellEditable(int rowIndex,int columnIndex){
     
     if (columnIndex == 0 && rowIndex >= 3)
@@ -75,6 +74,10 @@ public class AdminTeacherModel extends TeacherModel {
     return super.isCellEditable(rowIndex, columnIndex);
   }
   
+  /**
+   * Same role as <code>TeacherModel</code>' method, but changes students' names too.
+   * @see javax.swing.table.TableModel#setValueAt(java.lang.Object, int, int)
+   */
   public void setValueAt(Object aValue,int rowIndex,int columnIndex){
     if (columnIndex == 0){
       final Student s = studentList.get(rowIndex - 3);

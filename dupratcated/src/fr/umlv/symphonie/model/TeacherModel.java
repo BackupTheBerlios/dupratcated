@@ -55,10 +55,15 @@ import static fr.umlv.symphonie.view.SymphonieConstants.*;
 public class TeacherModel extends AbstractTableModel implements
     ObjectFormattingSupport, IDictionarySupport {
 
+  /**
+   * Don't know what the fuck it is about
+   */
   private final Map<String, Number> mappedValues = new HashMap<String, Number>();
 
-  // private static TeacherModel instance = null;
 
+  /**
+   * A comparator for students. Used to sort maps.
+   */
   protected final Comparator<Student> StudentComparator = new Comparator<Student>() {
 
     public int compare(Student o1, Student o2) {
@@ -72,44 +77,84 @@ public class TeacherModel extends AbstractTableModel implements
     }
   };
 
-  /*
-   * le datamanager et la matiere
+
+  /**
+   * The DataManager which handles database
    */
   protected final DataManager manager;
+  
+  /**
+   * The ComponentBuilder, used to internationalize the current model.
+   */
   protected final ComponentBuilder builder;
+  
+  /**
+   * The course being represented, null if the model is empty
+   */
   protected Course course = null;
 
-  /*
-   * nombre de colonnes et de lignes
+
+  /**
+   * Number of rows currently in the model
    */
   protected int rowCount = 0;
+  
+  /**
+   * Number of column currently in the model
+   */
   protected int columnCount = 0;
 
-  /*
-   * listes des tests et des etudiants
+
+  /**
+   * The list of columns in the model, except the first and the last ones.
+   * It can contain <code>Formulas</code> and <code>Marks</code>
    */
   protected final List<Object> columnList = new ArrayList<Object>();
+  
+  /**
+   * The list of <code>Student</code>. Used to represent lines if the model.
+   */
   protected final List<Student> studentList = new ArrayList<Student>();
 
-  /*
-   * maps des etudiants et des tests (le final devra servir pour les threads)
+  /**
+   * A Map of every <code>Mark</code> related to the current Course.
    */
   protected final Map<Integer, Mark> markMap = new HashMap<Integer, Mark>();
+  
+  /**
+   * A sorted map keyed with each <code>Student</code> of the database. Each value for each <code>Student</code>
+   * is a map keyed with the <code>Mark</code>s' available for the current <code>Course</code>, and the values are the
+   * <code>StudentMark</code>s associated to the <code>Mark</code>s.
+   */
   protected final SortedMap<Student, Map<Integer, StudentMark>> studentMarkMap = new TreeMap<Student, Map<Integer, StudentMark>>(
       StudentComparator);
 
   /**
-   * Pool de threads qui n'en contient qu'un seul et qui sert pour le
-   * rafraîchissement du canal courant.
+   * Pool of threads containing only one. Used to launch threads interacting with the database.
    */
   protected final ExecutorService es = Executors.newSingleThreadExecutor();
 
+  /**
+   * An object used to be locked by each thread launched,
+   * in order not to generate errors while interacting with the database.
+   */
   protected final Object lock = new Object();
 
+  /**
+   * Used in the <code>getValueAt</code> method, to check which row is being accessed. 
+   */
   private int lastRow = -1;
 
+  /**
+   * A <code>CompletionDictionary</code> used in order to provide auto-completion with this model.
+   */
   protected final CompletionDictionary dictionary = new CompletionDictionary();
 
+  /**
+   * Constructs an empty TeacherModel.
+   * @param manager The <code>DataManager</code> which will be used to interact with database.
+   * @param builder The <code>ComponentBuilder</code> which will provide internationalization.
+   */
   public TeacherModel(DataManager manager, ComponentBuilder builder) {
     this.manager = manager;
     this.builder = builder;
@@ -118,7 +163,7 @@ public class TeacherModel extends AbstractTableModel implements
   }
 
   /**
-   * 
+   * Fill the <code>CompletionDictionary</code> with default key words.
    */
   private void fillDefaultDictionary() {
     dictionary.add("average");
@@ -144,6 +189,10 @@ public class TeacherModel extends AbstractTableModel implements
   // this.manager = manager;
   // }
 
+  /**
+   * Sets the <code>Course</code> to be represented by the model.
+   * @param courseToAdd The <code>Course</code> to represent.
+   */
   public void setCourse(final Course courseToAdd) {
 
     es.execute(new Runnable() {
@@ -239,10 +288,19 @@ public class TeacherModel extends AbstractTableModel implements
     System.out.println("*********");
   }
 
+  /**
+   * Updates the data in the model.
+   */
   public void update() {
-    setCourse(course);
+    
+    if (course != null){
+      setCourse(course);
+    }
   }
 
+  /**
+   * Clears the model.
+   */
   public void clear() {
     course = null;
     rowCount = 0;
@@ -262,14 +320,26 @@ public class TeacherModel extends AbstractTableModel implements
     fireTableStructureChanged();
   }
 
+  /**
+   * Returns the number of rows currently in the model.
+   * @see javax.swing.table.TableModel#getRowCount()
+   */
   public int getRowCount() {
     return rowCount;
   }
 
+  /**
+   * Returns the number of columns currently int the model.
+   * @see javax.swing.table.TableModel#getColumnCount()
+   */
   public int getColumnCount() {
     return columnCount;
   }
 
+  /**
+   * Returns values contained in the model.
+   * @see javax.swing.table.TableModel#getValueAt(int, int)
+   */
   public Object getValueAt(int rowIndex, int columnIndex) {
 
     /*
@@ -327,9 +397,9 @@ public class TeacherModel extends AbstractTableModel implements
 
   }
 
-  /*
-   * (non-Javadoc)
-   * 
+  /**
+   * Tells if a cell in the model is editable or not.
+   * In the teacher model all values are editable, except the names of the students.
    * @see javax.swing.table.AbstractTableModel#isCellEditable(int, int)
    */
   public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -346,8 +416,8 @@ public class TeacherModel extends AbstractTableModel implements
     return true;
   }
 
-  /*
-   * (non-Javadoc)
+  /**
+   * Sets value at a given cell.
    * 
    * @see javax.swing.table.AbstractTableModel#setValueAt(java.lang.Object, int,
    *      int)
@@ -492,6 +562,13 @@ public class TeacherModel extends AbstractTableModel implements
     });
   }
 
+  /**
+   * Adds a formula in the interacted database and in the model.
+   * @param expression The expression of the formula given by the user.
+   * @param desc The title of the wanted formula.
+   * @param column The column index where to put the formula.
+   * (it will NEVER be added at the first or last column of the model).
+   */
   public void addFormula(final String expression, final String desc,
       final int column) {
 
@@ -523,6 +600,11 @@ public class TeacherModel extends AbstractTableModel implements
     });
   }
 
+  /**
+   * Adds a new test in the interacted database and in the model.
+   * @param desc The title of the new test.
+   * @param coeff The coefficient of the new test.
+   */
   public void addMark(final String desc, final float coeff) {
 
     es.execute(new Runnable() {
@@ -561,6 +643,10 @@ public class TeacherModel extends AbstractTableModel implements
     });
   }
 
+  /**
+   * Removes a column in the model. It will NEVER remove the first or last one.
+   * @param columnIndex The index of the column to remove in the model.
+   */
   public void removeColumn(int columnIndex) {
     if (columnIndex == 0 || columnIndex == columnCount - 1) return;
 
@@ -577,7 +663,8 @@ public class TeacherModel extends AbstractTableModel implements
   }
 
   /**
-   * @param formula
+   * Removes a given <code>Formula</code> from the database and the model. 
+   * @param formula the <code>Formula</code> to remove.
    */
   private void removeFormula(final Formula formula) {
     es.execute(new Runnable() {
@@ -609,7 +696,9 @@ public class TeacherModel extends AbstractTableModel implements
   }
 
   /**
-   * @param mark
+   * Removes a given <code>Mark</code> from the database and the model.
+   * (the class <code>Mark</code> represents a test in the application).
+   * @param mark the <code>Mark</code> to remove.
    */
   private void removeMark(final Mark mark) {
     es.execute(new Runnable() {
@@ -642,6 +731,9 @@ public class TeacherModel extends AbstractTableModel implements
     });
   }
 
+  /**
+   * Returns the <code>CompletionDictionary</code> of the curent model.
+   */
   public LookableCollection<String> getDictionary() {
     return dictionary;
   }
@@ -656,13 +748,19 @@ public class TeacherModel extends AbstractTableModel implements
     throw new UnsupportedOperationException("Cannot override dictionary");
   }
 
+  /**
+   * Used to display the chart of the current <code>Course</code> being represented. 
+   * @return a <code>Messageformat</code> containing the header message for the chart.
+   */
   public MessageFormat getHeaderMessageFormat() {
     return new MessageFormat(builder.getValue(TEACHER_HEADER) + course);
   }
 
   /**
-   * @param dataTab
-   * @param first
+   * Used to initialize data in the <code>Map</code> array, used to construct the chart
+   * for the current <code>Course</code>.
+   * @param dataTab The <code>Map</code> array to initialize.
+   * @param markMap The <code>Map<Integer, Mark></code> which contains all data to initialize the array.
    */
   private void initDataTab(Map<Integer, Integer>[] dataTab,
       Map<Integer, Mark> markMap) {
@@ -677,6 +775,12 @@ public class TeacherModel extends AbstractTableModel implements
     }
   }
 
+  /**
+   * Construct the <code>ChartPanel</code> containing the chart for the
+   * <code>Course</code> being represented.
+   * @param step The interval of marks for the chart.
+   * @return the <code>ChartPanel</code> containing the chart created.
+   */
   public ChartPanel getChartPanel(int step) {
 
     if (course != null) {
@@ -734,17 +838,32 @@ public class TeacherModel extends AbstractTableModel implements
   // Implement the ObjectFormattingSupport interface
   // ----------------------------------------------------------------------------
 
+  /**
+   * Spray's gonna comment this !
+   */
   private final FormattableCellRenderer formatter = CellRendererFactory
       .getTeacherModelCellRenderer();
 
+  /* (non-Javadoc)
+   * @see fr.umlv.symphonie.view.cells.ObjectFormattingSupport#getFormattableCellRenderer()
+   */
   public FormattableCellRenderer getFormattableCellRenderer() {
     return formatter;
   }
 
+  /**
+   * Tells if the current model is empty or not.
+   * @return true if the model is empty, false else.
+   */
   public boolean isEmpty() {
     return (course == null);
   }
 
+  /**
+   * Fills the <code>SymphonieFormulaFactory</code> map with each test's name and
+   * his associated mark, in order to calculate a <code>Formula</code> at a given row.
+   * @param rowIndex The index of the row to calculate.
+   */
   private void fillFormulaMap(int rowIndex) {
 
     if (rowIndex >= 3 && lastRow != rowIndex) {
