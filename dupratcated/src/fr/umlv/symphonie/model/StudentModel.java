@@ -23,8 +23,10 @@ import org.jfree.data.general.DefaultKeyedValuesDataset;
 import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
+import fr.umlv.symphonie.data.Mark;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
+import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
 import fr.umlv.symphonie.util.StudentAverage;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
 import fr.umlv.symphonie.view.cells.FormattableCellRenderer;
@@ -54,6 +56,8 @@ public class StudentModel extends AbstractTableModel implements
    */
   private final ExecutorService es = Executors.newSingleThreadExecutor();
 
+  private int lastRow = -1;
+  
   protected StudentModel(DataManager manager) {
     this.manager = manager;
   }
@@ -213,6 +217,7 @@ public class StudentModel extends AbstractTableModel implements
    * @see javax.swing.table.TableModel#getValueAt(int, int)
    */
   public Object getValueAt(int rowIndex, int columnIndex) {
+    fillFormulaMap(rowIndex);
     return matrix[rowIndex][columnIndex];
   }
 
@@ -258,6 +263,21 @@ public class StudentModel extends AbstractTableModel implements
     return (student == null);
   }
 
+  public void fillFormulaMap(int rowIndex){
+    int row = rowIndex / 4;
+
+    if (lastRow != row){
+      lastRow = row;
+      row *=4;
+      
+      SymphonieFormulaFactory.clearMappedValues();
+      
+      for (int i = 1 ; matrix[row][i] != null ; i++)
+        SymphonieFormulaFactory.putMappedValue( ((Mark)(matrix[row][i])).getDesc(), ((StudentMark)(matrix[row][i])).getValue() );
+
+    }
+  }
+  
   // public static void main(String[] args) throws DataManagerException {
   // JFrame frame = new JFrame ("test StudentModel");
   // frame.setSize(800,600);
