@@ -9,7 +9,7 @@ public abstract class SQLDataManagerConstants {
   static public final String TABLE_TITLE = "title";
   static public final String TABLE_HAS_MARK = "has_mark";
   static public final String TABLE_TEST = "test";
-  static public final String TABLE_TIMESTAMP = "timestamp";
+  static public final String TABLE_TIMESTAMP = "time_stamp";
   static public final String TABLE_TEACHER_FORMULA = "teacher_formula";
   static public final String TABLE_JURY_FORMULA = "jury_formula";
 
