@@ -18,38 +18,46 @@ import fr.umlv.symphonie.util.dataexport.xml.XMLExporter;
  */
 public class XMLExporterTest extends TestCase {
 
-  final DataExporter de = new XMLExporter();
-  final DataManager dm = SQLDataManager.getInstance();
+	final DataExporter de = new XMLExporter();
 
-  /**
-   * A SUPRIMER c'est juste pour tester pour nous. Mettre la dtd à la racine
-   * pour le moment, utiliser la bdd de sus, les fichiers exportés seront à la
-   * racine pour le moment
-   */
-  public void testExportStudentView() {
-    Student s = new Student(3, "Laurent", "Garcia", "sale homo !");
-    try {
-      de.exportStudentView("student_view.xml", dm, s);
-    } catch (DataExporterException e) {
-      e.printStackTrace();
-    }
-  }
+	final DataManager dm = SQLDataManager.getInstance();
 
-  public void testExportTeacherView() {
-    Course c = new Course(0, "Java", (float) 0.5);
-    try {
-      de.exportTeacherView("teacher_view.xml", dm, c);
-    } catch (DataExporterException e) {
-      e.printStackTrace();
-    }
-  }
+	/**
+	 * A SUPRIMER c'est juste pour tester pour nous. Utiliser la bdd de fabien,
+	 * les fichiers exportés seront à la racine par défaut.
+	 */
+	public void testExportStudentView() {
+		Student s = new Student(3, "Laurent", "Garcia", "sale homo !");
+		try {
+			de.exportStudentView("student_view.xml", dm, s);
+		} catch (DataExporterException e) {
+			e.printStackTrace();
+		}
+	}
 
-  public void testExportJuryView() {
-    try {
-      de.exportJuryView("jury_view.xml", dm);
-    } catch (DataExporterException e) {
-      e.printStackTrace();
-    }
-  }
+	/**
+	 * A SUPRIMER c'est juste pour tester pour nous. Utiliser la bdd de fabien,
+	 * les fichiers exportés seront à la racine par défaut.
+	 */
+	public void testExportTeacherView() {
+		Course c = new Course(0, "Java", (float) 0.5);
+		try {
+			de.exportTeacherView("teacher_view.xml", dm, c);
+		} catch (DataExporterException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * A SUPRIMER c'est juste pour tester pour nous. Utiliser la bdd de fabien,
+	 * les fichiers exportés seront à la racine par défaut.
+	 */
+	public void testExportJuryView() {
+		try {
+			de.exportJuryView("jury_view.xml", dm);
+		} catch (DataExporterException e) {
+			e.printStackTrace();
+		}
+	}
 
 }

@@ -18,6 +18,10 @@ public class XMLImporterAdminTest extends TestCase {
 
 	final DataManager dm = SQLDataManager.getInstance();
 
+	/**
+	 * A SUPRIMER c'est juste pour tester pour nous. Utiliser la bdd de fabien,
+	 * les fichiers exportés seront à la racine par défaut.
+	 */
 	public void testImportStudentView() {
 		try {
 			di.importStudentView("student_view.xml", dm);
@@ -26,6 +30,10 @@ public class XMLImporterAdminTest extends TestCase {
 		}
 	}
 
+	/**
+	 * A SUPRIMER c'est juste pour tester pour nous. Utiliser la bdd de fabien,
+	 * les fichiers exportés seront à la racine par défaut.
+	 */
 	public void testImportTeacherView() {
 		try {
 			di.importTeacherView("teacher_view.xml", dm);
@@ -34,6 +42,10 @@ public class XMLImporterAdminTest extends TestCase {
 		}
 	}
 
+	/**
+	 * A SUPRIMER c'est juste pour tester pour nous. Utiliser la bdd de fabien,
+	 * les fichiers exportés seront à la racine par défaut.
+	 */
 	public void testImportJuryView() {
 		try {
 			di.importJuryView("jury_view.xml", dm);
