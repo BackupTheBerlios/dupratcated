@@ -45,7 +45,7 @@ public class Symphonie {
   private static SymphonieComponentBuilder builder;
   private static HashMap<String, String> english;
   private static HashMap<String, String> french;
-  private static HashMap<String, String> spanish;
+  private static JFrame frame;
 
   private static JFrame getFrame() {
 
@@ -58,8 +58,8 @@ public class Symphonie {
       throw new AssertionError("Bim ! -> " + e.getMessage());
     }
 
-    builder = new SymphonieComponentBuilder(english);
-    JFrame frame = new JFrame(builder.getValue(SymphonieConstants.FRAME_TITLE));
+    builder = new SymphonieComponentBuilder(french);
+    frame = new JFrame(builder.getValue(SymphonieConstants.FRAME_TITLE));
     frame.setContentPane(getContentPane(frame, builder));
 
     JMenuBar bar = new JMenuBar();
@@ -75,17 +75,23 @@ public class Symphonie {
 
   }
 
+  /**
+   * Build "File" JMenu
+   * 
+   * @return JMenu
+   */
   private static JMenu getFileMenu() {
     JMenu file = builder.buildMenu(SymphonieConstants.FILE_MENU);
 
-    /* Actions ******************************************************* */
-    Action proxy = SymphonieActionFactory.getProxyAction(new ImageIcon(
-        Symphonie.class.getResource("icons/proxy.png")));
+    /*
+     * Actions Menu "File"
+     * *******************************************************
+     */
 
-    Action a_import = SymphonieActionFactory.getProxyAction(new ImageIcon(
+    Action a_import = SymphonieActionFactory.getImportAction(new ImageIcon(
         Symphonie.class.getResource("icons/import.png")));
 
-    Action export = SymphonieActionFactory.getProxyAction(new ImageIcon(
+    Action export = SymphonieActionFactory.getExportAction(new ImageIcon(
         Symphonie.class.getResource("icons/export.png")));
 
     Action print = SymphonieActionFactory.getPrintAction(new ImageIcon(
@@ -94,23 +100,35 @@ public class Symphonie {
     Action exit = SymphonieActionFactory.getExitAction(new ImageIcon(
         Symphonie.class.getResource("icons/exit.png")));
 
-    /* Items********************************************************* */
-    file.add(builder.buildMenuItem(proxy, SymphonieConstants.PROXY_MENU_ITEM,
-        SymphonieComponentBuilder.JMenuItemType.NORMAL_ITEM));
+    /*
+     * Items Menu "File"
+     * *********************************************************
+     */
+
     file.add(builder.buildMenuItem(a_import,
         SymphonieConstants.IMPORT_MENU_ITEM,
         SymphonieComponentBuilder.JMenuItemType.NORMAL_ITEM));
     file.add(builder.buildMenuItem(export, SymphonieConstants.EXPORT_MENU_ITEM,
         SymphonieComponentBuilder.JMenuItemType.NORMAL_ITEM));
+
+    file.add(new JSeparator());
+
     file.add(builder.buildMenuItem(print, SymphonieConstants.PRINT_MENU_ITEM,
         SymphonieComponentBuilder.JMenuItemType.NORMAL_ITEM));
+
     file.add(new JSeparator());
+
     file.add(builder.buildMenuItem(exit, SymphonieConstants.EXIT_MENU_ITEM,
         SymphonieComponentBuilder.JMenuItemType.NORMAL_ITEM));
 
     return file;
   }
 
+  /**
+   * Build "Language" JMenu included in the "Window" JMenu
+   * 
+   * @return JMenu
+   */
   private static JMenu getLangMenu() {
     JMenu lang = builder.buildMenu(SymphonieConstants.LANGUAGE_MENU_ITEM);
 
@@ -121,12 +139,14 @@ public class Symphonie {
         builder);
 
     // Items
-    JCheckBoxMenuItem engBox = (JCheckBoxMenuItem) builder.buildMenuItem(
-        inEnglish, SymphonieConstants.ENGLISH_MENU_ITEM,
-        SymphonieComponentBuilder.JMenuItemType.CHECK_BOX_ITEM);
-    engBox.setSelected(true);
+  
     JCheckBoxMenuItem frBox = (JCheckBoxMenuItem) builder.buildMenuItem(
         inFrench, SymphonieConstants.FRENCH_MENU_ITEM,
+        SymphonieComponentBuilder.JMenuItemType.CHECK_BOX_ITEM);
+    frBox.setSelected(true);
+    
+    JCheckBoxMenuItem engBox = (JCheckBoxMenuItem) builder.buildMenuItem(
+        inEnglish, SymphonieConstants.ENGLISH_MENU_ITEM,
         SymphonieComponentBuilder.JMenuItemType.CHECK_BOX_ITEM);
 
     ButtonGroup g = new ButtonGroup();
@@ -136,9 +156,16 @@ public class Symphonie {
     lang.add(engBox);
     lang.add(frBox);
 
+    lang.setIcon(new ImageIcon(Symphonie.class.getResource("icons/lang.png")));
+    
     return lang;
   }
 
+  /**
+   * Build "Mode" JMenu included in the "Window" JMenu
+   * 
+   * @return JMenu
+   */
   private static JMenu getModeMenu() {
     JMenu mode = builder.buildMenu(SymphonieConstants.CHANGE_VIEW_MENU);
     // Actions
@@ -174,6 +201,11 @@ public class Symphonie {
     return mode;
   }
 
+  /**
+   * Build "Window" JMenu
+   * 
+   * @return JMenu
+   */
   private static JMenu getWindowMenu() {
     JMenu window = builder.buildMenu(SymphonieConstants.WINDOW_MENU);
 
@@ -185,13 +217,18 @@ public class Symphonie {
 
   }
 
+  /**
+   * Build "Format" JMenu
+   * 
+   * @return JMenu
+   */
   private static JMenu getFormatMenu() {
     JMenu format = builder.buildMenu(SymphonieConstants.FORMAT_MENU);
 
     /* Actions ******************************************************* */
-    Action formula = SymphonieActionFactory.getFormulaAction(new ImageIcon());
+    Action formula = SymphonieActionFactory.getFormulaAction(new ImageIcon(Symphonie.class.getResource("icons/formula.png")), frame, builder);
     Action f_cell = SymphonieActionFactory
-        .getFormulaCellAction(new ImageIcon());
+        .getFormulaCellAction(new ImageIcon(), frame, builder);
 
     /* Items********************************************************* */
     format.add(builder.buildMenuItem(formula,
@@ -203,11 +240,16 @@ public class Symphonie {
     return format;
   }
 
+  /**
+   * Build "Insert" JMenu
+   * 
+   * @return JMenu
+   */
   private static JMenu getInsertMenu() {
     JMenu insert = builder.buildMenu(SymphonieConstants.INSERT_MENU);
     /* Actions ******************************************************* */
-    Action column = SymphonieActionFactory.getColumnAction(new ImageIcon());
-    Action line = SymphonieActionFactory.getLineAction(new ImageIcon());
+    Action column = SymphonieActionFactory.getColumnAction(new ImageIcon(Symphonie.class.getResource("icons/insert_column.png")));
+    Action line = SymphonieActionFactory.getLineAction(new ImageIcon(Symphonie.class.getResource("icons/insert_line.png")));
 
     /* Items********************************************************* */
     insert.add(builder.buildMenuItem(column,
@@ -219,11 +261,16 @@ public class Symphonie {
     return insert;
   }
 
+  /**
+   * Build "Admin" JMenu
+   * 
+   * @return JMenu
+   */
   private static JMenu getAdminMenu() {
     JMenu admin = builder.buildMenu(SymphonieConstants.ADMIN_MENU);
     /* Actions ******************************************************* */
     Action connect = SymphonieActionFactory.getConnectAction(new ImageIcon(
-        Symphonie.class.getResource("icons/admin.png")));
+        Symphonie.class.getResource("icons/admin.png")),builder);
     Action db = SymphonieActionFactory.getDBAction(new ImageIcon(
         Symphonie.class.getResource("icons/db.png")));
     Action pwd = SymphonieActionFactory.getPwdAction(new ImageIcon(
@@ -240,10 +287,15 @@ public class Symphonie {
     return admin;
   }
 
+  /**
+   * Build the toolbar
+   * 
+   * @return JToolBar
+   */
   private static JToolBar getToolbar() {
     JToolBar toolbar = new JToolBar();
     toolbar.add(SymphonieActionFactory.getConnectAction(new ImageIcon(
-        Symphonie.class.getResource("icons/connect.png"))));
+        Symphonie.class.getResource("icons/connect.png")),builder));
     toolbar.add(SymphonieActionFactory.getDBAction(new ImageIcon(
         Symphonie.class.getResource("icons/db.png"))));
 
@@ -256,13 +308,11 @@ public class Symphonie {
       final SymphonieComponentBuilder builder) {
     JPanel panel = new JPanel(new BorderLayout());
     panel.add(getToolbar(), BorderLayout.NORTH);
-    
+
     DataManager dataManager = new SQLDataManager();
     StudentModel model = new StudentModel(dataManager);
 
     Student student = new Student(1, "Fabien", "Vallee");
-
-    
 
     model.setStudent(student);
 
