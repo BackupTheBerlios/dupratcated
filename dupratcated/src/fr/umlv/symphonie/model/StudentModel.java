@@ -146,7 +146,7 @@ public class StudentModel extends AbstractTableModel implements
             blankRow(row + 3, 0);
 
             matrix[row][columnCount - 1] = builder.getValue(AVERAGE);
-            matrix[row + 1][columnCount - 1] = "";
+            matrix[row + 1][columnCount - 1] = null;
             matrix[row + 2][columnCount - 1] = StudentAverage
                 .getAverage(collection);
 
