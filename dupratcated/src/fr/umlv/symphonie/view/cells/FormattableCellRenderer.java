@@ -6,7 +6,6 @@
 package fr.umlv.symphonie.view.cells;
 
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableModel;
 
 /**
  * Interface defines a cell renderer that allows conditional formatting of
@@ -34,11 +33,4 @@ public interface FormattableCellRenderer extends TableCellRenderer {
    * @return The format that was associated to the object
    */
   public CellFormat removeFormatedObject(Object o);
-
-  /**
-   * Returns the model associated to this <code>FormattableCellRenderer</code>
-   * 
-   * @return a <code>TableModel</code>
-   */
-  public TableModel getModel();
 }
