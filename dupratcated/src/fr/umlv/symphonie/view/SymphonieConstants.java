@@ -61,4 +61,6 @@ public class SymphonieConstants {
   public static final String ADDMARKDIALOG_TITLE = "addmarkdialog.title";
   public static final String ADDMARKDIALOG_DESC = "addmarkdialog.desc";
   public static final String ADDMARKDIALOG_COEFF = "addmarkdialog_coeff";
+  
+  public static final String TEACHERVIEWPOPUP_TITLE = "teacherviewpopup.title";
 }
