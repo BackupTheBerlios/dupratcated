@@ -18,26 +18,53 @@ import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
 import fr.umlv.symphonie.util.ComponentBuilder;
+import fr.umlv.symphonie.util.ExceptionDisplayDialog;
 
 
 /**
+ * Model for teacher's view. Displays all courses available.
  * @author susmab
  *
  */
 public class CourseTreeModel extends DefaultTreeModel {
 
   
-  private final List<TreeModelListener> listenerList = new ArrayList<TreeModelListener>();
-  
+  /**
+   * The root of the tree
+   */
   protected final String root = "Matieres";
+  
+  /**
+   * The DataManager which handles database.
+   */
   protected final DataManager manager;
+  
+  /**
+   * The ComponentBuilder, used to internationalize the current model.
+   */
   protected final ComponentBuilder builder;
+  
+  /**
+   * The list of all courses.
+   */
   protected List<Course> courseList = null;
   
-//  private static CourseTreeModel instance = null;
+  /**
+   * A pool of one thread. Used to launch threads whic interact with the database. 
+   */
   protected final ExecutorService es = Executors.newSingleThreadExecutor();
+  
+  /**
+   * An object used to be locked by each thread launched,
+   * in order not to generate errors while interacting with the database.
+   */
   protected final Object lock = new Object();
   
+  /**
+   * Cosntructs an empty <code>CourseTreeModel</code>.
+   * @param manager The <code>DataManager</code> which will be used to interact with database.
+   * @param builder The <code>ComponentBuilder</code> which will provide internationalization.
+   */
   public CourseTreeModel(DataManager manager, ComponentBuilder builder) {
     super(null);
     this.manager = manager;
@@ -46,21 +73,9 @@ public class CourseTreeModel extends DefaultTreeModel {
     update();
   }
 
-//  public static CourseTreeModel getInstance(DataManager manager){
-//    if (instance == null)
-//      instance = new CourseTreeModel(manager);
-//    
-//    else instance.setManager(manager);
-//    
-//    return instance;
-//  }
-  
-  
-  
-//  private void setManager(DataManager manager) {
-//    this.manager = manager;    
-//  }
-
+  /**
+   * Updates the data in the model.
+   */
   public void update(){
     
     es.execute(new Runnable() {
@@ -71,8 +86,8 @@ public class CourseTreeModel extends DefaultTreeModel {
             try {
               courseList = manager.getCoursesList();
             } catch (DataManagerException e) {
-              System.out
-                  .println("error getting courses list from database. Try updating the list.");
+              ExceptionDisplayDialog.postException(e);
+              return;
             }
           }
 
@@ -80,7 +95,8 @@ public class CourseTreeModel extends DefaultTreeModel {
             try {
               manager.getCoursesList();
             } catch (DataManagerException e) {
-              System.out.println("error getting courses list from database. Try updating the list.");
+              ExceptionDisplayDialog.postException(e);
+              return;
             }
           }
           
@@ -104,12 +120,12 @@ public class CourseTreeModel extends DefaultTreeModel {
                 CourseTreeModel.this.fireTreeStructureChanged(source, path, childIndices, children);
               }
             });
-          } catch (InterruptedException e1) {
-            System.out.println("exception interrupted");
-            e1.printStackTrace();
-          } catch (InvocationTargetException e1) {
-            System.out.println("exception invocation");
-            e1.printStackTrace();
+          } catch (InterruptedException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
+          } catch (InvocationTargetException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
         }
       }
@@ -117,14 +133,16 @@ public class CourseTreeModel extends DefaultTreeModel {
   }
   
   
-  /* (non-Javadoc)
+  /**
+   * Used to get the root of the model.
    * @see javax.swing.tree.TreeModel#getRoot()
    */
   public Object getRoot() {
     return root;
   }
 
-  /* (non-Javadoc)
+  /**
+   * Used to get a certain child of a given node.
    * @see javax.swing.tree.TreeModel#getChild(java.lang.Object, int)
    */
   public Object getChild(Object parent, int index) {
@@ -135,7 +153,9 @@ public class CourseTreeModel extends DefaultTreeModel {
     return courseList.get(index);
   }
 
-  /* (non-Javadoc)
+  /**
+   * Returns the number of children a node has.
+   * In this model, only the root has children.
    * @see javax.swing.tree.TreeModel#getChildCount(java.lang.Object)
    */
   public int getChildCount(Object parent) {
@@ -146,7 +166,9 @@ public class CourseTreeModel extends DefaultTreeModel {
     return courseList.size();
   }
 
-  /* (non-Javadoc)
+  /**
+   * Tells if a node is a leaf or not.
+   * In this model, all nodes except root are leaves.
    * @see javax.swing.tree.TreeModel#isLeaf(java.lang.Object)
    */
   public boolean isLeaf(Object node) {
@@ -156,13 +178,9 @@ public class CourseTreeModel extends DefaultTreeModel {
     return true;
   }
 
-//  /* (non-Javadoc)
-//   * @see javax.swing.tree.TreeModel#valueForPathChanged(javax.swing.tree.TreePath, java.lang.Object)
-//   */
-//  public void valueForPathChanged(TreePath path, Object newValue) {
-//  }
 
-  /* (non-Javadoc)
+  /**
+   * Gets the index of a given node and his child.
    * @see javax.swing.tree.TreeModel#getIndexOfChild(java.lang.Object, java.lang.Object)
    */
   public int getIndexOfChild(Object parent, Object child) {
@@ -174,6 +192,11 @@ public class CourseTreeModel extends DefaultTreeModel {
   }
 
   
+  /**
+   * Removes a given course from the database and the model.
+   * Re-sorts the tree then. 
+   * @param c the <code>Course</code> to remove.
+   */
   public void removeCourse(final Course c){
     es.execute(new Runnable(){
       public void run(){
@@ -184,7 +207,8 @@ public class CourseTreeModel extends DefaultTreeModel {
           try{
             manager.removeCourse(c);
           }catch(DataManagerException e){
-            System.out.println(e.getMessage());
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
           
           try {
@@ -201,12 +225,13 @@ public class CourseTreeModel extends DefaultTreeModel {
                 CourseTreeModel.this.fireTreeNodesRemoved(source, path, childIndices, children);
               }
             });
-          } catch (InterruptedException e1) {
-            System.out.println("exception interrupted");
-            e1.printStackTrace();
-          } catch (InvocationTargetException e1) {
-            System.out.println("exception invocation");
-            e1.printStackTrace();
+          } catch (InterruptedException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
+
+          } catch (InvocationTargetException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
         }
       }
@@ -214,6 +239,11 @@ public class CourseTreeModel extends DefaultTreeModel {
   }
 
   
+  /**
+   * Adds a course into the database and in the model.
+   * @param desc The title of the new course.
+   * @param coeff The coeff of the new course.
+   */
   public void addCourse(final String desc, final float coeff){
     es.execute(new Runnable(){
       public void run(){
@@ -224,7 +254,8 @@ public class CourseTreeModel extends DefaultTreeModel {
           try{
             c = manager.addCourse(desc, coeff);
           }catch(DataManagerException e){
-            System.out.println(e.getMessage());
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
           
           final Course course = c;
@@ -244,30 +275,17 @@ public class CourseTreeModel extends DefaultTreeModel {
                 CourseTreeModel.this.fireTreeNodesInserted(source, path, childIndices, children);
               }
             });
-          } catch (InterruptedException e1) {
-            System.out.println("exception interrupted");
-            e1.printStackTrace();
-          } catch (InvocationTargetException e1) {
-            System.out.println("exception invocation");
-            e1.printStackTrace();
+          } catch (InterruptedException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
+          } catch (InvocationTargetException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
         }
       }
     });
   }
-//  /* (non-Javadoc)
-//   * @see javax.swing.tree.TreeModel#addTreeModelListener(javax.swing.event.TreeModelListener)
-//   */
-//  public void addTreeModelListener(TreeModelListener l) {
-//    listenerList.add(l);
-//  }
-
-//  /* (non-Javadoc)
-//   * @see javax.swing.tree.TreeModel#removeTreeModelListener(javax.swing.event.TreeModelListener)
-//   */
-//  public void removeTreeModelListener(TreeModelListener l) {
-//    listenerList.remove(l);
-//  }
 
 //  /**
 //   * @param args

@@ -6,67 +6,75 @@ package fr.umlv.symphonie.model;
 
 import java.awt.EventQueue;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.swing.event.TreeModelListener;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreePath;
 
-import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.util.ComponentBuilder;
+import fr.umlv.symphonie.util.ExceptionDisplayDialog;
 
 
 /**
+ * Model for student's view. Displays all students.
  * @author susmab
  *
  */
 public class StudentTreeModel extends DefaultTreeModel {
 
   
-  /*private final List<TreeModelListener> listenerList = new ArrayList<TreeModelListener>();*/
-  
+  /**
+   * The root node of the model.
+   */
   private final String root = "Etudiants"; // a changer pour l'internationalisation ?
+  
+  /**
+   * The DataManager which handles database.
+   */
   protected final DataManager manager;
+  
+  /**
+   * The ComponentBuilder, used to internationalize the current model.
+   */
   protected final ComponentBuilder builder;
+  
+  /**
+   * The list of all students.
+   */
   protected List<Student> studentList = null;
   
+  /**
+   * A pool of one thread. Used to launch threads which interact with the database.
+   */
   protected final ExecutorService es = Executors.newSingleThreadExecutor();
   
+  /**
+   * An object used to be locked by each thread launched,
+   * in order not to generate errors while interacting with the database.
+   */
   protected final Object lock = new Object();
   
-//  private static StudentTreeModel instance = null;
   
+  /**
+   * Constructs an empty <code>StudentTreeModel</code>.
+   * @param manager The <code>DataManager</code> which will be used to interact with database.
+   * @param builder The <code>ComponentBuilder</code> which will provide internationalization.
+   */
   public StudentTreeModel(DataManager manager, ComponentBuilder builder){
     super(null);
     this.manager = manager;
 	this.builder = builder;
     update();
   }
-  
-  
-//  public static StudentTreeModel getInstance(DataManager manager){
-//    if (instance == null)
-//      instance = new StudentTreeModel(manager);
-//    
-//    else instance.setManager(manager);
-//    
-//    return instance;
-//  }
-  
-  
-  
-//  private void setManager(DataManager manager) {
-//    this.manager = manager;
-//  }
 
 
+  /**
+   * Updates the data of the model.
+   */
   public void update() {
     
     es.execute(new Runnable(){
@@ -77,7 +85,8 @@ public class StudentTreeModel extends DefaultTreeModel {
             try {
               studentList = manager.getStudentList();
             } catch (DataManagerException e) {
-              System.out.println("error getting students list from database. Try updating the list.");
+              ExceptionDisplayDialog.postException(e);
+              return;
             }
           }
           
@@ -85,7 +94,8 @@ public class StudentTreeModel extends DefaultTreeModel {
             try {
               manager.getStudentList();
             } catch (DataManagerException e) {
-              System.out.println("error getting students list from database. Try updating the list.");
+              ExceptionDisplayDialog.postException(e);
+              return;
             }
           }
           
@@ -108,28 +118,29 @@ public class StudentTreeModel extends DefaultTreeModel {
                 StudentTreeModel.this.fireTreeStructureChanged(source, path, childIndices, children);
               }
             });
-          } catch (InterruptedException e1) {
-            System.out.println("exception interrupted");
-            e1.printStackTrace();
-          } catch (InvocationTargetException e1) {
-            System.out.println("exception invocation");
-            e1.printStackTrace();
+          } catch (InterruptedException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
+          } catch (InvocationTargetException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
         }
       }
     });
-
   }
 
 
-  /* (non-Javadoc)
+  /**
+   * Gets the root of the model.
    * @see javax.swing.tree.TreeModel#getRoot()
    */
   public Object getRoot() {
     return root;
   }
 
-  /* (non-Javadoc)
+  /**
+   * Used to get a certain child of a given node.
    * @see javax.swing.tree.TreeModel#getChild(java.lang.Object, int)
    */
   public Object getChild(Object parent, int index) {
@@ -140,7 +151,9 @@ public class StudentTreeModel extends DefaultTreeModel {
     return studentList.get(index);
   }
 
-  /* (non-Javadoc)
+  /**
+   * Returns the number of children a node has.
+   * In this model, only the root has children.
    * @see javax.swing.tree.TreeModel#getChildCount(java.lang.Object)
    */
   public int getChildCount(Object parent) {
@@ -151,7 +164,9 @@ public class StudentTreeModel extends DefaultTreeModel {
     return studentList.size();
   }
 
-  /* (non-Javadoc)
+  /**
+   * Tells if a node is a leaf or not.
+   * In this model, all nodes except root are leaves.
    * @see javax.swing.tree.TreeModel#isLeaf(java.lang.Object)
    */
   public boolean isLeaf(Object node) {
@@ -160,15 +175,8 @@ public class StudentTreeModel extends DefaultTreeModel {
     return true;
   }
 
-  /* (non-Javadoc)
-   * @see javax.swing.tree.TreeModel#valueForPathChanged(javax.swing.tree.TreePath, java.lang.Object)
-   */
-  /*public void valueForPathChanged(TreePath path, Object newValue) {
-    // TODO Auto-generated method stub
-
-  }*/
-
-  /* (non-Javadoc)
+  /**
+   * Gets the index of a given node and his child.
    * @see javax.swing.tree.TreeModel#getIndexOfChild(java.lang.Object, java.lang.Object)
    */
   public int getIndexOfChild(Object parent, Object child) {
@@ -179,20 +187,12 @@ public class StudentTreeModel extends DefaultTreeModel {
     return studentList.indexOf(child);
   }
 
-  /* (non-Javadoc)
-   * @see javax.swing.tree.TreeModel#addTreeModelListener(javax.swing.event.TreeModelListener)
-   */
-  /*public void addTreeModelListener(TreeModelListener l) {
-    listenerList.add(l);
-  }*/
 
-  /* (non-Javadoc)
-   * @see javax.swing.tree.TreeModel#removeTreeModelListener(javax.swing.event.TreeModelListener)
+  /**
+   * Adds a new student in the database and in the model.
+   * @param name The name of the new student.
+   * @param lastName The lastname of the new student.
    */
-  /*public void removeTreeModelListener(TreeModelListener l) {
-    listenerList.remove(l);
-  }*/
-
   public void addStudent(final String name, final String lastName){
     es.execute(new Runnable(){
       public void run(){
@@ -203,7 +203,8 @@ public class StudentTreeModel extends DefaultTreeModel {
           try{
             s = manager.addStudent(name, lastName);
           }catch(DataManagerException e){
-            System.out.println(e.getMessage());
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
           
           final Student student = s;
@@ -223,18 +224,22 @@ public class StudentTreeModel extends DefaultTreeModel {
                 StudentTreeModel.this.fireTreeNodesInserted(source, path, childIndices, children);
               }
             });
-          } catch (InterruptedException e1) {
-            System.out.println("exception interrupted");
-            e1.printStackTrace();
-          } catch (InvocationTargetException e1) {
-            System.out.println("exception invocation");
-            e1.printStackTrace();
+          } catch (InterruptedException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
+          } catch (InvocationTargetException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
         }
       }
     });
   }
   
+  /**
+   * Removes a given student from database and model.
+   * @param s The student to remove.
+   */
   public void removeStudent(final Student s){
     es.execute(new Runnable(){
       public void run(){
