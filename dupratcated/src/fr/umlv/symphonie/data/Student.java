@@ -42,7 +42,13 @@ public class Student {
     this.comment = comment;
   }
   
+  public void setName(String name) {
+    this.name = name;
+  }
   
+  public void setLastName(String lastName) {
+    this.lastName = lastName;
+  }
 
   public boolean equals(Object obj) {
     if (!(obj instanceof Student))
