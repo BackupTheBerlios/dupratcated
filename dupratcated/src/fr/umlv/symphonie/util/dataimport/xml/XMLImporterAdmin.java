@@ -60,6 +60,7 @@ public class XMLImporterAdmin extends XMLImporter {
 	 */
 	public void importJuryView(String documentName)
 			throws DataImporterException {
+		this.documentName = documentName;
 		Document d = newDocument();
 		Element root = d.getDocumentElement();
 
