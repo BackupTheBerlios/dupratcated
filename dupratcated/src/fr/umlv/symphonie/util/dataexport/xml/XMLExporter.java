@@ -341,7 +341,7 @@ public class XMLExporter implements DataExporter {
 		Map<Integer, StudentMark> map;
 		Node studentNode;
 		final int idLastStudent;
-    int i = 0;
+        int i = 1;
 
 		try {
 			pair = dm.getAllMarksByCourse(c);
@@ -382,7 +382,7 @@ public class XMLExporter implements DataExporter {
 
 				addMarkNode(studentNode, sm);
 			}
-      i++;
+            i++;
 		}
 
 		if (list != null) {
@@ -408,7 +408,7 @@ public class XMLExporter implements DataExporter {
 		ArrayList<Formula> list = null;
 		Map<Integer, StudentMark> map2;
 		Node studentNode;
-		int i = 0;
+		int i = 1;
 
 		try {
 			pair = dm.getAllStudentsMarks();
@@ -441,11 +441,11 @@ public class XMLExporter implements DataExporter {
 				 * before the student node since it has to be at the begin of
 				 * the xml
 				 */
-				if (i == 0) {
+				if (i == 1) {
 					addCourseNode(root, studentNode, c);
 				}
 			}
-      i++;
+			i++;
 		}
 
 		if (list != null) {
