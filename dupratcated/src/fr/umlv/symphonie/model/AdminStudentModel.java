@@ -7,8 +7,6 @@ package fr.umlv.symphonie.model;
 import java.awt.EventQueue;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManager;
