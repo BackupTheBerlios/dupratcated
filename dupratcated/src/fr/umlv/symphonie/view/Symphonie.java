@@ -446,7 +446,8 @@ public class Symphonie {
     table.addMouseListener(new MouseAdapter() {
 
       public void mousePressed(MouseEvent e) {
-        if (SwingUtilities.isLeftMouseButton(e) || SwingUtilities.isRightMouseButton(e)) {
+        if (SwingUtilities.isLeftMouseButton(e)
+            || SwingUtilities.isRightMouseButton(e)) {
           int row = table.rowAtPoint(e.getPoint());
           if ((row % 4) == 2) {
             int col = table.columnAtPoint(e.getPoint());
@@ -736,10 +737,10 @@ public class Symphonie {
     final JTree tree = new JTree(courseTreeModel);
     tree.setCellRenderer(new DefaultTreeCellRenderer() {
 
-      private final Icon leafIcon = new ImageIcon(StudentTreeModel.class
-          .getResource("../view/icons/course.png"));
-      private final Icon rootIcon = new ImageIcon(StudentTreeModel.class
-          .getResource("../view/icons/courses.png"));
+      private final Icon leafIcon = new ImageIcon(Symphonie.class
+          .getResource("icons/course.png"));
+      private final Icon rootIcon = new ImageIcon(Symphonie.class
+          .getResource("icons/courses.png"));
 
       public Component getTreeCellRendererComponent(JTree tree, Object value,
           boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
@@ -768,8 +769,9 @@ public class Symphonie {
         .buildPopupMenu(SymphonieConstants.TEACHERVIEWPOPUP_TITLE);
 
     final AbstractButton addCourse = builder.buildButton(actionFactory
-        .getAddCourseAction(EMPTY_ICON), SymphonieConstants.ADDCOURSE,
-        ComponentBuilder.ButtonType.MENU_ITEM);
+        .getAddCourseAction(new ImageIcon(Symphonie.class
+            .getResource("icons/add_course.png"))),
+        SymphonieConstants.ADDCOURSE, ComponentBuilder.ButtonType.MENU_ITEM);
     treePop.add(addCourse);
     addCourse.setEnabled(false);
 
@@ -778,7 +780,8 @@ public class Symphonie {
         ComponentBuilder.ButtonType.MENU_ITEM));
     treePop.add(new JSeparator());
     final AbstractButton removeCourse = builder.buildButton(actionFactory
-        .getRemoveCourseAction(EMPTY_ICON, tree),
+        .getRemoveCourseAction(new ImageIcon(Symphonie.class
+            .getResource("icons/delete_course.png")), tree),
         SymphonieConstants.REMOVECOURSE, ComponentBuilder.ButtonType.MENU_ITEM);
     treePop.add(removeCourse);
 
@@ -1156,7 +1159,7 @@ public class Symphonie {
 
     // Action factory
     actionFactory = new SymphonieActionFactory(this, builder);
-    formatCell = actionFactory.getFormulaCellAction(EMPTY_ICON);
+    formatCell = actionFactory.getFormatCellAction(EMPTY_ICON);
     addColumn = actionFactory.getAddMarkAction(new ImageIcon(Symphonie.class
         .getResource("icons/insert_column.png")));
     addColumn.setEnabled(false);

@@ -184,7 +184,7 @@ public class SymphonieActionFactory {
    *          the action SMALL_ICON
    * @return an AbstractAction
    */
-  public AbstractAction getFormulaCellAction(Icon icon) {
+  public AbstractAction getFormatCellAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
       private final CellDialog cd = new CellDialog(symphonie, builder);
@@ -209,6 +209,42 @@ public class SymphonieActionFactory {
 
         ((ObjectFormattingSupport) atm).getFormattableCellRenderer()
             .addFormatedObject(symphonie.selectedCell.getFirst(), cf);
+        Point p = symphonie.selectedCell.getSecond();
+        atm.fireTableCellUpdated(p.x, p.y);
+      }
+    };
+    a.putValue(Action.SMALL_ICON, icon);
+    return a;
+  }
+
+  /**
+   * Creates an action that deletes format from the current selected cell
+   * 
+   * @param icon
+   *          the action SMALL_ICON
+   * @return an AbstractAction
+   */
+  public AbstractAction getDeleteCellFormatAction(Icon icon) {
+    AbstractAction a = new AbstractAction() {
+
+      public void actionPerformed(ActionEvent event) {
+        AbstractTableModel atm = null;
+        switch (symphonie.getCurrentView().ordinal()) {
+          case 0:
+            atm = symphonie.getCurrentStudentModel();
+            break;
+          case 1:
+            atm = symphonie.getCurrentTeacherModel();
+            break;
+          case 2:
+            atm = symphonie.getCurrentJuryModel();
+            break;
+          case 3:
+            throw new IllegalStateException("Illegal view number");
+        }
+
+        ((ObjectFormattingSupport) atm).getFormattableCellRenderer()
+            .removeFormatedObject(symphonie.selectedCell.getFirst());
         Point p = symphonie.selectedCell.getSecond();
         atm.fireTableCellUpdated(p.x, p.y);
       }
