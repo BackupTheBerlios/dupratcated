@@ -356,11 +356,6 @@ public class SQLDataManager implements DataManager {
 
         tmpMap.put(s.getId(), s);
 
-        // if (studentMap.containsKey(s.getId()))
-        // studentMap.get(s.getId()).update(s);
-        //
-        // else
-        // studentMap.put(s.getId(), s);
       }
     } catch (SQLException e) {
       throw new DataManagerException(
@@ -465,11 +460,6 @@ public class SQLDataManager implements DataManager {
 
         tmpMap.put(c.getId(), c);
 
-        // if (courseMap.containsKey(c.getId()))
-        // courseMap.get(c.getId()).update(c);
-        //
-        // else
-        // courseMap.put(c.getId(), c);
       }
     } catch (SQLException e) {
       throw new DataManagerException(
@@ -524,11 +514,6 @@ public class SQLDataManager implements DataManager {
             .getString(COLUMN_DESC_FROM_TABLE_TITLE), results
             .getFloat(COLUMN_COEFF_FROM_TABLE_TEST), courseMap.get(results
             .getInt(COLUMN_ID_COURSE_FROM_TABLE_TEST)));
-
-        // if (markMap.containsKey(m.getId()))
-        // markMap.get(m.getId()).update(m);
-        // else
-        // markMap.put(m.getId(), m);
 
         tmpMap.put(m.getId(), m);
       }
