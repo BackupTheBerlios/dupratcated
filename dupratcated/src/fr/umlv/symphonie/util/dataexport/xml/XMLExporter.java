@@ -173,9 +173,12 @@ public abstract class XMLExporter implements DataExporter {
 	 */
 	protected Document newDocument() {
 		try {
-			/** we create a new document object */
-			return DocumentBuilderFactory.newInstance().newDocumentBuilder()
-					.newDocument();
+		      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		     
+		      /** the parser produced by this code will validate documents as they are parsed */
+		      dbf.setValidating(true);
+		
+		     return dbf.newDocumentBuilder().newDocument();
 		} catch (ParserConfigurationException e) {
 			System.out
 					.println("Error during the creation of the document object : \n"
