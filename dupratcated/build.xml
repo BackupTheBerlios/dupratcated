@@ -110,7 +110,7 @@
         		<attribute name="Main-Class" value="${Main}" />
         	</manifest>
     	</jar>
-    	<chmod file="run.sh" perm="ugo+rx" />
+    	<chmod file="symphonie.sh" perm="ugo+rx" />
     </target>
 	
 	
