@@ -93,7 +93,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
   public static int createPrimaryKey(String table, String id) throws SQLException {
 
     CachedRowSet results = null;
-    String request = "SELECT MAX(`" + id + "`) + 1 FROM `" + table + "`;";
+    String request = "SELECT MAX(" + id + ") + 1 FROM " + table + ";";
 
     results = connectAndQuery(request);
 
@@ -144,7 +144,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
    */
   private void syncStudentData() throws DataManagerException{
     CachedRowSet results = null;
-    String request = "SELECT * FROM `" + TABLE_STUDENT + "`;";
+    String request = "SELECT * FROM " + TABLE_STUDENT + ";";
     Map<Integer, Student> tmpMap = new HashMap<Integer,Student>();
 
     try {
@@ -247,7 +247,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
   private void syncCourseData() throws DataManagerException {
     
     CachedRowSet results = null;
-    String request = "SELECT * FROM `" + TABLE_COURSE + "`;";
+    String request = "SELECT * FROM " + TABLE_COURSE + ";";
     Map<Integer, Course> tmpMap = new HashMap<Integer, Course>();
 
     try {
@@ -674,11 +674,11 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       throw new DataManagerException("error creating primary key for new student " + lastName + " " + name, e);
     }
 
-    String request = "INSERT INTO `" + TABLE_STUDENT + "` (`"
-        + COLUMN_ID_FROM_TABLE_STUDENT + "`, `"
-        + COLUMN_NAME_FROM_TABLE_STUDENT + "`, `"
-        + COLUMN_LAST_NAME_FROM_TABLE_STUDENT + "`, `"
-        + COLUMN_COMMENT_FROM_TABLE_STUDENT + "`) VALUES (" + key + ", '"
+    String request = "INSERT INTO " + TABLE_STUDENT + " ("
+        + COLUMN_ID_FROM_TABLE_STUDENT + ", "
+        + COLUMN_NAME_FROM_TABLE_STUDENT + ", "
+        + COLUMN_LAST_NAME_FROM_TABLE_STUDENT + ", "
+        + COLUMN_COMMENT_FROM_TABLE_STUDENT + ") VALUES (" + key + ", '"
         + name + "', '" + lastName + "', NULL);";
 
     // on l'insere dans la base
@@ -748,11 +748,11 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
   public void addStudents(List<Pair<String, String>> namesList) throws DataManagerException {
     
-    String request = "INSERT INTO `" + TABLE_STUDENT + "` (`"
-        + COLUMN_ID_FROM_TABLE_STUDENT + "`, `"
-        + COLUMN_NAME_FROM_TABLE_STUDENT + "`, `"
-        + COLUMN_LAST_NAME_FROM_TABLE_STUDENT + "`, `"
-        + COLUMN_COMMENT_FROM_TABLE_STUDENT + "`) VALUES (?, ?, ?, NULL);";
+    String request = "INSERT INTO " + TABLE_STUDENT + " ("
+        + COLUMN_ID_FROM_TABLE_STUDENT + ", "
+        + COLUMN_NAME_FROM_TABLE_STUDENT + ", "
+        + COLUMN_LAST_NAME_FROM_TABLE_STUDENT + ", "
+        + COLUMN_COMMENT_FROM_TABLE_STUDENT + ") VALUES (?, ?, ?, NULL);";
     
     PreparedStatement preparedStatement = null;
     int key = 0;
@@ -860,8 +860,8 @@ public class SQLDataManager extends SQLDataManagerConstants implements
      */
     
     // effacement de la base de donnees
-    String request = "DELETE FROM `" + TABLE_STUDENT + "` WHERE `"
-        + COLUMN_ID_FROM_TABLE_STUDENT + "`=" + s.getId() + ";";
+    String request = "DELETE FROM " + TABLE_STUDENT + " WHERE "
+        + COLUMN_ID_FROM_TABLE_STUDENT + "=" + s.getId() + ";";
 
     try {
       connectAndUpdate(request);
@@ -942,9 +942,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       throw new DataManagerException("error creating primary key for course " + title, e);
     }
 
-    String request = "INSERT INTO `" + TABLE_COURSE + "` (`"
-        + COLUMN_ID_FROM_TABLE_COURSE + "`, `" + COLUMN_TITLE_FROM_TABLE_COURSE
-        + "`, `" + COLUMN_COEFF_FROM_TABLE_COURSE + "`) VALUES (" + key + ", '"
+    String request = "INSERT INTO " + TABLE_COURSE + " ("
+        + COLUMN_ID_FROM_TABLE_COURSE + ", " + COLUMN_TITLE_FROM_TABLE_COURSE
+        + ", " + COLUMN_COEFF_FROM_TABLE_COURSE + ") VALUES (" + key + ", '"
         + title + "', '" + coeff + "');";
 
     // on l'insere dans la table
@@ -977,9 +977,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     PreparedStatement preparedStatement = null;
     int key = 0;
     
-    String request = "INSERT INTO `" + TABLE_COURSE + "` (`"
-        + COLUMN_ID_FROM_TABLE_COURSE + "`, `" + COLUMN_TITLE_FROM_TABLE_COURSE
-        + "`, `" + COLUMN_COEFF_FROM_TABLE_COURSE + "`) VALUES (?, ?, ?);";
+    String request = "INSERT INTO " + TABLE_COURSE + " ("
+        + COLUMN_ID_FROM_TABLE_COURSE + ", " + COLUMN_TITLE_FROM_TABLE_COURSE
+        + ", " + COLUMN_COEFF_FROM_TABLE_COURSE + ") VALUES (?, ?, ?);";
     
     /*Map<Integer, Course> courseMap = getCourses();*/
     
@@ -1036,8 +1036,8 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     courseList.remove(c);
     
     // on l'efface de la base
-    String request = "DELETE FROM `" + TABLE_COURSE + "` WHERE `"
-        + COLUMN_ID_FROM_TABLE_COURSE + "`=" + c.getId() + ";";
+    String request = "DELETE FROM " + TABLE_COURSE + " WHERE "
+        + COLUMN_ID_FROM_TABLE_COURSE + "=" + c.getId() + ";";
 
     try {
       connectAndUpdate(request);
@@ -1063,9 +1063,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
           "error creating new primary key for title " + desc, e);
     }
 
-    String request = "INSERT INTO `" + TABLE_TITLE + "` (`"
-        + COLUMN_ID_FROM_TABLE_TITLE + "`, `" + COLUMN_DESC_FROM_TABLE_TITLE
-        + "`) VALUES (" + key + ", '" + desc + "');";
+    String request = "INSERT INTO " + TABLE_TITLE + " ("
+        + COLUMN_ID_FROM_TABLE_TITLE + ", " + COLUMN_DESC_FROM_TABLE_TITLE
+        + ") VALUES (" + key + ", '" + desc + "');";
 
     try {
       connectAndUpdate(request);

@@ -3,6 +3,7 @@ package fr.umlv.symphonie.data;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 
 
@@ -13,27 +14,31 @@ public class ConnectionManager {
     
     public static Connection createConnection() {
         
-      String url = "jdbc:mysql://localhost";
-    	String base = "dupratcated";
-    	String login = "susmab";
-    	String password = "";
-        
+      String url = "jdbc:postgresql://213.245.132.210";
+    	String base = "symphonie";
+    	String login = "symphonie";
+    	String password = "dupratcated";
+      
     	DriverLoader.loadDrivers();
-
+      
+      /*Properties props = new Properties();
+      props.setProperty("user", login);
+      props.setProperty("password", password);
+      props.setProperty("ssl", "true");*/
     	
     	if (connection == null) try {
-        connection = DriverManager.getConnection(url + "/" + base, login,password);
+        connection = DriverManager.getConnection(url + "/" + base, login, password);
+        System.out.println("on est connecte !");
       } catch (SQLException e) {
         base = "evazion";
         login = "root";
-        
-        try {
-          connection = DriverManager.getConnection(url + "/" + base, login,
-              password);
+        e.printStackTrace();
+        /*try {
+          connection = DriverManager.getConnection(url + "/" + base,props);
         } catch (SQLException e1) {
           System.out.println("error : createConnection()\n");
           e1.printStackTrace();
-        }
+        }*/
       }
     	
         return connection;
