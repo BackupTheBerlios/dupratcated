@@ -590,4 +590,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
   }
 
+  public void changeMarkCoeff(Mark mark, float newCoeff) throws SQLException {
+    // TODO Auto-generated method stub
+    
+  }
+
 }

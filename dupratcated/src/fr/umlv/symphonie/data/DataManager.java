@@ -46,6 +46,8 @@ public interface DataManager
   
   /* methodes d'edition */
   public void changeStudentMarkValue(StudentMark studentMark, float newValue) throws SQLException;
+  
+  public void changeMarkCoeff(Mark mark, float newCoeff) throws SQLException;
   public void changeMarkDescription(Mark mark, String newDescription) throws SQLException;
   
 }
