@@ -11,8 +11,8 @@ import java.util.HashMap;
 import fr.umlv.symphonie.util.wizard.event.WizardEvent;
 
 /**
- * Default implementation of a wizard model, it works as a queue of panels, first
- * in first shown.
+ * Default implementation of a wizard model, it works as a queue of panels,
+ * first in first shown.
  */
 public class DefaultWizardModel extends AbstractWizardModel {
 
@@ -25,11 +25,11 @@ public class DefaultWizardModel extends AbstractWizardModel {
    * Current panel
    */
   protected int currentPanel;
-  
+
   /**
    * Data for panels
    */
-  protected final HashMap<Object, Object> interPanelData = new HashMap<Object, Object>(); 
+  protected final HashMap<Object, Object> interPanelData = new HashMap<Object, Object>();
 
   /**
    * Creates a new WizardModel with the given panel as current panel
@@ -42,9 +42,9 @@ public class DefaultWizardModel extends AbstractWizardModel {
     firstPanel.setData(interPanelData);
     currentPanel = 0;
   }
-  
+
   /**
-   * Default constructor.<br>
+   * Default constructor. <br>
    * Can only be used by derived types.
    */
   protected DefaultWizardModel() {
@@ -59,6 +59,15 @@ public class DefaultWizardModel extends AbstractWizardModel {
    */
   public void addPanel(WizardPanel panel) {
     panels.add(panel);
+  }
+
+  /**
+   * Returns the data context for this model's panels
+   * 
+   * @return a <code>HashMap</code>
+   */
+  public HashMap<Object, Object> getInterPanelData() {
+    return interPanelData;
   }
 
   public WizardPanel getCurrentPanel() {
@@ -104,7 +113,7 @@ public class DefaultWizardModel extends AbstractWizardModel {
     getCurrentPanel().setData(interPanelData);
     fireCurrentPanelChanged(new WizardEvent(this, getCurrentPanel()));
   }
-  
+
   public String getCancelButtonText() {
     return DEFAULT_CANCEL_BUTTON_TEXT;
   }

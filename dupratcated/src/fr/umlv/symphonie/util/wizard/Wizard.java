@@ -162,6 +162,27 @@ public class Wizard {
   }
 
   /**
+   * Disables all dialog buttons
+   */
+  public void disableAllButtons() {
+    cancelAction.setEnabled(false);
+    finishAction.setEnabled(false);
+    nextAction.setEnabled(false);
+    previousAction.setEnabled(false);
+    helpAction.setEnabled(false);
+  }
+
+  /**
+   * Enables/disables the finish button
+   * 
+   * @param b
+   *          The enable value
+   */
+  public void setEnabledFinish(boolean b) {
+    finishAction.setEnabled(b);
+  }
+
+  /**
    * Initializes wizard dialog graphic components
    */
   private void initDialog() {
