@@ -125,3 +125,5 @@ teacher.header=Notas de los estudiantes en la materia
 jurychart.studentsaverages=Promedio interestudiantes
 jury.header=Promedios y comentarios
 cellformat.delete=Eliminar el formato
+tree.students=Estudiantes
+tree.courses=Materias

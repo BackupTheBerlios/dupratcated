@@ -124,3 +124,5 @@ teacher.header=Students' marks for course
 jurychart.studentsaverages=Students' averages
 jury.header=Students' averages and comments
 cellformat.delete=Remove cell format
+tree.students=Students
+tree.courses=Courses
