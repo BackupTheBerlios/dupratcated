@@ -32,6 +32,7 @@ import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.data.formula.Formula;
 import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
 import fr.umlv.symphonie.util.ComponentBuilder;
+import fr.umlv.symphonie.util.ExceptionDisplayDialog;
 import fr.umlv.symphonie.util.LookableCollection;
 import fr.umlv.symphonie.util.Pair;
 import fr.umlv.symphonie.util.StudentAverage;
@@ -44,40 +45,92 @@ import fr.umlv.symphonie.view.cells.ObjectFormattingSupport;
 import static fr.umlv.symphonie.view.SymphonieConstants.*;
 
 /**
+ * The model which represents jury's view
  * @author susmab
  * 
  */
+/**
+ * @author MARYSE
+ *
+ */
 public class JuryModel extends AbstractTableModel implements ObjectFormattingSupport, IDictionarySupport {
 
+  /**
+   * The DataManager which handles database
+   */
   protected final DataManager manager;
+  
+  /**
+   * The ComponentBuilder, used to internationalize the current model.
+   */
   protected final ComponentBuilder builder;
 
+  /**
+   * Number of rows currently in the model
+   */
   protected int rowCount = 0;
+  
+  /**
+   * Number of columns currently in the model
+   */
   protected int columnCount = 0;
+  
+  /**
+   * Used to check timestamps.
+   */
   protected int globalTimeStamp = -1; // le globalTimeStamp pourrait etre la
                                       // somme de
   // tous les timeStamp (a voir)
 
+  /**
+   * The list of columns in the model, except the first and the last ones.
+   * It can contain <code>Formulas</code>s and <code>Course</code>s
+   */
   protected final List<Object> columnList = new ArrayList<Object>();
+  
+  /**
+   * The list of <code>Student</code>. Used to represent lines of the model.
+   */
   protected final List<Student> studentList = new ArrayList<Student>();
+  
+  /**
+   * The map containing all students, and all marks of each student for each course.
+   */
   protected final Map<Student, Map<Course, Map<Integer, StudentMark>>> dataMap = new HashMap<Student, Map<Course, Map<Integer, StudentMark>>>();
 
+  /**
+   * A map containing all courses, keyed by their id.
+   */
   protected final Map<Integer, Course> courseMap = new HashMap<Integer, Course>();
 
   /**
-   * Pool de threads qui n'en contient qu'un seul et qui sert pour le
-   * rafraîchissement du canal courant.
+   * Pool of only one thread. Used to launch theads intercating with the database.
    */
   protected final ExecutorService es = Executors.newSingleThreadExecutor();
 
+  /**
+   * An object used to be locked by each thread launched,
+   * in order not to generate errors while interacting with the database.
+   */
   protected final Object lock = new Object();
 
 //  private static JuryModel instance = null;
 
+  /**
+   * Used in the <code>getValueAt</code> method, to check which row is being accessed.
+   */
   private int lastRow = -1;
   
+  /**
+   * A <code>CompletionDictionary</code> used in order to provide auto-completion with the model.
+   */
   protected CompletionDictionary dictionary = new CompletionDictionary();
   
+  /**
+   * Constructs an empty <code>JuryModel</code>.
+   * @param manager The <code>DataManager</code> which will be used to interact with database.
+   * @param builder The <code>ComponentBuilder</code> which will provide internationalization.
+   */
   public JuryModel(DataManager manager, ComponentBuilder builder) {
     this.manager = manager;
     this.builder = builder;
@@ -87,8 +140,8 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
     update();
   }
 
-/**
-   * 
+  /**
+   * Fill the <code>CompletionDictionary</code> with default key words.
    */
   private void fillDefaultDictionary() {
     dictionary.add("average");
@@ -96,29 +149,14 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
     dictionary.add("max");
   }
 
-//  protected void setManager(DataManager manager) {
-//    this.manager = manager;
-//  }
 
-//  public static JuryModel getInstance(DataManager manager) {
-//    if (instance == null)
-//      instance = new JuryModel(manager);
-//
-//    else
-//      instance.setManager(manager);
-//
-//    return instance;
-//  }
-
+  /**
+   * Updates the data in the model.
+   */
   public void update() {
 
     es.execute(new Runnable() {
 
-      /*
-       * (non-Javadoc)
-       * 
-       * @see java.lang.Runnable#run()
-       */
       public void run() {
 
         synchronized (lock) {
@@ -129,8 +167,8 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
           try {
             allData = manager.getAllStudentsMarks();
           } catch (DataManagerException e) {
-            System.out.println("Error getting data for Jury View");
-            e.printStackTrace();
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
 
           columnList.addAll(allData.getFirst().values());
@@ -142,14 +180,12 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
             dictionary.add(c.getTitle());
           
 
-          /*
-           * ici ajouter les formules de la vue jury
-           */
           List<Formula> formulaList;
 
           try {
             formulaList = manager.getJuryFormulas();
-          } catch (DataManagerException e2) {
+          } catch (DataManagerException e) {
+            ExceptionDisplayDialog.postException(e);
             formulaList = null;
           }
 
@@ -176,11 +212,6 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
           columnCount = columnList.size() + 4;
           rowCount = 3 + studentList.size();
 
-          /*
-           * System.out.println("lignes : " + JuryModel.this.rowCount);
-           * System.out.println("colonnes : " + JuryModel.this.columnCount);
-           */
-
           try {
             EventQueue.invokeAndWait(new Runnable() {
 
@@ -188,20 +219,22 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
                 JuryModel.this.fireTableStructureChanged();
               }
             });
-          } catch (InterruptedException e1) {
-            System.out.println("exception interrupted");
-            e1.printStackTrace();
-          } catch (InvocationTargetException e1) {
-            System.out.println("exception invocation");
-            e1.printStackTrace();
+          } catch (InterruptedException e) {
+              ExceptionDisplayDialog.postException(e);
+              return;
+          } catch (InvocationTargetException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
         }
-        /* System.out.println(("thread fini !")); */
       }
     });
 
   }
 
+  /* (non-Javadoc)
+   * @see fr.umlv.symphonie.util.completion.IDictionarySupport#getDictionary()
+   */
   public LookableCollection<String> getDictionary() {
     return dictionary;
   }
@@ -216,6 +249,9 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
     throw new UnsupportedOperationException("Cannot override dictionary");
   }
   
+  /**
+   * Clears the model.
+   */
   public void clear() {
     rowCount = 0;
     columnCount = 0;
@@ -231,40 +267,37 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
     fireTableStructureChanged();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
+  /**
+   * (Returns the number of rows currently in the model.
    * @see javax.swing.table.TableModel#getRowCount()
    */
   public int getRowCount() {
     return rowCount;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
+  /**
+   * Returns the number of columns currently int the model.
    * @see javax.swing.table.TableModel#getColumnCount()
    */
   public int getColumnCount() {
     return columnCount;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
+  /**
+   * Returns values contained in the model.
    * @see javax.swing.table.TableModel#getValueAt(int, int)
    */
   public Object getValueAt(int rowIndex, int columnIndex) {
 
     /*
-     * cas de la ligne separatrice
+     * case of the separate line
      */
     if (rowIndex == 2) return null;
 
     fillFormulaMap(rowIndex);
     
     /*
-     * cas de la colonne tout a gauche
+     * case of the first column
      */
     if (columnIndex == 0) {
       if (rowIndex == 0) return builder.getValue(COURSE);
@@ -273,7 +306,7 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
     }
 
     /*
-     * cas de la colonne tout a droite (commentaires)
+     * case of the last column (comments)
      */
     if (columnIndex == columnCount - 1) {
       if (rowIndex == 0) return builder.getValue(COMMENT);
@@ -283,7 +316,7 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
     }
 
     /*
-     * cas de l'avant derniere colonne (etudiants)
+     * case of the before-last column (students)
      */
     if (columnIndex == columnCount - 2) {
       if (rowIndex <= 1) return null;
@@ -292,7 +325,7 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
     }
 
     /*
-     * cas de la colonne des moyennes (avant avant derniere colonne)
+     * case of the averages column (before-before-last column)
      */
 
     if (columnIndex == columnCount - 3) {
@@ -304,10 +337,13 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
     }
 
     /*
-     * autres cas
+     * other cases
      */
     Object o = columnList.get(columnIndex - 1);
 
+    /*
+     * case of a formula
+     */
     if (o instanceof Formula) {
       Formula f = (Formula) o;
 
@@ -318,6 +354,10 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
       return f.getValue();
     }
 
+    /*
+     * case of a course
+     */
+    
     Course c = (Course) o;
 
     if (rowIndex == 0) return c;
@@ -327,37 +367,50 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
         .get(c).values());
   }
 
-  // private float getAverage(Collection<StudentMark> name) {
-  //    
-  // float result = 0;
-  //    
-  // for (StudentMark sm : name){
-  // result += sm.getValue() * sm.getCoeff();
-  // }
-  //    
-  // return result;
-  // }
 
+  /**
+   * Tells if a cell in the model is editable or not.
+   * In the jury model, all you can edit is the comments for each student.
+   * @see javax.swing.table.TableModel#isCellEditable(int, int)
+   */
   public boolean isCellEditable(int rowIndex, int columnIndex) {
     if (columnIndex == columnCount - 1 && rowIndex > 2) return true;
 
     return false;
   }
 
+  /**
+   * Sets a value at a given cell.
+   * @see javax.swing.table.TableModel#setValueAt(java.lang.Object, int, int)
+   */
   public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 
     if (columnIndex != columnCount - 1) return;
 
-    Student s = studentList.get(rowIndex - 3);
+    final Student s = studentList.get(rowIndex - 3);
+    final String comment = (String)aValue;
+    
+    es.execute(new Runnable(){
+        public void run() {
+          synchronized(lock){
+            try {
+              manager.changeStudentComment(s, comment);
+            } catch (DataManagerException e) {
+              ExceptionDisplayDialog.postException(e);
+              return;
+            }
+          }
+        }
+    });
+    
 
-    try {
-      manager.changeStudentComment(s, (String) aValue);
-    } catch (DataManagerException e) {
-      e.getMessage();
-      e.printStackTrace();
-    }
   }
 
+  /**
+   * Removes a given column from the database and the model.
+   * If the given column is not a formula, nothing will be removed.
+   * @param columnIndex The index in the model of the column to remove. 
+   */
   public void removeColumn(int columnIndex) {
 
     if (columnIndex >= columnCount - 3) return;
@@ -368,11 +421,6 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
       final Formula f = (Formula) o;
       es.execute(new Runnable() {
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.lang.Runnable#run()
-         */
         public void run() {
 
           synchronized (lock) {
@@ -380,7 +428,8 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
             try {
               manager.removeJuryFormula(f);
             } catch (DataManagerException e) {
-              System.out.println(e.getMessage());
+              ExceptionDisplayDialog.postException(e);
+              return;
             }
 
             try {
@@ -390,18 +439,24 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
                   JuryModel.this.update();
                 }
               });
-            } catch (InterruptedException e1) {
-              e1.printStackTrace();
-            } catch (InvocationTargetException e1) {
-              e1.printStackTrace();
+            } catch (InterruptedException e) {
+              ExceptionDisplayDialog.postException(e);
+              return;
+            } catch (InvocationTargetException e) {
+              ExceptionDisplayDialog.postException(e);
+              return;
             }
           }
         }
       });
     }
-
   }
 
+  /**
+   * Tells if a column in a the model is a formula.
+   * @param columnIndex the index in the model of the column to test.
+   * @return true if the column is a formula, false else.
+   */
   public boolean isColumnFormula(int columnIndex) {
     if (columnIndex == 0 || columnIndex >= columnCount - 3) return false;
 
@@ -412,14 +467,20 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
     return false;
   }
 
+  /**
+   * Used to construct the chart representing the averages of all students.
+   * @return A <code>MessageFormat</code> containing the header message of the chart.
+   */
   public MessageFormat getHeaderMessageFormat() {
     return new MessageFormat(builder.getValue(JURY_HEADER));
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see fr.umlv.symphonie.view.charts.SymphonieChartFactory#createJuryPanel()
+
+  /**
+   * Construct the <code>ChartPanel</code> containing the chart for the
+   * jury view.
+   * @param step The interval of averages for the chart.
+   * @return the <code>ChartPanel</code> containing the chart created.
    */
   public ChartPanel getChartPanel(int step) {
 
@@ -469,8 +530,10 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
   }
 
   /**
-   * @param dataTab
-   * @param courseMap
+   * Used to initialize data in the <code>Map</code> array, used to construct the chart
+   * for the jury view.
+   * @param dataTab The <code>Map</code> array to initialize.
+   * @param courseMap The <code>Map<Integer, Course></code> which contains all data to initialize the array.
    */
   private void initDataTabForJury(Map<Integer, Integer>[] dataTab,
       Map<Integer, Course> courseMap) {
@@ -486,6 +549,12 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
     }
   }
 
+  /**
+   * Adds a formula in the interacted database and in the model.
+   * @param expression The expression of the formula given by the user.
+   * @param desc The title of the wanted formula.
+   * @param column The column index where to put the formula.
+   */
   public void addFormula(final String expression, final String desc,
       final int column) {
     es.execute(new Runnable() {
@@ -496,7 +565,8 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
           try {
             manager.addJuryFormula(expression, desc, column);
           } catch (DataManagerException e) {
-            System.out.println(e.getMessage());
+        ExceptionDisplayDialog.postException(e);
+    return;
           }
 
           try {
@@ -506,10 +576,12 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
                 JuryModel.this.update();
               }
             });
-          } catch (InterruptedException e1) {
-            e1.printStackTrace();
-          } catch (InvocationTargetException e1) {
-            e1.printStackTrace();
+          } catch (InterruptedException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
+          } catch (InvocationTargetException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
         }
       }
@@ -517,6 +589,11 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
   }
 
   
+  /**
+   * Fills the <code>SymphonieFormulaFactory</code> map with each test's name and
+   * his associated mark, in order to calculate a <code>Formula</code> at a given row.
+   * @param rowIndex The index of the row to calculate.
+   */
   private void fillFormulaMap(int rowIndex){
     
     if (rowIndex >= 3 && lastRow != rowIndex) {
@@ -538,9 +615,15 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
   // Implement the ObjectFormattingSupport interface
   // ----------------------------------------------------------------------------
 
+  /**
+   * 
+   */
   private final FormattableCellRenderer formatter = CellRendererFactory
       .getJuryModelCellRenderer();
 
+  /* (non-Javadoc)
+   * @see fr.umlv.symphonie.view.cells.ObjectFormattingSupport#getFormattableCellRenderer()
+   */
   public FormattableCellRenderer getFormattableCellRenderer() {
     return formatter;
   }

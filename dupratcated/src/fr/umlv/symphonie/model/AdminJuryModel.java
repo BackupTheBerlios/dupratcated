@@ -17,32 +17,26 @@ import fr.umlv.symphonie.util.ComponentBuilder;
 
 
 /**
+ * The admin model which represents jury's view.
  * @author fvallee
  *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 public class AdminJuryModel extends JuryModel {
-
-  
-//  private static AdminJuryModel instance = null;
   
   
+  /**
+   * Constructs an empty <code>AdminJuryModel</code>
+   * @param manager The <code>DataManager</code> which will be used to interact with database.
+   * @param builder The <code>ComponentBuilder</code> which will provide internationalization.
+   */
   public AdminJuryModel(DataManager manager, ComponentBuilder builder){
     super(manager, builder);
   }
   
-//  public static AdminJuryModel getInstance(DataManager manager){
-//    if (instance == null)
-//      instance = new AdminJuryModel(manager);
-//    
-//    else instance.setManager(manager);
-//    
-//    return instance;
-//  }
   
-  
-  /* (non-Javadoc)
+  /**
+   * Tells if a cell is editable or not.
+   * In admin mode, you can edit students' names, courses' titles, courses' coefficients and comments.
    * @see fr.umlv.symphonie.model.JuryModel#isCellEditable(int, int)
    */
   public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -65,7 +59,8 @@ public class AdminJuryModel extends JuryModel {
   }
   
   
-  /* (non-Javadoc)
+  /**
+   * Sets value at a given cell.
    * @see fr.umlv.symphonie.model.JuryModel#setValueAt(java.lang.Object, int, int)
    */
   public void setValueAt(Object aValue, int rowIndex, int columnIndex) {

@@ -35,6 +35,7 @@ import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.data.formula.Formula;
 import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
 import fr.umlv.symphonie.util.ComponentBuilder;
+import fr.umlv.symphonie.util.ExceptionDisplayDialog;
 import fr.umlv.symphonie.util.LookableCollection;
 import fr.umlv.symphonie.util.Pair;
 import fr.umlv.symphonie.util.StudentAverage;
@@ -52,6 +53,11 @@ import static fr.umlv.symphonie.view.SymphonieConstants.*;
  * moyenne a la fin
  */
 
+/**
+ * The model which represents  teacher's view.
+ * @author susmab
+ *
+ */
 public class TeacherModel extends AbstractTableModel implements
     ObjectFormattingSupport, IDictionarySupport {
 
@@ -112,7 +118,7 @@ public class TeacherModel extends AbstractTableModel implements
   protected final List<Object> columnList = new ArrayList<Object>();
   
   /**
-   * The list of <code>Student</code>. Used to represent lines if the model.
+   * The list of <code>Student</code>. Used to represent lines of the model.
    */
   protected final List<Student> studentList = new ArrayList<Student>();
 
@@ -171,24 +177,6 @@ public class TeacherModel extends AbstractTableModel implements
     dictionary.add("max");
   }
 
-  // static public TeacherModel getInstance(final DataManager manager) {
-  // if (instance == null)
-  // instance = new TeacherModel(manager);
-  //
-  // else
-  // instance.setManager(manager);
-  //
-  // return instance;
-  // }
-
-  // /**
-  // * @param manager
-  // * The manager to set.
-  // */
-  // protected void setManager(DataManager manager) {
-  // this.manager = manager;
-  // }
-
   /**
    * Sets the <code>Course</code> to be represented by the model.
    * @param courseToAdd The <code>Course</code> to represent.
@@ -197,11 +185,6 @@ public class TeacherModel extends AbstractTableModel implements
 
     es.execute(new Runnable() {
 
-      /*
-       * (non-Javadoc)
-       * 
-       * @see java.lang.Runnable#run()
-       */
       public void run() {
 
         synchronized (lock) {
@@ -214,9 +197,8 @@ public class TeacherModel extends AbstractTableModel implements
           try {
             studentAndMarkMapPair = manager.getAllMarksByCourse(course);
           } catch (DataManagerException e) {
-            System.out
-                .println("error getting data from database for Teacher View.");
-            e.printStackTrace();
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
 
           markMap.putAll(studentAndMarkMapPair.getFirst());
@@ -232,7 +214,8 @@ public class TeacherModel extends AbstractTableModel implements
 
           try {
             formulaList = manager.getFormulasByCourse(course);
-          } catch (DataManagerException e2) {
+          } catch (DataManagerException e) {
+            ExceptionDisplayDialog.postException(e);
             formulaList = null;
           }
 
@@ -251,14 +234,10 @@ public class TeacherModel extends AbstractTableModel implements
               else
                 columnList.add(column - 1, f);
             }
-
           }
 
           columnCount = columnList.size() + 2;
           rowCount = studentMarkMap.size() + 3;
-
-          // System.out.println("lignes : " + rowCount);
-          // System.out.println("colonnes : " + columnCount);
 
           studentList.addAll(studentMarkMap.keySet());
 
@@ -270,10 +249,12 @@ public class TeacherModel extends AbstractTableModel implements
               }
 
             });
-          } catch (InterruptedException e1) {
-            e1.printStackTrace();
-          } catch (InvocationTargetException e1) {
-            e1.printStackTrace();
+          } catch (InterruptedException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
+          } catch (InvocationTargetException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
 
         }
@@ -459,10 +440,8 @@ public class TeacherModel extends AbstractTableModel implements
           try {
             manager.changeMarkDescription(m, (String) value);
           } catch (DataManagerException e) {
-            System.out
-                .println("Error while attempting to modify the test name to "
-                    + value);
-            e.printStackTrace();
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
 
           dictionary.add(m.getDesc());
@@ -475,12 +454,13 @@ public class TeacherModel extends AbstractTableModel implements
               }
 
             });
-          } catch (InterruptedException e1) {
-            e1.printStackTrace();
-          } catch (InvocationTargetException e1) {
-            e1.printStackTrace();
+          } catch (InterruptedException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
+          } catch (InvocationTargetException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
-
         }
       });
 
@@ -507,8 +487,8 @@ public class TeacherModel extends AbstractTableModel implements
           try {
             manager.changeMarkCoeff((Mark) o, newCoeff);
           } catch (DataManagerException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
 
           try {
@@ -519,12 +499,13 @@ public class TeacherModel extends AbstractTableModel implements
               }
 
             });
-          } catch (InterruptedException e1) {
-            e1.printStackTrace();
-          } catch (InvocationTargetException e1) {
-            e1.printStackTrace();
+          } catch (InterruptedException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
+          } catch (InvocationTargetException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
-
         }
       });
 
@@ -553,8 +534,8 @@ public class TeacherModel extends AbstractTableModel implements
           manager.changeStudentMarkValue(studentMarkMap.get(
               studentList.get(row - 3)).get(m.getId()), newValue);
         } catch (DataManagerException e) {
-          System.out.println(e.getMessage());
-          e.printStackTrace();
+          ExceptionDisplayDialog.postException(e);
+          return;
         }
 
         try {
@@ -565,12 +546,13 @@ public class TeacherModel extends AbstractTableModel implements
             }
 
           });
-        } catch (InterruptedException e1) {
-          e1.printStackTrace();
-        } catch (InvocationTargetException e1) {
-          e1.printStackTrace();
+        } catch (InterruptedException e) {
+          ExceptionDisplayDialog.postException(e);
+          return;
+        } catch (InvocationTargetException e) {
+          ExceptionDisplayDialog.postException(e);
+          return;
         }
-
       }
     });
   }
@@ -593,7 +575,8 @@ public class TeacherModel extends AbstractTableModel implements
           try {
             manager.addTeacherFormula(expression, desc, course, column);
           } catch (DataManagerException e) {
-            System.out.println(e.getMessage());
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
 
           try {
@@ -603,10 +586,12 @@ public class TeacherModel extends AbstractTableModel implements
                 TeacherModel.this.update();
               }
             });
-          } catch (InterruptedException e1) {
-            e1.printStackTrace();
-          } catch (InvocationTargetException e1) {
-            e1.printStackTrace();
+          } catch (InterruptedException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
+          } catch (InvocationTargetException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
         }
       }
@@ -632,7 +617,8 @@ public class TeacherModel extends AbstractTableModel implements
             try {
               m = manager.addMark(desc, coeff, course);
             } catch (DataManagerException e) {
-              System.out.println(e.getMessage());
+              ExceptionDisplayDialog.postException(e);
+              return;
             }
 
             dictionary.add(m.getDesc());
@@ -645,10 +631,12 @@ public class TeacherModel extends AbstractTableModel implements
                 }
 
               });
-            } catch (InterruptedException e1) {
-              e1.printStackTrace();
-            } catch (InvocationTargetException e1) {
-              e1.printStackTrace();
+            } catch (InterruptedException e) {
+              ExceptionDisplayDialog.postException(e);
+              return;
+            } catch (InvocationTargetException e) {
+              ExceptionDisplayDialog.postException(e);
+              return;
             }
           }
         }
@@ -687,7 +675,8 @@ public class TeacherModel extends AbstractTableModel implements
           try {
             manager.removeTeacherFormula(formula, course);
           } catch (DataManagerException e) {
-            System.out.println(e.getMessage());
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
 
           try {
@@ -697,10 +686,12 @@ public class TeacherModel extends AbstractTableModel implements
                 TeacherModel.this.update();
               }
             });
-          } catch (InterruptedException e1) {
-            e1.printStackTrace();
-          } catch (InvocationTargetException e1) {
-            e1.printStackTrace();
+          } catch (InterruptedException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
+          } catch (InvocationTargetException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
         }
       }
@@ -722,7 +713,8 @@ public class TeacherModel extends AbstractTableModel implements
           try {
             manager.removeMark(mark);
           } catch (DataManagerException e) {
-            System.out.println(e.getMessage());
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
 
           dictionary.remove(mark.getDesc());
@@ -734,10 +726,12 @@ public class TeacherModel extends AbstractTableModel implements
                 TeacherModel.this.update();
               }
             });
-          } catch (InterruptedException e1) {
-            e1.printStackTrace();
-          } catch (InvocationTargetException e1) {
-            e1.printStackTrace();
+          } catch (InterruptedException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
+          } catch (InvocationTargetException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
         }
       }

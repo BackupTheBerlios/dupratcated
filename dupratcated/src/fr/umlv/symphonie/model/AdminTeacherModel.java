@@ -38,6 +38,7 @@ import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.data.formula.Formula;
 import fr.umlv.symphonie.util.ComponentBuilder;
+import fr.umlv.symphonie.util.ExceptionDisplayDialog;
 import fr.umlv.symphonie.util.TextualResourcesLoader;
 import fr.umlv.symphonie.view.PointSaver;
 import fr.umlv.symphonie.view.SymphonieActionFactory;
@@ -98,7 +99,8 @@ public class AdminTeacherModel extends TeacherModel {
           try {
             manager.changeStudentNameAndLastName(s, name, lastName);
           }catch (DataManagerException e){
-            System.out.println(e.getMessage());
+            ExceptionDisplayDialog.postException(e);
+            return;
           }
 		  
           Collections.sort(studentList, StudentComparator);
@@ -113,16 +115,16 @@ public class AdminTeacherModel extends TeacherModel {
 	            }
 
 	          });
-	        } catch (InterruptedException e1) {
-	          e1.printStackTrace();
-	        } catch (InvocationTargetException e1) {
-	          e1.printStackTrace();
+	        } catch (InterruptedException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
+	        } catch (InvocationTargetException e) {
+            ExceptionDisplayDialog.postException(e);
+            return;
 	        }
         }
       });
-      
       return;
-    
     }
     
     super.setValueAt(aValue, rowIndex, columnIndex);
