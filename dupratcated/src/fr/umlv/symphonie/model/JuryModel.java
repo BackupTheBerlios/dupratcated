@@ -339,6 +339,7 @@ public class JuryModel extends AbstractTableModel {
     Object o = columnList.get(columnIndex - 1);
 
     if (o instanceof Formula) {
+      final Formula f = (Formula)o;
       es.execute(new Runnable() {
 
         /*
@@ -351,17 +352,21 @@ public class JuryModel extends AbstractTableModel {
           synchronized (lock) {
             
             try {
+              manager.removeJuryFormula(f);
+            } catch (DataManagerException e) {
+              System.out.println(e.getMessage());
+            }
+            
+            try {
               EventQueue.invokeAndWait(new Runnable() {
 
                 public void run() {
-                  JuryModel.this.fireTableStructureChanged();
+                  JuryModel.this.update();
                 }
               });
             } catch (InterruptedException e1) {
-              System.out.println("exception interrupted");
               e1.printStackTrace();
             } catch (InvocationTargetException e1) {
-              System.out.println("exception invocation");
               e1.printStackTrace();
             }
           }
