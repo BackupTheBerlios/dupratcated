@@ -159,6 +159,17 @@ public interface DataManager {
 	 * @throws DataManagerException
 	 */
 	public void removeMark(Mark m) throws DataManagerException;
+	
+	/**
+	 * to edit 
+	 * @param s
+	 * @param newName
+	 * @param newLastName
+	 * @param newComment
+	 * @throws DataManagerException
+	 */
+	public void changeStudentNameAndLastNameAndComment(Student s, String newName, String newLastName, String newComment)
+			throws DataManagerException;
 
 	/**
 	 * to edit 
@@ -195,6 +206,16 @@ public interface DataManager {
 	 */
 	public void changeStudentMarkValue(StudentMark sm, float newValue)
 			throws DataManagerException;
+	
+	/**
+	 * to edit 
+	 * @param m
+	 * @param newDescription
+	 * @param newCoeff
+	 * @throws DataManagerException
+	 */
+	public void changeMarkDescriptionAndCoeff(Mark m, String newDescription,  float newCoeff)
+			throws DataManagerException;
 
 	/**
 	 * to edit 
@@ -212,6 +233,16 @@ public interface DataManager {
 	 * @throws DataManagerException
 	 */
 	public void changeMarkDescription(Mark m, String newDescription)
+			throws DataManagerException;
+	
+	/**
+	 * to edit 
+	 * @param c
+	 * @param newTitle
+	 * @param newCoeff
+	 * @throws DataManagerException
+	 */
+	public void changeCourseTitleAndCoeff(Course c, String newTitle, float newCoeff)
 			throws DataManagerException;
 
 	/**

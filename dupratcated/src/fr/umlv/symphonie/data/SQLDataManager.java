@@ -1339,6 +1339,54 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 		}
 
 	}
+	
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#changeMarkDescriptionAndCoeff(fr.umlv.symphonie.data.Mark, java.lang.String, float)
+	 */
+	public void changeMarkDescriptionAndCoeff(Mark m, String newDescription, float newCoeff) throws DataManagerException {
+		int markKey = -1;
+
+		// on cherche si l'intitule est deja dans la base
+		try {
+			markKey = getKeyForTitle(newDescription);
+		} catch (SQLException e) {
+			throw new DataManagerException(
+					"error resolving primary key for title " + newDescription,
+					e);
+		}
+
+		// s'il ne l'est pas on le rajoute dans la table des intitules
+		if (markKey < 0)
+			markKey = addTitle(newDescription);
+
+		// on met a jour la reference dans la table
+		String request = "update " + TABLE_TEST + " " + "set "
+				+ COLUMN_ID_TITLE_FROM_TABLE_TEST + " = " + markKey + " " 
+				+ "AND " + COLUMN_COEFF_FROM_TABLE_TEST + " = " + newCoeff + " "
+				+ "where " + COLUMN_ID_FROM_TABLE_TEST + " = " + m.getId()
+				+ " " + ";";
+
+		try {
+			connectAndUpdate(request);
+		} catch (SQLException e) {
+			throw new DataManagerException(
+					"error updating description for test " + m
+							+ "related to " + m.getCourse(), e);
+		}
+
+		// on met a jour dans les donnees locales
+		m.setDesc(newDescription);
+		m.setCoeff(newCoeff);
+
+		// on synchronise si besoin est
+		try {
+			updateMarkData(markMapTimeStamp + 1);
+		} catch (DataManagerException e) {
+			throw new DataManagerException("error updating data.", e);
+		}
+
+		
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -1417,6 +1465,36 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 		} catch (DataManagerException e) {
 			throw new DataManagerException("error updating data.", e);
 		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#changeStudentNameAndLastNameAndComment(fr.umlv.symphonie.data.Student, java.lang.String, java.lang.String, java.lang.String)
+	 */
+	public void changeStudentNameAndLastNameAndComment(Student s, String newName, String newLastName, String newComment) throws DataManagerException {
+		s.setName(newName);
+		s.setLastName(newLastName);
+		s.setComment(newComment);
+
+		String request = "update " + TABLE_STUDENT + " " + "set "
+				+ COLUMN_COMMENT_FROM_TABLE_STUDENT + " = '" + newComment + "' " 
+				+ "AND " + COLUMN_NAME_FROM_TABLE_STUDENT + " = '" + newName + "' " 
+				+ "AND " + COLUMN_LAST_NAME_FROM_TABLE_STUDENT + " = '" + newLastName + "' " 
+				+ "where " + COLUMN_ID_FROM_TABLE_STUDENT + " = "
+				+ s.getId() + ";";
+
+		try {
+			connectAndUpdate(request);
+		} catch (SQLException e) {
+			throw new DataManagerException("unable to set comment for student "
+					+ s, e);
+		}
+
+		try {
+			updateStudentData(studentMapTimeStamp + 1);
+		} catch (DataManagerException e) {
+			throw new DataManagerException("error updating data.", e);
+		}
+		
 	}
 
 	/*
@@ -1506,6 +1584,34 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 			throw new DataManagerException("error updating data.", e);
 		}
 
+	}
+	
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#changeCourseTitleAndCoeff(fr.umlv.symphonie.data.Course, java.lang.String, float)
+	 */
+	public void changeCourseTitleAndCoeff(Course c, String newTitle, float newCoeff) throws DataManagerException {
+		c.setTitle(newTitle);
+		c.setCoeff(newCoeff);
+
+		String request = "update " + TABLE_COURSE + " " + "set "
+				+ COLUMN_TITLE_FROM_TABLE_COURSE + " = '" + newTitle + "' "
+				+ "AND " + COLUMN_COEFF_FROM_TABLE_COURSE + " = " + newCoeff + " "
+				+ "where " + COLUMN_ID_FROM_TABLE_COURSE + " = " + c.getId()
+				+ ";";
+
+		try {
+			connectAndUpdate(request);
+		} catch (SQLException e) {
+			throw new DataManagerException("unable to set title for course "
+					+ c, e);
+		}
+
+		try {
+			updateCourseData(courseMapTimeStamp + 1);
+		} catch (DataManagerException e) {
+			throw new DataManagerException("error updating data.", e);
+		}
+		
 	}
 
 	/*
