@@ -12,7 +12,13 @@ import fr.umlv.symphonie.data.formula.function.FormulaFunction;
  * <i>double </i>and <i>boolean </i> values, and from <code>Formula</code>
  * instances and binary operators.
  */
-public class BasicFormulaFactory {
+public final class BasicFormulaFactory {
+
+  /**
+   * Default constructor
+   */
+  private BasicFormulaFactory() {
+  }
 
   /**
    * Returns a formula representing <i>value </i>
@@ -21,7 +27,7 @@ public class BasicFormulaFactory {
    *          This formula integer value
    * @return a <code>NumericFormula</code> object
    */
-  public static NumericFormula integerInstance(final int value) {
+  public static final NumericFormula integerInstance(final int value) {
     return new NumericFormula() {
 
       private final Integer val = new Integer(value);
@@ -43,7 +49,7 @@ public class BasicFormulaFactory {
    *          This formula double value
    * @return a <code>NumericFormula</code> object
    */
-  public static NumericFormula floatInstance(final float value) {
+  public static final NumericFormula floatInstance(final float value) {
     return new NumericFormula() {
 
       private final Float val = new Float(value);
@@ -65,7 +71,7 @@ public class BasicFormulaFactory {
    *          This formula boolean value
    * @return a <code>BooleanFormula</code> object
    */
-  public static BooleanFormula booleanInstance(final boolean value) {
+  public static final BooleanFormula booleanInstance(final boolean value) {
     return new BooleanFormula() {
 
       private final Boolean val = new Boolean(value);
@@ -92,7 +98,7 @@ public class BasicFormulaFactory {
    * @return null if there's no mapped value to the given key or the
    *         <code>Number</code> associated to the key.
    */
-  public static NumericFormula mappedInstance(final String key,
+  public static final NumericFormula mappedInstance(final String key,
       final Map<String, Number> values) {
     return new NumericFormula() {
 
@@ -118,7 +124,7 @@ public class BasicFormulaFactory {
    *          The right operand
    * @return a <code>NumericFormula</code> object
    */
-  public static NumericFormula numericOperatorInstance(
+  public static final NumericFormula numericOperatorInstance(
       final BinaryNumericOperator op, final NumericFormula left,
       final NumericFormula right) {
     return new NumericFormula() {
@@ -145,7 +151,7 @@ public class BasicFormulaFactory {
    *          The parameters used by the function.
    * @return a <code>NumericFormula</code> object.
    */
-  public static NumericFormula functionInstance(final String name,
+  public static final NumericFormula functionInstance(final String name,
       final FormulaFunction f, final List<NumericFormula> params) {
     return new NumericFormula() {
 
@@ -187,7 +193,7 @@ public class BasicFormulaFactory {
    *          The right operand
    * @return a <code>BooleanFormula</code> object
    */
-  public static BooleanFormula relationalOperatorInstance(
+  public static final BooleanFormula relationalOperatorInstance(
       final BinaryRelationalOperator op, final NumericFormula left,
       final NumericFormula right) {
     return new BooleanFormula() {
@@ -215,7 +221,7 @@ public class BasicFormulaFactory {
    *          The right operand
    * @return a <code>BooleanFormula</code> object
    */
-  public static BooleanFormula logicalOperatorInstance(
+  public static final BooleanFormula logicalOperatorInstance(
       final BinaryLogicalOperator op, final BooleanFormula left,
       final BooleanFormula right) {
     return new BooleanFormula() {

@@ -143,20 +143,39 @@ public class FormulaAnalysis extends AnalysisAdapter {
     node.getPExpression().apply(this);
     final Formula intern = (Formula) getOut(node.getPExpression());
     final String desc = description;
-    setOut(node, new Formula<Object>() {
+    Formula f;
+    if (intern instanceof NumericFormula) {
+      f = new NumericFormula() {
 
-      public Object getValue() {
-        return intern.getValue();
-      }
+        public Number getValue() {
+          return (Number) intern.getValue();
+        }
 
-      public String getDescription() {
-        return desc;
-      }
+        public String getDescription() {
+          return desc;
+        }
 
-      public String toString() {
-        return intern.toString();
-      }
-    });
+        public String toString() {
+          return intern.toString();
+        }
+      };
+    } else {
+      f = new BooleanFormula() {
+
+        public Boolean getValue() {
+          return (Boolean) intern.getValue();
+        }
+
+        public String getDescription() {
+          return desc;
+        }
+
+        public String toString() {
+          return intern.toString();
+        }
+      };
+    }
+    setOut(node, f);
   }
 
   public void caseANumericExpression(ANumericExpression node) {

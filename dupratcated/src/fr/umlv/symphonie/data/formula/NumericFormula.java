@@ -23,7 +23,7 @@ public abstract class NumericFormula implements Formula<Number> {
    *          The second operand
    * @return <code>(v1 instanceof Integer) && (v2 instanceof Integer)</code>
    */
-  public static boolean resultCanBeInteger(Number v1, Number v2) {
+  public static final boolean resultCanBeInteger(Number v1, Number v2) {
     return (v1 instanceof Integer) && (v2 instanceof Integer);
   }
 
@@ -39,7 +39,7 @@ public abstract class NumericFormula implements Formula<Number> {
    *         <code>Double</code> and the other one of <code>Integer</code>
    *         or false otherwise.
    */
-  public static boolean resultCanBeDouble(Number v1, Number v2) {
+  public static final boolean resultCanBeDouble(Number v1, Number v2) {
     return NumericFormula.isValidType(v1) && NumericFormula.isValidType(v2);
   }
 
@@ -51,11 +51,19 @@ public abstract class NumericFormula implements Formula<Number> {
    *          The number to test
    * @return <code>(n instanceof Double) || (n instanceof Integer)</code>
    */
-  private static boolean isValidType(Number n) {
+  private static final boolean isValidType(Number n) {
     return (n instanceof Float) || (n instanceof Integer);
   }
   
   public String getDescription() {
     return null;
+  }
+  
+  public boolean equals(Object obj) {
+    if (obj instanceof NumericFormula) {
+      NumericFormula nf = (NumericFormula) obj;
+      return nf.getDescription().equals(getDescription()) && nf.toString().equals(toString());
+    }
+    return false;
   }
 }

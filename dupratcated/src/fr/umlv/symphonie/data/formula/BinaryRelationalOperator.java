@@ -114,7 +114,7 @@ public enum BinaryRelationalOperator {
   /**
    * Message used in thrown exceptions.
    */
-  private static String invalidTypeMessage = "Invalid Formula types for operator ";
+  private static final String invalidTypeMessage = "Invalid Formula types for operator ";
 
   /**
    * Performs an operation between two <code>NumericFormula</code> type
