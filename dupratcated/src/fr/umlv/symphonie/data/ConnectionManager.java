@@ -22,8 +22,7 @@ public class ConnectionManager {
 
     	
     	if (connection == null) try {
-        connection = DriverManager.getConnection(url + "/" + base, login,
-password);
+        connection = DriverManager.getConnection(url + "/" + base, login,password);
       } catch (SQLException e) {
         base = "evazion";
         login = "root";
@@ -34,7 +33,7 @@ password);
         } catch (SQLException e1) {
           System.out.println("error : createConnection()\n");
           e1.printStackTrace();
-        }       
+        }
       }
     	
         return connection;

@@ -569,6 +569,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     
     Student s = new Student(key, name, lastName);
     
+    Map<Integer, Student> studentMap = getStudents();
     studentMap.put(key, s);
     
     try {
@@ -576,50 +577,134 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     }catch (DataManagerException e){
       throw new DataManagerException("error updating data.", e);
     }
+    
+    try {
+      addDefaultMarksForStudent(s);
+    }catch (DataManagerException e){
+      throw new DataManagerException ("error updating data.", e);
+    }
   }
 
-  public void addStudents(List<String> listName, List<String> listLastName)
-      throws SQLException, DataManagerException {
+  private void addDefaultMarksForStudent(Student s) throws DataManagerException{
+    Map<Integer, Mark> markMap = getMarks();
+    PreparedStatement preparedStatement = null;
+    
+    String request = "insert into " + TABLE_HAS_MARK + " " +
+                     "values ( " + s.getId() + ", ?, 0 );";
+    
+    try {
+      preparedStatement = connectAndPrepare(request);
+    }catch(SQLException e){
+      throw new DataManagerException ("error preparing multi request.", e);
+    }
+    
+    List<StudentMark> studentMarkList = getStudentMarks();
+    
+    for (int key : markMap.keySet()){
+      try {
+        preparedStatement.setInt(1, key);
+        preparedStatement.executeUpdate();
+        studentMarkList.add(new StudentMark(s, markMap.get(key), 0f));
+      } catch (SQLException e) {
+        throw new DataManagerException("error performing prepared statement.", e);
+      }
+    }
+    
+    try{
+      updateStudentMarksData(studentMarkListTimeStamp + 1);
+    }catch (DataManagerException e){
+      throw new DataManagerException ("error updating data.", e);
+    }
+  }
+
+  public void addStudents(List<Pair<String, String>> namesList) throws DataManagerException {
     
     String request = "INSERT INTO `" + TABLE_STUDENT + "` (`"
         + COLUMN_ID_FROM_TABLE_STUDENT + "`, `"
         + COLUMN_NAME_FROM_TABLE_STUDENT + "`, `"
         + COLUMN_LAST_NAME_FROM_TABLE_STUDENT + "`, `"
         + COLUMN_COMMENT_FROM_TABLE_STUDENT + "`) VALUES (?, ?, ?, NULL);";
+    
     PreparedStatement preparedStatement = null;
     int key = 0;
-    int size = listName.size();
-
-    if (size != listLastName.size()) {
-      throw new DataManagerException(
-          "the lists of addStudents(List<String> listName, List<String> listLastName) must have the same size.\n");
-    }
-
+    Map<Integer, Student> studentMap = getStudents();
+    List<Student> studentList = new ArrayList<Student>();
+    
     try {
       preparedStatement = connectAndPrepare(request);
     } catch (SQLException e) {
-      System.out.println("Error with current query :\n" + request);
-      e.printStackTrace();
+      throw new DataManagerException ("error preparing multi request.", e);
     }
 
-    for (int i = 0; i < size; i++) {
+    for (Pair<String, String> p : namesList) {
       try {
         key = createPrimaryKey(TABLE_STUDENT, COLUMN_ID_FROM_TABLE_STUDENT);
       } catch (SQLException e) {
-        System.out.println("Error with current query : createPrimaryKey("
-            + TABLE_STUDENT + ", " + COLUMN_ID_FROM_TABLE_STUDENT + ")\n");
-        e.printStackTrace();
+        throw new DataManagerException ("error creating new primary key for student " + p.getFirst() + " " + p.getSecond(), e);
       }
 
       try {
         preparedStatement.setInt(1, key);
-        preparedStatement.setString(2, listName.get(i));
-        preparedStatement.setString(3, listLastName.get(i));
-        preparedStatement.execute();
+        preparedStatement.setString(2, p.getFirst());
+        preparedStatement.setString(3, p.getSecond());
+        preparedStatement.executeUpdate();
       } catch (SQLException e) {
-        System.out.println("Error with current query :\n" + request);
-        e.printStackTrace();
+        throw new DataManagerException ("error performing prepared statement.", e);
       }
+      
+      Student s = new Student(key, p.getFirst(), p.getSecond());
+      
+      studentMap.put(s.getId(), s);
+      studentList.add(s);
+    }
+    
+    try{
+      updateStudentData(studentMapTimeStamp + 1);
+    }catch (DataManagerException e){
+      throw new DataManagerException("error updating data.", e);
+    }
+    
+    try {
+      addDefaultMarksForStudents(studentList);
+    }catch (DataManagerException e){
+      throw new DataManagerException("error adding default marks to new students.", e);
+    }
+  }
+
+  private void addDefaultMarksForStudents(List<Student> studentList) throws DataManagerException {
+    Map<Integer, Mark> markMap = getMarks();
+    PreparedStatement preparedStatement = null;
+    
+    String request = "insert into " + TABLE_HAS_MARK + " " +
+                     "values ( ?, ?, 0 );";
+    
+    List<StudentMark> studentMarkList = getStudentMarks();
+    
+    try {
+      preparedStatement = connectAndPrepare(request);
+    }catch(SQLException e){
+      throw new DataManagerException ("error preparing multi request.", e);
+    }
+    
+    for (Student s : studentList) {
+
+      for (int key : markMap.keySet()) {
+        try {
+          preparedStatement.setInt(1, s.getId());
+          preparedStatement.setInt(2, key);
+          preparedStatement.executeUpdate();
+          studentMarkList.add(new StudentMark(s, markMap.get(key), 0f));
+        } catch (SQLException e) {
+          throw new DataManagerException(
+              "error performing prepared statement.", e);
+        }
+      }
+    }
+    
+    try{
+      updateStudentMarksData(studentMarkListTimeStamp + 1);
+    }catch (DataManagerException e){
+      throw new DataManagerException ("error updating data.", e);
     }
   }
 

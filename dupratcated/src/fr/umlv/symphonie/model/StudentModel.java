@@ -13,6 +13,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import fr.umlv.symphonie.data.*;
+import fr.umlv.symphonie.util.Pair;
 
 
 /**
@@ -189,12 +190,19 @@ public class StudentModel extends AbstractTableModel {
       return;
     }
     
-    Student student = new Student(0, "Fabien", "Vallee");
+    Student student = new Student(4, "Alban", "Nebie");
     
     Map<Course, Map<Integer, StudentMark>> map = dataManager.getAllMarksByStudent(student);
     
     System.out.println("taille de la map : " + map.size());
     
+    
+    List<Pair<String, String>> pairList = new ArrayList<Pair<String, String>>();
+    
+    pairList.add(new Pair<String, String>("Jean-Rene", "Moustafa"));
+    pairList.add(new Pair<String, String>("Paul", "Ochon"));
+    
+    dataManager.addStudents(pairList);
     
     model.setStudent(student);
     
