@@ -1,7 +1,7 @@
 /*
  * This file is part of Symphonie Created : 9 mars 2005 14:00:00
  */
-package fr.umlv.symphonie.util.dataimportation.xml;
+package fr.umlv.symphonie.util.dataimport.xml;
 
 import java.util.HashMap;
 import java.util.Map;
