@@ -3,7 +3,7 @@ package fr.umlv.symphonie.data;
 
 /**
  * This class contains all tables and fields that are used by the
- * <code>SQLDataManager</code>
+ * <code>SQLDataManager</code> class.
  * @author susmab
  *
  */

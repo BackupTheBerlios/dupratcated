@@ -12,15 +12,25 @@ import fr.umlv.symphonie.data.StudentMark;
 
 
 /**
+ * A class used to calculate the average of a student.
+ * Can calculate an average for course, or global average.
  * @author susmab
  *
  */
 public class StudentAverage {
 
+  /**
+   * Private constructor.
+   */
   private StudentAverage(){
   }
   
   
+  /**
+   * Used to get the average of a student for a given course.
+   * @param collection the <code>Collection</code> of all <code>StudentMarks</code>s in the given course.
+   * @return the average for the marks contained in the <code>Collection</code>. Involves the coefficients.
+   */
   public static float getAverage(Collection<StudentMark> collection){
     float result = 0;
     float div = 0;
@@ -37,6 +47,11 @@ public class StudentAverage {
   }
   
   
+  /**
+   * Used to calculate the global average of a student, by all his marks in every courses.
+   * @param map a <code>Map</code> of all marks for the student, keyed by the courses.
+   * @return the annual average for the student. Involves the coefficients.
+   */
   public static float getAnnualAverage(Map<Course, Map<Integer, StudentMark>> map){
     float result = 0;
 	float div = 0;
