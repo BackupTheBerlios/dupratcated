@@ -22,7 +22,7 @@ public final class SymphonieFormulaFactory {
   // ----------------------------------------------------------------------------
 
   public static final Formula parseFormula(String name, String unparsedFormula,
-      int id) {
+      int id, int column) {
     return null;
   }
   
