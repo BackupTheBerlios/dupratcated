@@ -2,6 +2,7 @@
  * This file is part of Symphonie
  * Created : 27-févr.-2005 15:26:50
  */
+
 package fr.umlv.symphonie.model;
 
 import java.awt.EventQueue;
@@ -32,25 +33,27 @@ import fr.umlv.symphonie.data.formula.Formula;
 import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
 import fr.umlv.symphonie.util.Pair;
 import fr.umlv.symphonie.util.StudentAverage;
-
+import fr.umlv.symphonie.view.cells.CellRendererFactory;
+import fr.umlv.symphonie.view.cells.FormattableCellRenderer;
 
 /**
  * @author susmab
- *
+ * 
  */
 public class JuryModel extends AbstractTableModel {
 
   protected DataManager manager;
-  
-  protected int rowCount    = 0;
+
+  protected int rowCount = 0;
   protected int columnCount = 0;
-  protected int globalTimeStamp = -1; // le globalTimeStamp pourrait etre la somme de
-                                    // tous les timeStamp (a voir)
-  
+  protected int globalTimeStamp = -1; // le globalTimeStamp pourrait etre la
+                                      // somme de
+  // tous les timeStamp (a voir)
+
   protected final List<Object> columnList = new ArrayList<Object>();
   protected final List<Student> studentList = new ArrayList<Student>();
   protected final Map<Student, Map<Course, Map<Integer, StudentMark>>> dataMap = new HashMap<Student, Map<Course, Map<Integer, StudentMark>>>();
-  
+
   protected final Map<Integer, Course> courseMap = new HashMap<Integer, Course>();
 
   /**
@@ -58,42 +61,45 @@ public class JuryModel extends AbstractTableModel {
    * rafraîchissement du canal courant.
    */
   protected final ExecutorService es = Executors.newSingleThreadExecutor();
-  
+
   protected final Object lock = new Object();
-  
-  private static JuryModel instance = null; 
-  
+
+  private static JuryModel instance = null;
+
   protected JuryModel(DataManager manager) {
     this.manager = manager;
     update();
   }
-  
-  protected void setManager(DataManager manager){
+
+  protected void setManager(DataManager manager) {
     this.manager = manager;
   }
-  
-  public static JuryModel getInstance(DataManager manager){
+
+  public static JuryModel getInstance(DataManager manager) {
     if (instance == null)
       instance = new JuryModel(manager);
-    
-    else instance.setManager(manager);
-    
+
+    else
+      instance.setManager(manager);
+
     return instance;
   }
-  
+
   public void update() {
-    
-    es.execute(new Runnable(){
-      
-      /* (non-Javadoc)
+
+    es.execute(new Runnable() {
+
+      /*
+       * (non-Javadoc)
+       * 
        * @see java.lang.Runnable#run()
        */
       public void run() {
-        
+
         synchronized (lock) {
-          
+
           clear();
-          
+
           Pair<Map<Integer, Course>, SortedMap<Student, Map<Course, Map<Integer, StudentMark>>>> allData = null;
           try {
             allData = manager.getAllStudentsMarks();
@@ -169,170 +175,156 @@ public class JuryModel extends AbstractTableModel {
 
   }
 
-
-  protected void clear(){
+  protected void clear() {
     rowCount = 0;
     columnCount = 0;
     columnList.clear();
     studentList.clear();
     dataMap.clear();
   }
-  /* (non-Javadoc)
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see javax.swing.table.TableModel#getRowCount()
    */
   public int getRowCount() {
     return rowCount;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see javax.swing.table.TableModel#getColumnCount()
    */
   public int getColumnCount() {
     return columnCount;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see javax.swing.table.TableModel#getValueAt(int, int)
    */
   public Object getValueAt(int rowIndex, int columnIndex) {
-    
+
     /*
      * cas de la ligne separatrice
      */
-    if (rowIndex == 2)
-      return null;
-    
+    if (rowIndex == 2) return null;
+
     /*
      * cas de la colonne tout a gauche
      */
-    if (columnIndex == 0){
-      if (rowIndex == 0)
-        return "Matiere";
-      if (rowIndex == 1)
-        return "Coeff";
+    if (columnIndex == 0) {
+      if (rowIndex == 0) return "Matiere";
+      if (rowIndex == 1) return "Coeff";
       return studentList.get(rowIndex - 3);
     }
-    
-    
+
     /*
-     * cas de la colonne tout a droite
-     * (commentaires)
+     * cas de la colonne tout a droite (commentaires)
      */
-    if (columnIndex == columnCount - 1){
-      if (rowIndex == 0)
-        return "Commentaires";
-      if (rowIndex == 1)
-        return null;
-      
+    if (columnIndex == columnCount - 1) {
+      if (rowIndex == 0) return "Commentaires";
+      if (rowIndex == 1) return null;
+
       return studentList.get(rowIndex - 3).getComment();
     }
-    
-    
+
     /*
-     * cas de l'avant derniere colonne
-     * (etudiants)
+     * cas de l'avant derniere colonne (etudiants)
      */
-    if (columnIndex == columnCount - 2){
-      if (rowIndex <= 1)
-        return null;
-      
+    if (columnIndex == columnCount - 2) {
+      if (rowIndex <= 1) return null;
+
       return studentList.get(rowIndex - 3);
     }
-    
-    
+
     /*
-     * cas de la colonne des moyennes
-     * (avant avant derniere colonne)
+     * cas de la colonne des moyennes (avant avant derniere colonne)
      */
-    
-    if (columnIndex == columnCount -3){
-      if (rowIndex == 0)
-        return "Moyenne";
-      if (rowIndex <= 2)
-        return null;
-      
-      return StudentAverage.getAnnualAverage(dataMap.get(studentList.get(rowIndex - 3)));
+
+    if (columnIndex == columnCount - 3) {
+      if (rowIndex == 0) return "Moyenne";
+      if (rowIndex <= 2) return null;
+
+      return StudentAverage.getAnnualAverage(dataMap.get(studentList
+          .get(rowIndex - 3)));
     }
-    
-    
+
     /*
      * autres cas
      */
     Object o = columnList.get(columnIndex - 1);
-    
-    if (o instanceof Formula){
-      Formula f = (Formula)o;
-      
-      if (rowIndex == 0)
-        return f.getDescription();
-      
-      if (rowIndex == 1)
-        return null;
-      
+
+    if (o instanceof Formula) {
+      Formula f = (Formula) o;
+
+      if (rowIndex == 0) return f.getDescription();
+
+      if (rowIndex == 1) return null;
+
       SymphonieFormulaFactory.clearMappedValues();
-      
+
       Student s = studentList.get(rowIndex - 3);
-      
-      for (Course c : dataMap.get(s).keySet()){
-        SymphonieFormulaFactory.putMappedValue(c.getTitle(), StudentAverage.getAverage(dataMap.get(s).get(c).values()));
+
+      for (Course c : dataMap.get(s).keySet()) {
+        SymphonieFormulaFactory.putMappedValue(c.getTitle(), StudentAverage
+            .getAverage(dataMap.get(s).get(c).values()));
       }
-      
+
       return f.getValue();
     }
-    
-    Course c = (Course)o;
-    
-    if(rowIndex == 0)
-      return c;
-    if(rowIndex == 1)
-      return c.getCoeff();
-    
-    return StudentAverage.getAverage(dataMap.get(studentList.get(rowIndex - 3)).get(c).values());
+
+    Course c = (Course) o;
+
+    if (rowIndex == 0) return c;
+    if (rowIndex == 1) return c.getCoeff();
+
+    return StudentAverage.getAverage(dataMap.get(studentList.get(rowIndex - 3))
+        .get(c).values());
   }
 
-//  private float getAverage(Collection<StudentMark> name) {
-//    
-//    float result = 0;
-//    
-//    for (StudentMark sm : name){
-//      result += sm.getValue() * sm.getCoeff();
-//    }
-//    
-//    return result;
-//  }
+  // private float getAverage(Collection<StudentMark> name) {
+  //    
+  // float result = 0;
+  //    
+  // for (StudentMark sm : name){
+  // result += sm.getValue() * sm.getCoeff();
+  // }
+  //    
+  // return result;
+  // }
 
-  
-  public boolean isCellEditable(int rowIndex,int columnIndex){
-    if (columnIndex == columnCount - 1 && rowIndex > 2)
-      return true;
+  public boolean isCellEditable(int rowIndex, int columnIndex) {
+    if (columnIndex == columnCount - 1 && rowIndex > 2) return true;
 
     return false;
   }
 
-  
-  public void setValueAt(Object aValue,int rowIndex,int columnIndex){
-    
-    if (columnIndex != columnCount -1)
-      return;
-    
+  public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+
+    if (columnIndex != columnCount - 1) return;
+
     Student s = studentList.get(rowIndex - 3);
-    
+
     try {
-      manager.changeStudentComment(s, (String)aValue);
+      manager.changeStudentComment(s, (String) aValue);
     } catch (DataManagerException e) {
       e.getMessage();
       e.printStackTrace();
     }
   }
-  
-  public void removeColumn(int columnIndex){
-    
+
+  public void removeColumn(int columnIndex) {
+
     if (columnIndex >= columnCount - 3) return;
 
     Object o = columnList.get(columnIndex - 1);
 
     if (o instanceof Formula) {
-      final Formula f = (Formula)o;
+      final Formula f = (Formula) o;
       es.execute(new Runnable() {
 
         /*
@@ -343,13 +335,13 @@ public class JuryModel extends AbstractTableModel {
         public void run() {
 
           synchronized (lock) {
-            
+
             try {
               manager.removeJuryFormula(f);
             } catch (DataManagerException e) {
               System.out.println(e.getMessage());
             }
-            
+
             try {
               EventQueue.invokeAndWait(new Runnable() {
 
@@ -369,68 +361,66 @@ public class JuryModel extends AbstractTableModel {
 
   }
 
-  public boolean isColumnFormula(int columnIndex){
-    if (columnIndex == 0 
-        || columnIndex >= columnCount -3)
-      return false;
-    
-    Object o = columnList.get(columnIndex -1);
-    
-    if (o instanceof Formula)
-      return true;
-    
+  public boolean isColumnFormula(int columnIndex) {
+    if (columnIndex == 0 || columnIndex >= columnCount - 3) return false;
+
+    Object o = columnList.get(columnIndex - 1);
+
+    if (o instanceof Formula) return true;
+
     return false;
   }
-  
-  public MessageFormat getHeaderMessageFormat(){
+
+  public MessageFormat getHeaderMessageFormat() {
     return new MessageFormat("Ensemble des moyennes des etudiants et deliberes");
   }
-  
-  
-  /* (non-Javadoc)
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see fr.umlv.symphonie.view.charts.SymphonieChartFactory#createJuryPanel()
    */
-  public ChartPanel getChartPanel(int step){
-    
+  public ChartPanel getChartPanel(int step) {
+
     Map<Integer, Integer>[] dataTab;
-    
-    
-    int size = (20%step == 0 ? 20/step : 20/step + 1);
-    
+
+    int size = (20 % step == 0 ? 20 / step : 20 / step + 1);
+
     dataTab = new Map[size];
-    
+
     initDataTabForJury(dataTab, courseMap);
-    
-    for (Map<Course, Map<Integer, StudentMark>> map : dataMap.values()){
-      for (Course c : map.keySet()){
-        int index = (int)StudentAverage.getAverage(map.get(c).values()) / step;
-        
-        if (index >= size)
-          index = size -1;
-        
+
+    for (Map<Course, Map<Integer, StudentMark>> map : dataMap.values()) {
+      for (Course c : map.keySet()) {
+        int index = (int) StudentAverage.getAverage(map.get(c).values()) / step;
+
+        if (index >= size) index = size - 1;
+
         int previousValue = dataTab[index].get(c.getId());
         dataTab[index].put(c.getId(), previousValue + 1);
       }
     }
-    
+
     DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-    
+
     int low = 0;
     int hi = step;
-    
-    for (Map<Integer, Integer> map : dataTab){
-      for (int courseId : map.keySet()){
-        dataset.addValue(map.get(courseId), courseMap.get(courseId).getTitle(), "de " + low + " a " + hi);
+
+    for (Map<Integer, Integer> map : dataTab) {
+      for (int courseId : map.keySet()) {
+        dataset.addValue(map.get(courseId), courseMap.get(courseId).getTitle(),
+            "de " + low + " a " + hi);
       }
-      
+
       low += step;
       hi += step;
     }
-    
-    JFreeChart barChart = ChartFactory.createBarChart3D("Moyennes des etudiants", "intervalles de notes", 
-        "nombre d'eleves", dataset, PlotOrientation.VERTICAL, true, true, true);
+
+    JFreeChart barChart = ChartFactory.createBarChart3D(
+        "Moyennes des etudiants", "intervalles de notes", "nombre d'eleves",
+        dataset, PlotOrientation.VERTICAL, true, true, true);
     barChart.getPlot().setForegroundAlpha(0.65f);
-    
+
     return new ChartPanel(barChart);
   }
 
@@ -438,20 +428,22 @@ public class JuryModel extends AbstractTableModel {
    * @param dataTab
    * @param courseMap
    */
-  private void initDataTabForJury(Map<Integer, Integer>[] dataTab, Map<Integer, Course> courseMap) {
-    
-    for (int i = 0 ; i < dataTab.length ; i++){
+  private void initDataTabForJury(Map<Integer, Integer>[] dataTab,
+      Map<Integer, Course> courseMap) {
+
+    for (int i = 0; i < dataTab.length; i++) {
       dataTab[i] = new HashMap<Integer, Integer>();
     }
-    
-    for (Map<Integer, Integer> map : dataTab){
-      for (int i : courseMap.keySet()){
+
+    for (Map<Integer, Integer> map : dataTab) {
+      for (int i : courseMap.keySet()) {
         map.put(i, 0);
       }
     }
   }
-  
-  public void addFormula(final String expression, final String desc, final int column){
+
+  public void addFormula(final String expression, final String desc,
+      final int column) {
     es.execute(new Runnable() {
 
       public void run() {
@@ -480,98 +472,124 @@ public class JuryModel extends AbstractTableModel {
       }
     });
   }
-  
-//  /**
-//   * @param args
-//   * @throws IOException 
-//   */
-//  public static void main(String[] args) throws IOException {
-//    JFrame frame = new JFrame ("test JuryModel");
-//    frame.setSize(800,600);
-//    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//    
-//    DataManager dataManager = SQLDataManager.getInstance();
-//
-//    final JuryModel model = JuryModel.getInstance(dataManager);
-//    
-//    final JTable table = new JTable(model);
-//    table.setTableHeader(null);
-//    
-//    
-//    HashMap<String, String> map = TextualResourcesLoader.getResourceMap("language/symphonie", new Locale(
-//    "french"), "ISO-8859-1");
-//    
-//    ComponentBuilder builder = new ComponentBuilder(map);
-//    
-//    // popup and buttons
-//    final JPopupMenu pop = builder.buildPopupMenu(SymphonieConstants.JURYVIEWPOPUP_TITLE);
-//    
-//    pop.add(builder.buildButton(SymphonieActionFactory.getJuryAddFormulaAction(null, frame, builder),SymphonieConstants.ADD_FORMULA, ComponentBuilder.ButtonType.MENU_ITEM));
-//    pop.add(builder.buildButton(SymphonieActionFactory.getJuryUpdateAction(null), SymphonieConstants.UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
-//    pop.add(builder.buildButton(SymphonieActionFactory.getJuryPrintAction(null, table), SymphonieConstants.PRINT_MENU_ITEM, ComponentBuilder.ButtonType.MENU_ITEM));
-//    pop.add(builder.buildButton(SymphonieActionFactory.getJuryChartAction(null, frame), SymphonieConstants.DISPLAY_CHART, ComponentBuilder.ButtonType.MENU_ITEM));
-//    
-//    final AbstractButton removeColumn = builder.buildButton(SymphonieActionFactory.getRemoveJuryColumnAction(null, table), SymphonieConstants.REMOVE_COLUMN, ComponentBuilder.ButtonType.MENU_ITEM);
-//    pop.add(removeColumn);
-//    
-//    // listener which displays the popup
-//    table.addMouseListener(new MouseAdapter() {
-//
-//      public void mousePressed(MouseEvent e) {
-//        if (SwingUtilities.isRightMouseButton(e)) {
-//          pop.show(e.getComponent(), e.getX(), e.getY());
-//        }
-//      }
-//    });
-//    
-//    // listener which saves the cursor location
-//    table.addMouseListener(new MouseAdapter() {
-//
-//      public void mousePressed(MouseEvent e) {
-//        if (SwingUtilities.isRightMouseButton(e)) {
-//          PointSaver.setPoint(e.getPoint());
-//        }
-//      }
-//    });
-//    
-//    // listener which disables buttons
-//    table.addMouseListener(new MouseAdapter() {
-//
-//      public void mousePressed(MouseEvent e) {
-//        if (SwingUtilities.isRightMouseButton(e)) {
-//          if (model.isColumnFormula(table.columnAtPoint(e.getPoint())))
-//            removeColumn.setEnabled(true);
-//          else removeColumn.setEnabled(false);
-//        }
-//      }
-//    });
-//    
-//    
-//    
-//    
-//    
-//    
-//    table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer(){
-//      
-//      public java.awt.Component getTableCellRendererComponent(JTable table,Object value,
-//          boolean isSelected,boolean hasFocus,int row,int column){
-//        JLabel label = (JLabel)super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-//        
-//          label.setHorizontalAlignment(SwingConstants.CENTER);
-//          
-//          if (column == 0 || row == 0 || column == table.getModel().getColumnCount() - 2)
-//            label.setFont(getFont().deriveFont(Font.BOLD));
-//          
-//          return label;
-//      }
-//    });
-//    
-//    
-//    JScrollPane scroll = new JScrollPane(table);
-//    
-//    frame.setContentPane(scroll);
-//    
-//    frame.setVisible(true);
-//  }
+
+  // ----------------------------------------------------------------------------
+  // Implement the ObjectFormattingSupport interface
+  // ----------------------------------------------------------------------------
+
+  private final FormattableCellRenderer formatter = CellRendererFactory
+      .getJuryModelCellRenderer();
+
+  public FormattableCellRenderer getFormattableCellRenderer() {
+    return formatter;
+  }
+
+  // /**
+  // * @param args
+  // * @throws IOException
+  // */
+  // public static void main(String[] args) throws IOException {
+  // JFrame frame = new JFrame ("test JuryModel");
+  // frame.setSize(800,600);
+  // frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+  //    
+  // DataManager dataManager = SQLDataManager.getInstance();
+  //
+  // final JuryModel model = JuryModel.getInstance(dataManager);
+  //    
+  // final JTable table = new JTable(model);
+  // table.setTableHeader(null);
+  //    
+  //    
+  // HashMap<String, String> map =
+  // TextualResourcesLoader.getResourceMap("language/symphonie", new Locale(
+  // "french"), "ISO-8859-1");
+  //    
+  // ComponentBuilder builder = new ComponentBuilder(map);
+  //    
+  // // popup and buttons
+  // final JPopupMenu pop =
+  // builder.buildPopupMenu(SymphonieConstants.JURYVIEWPOPUP_TITLE);
+  //    
+  // pop.add(builder.buildButton(SymphonieActionFactory.getJuryAddFormulaAction(null,
+  // frame, builder),SymphonieConstants.ADD_FORMULA,
+  // ComponentBuilder.ButtonType.MENU_ITEM));
+  // pop.add(builder.buildButton(SymphonieActionFactory.getJuryUpdateAction(null),
+  // SymphonieConstants.UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
+  // pop.add(builder.buildButton(SymphonieActionFactory.getJuryPrintAction(null,
+  // table), SymphonieConstants.PRINT_MENU_ITEM,
+  // ComponentBuilder.ButtonType.MENU_ITEM));
+  // pop.add(builder.buildButton(SymphonieActionFactory.getJuryChartAction(null,
+  // frame), SymphonieConstants.DISPLAY_CHART,
+  // ComponentBuilder.ButtonType.MENU_ITEM));
+  //    
+  // final AbstractButton removeColumn =
+  // builder.buildButton(SymphonieActionFactory.getRemoveJuryColumnAction(null,
+  // table), SymphonieConstants.REMOVE_COLUMN,
+  // ComponentBuilder.ButtonType.MENU_ITEM);
+  // pop.add(removeColumn);
+  //    
+  // // listener which displays the popup
+  // table.addMouseListener(new MouseAdapter() {
+  //
+  // public void mousePressed(MouseEvent e) {
+  // if (SwingUtilities.isRightMouseButton(e)) {
+  // pop.show(e.getComponent(), e.getX(), e.getY());
+  // }
+  // }
+  // });
+  //    
+  // // listener which saves the cursor location
+  // table.addMouseListener(new MouseAdapter() {
+  //
+  // public void mousePressed(MouseEvent e) {
+  // if (SwingUtilities.isRightMouseButton(e)) {
+  // PointSaver.setPoint(e.getPoint());
+  // }
+  // }
+  // });
+  //    
+  // // listener which disables buttons
+  // table.addMouseListener(new MouseAdapter() {
+  //
+  // public void mousePressed(MouseEvent e) {
+  // if (SwingUtilities.isRightMouseButton(e)) {
+  // if (model.isColumnFormula(table.columnAtPoint(e.getPoint())))
+  // removeColumn.setEnabled(true);
+  // else removeColumn.setEnabled(false);
+  // }
+  // }
+  // });
+  //    
+  //    
+  //    
+  //    
+  //    
+  //    
+  // table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer(){
+  //      
+  // public java.awt.Component getTableCellRendererComponent(JTable table,Object
+  // value,
+  // boolean isSelected,boolean hasFocus,int row,int column){
+  // JLabel label = (JLabel)super.getTableCellRendererComponent(table, value,
+  // isSelected, hasFocus, row, column);
+  //        
+  // label.setHorizontalAlignment(SwingConstants.CENTER);
+  //          
+  // if (column == 0 || row == 0 || column == table.getModel().getColumnCount()
+  // - 2)
+  // label.setFont(getFont().deriveFont(Font.BOLD));
+  //          
+  // return label;
+  // }
+  // });
+  //    
+  //    
+  // JScrollPane scroll = new JScrollPane(table);
+  //    
+  // frame.setContentPane(scroll);
+  //    
+  // frame.setVisible(true);
+  // }
 
 }
