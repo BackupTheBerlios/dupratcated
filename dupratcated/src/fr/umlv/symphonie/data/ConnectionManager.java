@@ -9,7 +9,7 @@ import java.util.Properties;
 import javax.swing.JOptionPane;
 
 import fr.umlv.symphonie.util.SymphoniePreferencesManager;
-import fr.umlv.symphonie.view.DatabaseDialog;
+import fr.umlv.symphonie.view.dialog.DatabaseDialog;
 
 public class ConnectionManager {
 
