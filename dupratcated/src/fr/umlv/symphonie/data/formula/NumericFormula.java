@@ -59,7 +59,22 @@ public abstract class NumericFormula implements Formula<Number> {
     return null;
   }
 
+  /**
+   * Returns -1, subclasses may override this method
+   * 
+   * @return -1
+   */
   public int getColumn() {
+    return -1;
+  }
+
+  /**
+   * Always returns -1, you may override this method in subclasses or wrap it in
+   * another formula instance
+   * 
+   * @return -1
+   */
+  public int getID() {
     return -1;
   }
 

@@ -64,6 +64,9 @@ public class FormulaAnalysis extends AnalysisAdapter {
   /** The index of the column that the formulas parsed will be applied on */
   private int col;
 
+  /** The id that the formulas parsed will have */
+  private int id;
+
   /**
    * Creates a new formula analyser. <br>
    * 
@@ -105,6 +108,14 @@ public class FormulaAnalysis extends AnalysisAdapter {
 
   public void setColumn(int col) {
     this.col = col;
+  }
+
+  public int getID() {
+    return id;
+  }
+
+  public void setID(int id) {
+    this.id = id;
   }
 
   /**
@@ -149,6 +160,7 @@ public class FormulaAnalysis extends AnalysisAdapter {
     final Formula intern = (Formula) getOut(node.getPExpression());
     final String desc = description;
     final int column = col;
+    final int ID = id;
     Formula f;
     if (intern instanceof NumericFormula) {
       f = new NumericFormula() {
@@ -163,6 +175,10 @@ public class FormulaAnalysis extends AnalysisAdapter {
 
         public int getColumn() {
           return column;
+        }
+        
+        public int getID() {
+         return ID;   
         }
 
         public String toString() {
@@ -180,6 +196,10 @@ public class FormulaAnalysis extends AnalysisAdapter {
           return desc;
         }
 
+        public int getID() {
+          return ID;   
+         }
+        
         public String toString() {
           return intern.toString();
         }

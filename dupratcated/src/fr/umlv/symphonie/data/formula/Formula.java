@@ -27,4 +27,11 @@ public interface Formula<T> {
    * @return an <code>int</code>
    */
   public int getColumn();
+
+  /**
+   * Returns this formula's ID
+   * 
+   * @return an <code>int</code>
+   */
+  public int getID();
 }

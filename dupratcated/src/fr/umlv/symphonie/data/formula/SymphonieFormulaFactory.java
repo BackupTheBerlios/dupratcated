@@ -98,6 +98,7 @@ public final class SymphonieFormulaFactory {
         // Set up analyzer
         analyzer.setDescription(name);
         analyzer.setColumn(column);
+        analyzer.setID(id);
         formula.apply(analyzer);
 
         // return the built formula
