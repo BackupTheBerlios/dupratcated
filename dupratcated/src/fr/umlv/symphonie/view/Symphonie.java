@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
@@ -255,7 +256,7 @@ public class Symphonie {
   private final JMenu getFormatMenu() {
     JMenu format = (JMenu) builder.buildButton(FORMAT_MENU, ButtonType.MENU);
 
-    Action f_cell = actionFactory.getFormulaCellAction(EMPTYICON);
+    Action f_cell = actionFactory.getFormulaCellAction(null);
 
     format.add(builder
         .buildButton(f_cell, CELL_MENU_ITEM, ButtonType.MENU_ITEM));
@@ -266,26 +267,21 @@ public class Symphonie {
   /**
    * Builds the "Insert" menu
    * 
+   * @param formula
+   *          The add formula menu item
+   * @param tbar
+   *          A toolbar to add some stuff
    * @return a <code>JMenu</code>
    */
-  private final JMenu getInsertMenu() {
+  private final JMenu getInsertMenu(JMenuItem formula, JToolBar tbar) {
     JMenu insert = (JMenu) builder.buildButton(INSERT_MENU, ButtonType.MENU);
 
-    /* Actions ******************************************************* */
-    Action formula = actionFactory.getFormulaAction(new ImageIcon(
-        Symphonie.class.getResource("icons/formula.png")));
-    Action column = actionFactory.getColumnAction(new ImageIcon(Symphonie.class
-        .getResource("icons/insert_column.png")));
-    Action line = actionFactory.getLineAction(new ImageIcon(Symphonie.class
-        .getResource("icons/insert_line.png")));
+    JMenuItem addCol = (JMenuItem) builder.buildButton(addColumn,
+        INSERT_COLUMN_MENU_ITEM, ButtonType.MENU_ITEM);
 
-    /* Items********************************************************* */
-    insert.add(builder.buildButton(column, INSERT_COLUMN_MENU_ITEM,
-        ButtonType.MENU_ITEM));
-    insert.add(builder.buildButton(line, INSERT_LINE_MENU_ITEM,
-        ButtonType.MENU_ITEM));
-    insert.add(builder.buildButton(formula, FORMULA_MENU_ITEM,
-        ButtonType.MENU_ITEM));
+    insert.add(addCol);
+    tbar.add(createToolbarButton(ADDMARKDIALOG_TITLE, addCol, builder));
+    insert.add(formula);
     return insert;
   }
 
@@ -946,6 +942,9 @@ public class Symphonie {
 
     // Action factory
     actionFactory = new SymphonieActionFactory(this, builder);
+    addColumn = actionFactory.getAddMarkAction(new ImageIcon(Symphonie.class
+        .getResource("icons/insert_column.png")));
+    addColumn.setEnabled(false);
 
     // Content pane
     JMenu mode = getModeMenu();
@@ -973,15 +972,20 @@ public class Symphonie {
     toolbar.add(createToolbarButton(EXPORT_MENU_ITEM, exp, builder));
     toolbar.addSeparator();
 
+    JButton dischart = new JButton(actionFactory.getChartDisplayAction(
+        CHARTICON, builder));
     JPanel content = getContentPane();
     JPanel welcome = getWelcomePagePanel(content, toolbar, mode, imp, exp,
-        print);
+        print, dischart);
     frame.setContentPane((welcome != null) ? welcome : content);
 
     // Menu bar
+    addFormula.setEnabled(false);
+    JMenuItem morfula = (JMenuItem) builder.buildButton(addFormula,
+        FORMULA_MENU_ITEM, ButtonType.MENU_ITEM);
     frame.setJMenuBar(getMenubar(getFileMenu(exp, imp, print, exit),
-        getWindowMenu(mode, getLangMenu()), getFormatMenu(), getInsertMenu(),
-        getAdminMenu(toolbar)));
+        getWindowMenu(mode, getLangMenu()), getFormatMenu(), getInsertMenu(
+            morfula, toolbar), getAdminMenu(toolbar)));
 
     // Listen changes in builder for frame title
     builder.addChangeListener(content, new ChangeListener() {
@@ -995,7 +999,8 @@ public class Symphonie {
     currentTeacherModel = teacherModel;
     currentStudentModel = studentModel;
 
-    toolbar.add(actionFactory.getChartDisplayAction(CHARTICON, builder));
+    toolbar.add(createToolbarButton(ADDMARKDIALOG_TITLE, morfula, builder));
+    toolbar.add(dischart);
     toolbar.addSeparator();
     toolbar.add(createToolbarButton(EXIT_MENU_ITEM, exit, builder));
 
@@ -1047,6 +1052,8 @@ public class Symphonie {
         SymphonieWizardConstants.DATA_VIEW, newView);
     ((DefaultWizardModel) importW.getModel()).getInterPanelData().put(
         SymphonieWizardConstants.DATA_VIEW, newView);
+    addFormula.setEnabled(newView.isFormulaSupported());
+    addColumn.setEnabled(newView.equals(View.teacher));
   }
 
   /**
@@ -1167,11 +1174,11 @@ public class Symphonie {
   // ----------------------------------------------------------------------------
 
   /** A transparent 16x16 icon */
-  private static final ImageIcon EMPTYICON = new ImageIcon(Symphonie.class
+  public static final ImageIcon EMPTYICON = new ImageIcon(Symphonie.class
       .getResource("icons/empty.png"));
 
   /** Chart 16x16 icon */
-  private static final ImageIcon CHARTICON = new ImageIcon(Symphonie.class
+  public static final ImageIcon CHARTICON = new ImageIcon(Symphonie.class
       .getResource("icons/chart.png"));
 
   /**
@@ -1303,6 +1310,13 @@ public class Symphonie {
       void displayChart(Symphonie s, ActionEvent event) {
         s.actionFactory.studentChartAction.actionPerformed(null);
       }
+
+      boolean isFormulaSupported() {
+        return false;
+      }
+
+      void displayFormulaDialog(Symphonie s, ActionEvent e) {
+      }
     },
     teacher {
 
@@ -1328,6 +1342,10 @@ public class Symphonie {
       void displayChart(Symphonie s, ActionEvent event) {
         s.actionFactory.teacherChartAction.actionPerformed(null);
       }
+
+      void displayFormulaDialog(Symphonie s, ActionEvent e) {
+        s.actionFactory.teacherAddFormulaAction.actionPerformed(e);
+      }
     },
     jury {
 
@@ -1351,6 +1369,10 @@ public class Symphonie {
 
       void displayChart(Symphonie s, ActionEvent event) {
         s.actionFactory.juryChartAction.actionPerformed(event);
+      }
+
+      void displayFormulaDialog(Symphonie s, ActionEvent e) {
+        s.actionFactory.juryAddFormulaAction.actionPerformed(e);
       }
     };
 
@@ -1415,5 +1437,40 @@ public class Symphonie {
      *          Event that started the action
      */
     abstract void displayChart(Symphonie s, ActionEvent e);
+
+    /**
+     * Tells whether this view supports formula adding
+     * 
+     * @return true or false
+     */
+    boolean isFormulaSupported() {
+      return true;
+    }
+
+    /**
+     * Displays the formula adding dialog (if supported)
+     * 
+     * @param s
+     *          The symphonie instance
+     * @param e
+     *          Event that started the action
+     */
+    abstract void displayFormulaDialog(Symphonie s, ActionEvent e);
   }
+
+  // ----------------------------------------------------------------------------
+  // Actions that depends on views
+  // ----------------------------------------------------------------------------
+
+  /** Global add formula action (depends on views) */
+  private final AbstractAction addFormula = new AbstractAction("erf",
+      new ImageIcon(Symphonie.class.getResource("icons/formula.png"))) {
+
+    public void actionPerformed(ActionEvent e) {
+      currentView.displayFormulaDialog(Symphonie.this, e);
+    }
+  };
+
+  /** Add column action (depends on views) */
+  private AbstractAction addColumn;
 }

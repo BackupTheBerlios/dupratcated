@@ -167,18 +167,6 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public AbstractAction getFormulaAction(Icon icon) {
-    AbstractAction a = new AbstractAction() {
-
-      public void actionPerformed(ActionEvent event) {
-        // FormulaDialog fd = new FormulaDialog(frame, builder);
-        // fd.setVisible(true);
-      }
-    };
-    a.putValue(Action.SMALL_ICON, icon);
-    return a;
-  }
-
   public AbstractAction getFormulaCellAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
@@ -190,27 +178,7 @@ public class SymphonieActionFactory {
     a.putValue(Action.SMALL_ICON, icon);
     return a;
   }
-
-  public AbstractAction getColumnAction(Icon icon) {
-    AbstractAction a = new AbstractAction() {
-
-      public void actionPerformed(ActionEvent event) {
-      }
-    };
-    a.putValue(Action.SMALL_ICON, icon);
-    return a;
-  }
-
-  public AbstractAction getLineAction(Icon icon) {
-    AbstractAction a = new AbstractAction() {
-
-      public void actionPerformed(ActionEvent event) {
-      }
-    };
-    a.putValue(Action.SMALL_ICON, icon);
-    return a;
-  }
-
+  
   /**
    * Creates an action that prompts a login dialog
    * 
@@ -410,37 +378,71 @@ public class SymphonieActionFactory {
   protected AbstractAction studentChartAction;
 
   /* TEACHER VIEW ACTIONS ********************************** */
+
+  /**
+   * Creates an action that adds a mark column on the teacher model, this is a
+   * singleton action
+   * 
+   * @param icon
+   *          The action SMALL_ICON
+   * @return an AbstractAction
+   */
   public AbstractAction getAddMarkAction(Icon icon) {
-    AbstractAction a = new AbstractAction() {
+    if (addMarkAction == null) {
+      addMarkAction = new AbstractAction() {
 
-      private final AddMarkDialog amd = new AddMarkDialog(symphonie, builder);
+        private final AddMarkDialog amd = new AddMarkDialog(symphonie, builder);
 
-      public void actionPerformed(ActionEvent e) {
-        amd.setModal(true);
-        amd.setVisible(true);
-      }
-    };
-
-    a.putValue(Action.SMALL_ICON, icon);
-
-    return a;
+        public void actionPerformed(ActionEvent e) {
+          amd.setModal(true);
+          amd.setVisible(true);
+        }
+      };
+      addMarkAction.putValue(Action.SMALL_ICON, icon);
+    }
+    return addMarkAction;
   }
 
+  /** getAddMarkAction singleton instance */
+  protected AbstractAction addMarkAction;
+
+  /**
+   * Creates an action that displays a dialog that allows users to add a formula
+   * in the teacher view. This is a singleton action.
+   * 
+   * @param icon
+   *          the Action SMALL_ICON
+   * @return an AbstractAction
+   */
   public AbstractAction getTeacherAddFormulaAction(Icon icon) {
-    AbstractAction a = new AbstractAction() {
+    if (teacherAddFormulaAction == null) {
+      teacherAddFormulaAction = new AbstractAction() {
 
-      private final FormulaDialog dialog = new FormulaDialog(symphonie, builder);
+        private final FormulaDialog dialog = new FormulaDialog(symphonie,
+            builder);
 
-      public void actionPerformed(ActionEvent e) {
-        dialog.setModal(true);
-        dialog.setVisible(true);
-      }
-    };
-
-    a.putValue(Action.SMALL_ICON, icon);
-    return a;
+        public void actionPerformed(ActionEvent e) {
+          dialog.setModal(true);
+          dialog.setVisible(true);
+        }
+      };
+      teacherAddFormulaAction.putValue(Action.SMALL_ICON, icon);
+    }
+    return teacherAddFormulaAction;
   }
 
+  /** getTeacherAddFormulaAction singleton instance */
+  protected AbstractAction teacherAddFormulaAction;
+
+  /**
+   * Creates an action that removes a column
+   * 
+   * @param icon
+   *          the action SMALL_ICON
+   * @param table
+   *          the table where the columns are to be removed
+   * @return an AbstractAction
+   */
   public AbstractAction getRemoveTeacherColumnAction(Icon icon,
       final JTable table) {
     AbstractAction a = new AbstractAction() {
@@ -458,9 +460,7 @@ public class SymphonieActionFactory {
         }
       }
     };
-
     a.putValue(Action.SMALL_ICON, icon);
-
     return a;
   }
 
@@ -541,21 +541,35 @@ public class SymphonieActionFactory {
   protected AbstractAction teacherChartAction;
 
   /* JURY VIEW ACTIONS ************************************* */
+
+  /**
+   * Creates an action that displays a dialog that allows users to add a formula
+   * in the jury view. This is a singleton action.
+   * 
+   * @param icon
+   *          the Action SMALL_ICON
+   * @return an AbstractAction
+   */
   public AbstractAction getJuryAddFormulaAction(Icon icon) {
-    AbstractAction a = new AbstractAction() {
+    if (juryAddFormulaAction == null) {
+      juryAddFormulaAction = new AbstractAction() {
 
-      private final JuryFormulaDialog dialog = new JuryFormulaDialog(symphonie,
-          builder);
+        private final JuryFormulaDialog dialog = new JuryFormulaDialog(
+            symphonie, builder);
 
-      public void actionPerformed(ActionEvent e) {
-        dialog.setModal(true);
-        dialog.setVisible(true);
-      }
-    };
+        public void actionPerformed(ActionEvent e) {
+          dialog.setModal(true);
+          dialog.setVisible(true);
+        }
+      };
 
-    a.putValue(Action.SMALL_ICON, icon);
-    return a;
+      juryAddFormulaAction.putValue(Action.SMALL_ICON, icon);
+    }
+    return juryAddFormulaAction;
   }
+
+  /** getJuryPrintAction singleton instance */
+  protected AbstractAction juryAddFormulaAction;
 
   public AbstractAction getRemoveJuryColumnAction(Icon icon, final JTable table) {
     AbstractAction a = new AbstractAction() {
