@@ -47,7 +47,12 @@ public class SymphonieConstants {
   public static final String FORMULADIALOG_TITLE = "formuladialog.title";
   public static final String DATABASEDIALOG_TITLE = "databasedialog.title";
   public static final String DATABASEDIALOG_SERVER = "databasedialog.server";
-  public static final String DATABASEDIALOG_ERROR = "databasedialog.error";
+  public static final String ERROR = "error";
   public static final String DATABASEDIALOG_ERROR_PORT = "databasedialog.error.port";
   public static final String DATABASEDIALOG_ERROR_SERVER = "databasedialog.error.server";
+  public static final String CHANGEPASSDIALOG_OLD = "changepassdialog.old";
+  public static final String CHANGEPASSDIALOG_NEW = "changepassdialog.new";
+  public static final String CHANGEPASSDIALOG_VERIF = "changepassdialog.verif";
+  public static final String CHANGEPASSDIALOG_ERROR_EMPTY = "changepassdialog.error.empty";
+  public static final String CHANGEPASSDIALOG_ERROR_MATCH = "changepassdialog.error.match";
 }

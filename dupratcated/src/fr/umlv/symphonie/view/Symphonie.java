@@ -16,6 +16,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -46,7 +47,7 @@ import fr.umlv.symphonie.model.JuryModel;
 import fr.umlv.symphonie.model.StudentModel;
 import fr.umlv.symphonie.model.StudentTreeModel;
 import fr.umlv.symphonie.model.TeacherModel;
-import fr.umlv.symphonie.util.SymphonieComponentBuilder;
+import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.TextualResourcesLoader;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
 
@@ -55,7 +56,7 @@ public class Symphonie {
   private static final String FILE_PATTERN = "language/symphonie";
   private static final String FILE_CHARSET = "ISO-8859-1";
 
-  private static SymphonieComponentBuilder builder;
+  private static ComponentBuilder builder;
   private static HashMap<String, String> english;
   private static HashMap<String, String> french;
   private static JFrame frame;
@@ -72,7 +73,7 @@ public class Symphonie {
       throw new AssertionError("Bim ! -> " + e.getMessage());
     }
 
-    builder = new SymphonieComponentBuilder(french);
+    builder = new ComponentBuilder(french);
     frame = new JFrame(builder.getValue(SymphonieConstants.FRAME_TITLE));
     frame.setContentPane(getContentPane(frame, builder));
 
@@ -95,7 +96,7 @@ public class Symphonie {
    * @return JMenu
    */
   private static JMenu getFileMenu() {
-    JMenu file = builder.buildMenu(SymphonieConstants.FILE_MENU);
+    JMenu file = (JMenu) builder.buildButton(SymphonieConstants.FILE_MENU, ComponentBuilder.ButtonType.MENU);
 
     /*
      * Actions Menu "File"
@@ -119,21 +120,21 @@ public class Symphonie {
      * *********************************************************
      */
 
-    file.add(builder.buildMenuItem(a_import,
+    file.add(builder.buildButton(a_import,
         SymphonieConstants.IMPORT_MENU_ITEM,
-        SymphonieComponentBuilder.JMenuItemType.NORMAL_ITEM));
-    file.add(builder.buildMenuItem(export, SymphonieConstants.EXPORT_MENU_ITEM,
-        SymphonieComponentBuilder.JMenuItemType.NORMAL_ITEM));
+        ComponentBuilder.ButtonType.MENU_ITEM));
+    file.add(builder.buildButton(export, SymphonieConstants.EXPORT_MENU_ITEM,
+        ComponentBuilder.ButtonType.MENU_ITEM));
 
     file.add(new JSeparator());
 
-    file.add(builder.buildMenuItem(print, SymphonieConstants.PRINT_MENU_ITEM,
-        SymphonieComponentBuilder.JMenuItemType.NORMAL_ITEM));
+    file.add(builder.buildButton(print, SymphonieConstants.PRINT_MENU_ITEM,
+        ComponentBuilder.ButtonType.MENU_ITEM));
 
     file.add(new JSeparator());
 
-    file.add(builder.buildMenuItem(exit, SymphonieConstants.EXIT_MENU_ITEM,
-        SymphonieComponentBuilder.JMenuItemType.NORMAL_ITEM));
+    file.add(builder.buildButton(exit, SymphonieConstants.EXIT_MENU_ITEM,
+        ComponentBuilder.ButtonType.MENU_ITEM));
 
     return file;
   }
@@ -144,7 +145,7 @@ public class Symphonie {
    * @return JMenu
    */
   private static JMenu getLangMenu() {
-    JMenu lang = builder.buildMenu(SymphonieConstants.LANGUAGE_MENU_ITEM);
+    JMenu lang = (JMenu) builder.buildButton(SymphonieConstants.LANGUAGE_MENU_ITEM, ComponentBuilder.ButtonType.MENU);
 
     // Actions
     Action inEnglish = SymphonieActionFactory.getLanguageChangeAction(english,
@@ -154,14 +155,14 @@ public class Symphonie {
 
     // Items
 
-    JCheckBoxMenuItem frBox = (JCheckBoxMenuItem) builder.buildMenuItem(
+    JCheckBoxMenuItem frBox = (JCheckBoxMenuItem) builder.buildButton(
         inFrench, SymphonieConstants.FRENCH_MENU_ITEM,
-        SymphonieComponentBuilder.JMenuItemType.CHECK_BOX_ITEM);
+        ComponentBuilder.ButtonType.CHECK_BOX_MENU_ITEM);
     frBox.setSelected(true);
 
-    JCheckBoxMenuItem engBox = (JCheckBoxMenuItem) builder.buildMenuItem(
+    JCheckBoxMenuItem engBox = (JCheckBoxMenuItem) builder.buildButton(
         inEnglish, SymphonieConstants.ENGLISH_MENU_ITEM,
-        SymphonieComponentBuilder.JMenuItemType.CHECK_BOX_ITEM);
+        ComponentBuilder.ButtonType.CHECK_BOX_MENU_ITEM);
 
     ButtonGroup g = new ButtonGroup();
     g.add(engBox);
@@ -181,7 +182,8 @@ public class Symphonie {
    * @return JMenu
    */
   private static JMenu getModeMenu() {
-    JMenu mode = builder.buildMenu(SymphonieConstants.CHANGE_VIEW_MENU);
+    JMenu mode = (JMenu) builder.buildButton(
+        SymphonieConstants.CHANGE_VIEW_MENU, ComponentBuilder.ButtonType.MENU);
     // Actions
     Action viewStudent = SymphonieActionFactory.getModeChangeAction("student",
         new ImageIcon(), tab, 0);
@@ -191,17 +193,17 @@ public class Symphonie {
         new ImageIcon(), tab, 2);
 
     // Items
-    JCheckBoxMenuItem studentBox = (JCheckBoxMenuItem) builder.buildMenuItem(
+    JCheckBoxMenuItem studentBox = (JCheckBoxMenuItem) builder.buildButton(
         viewStudent, SymphonieConstants.VIEW_STUDENT_MENU_ITEM,
-        SymphonieComponentBuilder.JMenuItemType.CHECK_BOX_ITEM);
+        ComponentBuilder.ButtonType.CHECK_BOX_MENU_ITEM);
 
-    JCheckBoxMenuItem teacherBox = (JCheckBoxMenuItem) builder.buildMenuItem(
+    JCheckBoxMenuItem teacherBox = (JCheckBoxMenuItem) builder.buildButton(
         viewTeacher, SymphonieConstants.VIEW_TEACHER_MENU_ITEM,
-        SymphonieComponentBuilder.JMenuItemType.CHECK_BOX_ITEM);
+        ComponentBuilder.ButtonType.CHECK_BOX_MENU_ITEM);
 
-    JCheckBoxMenuItem juryBox = (JCheckBoxMenuItem) builder.buildMenuItem(
+    JCheckBoxMenuItem juryBox = (JCheckBoxMenuItem) builder.buildButton(
         viewJury, SymphonieConstants.VIEW_JURY_MENU_ITEM,
-        SymphonieComponentBuilder.JMenuItemType.CHECK_BOX_ITEM);
+        ComponentBuilder.ButtonType.CHECK_BOX_MENU_ITEM);
 
     ButtonGroup g = new ButtonGroup();
     g.add(studentBox);
@@ -221,7 +223,8 @@ public class Symphonie {
    * @return JMenu
    */
   private static JMenu getWindowMenu() {
-    JMenu window = builder.buildMenu(SymphonieConstants.WINDOW_MENU);
+    JMenu window = (JMenu) builder.buildButton(SymphonieConstants.WINDOW_MENU,
+        ComponentBuilder.ButtonType.MENU);
 
     /* Items********************************************************* */
     window.add(getModeMenu());
@@ -237,7 +240,8 @@ public class Symphonie {
    * @return JMenu
    */
   private static JMenu getFormatMenu() {
-    JMenu format = builder.buildMenu(SymphonieConstants.FORMAT_MENU);
+    JMenu format = (JMenu) builder.buildButton(SymphonieConstants.FORMAT_MENU,
+        ComponentBuilder.ButtonType.MENU);
 
     /* Actions ******************************************************* */
     Action formula = SymphonieActionFactory.getFormulaAction(new ImageIcon(
@@ -246,11 +250,11 @@ public class Symphonie {
         new ImageIcon(), frame, builder);
 
     /* Items********************************************************* */
-    format.add(builder.buildMenuItem(formula,
+    format.add(builder.buildButton(formula,
         SymphonieConstants.FORMULA_MENU_ITEM,
-        SymphonieComponentBuilder.JMenuItemType.NORMAL_ITEM));
-    format.add(builder.buildMenuItem(f_cell, SymphonieConstants.CELL_MENU_ITEM,
-        SymphonieComponentBuilder.JMenuItemType.NORMAL_ITEM));
+        ComponentBuilder.ButtonType.MENU_ITEM));
+    format.add(builder.buildButton(f_cell, SymphonieConstants.CELL_MENU_ITEM,
+        ComponentBuilder.ButtonType.MENU_ITEM));
 
     return format;
   }
@@ -261,7 +265,8 @@ public class Symphonie {
    * @return JMenu
    */
   private static JMenu getInsertMenu() {
-    JMenu insert = builder.buildMenu(SymphonieConstants.INSERT_MENU);
+    JMenu insert = (JMenu) builder.buildButton(SymphonieConstants.INSERT_MENU,
+        ComponentBuilder.ButtonType.MENU);
     /* Actions ******************************************************* */
     Action column = SymphonieActionFactory.getColumnAction(new ImageIcon(
         Symphonie.class.getResource("icons/insert_column.png")));
@@ -269,12 +274,12 @@ public class Symphonie {
         Symphonie.class.getResource("icons/insert_line.png")));
 
     /* Items********************************************************* */
-    insert.add(builder.buildMenuItem(column,
+    insert.add(builder.buildButton(column,
         SymphonieConstants.INSERT_COLUMN_MENU_ITEM,
-        SymphonieComponentBuilder.JMenuItemType.NORMAL_ITEM));
-    insert.add(builder.buildMenuItem(line,
+        ComponentBuilder.ButtonType.MENU_ITEM));
+    insert.add(builder.buildButton(line,
         SymphonieConstants.INSERT_LINE_MENU_ITEM,
-        SymphonieComponentBuilder.JMenuItemType.NORMAL_ITEM));
+        ComponentBuilder.ButtonType.MENU_ITEM));
     return insert;
   }
 
@@ -284,23 +289,24 @@ public class Symphonie {
    * @return JMenu
    */
   private static JMenu getAdminMenu() {
-    JMenu admin = builder.buildMenu(SymphonieConstants.ADMIN_MENU);
+    JMenu admin = (JMenu) builder.buildButton(SymphonieConstants.ADMIN_MENU,
+        ComponentBuilder.ButtonType.MENU);
     /* Actions ******************************************************* */
     Action connect = SymphonieActionFactory.getConnectAction(new ImageIcon(
         Symphonie.class.getResource("icons/admin.png")), builder);
     Action db = SymphonieActionFactory.getDBAction(new ImageIcon(
         Symphonie.class.getResource("icons/db.png")), frame, builder);
     Action pwd = SymphonieActionFactory.getPwdAction(new ImageIcon(
-        Symphonie.class.getResource("icons/pwd.png")));
+        Symphonie.class.getResource("icons/pwd.png")), frame, builder);
 
     /* Items********************************************************* */
-    admin.add(builder.buildMenuItem(connect,
+    admin.add(builder.buildButton(connect,
         SymphonieConstants.CONNECT_MENU_ITEM,
-        SymphonieComponentBuilder.JMenuItemType.NORMAL_ITEM));
-    admin.add(builder.buildMenuItem(db, SymphonieConstants.DB_MENU_ITEM,
-        SymphonieComponentBuilder.JMenuItemType.NORMAL_ITEM));
-    admin.add(builder.buildMenuItem(pwd, SymphonieConstants.PWD_MENU_ITEM,
-        SymphonieComponentBuilder.JMenuItemType.NORMAL_ITEM));
+        ComponentBuilder.ButtonType.MENU_ITEM));
+    admin.add(builder.buildButton(db, SymphonieConstants.DB_MENU_ITEM,
+        ComponentBuilder.ButtonType.MENU_ITEM));
+    admin.add(builder.buildButton(pwd, SymphonieConstants.PWD_MENU_ITEM,
+        ComponentBuilder.ButtonType.MENU_ITEM));
     return admin;
   }
 
@@ -314,7 +320,7 @@ public class Symphonie {
     toolbar.add(SymphonieActionFactory.getConnectAction(new ImageIcon(
         Symphonie.class.getResource("icons/connect.png")), builder));
     toolbar.add(SymphonieActionFactory.getDBAction(new ImageIcon(
-        Symphonie.class.getResource("icons/db.png")),frame,builder));
+        Symphonie.class.getResource("icons/db.png")), frame, builder));
 
     toolbar.setFloatable(false);
 
@@ -550,7 +556,7 @@ public class Symphonie {
    * @throws DataManagerException
    */
   private static JPanel getContentPane(final JFrame f,
-      final SymphonieComponentBuilder builder) throws DataManagerException {
+      final ComponentBuilder builder) throws DataManagerException {
     JPanel panel = new JPanel(new BorderLayout());
     panel.add(getToolbar(), BorderLayout.NORTH);
 
@@ -559,22 +565,53 @@ public class Symphonie {
     tab = new JTabbedPane(JTabbedPane.BOTTOM, JTabbedPane.SCROLL_TAB_LAYOUT);
 
     /* Student JTabbedPane */
-    tab.add(SymphonieConstants.VIEW_STUDENT_MENU_ITEM, new JScrollPane(
-        getStudentPane(dataManager)));
-    panel.add(tab);
+    tab.add(builder.getValue(SymphonieConstants.VIEW_STUDENT_MENU_ITEM),
+        new JScrollPane(getStudentPane(dataManager)));
+    final int sTab = tab.indexOfTab(builder
+        .getValue(SymphonieConstants.VIEW_STUDENT_MENU_ITEM));
+    builder.addChangeListener((JComponent) tab.getComponentAt(sTab),
+        new ChangeListener() {
+
+          public void stateChanged(ChangeEvent e) {
+            tab.setTitleAt(sTab, builder
+                .getValue(SymphonieConstants.VIEW_STUDENT_MENU_ITEM));
+          }
+        });
 
     /* Teacher JTabbedPane */
-    tab.add(SymphonieConstants.VIEW_TEACHER_MENU_ITEM, new JScrollPane(
-        getTeacherPane(dataManager)));
+    tab.add(builder.getValue(SymphonieConstants.VIEW_TEACHER_MENU_ITEM),
+        new JScrollPane(getTeacherPane(dataManager)));
+    final int tTab = tab.indexOfTab(builder
+        .getValue(SymphonieConstants.VIEW_TEACHER_MENU_ITEM));
+    builder.addChangeListener((JComponent) tab.getComponentAt(tTab),
+        new ChangeListener() {
+
+          public void stateChanged(ChangeEvent e) {
+            tab.setTitleAt(tTab, builder
+                .getValue(SymphonieConstants.VIEW_TEACHER_MENU_ITEM));
+          }
+        });
+
+    /* Jury JTabbedPane */
+    tab.add(builder.getValue(SymphonieConstants.VIEW_JURY_MENU_ITEM),
+        new JScrollPane(getJuryPane(dataManager)));
+    final int jTab = tab.indexOfTab(builder
+        .getValue(SymphonieConstants.VIEW_JURY_MENU_ITEM));
+    builder.addChangeListener((JComponent) tab.getComponentAt(jTab),
+        new ChangeListener() {
+
+          public void stateChanged(ChangeEvent e) {
+            tab.setTitleAt(jTab, builder
+                .getValue(SymphonieConstants.VIEW_JURY_MENU_ITEM));
+          }
+        });
+
     panel.add(tab);
 
-    /* Teacher JTabbedPane */
-    tab.add(SymphonieConstants.VIEW_JURY_MENU_ITEM, new JScrollPane(
-        getJuryPane(dataManager)));
-
+    /* change the title of the frame */
     builder.addChangeListener(panel, new ChangeListener() {
 
-      public void stateChanged(ChangeEvent arg0) {
+      public void stateChanged(ChangeEvent e) {
         f.setTitle(builder.getValue(SymphonieConstants.FRAME_TITLE));
       }
     });

@@ -17,7 +17,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTabbedPane;
 
-import fr.umlv.symphonie.util.SymphonieComponentBuilder;
+import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.wizard.DefaultWizardModel;
 import fr.umlv.symphonie.util.wizard.Wizard;
 import fr.umlv.symphonie.util.wizard.WizardPanel;
@@ -114,7 +114,7 @@ public class SymphonieActionFactory {
 
   public static AbstractAction getLanguageChangeAction(
       final HashMap<String, String> resources,
-      final SymphonieComponentBuilder builder) {
+      final ComponentBuilder builder) {
     return new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
@@ -124,7 +124,7 @@ public class SymphonieActionFactory {
   }
 
   public static AbstractAction getFormulaAction(Icon icon, final JFrame frame,
-      final SymphonieComponentBuilder builder) {
+      final ComponentBuilder builder) {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
@@ -137,7 +137,7 @@ public class SymphonieActionFactory {
   }
 
   public static AbstractAction getFormulaCellAction(Icon icon,
-      final JFrame frame, final SymphonieComponentBuilder builder) {
+      final JFrame frame, final ComponentBuilder builder) {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
@@ -170,7 +170,7 @@ public class SymphonieActionFactory {
   }
 
   public static AbstractAction getConnectAction(Icon icon,
-      final SymphonieComponentBuilder builder) {
+      final ComponentBuilder builder) {
 
     AbstractAction a = new AbstractAction() {
 
@@ -206,7 +206,7 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getDBAction(Icon icon,final JFrame frame, final SymphonieComponentBuilder builder ) {
+  public static AbstractAction getDBAction(Icon icon,final JFrame frame, final ComponentBuilder builder ) {
     AbstractAction a = new AbstractAction() {
       public void actionPerformed(ActionEvent event) {
         DatabaseDialog dbd = new DatabaseDialog(frame, builder);
@@ -217,10 +217,12 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getPwdAction(Icon icon) {
+  public static AbstractAction getPwdAction(Icon icon,final JFrame frame, final ComponentBuilder builder ) {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
+        ChangePassDialog cpd = new ChangePassDialog(frame, builder);
+        cpd.setVisible(true);
       }
     };
     a.putValue(Action.SMALL_ICON, icon);
