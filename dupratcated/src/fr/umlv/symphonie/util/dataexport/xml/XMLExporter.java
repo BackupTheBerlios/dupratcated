@@ -177,10 +177,9 @@ public class XMLExporter implements DataExporter {
   private static void addFormulaNode(Node root, Formula f) {
     final Node formula;
 
-    /** <formula id_formula="?" id_title=?">... </formula> */
+    /** <formula id_formula="?">... </formula> */
     Element e = root.getOwnerDocument().createElement("formula");
-    e.setAttribute("id_formula", "" + 0);
-    e.setAttribute("id_examen", "" + 0);
+    e.setAttribute("id_formula", "" + f.getID());
     formula = root.appendChild(e);
 
     /** <column>? </column> */

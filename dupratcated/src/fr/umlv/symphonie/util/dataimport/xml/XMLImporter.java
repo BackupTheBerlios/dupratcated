@@ -230,9 +230,8 @@ public class XMLImporter implements DataImporter {
       e = (Element) n;    
 
       /** we create the formula object */
-      //f = new Formula();
+      //f = new ;
       Integer.parseInt(e.getAttribute("id_formula"));
-      Integer.parseInt(e.getAttribute("id_examen"));
       Integer.parseInt(e
           .getElementsByTagName("column").item(0).getTextContent());
       e.getElementsByTagName("expression").item(0).getTextContent();
