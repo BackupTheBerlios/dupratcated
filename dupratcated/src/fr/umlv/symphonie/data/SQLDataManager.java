@@ -1247,8 +1247,8 @@ public class SQLDataManager extends SQLDataManagerConstants implements
   public void changeStudentMarkValue(StudentMark studentMark, float newValue)
       throws DataManagerException {
     
-    System.out.println("new value to set : " + newValue);
-    System.out.println(studentMark.getMark() + " " + studentMark.getCourse());
+    //System.out.println("new value to set : " + newValue);
+    //System.out.println(studentMark.getMark() + " " + studentMark.getCourse());
     
     String request = "update " + TABLE_HAS_MARK + " " + "set "
         + COLUMN_MARK_FROM_TABLE_HAS_MARK + " = " + newValue + " " + "where "
@@ -1325,7 +1325,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
         + COLUMN_COEFF_FROM_TABLE_TEST + " = '" + newCoeff + "' " + "WHERE "
         + COLUMN_ID_FROM_TABLE_TEST + " = '" + mark.getId() + "' " + ";";
 
-    System.out.println(request);
+    //System.out.println(request);
 
     try {
       connectAndUpdate(request);
