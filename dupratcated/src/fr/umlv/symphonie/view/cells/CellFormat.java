@@ -64,4 +64,9 @@ public final class CellFormat {
   public void setForeground(Color foreground) {
     this.foreground = foreground;
   }
+
+  public String toString() {
+    return "[" + condition.toString() + " | " + foreground + " | " + background
+        + "]";
+  }
 }
