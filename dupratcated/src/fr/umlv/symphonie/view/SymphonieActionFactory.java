@@ -287,7 +287,7 @@ public class SymphonieActionFactory {
   public AbstractAction getPwdAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
-      private final ChangePassDialog cpd = new ChangePassDialog(symphonie.getFrame(), builder, symphonie.getIdentificationStrategy());
+      private final ChangePassDialog cpd = new ChangePassDialog(symphonie, builder);
 
       public void actionPerformed(ActionEvent event) {
         cpd.setVisible(true);
