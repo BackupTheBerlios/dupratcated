@@ -59,6 +59,7 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -579,6 +580,7 @@ public class Symphonie {
     removeStudent.getAction().setEnabled(false);
     treePop.add(removeStudent);
     toolbar.add(createToolbarButton(REMOVE_STUDENT, removeStudent, builder));
+    toolbar.addSeparator();
 
     // listener for popup
     tree.addMouseListener(new MouseAdapter() {
@@ -812,6 +814,7 @@ public class Symphonie {
     removeCourse.getAction().setEnabled(false);
     treePop.add(removeCourse);
     toolbar.add(createToolbarButton(REMOVECOURSE, removeCourse, builder));
+    toolbar.addSeparator();
 
     // listener for popup
     tree.addMouseListener(new MouseAdapter() {
@@ -901,7 +904,6 @@ public class Symphonie {
           if (row >= 3) {
             int col = table.columnAtPoint(e.getPoint());
             Object o = table.getValueAt(row, col);
-            System.out.println(o);
             selectedCell = new Pair<Object, Point>(table.getValueAt(row, col),
                 new Point(row, col));
             formatCell.setEnabled(true);
@@ -1022,8 +1024,14 @@ public class Symphonie {
     jeep.setEditable(false);
 
     // Disable
-    for (AbstractButton b : butts)
-      b.setEnabled(false);
+    Action a;
+    for (AbstractButton b : butts) {
+      a = b.getAction();
+      if (a != null)
+        a.setEnabled(false);
+      else
+        b.setEnabled(false);
+    }
 
     // Listen user clicks
     jeep.addHyperlinkListener(new HyperlinkListener() {
@@ -1032,8 +1040,14 @@ public class Symphonie {
         if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
           String f = e.getURL().getFile();
           setCurrentView(View.valueOf(f.substring(f.lastIndexOf('/') + 1)));
-          for (AbstractButton b : butts)
-            b.setEnabled(true);
+          Action act;
+          for (AbstractButton b : butts) {
+            act = b.getAction();
+            if (act != null)
+              act.setEnabled(true);
+            else
+              b.setEnabled(true);
+          }
           content.add(toolbar, BorderLayout.NORTH);
           frame.setContentPane(content);
         }
@@ -1088,14 +1102,12 @@ public class Symphonie {
     tab.add(builder.getValue(VIEW_STUDENT_MENU_ITEM), jsp);
     builder.addChangeListener(jsp, makeTabChangeListener(tab, View.student,
         builder));
-    toolbar.add(new JSeparator());
 
     /* Teacher JTabbedPane */
     jsp = new JScrollPane(getTeacherPane(toolbar));
     tab.add(builder.getValue(VIEW_TEACHER_MENU_ITEM), jsp);
     builder.addChangeListener(jsp, makeTabChangeListener(tab, View.teacher,
         builder));
-    toolbar.add(new JSeparator());
 
     /* Jury JTabbedPane */
     jsp = new JScrollPane(getJuryPane());
@@ -1196,6 +1208,7 @@ public class Symphonie {
         .getWizardAction(new ImageIcon(Symphonie.class
             .getResource("icons/import.png")), importW), IMPORT_MENU_ITEM,
         ButtonType.MENU_ITEM);
+    imp.getAction().setEnabled(false);
     JMenuItem exp = (JMenuItem) builder.buildButton(actionFactory
         .getWizardAction(new ImageIcon(Symphonie.class
             .getResource("icons/export.png")), exportW), EXPORT_MENU_ITEM,
@@ -1273,7 +1286,6 @@ public class Symphonie {
 
       public void windowClosed(java.awt.event.WindowEvent e) {
         try {
-          System.out.println("Symphonie.Symphonie()");
           if (logger.isIdentified()) logger.logout();
         } catch (IdentificationException e1) {
           errDisplay.showException(e1);
@@ -1282,7 +1294,6 @@ public class Symphonie {
 
       public void windowClosing(java.awt.event.WindowEvent e) {
         try {
-          System.out.println("Symphonie.Symphonie()");
           if (logger.isIdentified()) logger.logout();
         } catch (IdentificationException e1) {
           errDisplay.showException(e1);
@@ -1636,6 +1647,10 @@ public class Symphonie {
 
       void displayFormulaDialog(Symphonie s, ActionEvent e) {
       }
+
+      AbstractTableModel getModel(Symphonie s) {
+        return s.getCurrentStudentModel();
+      }
     },
     teacher {
 
@@ -1665,6 +1680,10 @@ public class Symphonie {
       void displayFormulaDialog(Symphonie s, ActionEvent e) {
         s.actionFactory.teacherAddFormulaAction.actionPerformed(e);
       }
+
+      AbstractTableModel getModel(Symphonie s) {
+        return s.getCurrentTeacherModel();
+      }
     },
     jury {
 
@@ -1692,6 +1711,10 @@ public class Symphonie {
 
       void displayFormulaDialog(Symphonie s, ActionEvent e) {
         s.actionFactory.juryAddFormulaAction.actionPerformed(e);
+      }
+
+      AbstractTableModel getModel(Symphonie s) {
+        return s.getCurrentJuryModel();
       }
     };
 
@@ -1775,6 +1798,16 @@ public class Symphonie {
      *          Event that started the action
      */
     abstract void displayFormulaDialog(Symphonie s, ActionEvent e);
+
+    /**
+     * Returns the table model associated to the view
+     * 
+     * @param s
+     *          The symphonie instance
+     * @return a <code>TableModel</code>
+     */
+    abstract AbstractTableModel getModel(Symphonie s);
+
   }
 
   // ----------------------------------------------------------------------------

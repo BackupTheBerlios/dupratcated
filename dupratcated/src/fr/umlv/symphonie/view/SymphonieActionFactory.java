@@ -28,6 +28,7 @@ import fr.umlv.symphonie.model.JuryModel;
 import fr.umlv.symphonie.model.StudentModel;
 import fr.umlv.symphonie.model.TeacherModel;
 import fr.umlv.symphonie.util.ComponentBuilder;
+import fr.umlv.symphonie.util.completion.IDictionarySupport;
 import fr.umlv.symphonie.util.identification.IdentificationException;
 import fr.umlv.symphonie.util.identification.IdentificationStrategy;
 import fr.umlv.symphonie.util.wizard.Wizard;
@@ -194,27 +195,18 @@ public class SymphonieActionFactory {
       private final CellDialog cd = new CellDialog(symphonie, builder);
 
       public void actionPerformed(ActionEvent event) {
+        cd.setDictionary(((IDictionarySupport) symphonie.getCurrentView()
+            .getModel(symphonie)).getDictionary());
         cd.setVisible(true);
         CellFormat cf = cd.getUserFormat();
-        AbstractTableModel atm = null;
-        switch (symphonie.getCurrentView().ordinal()) {
-          case 0:
-            atm = symphonie.getCurrentStudentModel();
-            break;
-          case 1:
-            atm = symphonie.getCurrentTeacherModel();
-            break;
-          case 2:
-            atm = symphonie.getCurrentJuryModel();
-            break;
-          case 3:
-            throw new IllegalStateException("Illegal view number");
+        if (cf != null) {
+          AbstractTableModel atm = symphonie.getCurrentView().getModel(
+              symphonie);
+          ((ObjectFormattingSupport) atm).getFormattableCellRenderer()
+              .addFormatedObject(symphonie.selectedCell.getFirst(), cf);
+          Point p = symphonie.selectedCell.getSecond();
+          atm.fireTableCellUpdated(p.x, p.y);
         }
-
-        ((ObjectFormattingSupport) atm).getFormattableCellRenderer()
-            .addFormatedObject(symphonie.selectedCell.getFirst(), cf);
-        Point p = symphonie.selectedCell.getSecond();
-        atm.fireTableCellUpdated(p.x, p.y);
       }
     };
     a.putValue(Action.SMALL_ICON, icon);
@@ -234,21 +226,8 @@ public class SymphonieActionFactory {
       deleteCellFormatAction = new AbstractAction() {
 
         public void actionPerformed(ActionEvent event) {
-          AbstractTableModel atm = null;
-          switch (symphonie.getCurrentView().ordinal()) {
-            case 0:
-              atm = symphonie.getCurrentStudentModel();
-              break;
-            case 1:
-              atm = symphonie.getCurrentTeacherModel();
-              break;
-            case 2:
-              atm = symphonie.getCurrentJuryModel();
-              break;
-            case 3:
-              throw new IllegalStateException("Illegal view number");
-          }
-
+          AbstractTableModel atm = symphonie.getCurrentView().getModel(
+              symphonie);
           ((ObjectFormattingSupport) atm).getFormattableCellRenderer()
               .removeFormatedObject(symphonie.selectedCell.getFirst());
           Point p = symphonie.selectedCell.getSecond();
@@ -556,6 +535,8 @@ public class SymphonieActionFactory {
 
         public void actionPerformed(ActionEvent e) {
           dialog.setModal(true);
+          dialog.setDictionary(symphonie.getCurrentTeacherModel()
+              .getDictionary());
           dialog.setVisible(true);
         }
       };
@@ -737,6 +718,7 @@ public class SymphonieActionFactory {
 
         public void actionPerformed(ActionEvent e) {
           dialog.setModal(true);
+          dialog.setDictionary(symphonie.getCurrentJuryModel().getDictionary());
           dialog.setVisible(true);
         }
       };

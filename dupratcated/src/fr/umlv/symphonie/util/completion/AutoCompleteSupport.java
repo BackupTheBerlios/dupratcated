@@ -5,9 +5,7 @@
 
 package fr.umlv.symphonie.util.completion;
 
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.regex.Pattern;
 
 import javax.swing.text.JTextComponent;
@@ -42,19 +40,19 @@ public final class AutoCompleteSupport {
    *          The dictionary of completable words
    * @param wordDelimiter
    *          A list of tokens(regexp) that separates words between them
-   * @return a <code>KeyListener</code>, remove this listener from the text
-   *         component listeners list to remove autocomplete support.
+   * @return a <code>DictionaryKeyListener</code>, remove this listener from
+   *         the text component listeners list to remove autocomplete support.
    */
-  public static KeyListener addSupport(final JTextComponent textCo,
-      final LookableCollection<String> dictionary, String wordDelimiter) {
+  public static DictionaryKeyListener addSupport(final JTextComponent textCo,
+      LookableCollection<String> dictionary, String wordDelimiter) {
 
     // Verify arguments
-    if (wordDelimiter == null || textCo == null || dictionary == null)
+    if (wordDelimiter == null || textCo == null)
       throw new IllegalArgumentException("Method doesn't take null parameters");
 
     final Pattern delimiter = Pattern.compile(wordDelimiter);
 
-    KeyAdapter ka = new KeyAdapter() {
+    DictionaryKeyListener ka = new DictionaryKeyListener() {
 
       boolean isTextSelected;
 
@@ -99,7 +97,10 @@ public final class AutoCompleteSupport {
         }
       }
     };
+    
     textCo.addKeyListener(ka);
+    ka.setDictionary(dictionary);
+    
     return ka;
   }
 }
