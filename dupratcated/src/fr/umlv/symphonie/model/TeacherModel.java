@@ -34,6 +34,7 @@ import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.data.formula.Formula;
 import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
+import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.Pair;
 import fr.umlv.symphonie.util.StudentAverage;
 import fr.umlv.symphonie.view.cells.CellFormat;
@@ -51,7 +52,7 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
 
   private final Map<String, Number> mappedValues = new HashMap<String, Number>();
 
-  private static TeacherModel instance = null;
+//  private static TeacherModel instance = null;
 
   protected final Comparator<Student> StudentComparator = new Comparator<Student>() {
 
@@ -69,7 +70,8 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
   /*
    * le datamanager et la matiere
    */
-  protected DataManager manager;
+  protected final DataManager manager;
+  protected final ComponentBuilder builder;
   protected Course course = null;
 
   /*
@@ -102,27 +104,28 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
 
   private int lastRow = -1;
   
-  protected TeacherModel(DataManager manager) {
+  public TeacherModel(DataManager manager, ComponentBuilder builder) {
     this.manager = manager;
+	this.builder = builder;
   }
 
-  static public TeacherModel getInstance(final DataManager manager) {
-    if (instance == null)
-      instance = new TeacherModel(manager);
+//  static public TeacherModel getInstance(final DataManager manager) {
+//    if (instance == null)
+//      instance = new TeacherModel(manager);
+//
+//    else
+//      instance.setManager(manager);
+//
+//    return instance;
+//  }
 
-    else
-      instance.setManager(manager);
-
-    return instance;
-  }
-
-  /**
-   * @param manager
-   *          The manager to set.
-   */
-  protected void setManager(DataManager manager) {
-    this.manager = manager;
-  }
+//  /**
+//   * @param manager
+//   *          The manager to set.
+//   */
+//  protected void setManager(DataManager manager) {
+//    this.manager = manager;
+//  }
 
 
   public void setCourse(final Course courseToAdd) {

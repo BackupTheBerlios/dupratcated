@@ -13,6 +13,7 @@ import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.formula.Formula;
+import fr.umlv.symphonie.util.ComponentBuilder;
 
 
 /**
@@ -27,8 +28,8 @@ public class AdminJuryModel extends JuryModel {
 //  private static AdminJuryModel instance = null;
   
   
-  public AdminJuryModel(DataManager manager){
-    super(manager);
+  public AdminJuryModel(DataManager manager, ComponentBuilder builder){
+    super(manager, builder);
   }
   
 //  public static AdminJuryModel getInstance(DataManager manager){

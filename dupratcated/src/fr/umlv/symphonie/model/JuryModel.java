@@ -31,6 +31,7 @@ import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.data.formula.Formula;
 import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
+import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.Pair;
 import fr.umlv.symphonie.util.StudentAverage;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
@@ -43,7 +44,8 @@ import fr.umlv.symphonie.view.cells.ObjectFormattingSupport;
  */
 public class JuryModel extends AbstractTableModel implements ObjectFormattingSupport {
 
-  protected DataManager manager;
+  protected final DataManager manager;
+  protected final ComponentBuilder builder;
 
   protected int rowCount = 0;
   protected int columnCount = 0;
@@ -65,28 +67,29 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
 
   protected final Object lock = new Object();
 
-  private static JuryModel instance = null;
+//  private static JuryModel instance = null;
 
   private int lastRow = -1;
   
-  protected JuryModel(DataManager manager) {
+  public JuryModel(DataManager manager, ComponentBuilder builder) {
     this.manager = manager;
+	this.builder = builder;
     update();
   }
 
-  protected void setManager(DataManager manager) {
-    this.manager = manager;
-  }
+//  protected void setManager(DataManager manager) {
+//    this.manager = manager;
+//  }
 
-  public static JuryModel getInstance(DataManager manager) {
-    if (instance == null)
-      instance = new JuryModel(manager);
-
-    else
-      instance.setManager(manager);
-
-    return instance;
-  }
+//  public static JuryModel getInstance(DataManager manager) {
+//    if (instance == null)
+//      instance = new JuryModel(manager);
+//
+//    else
+//      instance.setManager(manager);
+//
+//    return instance;
+//  }
 
   public void update() {
 
