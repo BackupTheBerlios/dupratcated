@@ -39,7 +39,7 @@ public final class HSSFExportUtils {
   public static final String MARK_TITLE_KEY = "hssfdataexporter.marktitle";
 
   /** Course title description key */
-  public static final String COURSE_TITLE_KEY = "hssfdataexporter.marktitletitle";
+  public static final String COURSE_TITLE_KEY = "hssfdataexporter.coursetitle";
 
   /** Average mark description key */
   public static final String AVERAGE_KEY = "hssfdataexporter.average";
