@@ -4,6 +4,7 @@
  */
 package fr.umlv.symphonie.model;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.util.*;
 
@@ -29,8 +30,11 @@ import fr.umlv.symphonie.data.Mark;
 import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
+import fr.umlv.symphonie.data.formula.BasicFormulaFactory;
 import fr.umlv.symphonie.data.formula.Formula;
 import fr.umlv.symphonie.util.Pair;
+import fr.umlv.symphonie.view.cells.CellFormat;
+import fr.umlv.symphonie.view.cells.CellRendererFactory;
 
 /*
  * par convention il est decide
@@ -82,15 +86,16 @@ public class TeacherModel extends AbstractTableModel {
       }
     });
   
+  
+  private final HashMap<Object, CellFormat> formattedObjects = new HashMap<Object, CellFormat>();
 
-  
-  
-  
-  
   public TeacherModel(DataManager manager) {
     this.manager = manager;
   }
   
+  public HashMap<Object, CellFormat> getFormattedObjects() {
+    return formattedObjects;
+  }
   
   public void setCourse(Course course) {
     
@@ -464,7 +469,7 @@ public class TeacherModel extends AbstractTableModel {
      * table
      */
     
-    TeacherModel teacherModel = new TeacherModel(dataManager);
+    final TeacherModel teacherModel = new TeacherModel(dataManager);
     
     /*Course course = new Course (0, "java", 0.5f);
 
@@ -474,20 +479,7 @@ public class TeacherModel extends AbstractTableModel {
     table.setTableHeader(null);
     
     
-    table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer(){
-      
-      public java.awt.Component getTableCellRendererComponent(JTable table,Object value,
-          boolean isSelected,boolean hasFocus,int row,int column){
-        JLabel label = (JLabel)super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        
-          label.setHorizontalAlignment(SwingConstants.CENTER);
-          
-          if (column == 0 || row == 0)
-            label.setFont(getFont().deriveFont(Font.BOLD));
-          
-          return label;
-      }
-    });
+    table.setDefaultRenderer(Object.class, CellRendererFactory.getTeacherModelCellRenderer(teacherModel.getFormattedObjects()));
     
     
     JScrollPane scroll1 = new JScrollPane(table);
@@ -543,6 +535,11 @@ public class TeacherModel extends AbstractTableModel {
         if (o instanceof Course){
           System.out.println("on a selectionne une matiere !");
           ((TeacherModel)table.getModel()).setCourse((Course)o);
+          CellFormat f = new CellFormat(BasicFormulaFactory.booleanInstance(true), Color.RED, Color.CYAN);
+          for (int i = 3; i < 7; i++) {
+            Object ob = teacherModel.getValueAt(i, 0);
+            teacherModel.getFormattedObjects().put(ob, f);
+          }
         }
       }
       
