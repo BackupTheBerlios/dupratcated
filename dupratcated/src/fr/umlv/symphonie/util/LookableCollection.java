@@ -2,6 +2,7 @@
  * This file is part of Symphonie
  * Created on 24 mars 2005
  */
+
 package fr.umlv.symphonie.util;
 
 import java.util.Collection;
@@ -13,12 +14,11 @@ import java.util.Collection;
  */
 public interface LookableCollection<T> extends Collection<T> {
 
-	/**
-	 * Perform a lookup and returns the closest matching object to the passed
-	 * one.
-	 * 
-	 * @param t
-	 *            The object to use as the base for the lookup.
-	 */
-	public T lookup(T t);
+  /**
+   * Perform a lookup and returns the closest matching object to the passed one.
+   * 
+   * @param t
+   *          The object to use as the base for the lookup.
+   */
+  public T lookup(T t);
 }
