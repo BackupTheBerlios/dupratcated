@@ -146,9 +146,8 @@ public class XMLExporter implements DataExporter {
 	private static void addMarkNode(Node root, StudentMark sm) {
 		final Node mark;
 
-		/** <student_mark id_course="?" id_examen=?">... </student_mark> */
+		/** <student_mark id_examen=?">... </student_mark> */
 		Element e = root.getOwnerDocument().createElement("student_mark");
-		e.setAttribute("id_course", "" + sm.getCourse().getId());
 		e.setAttribute("id_examen", "" + sm.getMark().getId());
 		mark = root.appendChild(e);
 
