@@ -387,7 +387,7 @@ public class SQLDataManager implements
                      COLUMN_COLUMN_FROM_TABLE_FORMULA + " " +
                      "from " + TABLE_TEACHER_FORMULA + ", " + TABLE_TITLE + " " +
                      "where " + TABLE_TITLE + "." + COLUMN_ID_FROM_TABLE_TITLE + " = " + TABLE_TEACHER_FORMULA + "." + COLUMN_ID_COURSE_FROM_TABLE_TEACHER_FORMULA + " " +
-                     "sort by " + COLUMN_COLUMN_FROM_TABLE_FORMULA + " " +
+                     "order by " + COLUMN_COLUMN_FROM_TABLE_FORMULA + " " +
                      ";";
     
     CachedRowSet result = null;
@@ -1533,6 +1533,32 @@ public class SQLDataManager implements
    */
   public void addTeacherFormula(String expression, String desc, Course course, int column) throws DataManagerException {
     
+    
+    int formulaKey = -1;
+
+    // create new primary key for the new formula to add
+    try {
+      formulaKey = createPrimaryKey(TABLE_TEACHER_FORMULA, COLUMN_ID_FORMULA_FROM_TABLE_FORMULA);
+    } catch (SQLException e) {
+      throw new DataManagerException(
+          "error creating new primary key for formula " + desc
+              + " related to " + course, e);
+    }
+    
+    
+    // create new formula
+    Formula f = null;
+    try {
+      f = SymphonieFormulaFactory.parseFormula(desc, expression, formulaKey, column);
+    } catch (ParserException e1) {
+      return;
+    } catch (LexerException e1) {
+      return;
+    } catch (IOException e1) {
+      return;
+    }
+    
+    
     int titleKey = -1;
     
     // get key for the formula title
@@ -1553,18 +1579,7 @@ public class SQLDataManager implements
       }
     }
 
-    int formulaKey = -1;
 
-    // create new primary key for the new formula to add
-    try {
-      formulaKey = createPrimaryKey(TABLE_TEACHER_FORMULA, COLUMN_ID_FORMULA_FROM_TABLE_FORMULA);
-    } catch (SQLException e) {
-      throw new DataManagerException(
-          "error creating new primary key for formula " + desc
-              + " related to " + course, e);
-    }
-    
-    
     // insert into database
     String request = "insert into " + TABLE_TEACHER_FORMULA + " " +
                      "values ( " + formulaKey + ", " + titleKey + ", " + course.getId() + ", '" + expression + "', " + column + ")" +
@@ -1576,21 +1591,8 @@ public class SQLDataManager implements
       throw new DataManagerException ("error inserting new formula", e);
     }
     
-    // add new formula into local data
-    Formula f;
-    try {
-      f = SymphonieFormulaFactory.parseFormula(desc, expression, formulaKey, column);
-    } catch (ParserException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    } catch (LexerException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    } catch (IOException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    }
-    
+
+    // add formula into local data
     List<Formula> list = teacherFormulaMap.get(course.getId());
     
     if (list == null){

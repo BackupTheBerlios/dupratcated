@@ -44,6 +44,8 @@ public interface DataManager {
 	 */
 	public List<StudentMark> getStudentMarks() throws DataManagerException;
 
+  public List<Formula> getFormulasByCourse(Course c) throws DataManagerException;
+  
 	/**
 	 * @param c
 	 * @return
@@ -167,14 +169,14 @@ public interface DataManager {
    * @param course
    * @param column
    */
-  public void addTeacherFormula(Formula f, Course course, int column)throws DataManagerException;
+  public void addTeacherFormula(String expression, String desc, Course course, int column)throws DataManagerException;
   
   /**
    * @param f
    * @param column
    * @throws DataManagerException
    */
-  public void addJuryFormula(Formula f, int column) throws DataManagerException;
+  public void addJuryFormula(String expression, String desc, int column) throws DataManagerException;
     
   
 	/**

@@ -47,7 +47,7 @@ public abstract class SQLDataManagerConstants {
   static public final String COLUMN_ID_FORMULA_FROM_TABLE_FORMULA = "id_formula";
   static public final String COLUMN_ID_TITLE_FROM_TABLE_FORMULA = "id_title";
   static public final String COLUMN_EXPRESSION_FROM_TABLE_FORMULA = "expression";
-  static public final String COLUMN_COLUMN_FROM_TABLE_FORMULA = "column";
+  static public final String COLUMN_COLUMN_FROM_TABLE_FORMULA = "column_index";
   
   static public final String COLUMN_ID_COURSE_FROM_TABLE_TEACHER_FORMULA = "id_course";
 }
