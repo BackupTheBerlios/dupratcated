@@ -5,19 +5,49 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.sql.SQLException;
 
+import fr.umlv.symphonie.util.Pair;
+
 
 public interface DataManager
 {    
 	public List<Student> getStudents();
 	public List<Course> getCourses();
-	public Map<Integer, String> getTitles();
-	public SortedMap<Mark, Float> getTitlesByCourse(Course c);
+	/*public Map<Integer, String> getTitles();*/
+	public Map<Integer, Mark> getTitlesByCourse(Course c);
 	
-	public Map<String, StudentMark> getMarksByStudentAndCourse(Student s, Course c);
-	public SortedMap<Student, Map<String, StudentMark>> getAllMarksByCourse(Course c);
-	public Map<Course, Map<String, StudentMark>> getAllMarksByStudent(Student s);
-	public Map<Student, Map<Course, Map<String, StudentMark>>> getAllStudentsMarks();
+  /* methodes servant a la vue etudiant */
+	public Map<Integer, StudentMark> getMarksByStudentAndCourse(Student s, Course c);
+  public Map<Course, Map<Integer, StudentMark>> getAllMarksByStudent(Student s);
+  
+  
+  
+  /* methodes servant a la vue professeur */
+  // public SortedMap<Student, Map<Integer, StudentMark>> getMarksByStudentsAndCourse (List<Student> students, Course c);
+	public Pair<Map<Integer, Mark>,
+              SortedMap<Student, Map<Integer, StudentMark>>> getAllMarksByCourse(Course c);
 	
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+	public Map<Student, Map<Course, Map<Integer, StudentMark>>> getAllStudentsMarks();
+	
+  
+  
+  
+ 
 	public void addStudent(String name, String lastName) throws SQLException;
 	public void addStudents(List<String> listName, List<String> listLastName) throws SQLException, DataManagerException;
 	public void removeStudent(Student s) throws SQLException;
@@ -41,20 +71,5 @@ public interface DataManager
   
   public void changeStudentMarkValue(StudentMark studentMark, float newValue) throws SQLException;
   public void changeMarkDescription(Mark mark, String newDescription) throws SQLException;
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
 }

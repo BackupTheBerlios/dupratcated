@@ -42,7 +42,7 @@ public class StudentModel extends AbstractTableModel {
     
     student = s;
     
-    Map<Course, Map<String, StudentMark>> markMap = manager.getAllMarksByStudent(student);
+    Map<Course, Map<Integer, StudentMark>> markMap = manager.getAllMarksByStudent(student);
     
     int n;
     for (Course c : markMap.keySet()){

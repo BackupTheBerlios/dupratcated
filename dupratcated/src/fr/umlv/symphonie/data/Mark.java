@@ -6,10 +6,12 @@ public class Mark {
   private int id;
   private String desc;
   private Course course;
+  private float coeff;
 
-  public Mark(int id, String desc, Course course) {
+  public Mark(int id, String desc, float coeff, Course course) {
     this.id = id;
     this.desc = desc;
+    this.coeff = coeff;
     this.course = course;
   }
 
@@ -25,7 +27,15 @@ public class Mark {
     return course;
   }
   
+  public float getCoeff() {
+    return coeff;
+  }
   
+  public void setCoeff(float coeff) {
+    this.coeff = coeff;
+  }
+  
+
   /**
    * @param desc The desc to set.
    */

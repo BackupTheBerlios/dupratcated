@@ -61,7 +61,7 @@ public class TeacherModel extends AbstractTableModel {
     
     matrix = new Object[rowCount][columnCount];
     
-    matrix[0][0] = "Intitul�";
+    matrix[0][0] = "Intitule";
     matrix[1][0] = "Coeff";
     /*Mark[] markTab = new Mark[1];
     markMap.keySet().toArray(markTab);*/
