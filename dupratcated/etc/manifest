@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Created-By: spenasal
+Main-Class: fr.umlv.symphonie.view.SymphonieLauncher
+Class-Path: ../lib/jfreechart-0.9.21.jar ../lib/poi-2.5.1-final-20040804.jar ../lib/rowset.jar ../lib/jcommon-0.9.6.jar ../lib/mysql-connector-java-3.2.0-alpha-bin.jar ../lib/postgresql-8.0-310.jdbc3.jar
