@@ -271,7 +271,7 @@ public class XMLImporter implements DataImporter {
 		if (!root.getAttribute("view").equals("teacher")) {
 			throw new DataImporterException("the file isn't a teacher view.\n");
 		}
-		final Map<Integer, Course> courseMap = getCourseNodes(root);
+		
 		final Map<Integer, Mark> markMap = getMarkNodes(root,
 				getCourseNodes(root));
 		final Map<Student, Map<Integer, StudentMark>> studentAndStudentMakMap = getStudentNodes(
