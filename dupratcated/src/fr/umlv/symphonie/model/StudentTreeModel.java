@@ -20,6 +20,7 @@ import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
 import fr.umlv.symphonie.data.Student;
+import fr.umlv.symphonie.util.ComponentBuilder;
 
 
 /**
@@ -32,7 +33,8 @@ public class StudentTreeModel extends DefaultTreeModel {
   /*private final List<TreeModelListener> listenerList = new ArrayList<TreeModelListener>();*/
   
   private final String root = "Etudiants"; // a changer pour l'internationalisation ?
-  protected DataManager manager;
+  protected final DataManager manager;
+  protected final ComponentBuilder builder;
   protected List<Student> studentList = null;
   
   protected final ExecutorService es = Executors.newSingleThreadExecutor();
@@ -41,9 +43,10 @@ public class StudentTreeModel extends DefaultTreeModel {
   
 //  private static StudentTreeModel instance = null;
   
-  public StudentTreeModel(DataManager manager){
+  public StudentTreeModel(DataManager manager, ComponentBuilder builder){
     super(null);
     this.manager = manager;
+	this.builder = builder;
     update();
   }
   

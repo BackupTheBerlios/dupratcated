@@ -17,6 +17,7 @@ import javax.swing.tree.DefaultTreeModel;
 import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
+import fr.umlv.symphonie.util.ComponentBuilder;
 
 
 /**
@@ -29,16 +30,18 @@ public class CourseTreeModel extends DefaultTreeModel {
   private final List<TreeModelListener> listenerList = new ArrayList<TreeModelListener>();
   
   protected final String root = "Matieres";
-  protected DataManager manager;
+  protected final DataManager manager;
+  protected final ComponentBuilder builder;
   protected List<Course> courseList = null;
   
 //  private static CourseTreeModel instance = null;
   protected final ExecutorService es = Executors.newSingleThreadExecutor();
   protected final Object lock = new Object();
   
-  public CourseTreeModel(DataManager manager) {
+  public CourseTreeModel(DataManager manager, ComponentBuilder builder) {
     super(null);
     this.manager = manager;
+	this.builder = builder;
     
     update();
   }
