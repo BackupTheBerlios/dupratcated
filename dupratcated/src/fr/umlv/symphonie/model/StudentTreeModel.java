@@ -145,7 +145,7 @@ public class StudentTreeModel implements TreeModel {
     frame.setSize(800,600);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     
-    DataManager dataManager = new SQLDataManager();
+    DataManager dataManager = SQLDataManager.getInstance();
     StudentTreeModel model = new StudentTreeModel(dataManager);
     
     JTree tree = new JTree(model);

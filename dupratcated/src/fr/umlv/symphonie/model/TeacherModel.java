@@ -54,34 +54,35 @@ public class TeacherModel extends AbstractTableModel {
 
   private final Map<String, Number> mappedValues = new HashMap<String, Number>();
   
+  private static TeacherModel instance = null;
   
   /*
    * le datamanager et
    * la matiere
    */
-  private final DataManager manager;
-  private Course course = null;
+  protected DataManager manager;
+  protected Course course = null;
   
   /*
    * nombre de colonnes et
    * de lignes
    */
-  private int rowCount = 0;
-  private int columnCount = 0;
+  protected int rowCount = 0;
+  protected int columnCount = 0;
   
   /*
    * listes des tests
    * et des etudiants
    */
-  private final List<Object> columnList = new ArrayList<Object>();
-  private final List<Student> studentList = new ArrayList<Student>();
+  protected final List<Object> columnList = new ArrayList<Object>();
+  protected final List<Student> studentList = new ArrayList<Student>();
   
   /*
    * maps des etudiants et des tests
    * (le final devra servir pour les threads)
    */
-  private final Map<Integer, Mark> markMap = new HashMap<Integer, Mark>();
-  private final SortedMap<Student, Map<Integer, StudentMark>> studentMarkMap =
+  protected final Map<Integer, Mark> markMap = new HashMap<Integer, Mark>();
+  protected final SortedMap<Student, Map<Integer, StudentMark>> studentMarkMap =
     new TreeMap<Student, Map<Integer, StudentMark>>(new Comparator<Student>(){
       public int compare(Student o1, Student o2) {
         int n = o1.getLastName().compareToIgnoreCase(o2.getLastName());
@@ -107,9 +108,27 @@ public class TeacherModel extends AbstractTableModel {
   private final ExecutorService es = Executors.newSingleThreadExecutor();
   
   
-  private final Object lock = new Object();
+  protected final Object lock = new Object();
   
-  public TeacherModel(DataManager manager) {
+  private TeacherModel(DataManager manager) {
+    this.manager = manager;
+  }
+  
+  static public TeacherModel getInstance(final DataManager manager){
+    if (instance == null)
+      instance = new TeacherModel(manager);
+    
+    instance.setManager(manager);
+    
+    return instance;
+  }
+  
+  
+  
+  /**
+   * @param manager The manager to set.
+   */
+  private void setManager(DataManager manager) {
     this.manager = manager;
   }
   
@@ -144,12 +163,6 @@ public class TeacherModel extends AbstractTableModel {
           markMap.putAll(studentAndMarkMapPair.getFirst());
           studentMarkMap.putAll(studentAndMarkMapPair.getSecond());
 
-          columnCount = markMap.size() + 2;
-          rowCount = studentMarkMap.size() + 3;
-
-          System.out.println("lignes : " + rowCount);
-          System.out.println("colonnes : " + columnCount);
-
           columnList.addAll(markMap.values());
 
           List<Formula> formulaList;
@@ -161,6 +174,9 @@ public class TeacherModel extends AbstractTableModel {
           }
 
           if (formulaList != null) {
+            
+            System.out.println("taille de la liste des formules : " + formulaList.size());
+            
             int column;
 
             for (Formula f : formulaList) {
@@ -176,6 +192,14 @@ public class TeacherModel extends AbstractTableModel {
             }
 
           }
+          
+          else System.out.println("pas de formules pour " + course);
+
+          columnCount = columnList.size() + 2;
+          rowCount = studentMarkMap.size() + 3;
+          
+          System.out.println("lignes : " + rowCount);
+          System.out.println("colonnes : " + columnCount);
 
           studentList.addAll(studentMarkMap.keySet());
 
@@ -204,7 +228,7 @@ public class TeacherModel extends AbstractTableModel {
     setCourse(course);
   }
   
-  private void clear() {
+  protected void clear() {
     course = null;
     rowCount = 0;
     columnCount = 0;
@@ -275,11 +299,19 @@ public class TeacherModel extends AbstractTableModel {
     if(o instanceof Formula){
       Formula f = (Formula)o;
       
+      if (rowIndex == 0){
+        return f.getDescription();
+      }
+      
+      if (rowIndex == 1){
+        return null;
+      }
+        
       Student s = studentList.get(rowIndex - 3);
       
       SymphonieFormulaFactory.clearMappedValues();
       
-      for (StudentMark sm : studentMarkMap.get(s.getId()).values())
+      for (StudentMark sm : studentMarkMap.get(s).values())
         SymphonieFormulaFactory.putMappedValue(sm.getMark().getDesc(), sm.getValue());
       
       return f.getValue();
@@ -416,7 +448,6 @@ public class TeacherModel extends AbstractTableModel {
     update();
   }
   
-  
   public void addMark(final String desc, final float coeff){
     
     final Course course = this.course;
@@ -440,12 +471,42 @@ public class TeacherModel extends AbstractTableModel {
     update();
   }
   
+  public void removeColumn(int columnIndex){
+    if (columnIndex == 0 || columnIndex == columnCount -1)
+      return;
+    
+    columnIndex--;
+    
+    Object o = columnList.get(columnIndex);
+    
+    if (o instanceof Mark)
+      removeMark((Mark)o);
+    
+    else removeFormula((Formula)o);
+  }
+  
+  /**
+   * @param formula
+   */
+  private void removeFormula(Formula formula) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /**
+   * @param mark
+   */
+  private void removeMark(Mark mark) {
+    // TODO Auto-generated method stub
+    
+  }
+
   public static void main(String[] args) throws DataManagerException {
     JFrame frame = new JFrame ("test TeacherModel");
     frame.setSize(800,600);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     
-    DataManager dataManager = new SQLDataManager();
+    DataManager dataManager = SQLDataManager.getInstance();
     
 //    /*
 //     * test des etudiants

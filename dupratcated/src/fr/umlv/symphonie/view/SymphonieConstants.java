@@ -56,4 +56,9 @@ public class SymphonieConstants {
   public static final String CHANGEPASSDIALOG_VERIF = "changepassdialog.verif";
   public static final String CHANGEPASSDIALOG_ERROR_EMPTY = "changepassdialog.error.empty";
   public static final String CHANGEPASSDIALOG_ERROR_MATCH = "changepassdialog.error.match";
+  
+  // added by sus for teacher view
+  public static final String ADDMARKDIALOG_TITLE = "addmarkdialog.title";
+  public static final String ADDMARKDIALOG_DESC = "addmarkdialog.desc";
+  public static final String ADDMARKDIALOG_COEFF = "addmarkdialog_coeff";
 }

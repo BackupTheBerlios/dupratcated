@@ -79,6 +79,24 @@ public class SQLDataManager implements
 		}
 	};
 
+  private static SQLDataManager instance = null;
+  
+  
+  private SQLDataManager (){
+  }
+  
+  public static SQLDataManager getInstance(){
+    if (instance == null)
+      instance = new SQLDataManager();
+    
+    return instance;
+  }
+  
+  
+  
+  
+  
+  
 	/*
 	 * methodes internes
 	 */
@@ -399,6 +417,8 @@ public class SQLDataManager implements
       
       while (result.next()){
       
+        System.out.println("traitement du resultat de la requete.");
+        
         Formula f;
         try {
           f = SymphonieFormulaFactory.parseFormula(result
@@ -414,15 +434,21 @@ public class SQLDataManager implements
           continue;
         }
 
+        System.out.println("formule cree : " + f);
+        
         courseKey = result.getInt(COLUMN_ID_COURSE_FROM_TABLE_TEACHER_FORMULA);
 
+        System.out.println("associee a la course d'id " + courseKey);
+        
         List<Formula> list = tmpMap.get(courseKey);
 
         if (list == null) {
+          System.out.println("pas encore de liste pour cette matiere.");
           list = new ArrayList<Formula>();
           tmpMap.put(courseKey, list);
         }
         list.add(f);
+        System.out.println("ajout de la formule dans sa liste correspondante");
     }
     }catch(SQLException e){
       throw new DataManagerException("error getting teacher formulas from database", e);
@@ -432,7 +458,7 @@ public class SQLDataManager implements
     List<Formula> localList;
     
     // for each list contained in tmpMap
-    for (int i : teacherFormulaMap.keySet()){
+    for (int i : tmpMap.keySet()){
       tmpList = tmpMap.get(i);
       
       // if the list is not null
@@ -454,6 +480,8 @@ public class SQLDataManager implements
         }
       }
     }
+    
+    System.out.println("premiere boucle finie.");
     
     // for each list contained in local map
     for (int i : teacherFormulaMap.keySet()){
@@ -694,6 +722,7 @@ public class SQLDataManager implements
     }
     
     if (n > teacherFormulaMapTimeStamp) {
+      System.out.println("on va synchroniser les datas des formules teacher.");
       syncTeacherFormulaData();
       teacherFormulaMapTimeStamp = n;
     }

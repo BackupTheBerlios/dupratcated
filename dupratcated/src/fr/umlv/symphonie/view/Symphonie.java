@@ -355,7 +355,7 @@ public class Symphonie {
 
     /* table */
 
-    final TeacherModel teacherModel = new TeacherModel(dataManager);
+    final TeacherModel teacherModel = TeacherModel.getInstance(dataManager);
 
     final JTable table = new JTable(teacherModel);
     table.setTableHeader(null);
@@ -577,7 +577,7 @@ public class Symphonie {
     JPanel panel = new JPanel(new BorderLayout());
     panel.add(getToolbar(), BorderLayout.NORTH);
 
-    DataManager dataManager = new SQLDataManager();
+    DataManager dataManager = SQLDataManager.getInstance();
 
     tab = new JTabbedPane(JTabbedPane.BOTTOM, JTabbedPane.SCROLL_TAB_LAYOUT);
 

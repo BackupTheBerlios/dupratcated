@@ -233,5 +233,33 @@ public class SymphonieActionFactory {
     a.putValue(Action.SMALL_ICON, icon);
     return a;
   }
+  
+  /* TEACHER VIEW ACTIONS ***********************************/
+  public static AbstractAction getAddMarkAction(Icon icon, final JFrame frame, final ComponentBuilder builder){
+    AbstractAction a = new AbstractAction() {
+      private final AddMarkDialog amd = new AddMarkDialog(frame, builder);
+      public void actionPerformed(ActionEvent e){
+        amd.setVisible(true);
+      }
+    };
+    
+    a.putValue(Action.SMALL_ICON, icon);
+    
+    return a;
+  }
+  
+  public static AbstractAction getRemoveColumnAction(Icon icon, final JFrame frame, final ComponentBuilder builder){
+    AbstractAction a = new AbstractAction(){
+      public void actionPerformed(ActionEvent e){
+        
+      }
+    };
+    
+    a.putValue(Action.SMALL_ICON, icon);
+    
+    return a;
+  }
+  
+  
 
 }
