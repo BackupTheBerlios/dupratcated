@@ -1,29 +1,25 @@
+
 package fr.umlv.symphonie.data;
 
+import fr.umlv.symphonie.util.SymphoniePreferencesManager.DataBaseType;
 
 public class DriverLoader {
-    
-    private static boolean driversLoaded = false;
-    
-    private DriverLoader(){
-    }
-    
-    public static void loadDrivers(){
-        
-        if (driversLoaded == false) {
-            
-            try {
-                Class.forName("com.mysql.jdbc.Driver");
-                Class.forName("org.postgresql.Driver");
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-            
-            
-            
-            driversLoaded = true;
+
+  private static boolean driversLoaded = false;
+
+  private DriverLoader() {
+  }
+
+  public static void loadDrivers() {
+
+    if (driversLoaded == false) {
+      for (DataBaseType t : DataBaseType.values())
+        try {
+          t.loadDriver();
+        } catch (ClassNotFoundException e) {
+          System.err.println("Unable to load Driver class : " + e.getMessage());
         }
+      driversLoaded = true;
     }
-
+  }
 }
-
