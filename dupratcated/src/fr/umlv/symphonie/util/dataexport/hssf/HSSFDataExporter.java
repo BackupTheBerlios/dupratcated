@@ -563,7 +563,7 @@ public class HSSFDataExporter implements DataExporter {
    * 
    * @param row
    *          The sheet row
-   * @param markColumns
+   * @param columns
    *          The columns that are to be used for calculating the average
    * @return An excel formula
    */
