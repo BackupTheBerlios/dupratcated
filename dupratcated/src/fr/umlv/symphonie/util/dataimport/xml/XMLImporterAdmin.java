@@ -52,7 +52,6 @@ public class XMLImporterAdmin extends XMLImporter {
 				} else {
 					/** else we update */
 					dm.changeCourseTitle(c, c.getTitle());
-					dm.changeCourseCoeff(c, c.getCoeff());
 				}
 			} catch (DataManagerException e) {
 				throw new DataImporterException(
@@ -68,12 +67,24 @@ public class XMLImporterAdmin extends XMLImporter {
 					dm.addMark(m.getDesc(), m.getCoeff(), m.getCourse());
 				} else {
 					/** else we update */
-					dm.changeMarkCoeff(m, m.getCoeff());
-					dm.changeMarkDescription(m, m.getDesc());
+					dm.changeMarkDescriptionAndCoeff(m, m.getDesc(), m
+							.getCoeff());
 				}
 			} catch (DataManagerException e) {
 				throw new DataImporterException(
 						"Error during the importation with the bdd.\n", e);
+			}
+		}
+
+		/** we update all the student mark data */
+		for (Map<Integer, StudentMark> tmp : studentAndStudentMakMap.values()) {
+			for (StudentMark sm : tmp.values()) {
+				try {
+					dm.changeStudentMarkValue(sm, sm.getValue());
+				} catch (DataManagerException e) {
+					throw new DataImporterException(
+							"Error during the importation with the bdd.\n", e);
+				}
 			}
 		}
 	}
@@ -105,16 +116,16 @@ public class XMLImporterAdmin extends XMLImporter {
 					dm.addMark(m.getDesc(), m.getCoeff(), m.getCourse());
 				} else {
 					/** else we update */
-					dm.changeMarkCoeff(m, m.getCoeff());
-					dm.changeMarkDescription(m, m.getDesc());
+					dm.changeMarkDescriptionAndCoeff(m, m.getDesc(), m
+							.getCoeff());
 				}
 			} catch (DataManagerException e) {
 				throw new DataImporterException(
 						"Error during the importation with the bdd.\n", e);
 			}
 		}
-		
-		/** we update the student data : comment */
+
+		/** we update all the student data */
 		for (Student s : studentAndStudentMakMap.keySet()) {
 			try {
 				/** if we need to add */
@@ -122,12 +133,24 @@ public class XMLImporterAdmin extends XMLImporter {
 					dm.addStudent(s.getName(), s.getLastName());
 				} else {
 					/** else we update */
-					dm.changeStudentName(s, s.getName());
-					dm.changeStudentLastName(s, s.getLastName());
-				}				
+					dm.changeStudentNameAndLastNameAndComment(s, s.getName(), s
+							.getLastName(), null);
+				}
 			} catch (DataManagerException e) {
 				throw new DataImporterException(
 						"Error during the importation with the bdd.\n", e);
+			}
+		}
+
+		/** we update all the student mark data */
+		for (Map<Integer, StudentMark> tmp : studentAndStudentMakMap.values()) {
+			for (StudentMark sm : tmp.values()) {
+				try {
+					dm.changeStudentMarkValue(sm, sm.getValue());
+				} catch (DataManagerException e) {
+					throw new DataImporterException(
+							"Error during the importation with the bdd.\n", e);
+				}
 			}
 		}
 	}
@@ -159,16 +182,15 @@ public class XMLImporterAdmin extends XMLImporter {
 					dm.addCourse(c.getTitle(), c.getCoeff());
 				} else {
 					/** else we update */
-					dm.changeCourseTitle(c, c.getTitle());
-					dm.changeCourseCoeff(c, c.getCoeff());
+					dm.changeCourseTitleAndCoeff(c, c.getTitle(), c.getCoeff());
 				}
 			} catch (DataManagerException e) {
 				throw new DataImporterException(
 						"Error during the importation with the bdd.\n", e);
 			}
 		}
-		
-		/** we update the student data : comment */
+
+		/** we update all the student data */
 		for (Student s : studentAndStudentMakMap.keySet()) {
 			try {
 				/** if we need to add */
@@ -177,10 +199,9 @@ public class XMLImporterAdmin extends XMLImporter {
 					dm.changeStudentComment(s, s.getComment());
 				} else {
 					/** else we update */
-					dm.changeStudentComment(s, s.getComment());
-					dm.changeStudentName(s, s.getName());
-					dm.changeStudentLastName(s, s.getLastName());
-				}				
+					dm.changeStudentNameAndLastNameAndComment(s, s.getName(), s
+							.getLastName(), s.getComment());
+				}
 			} catch (DataManagerException e) {
 				throw new DataImporterException(
 						"Error during the importation with the bdd.\n", e);

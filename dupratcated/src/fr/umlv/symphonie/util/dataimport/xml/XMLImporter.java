@@ -275,8 +275,7 @@ public class XMLImporter implements DataImporter {
 		/** we update the mark data : desc et coeff */
 		for (Mark m : markMap.values()) {
 			try {
-				dm.changeMarkCoeff(m, m.getCoeff());
-				dm.changeMarkDescription(m, m.getDesc());
+				dm.changeMarkDescriptionAndCoeff(m, m.getDesc(), m.getCoeff());
 			} catch (DataManagerException e) {
 				throw new DataImporterException(
 						"Error during the importation with the bdd.\n", e);
