@@ -1366,4 +1366,54 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
   }
 
+/* (non-Javadoc)
+ * @see fr.umlv.symphonie.data.DataManager#changeCourseTitle(fr.umlv.symphonie.data.Course, java.lang.String)
+ */
+public void changeCourseTitle(Course c, String newTitle) throws DataManagerException {
+	    c.setTitle(newTitle);
+
+	    String request = "update " + TABLE_COURSE + " " + "set "
+	        + COLUMN_TITLE_FROM_TABLE_COURSE + " = '" + newTitle + "' "
+	        + "where " + COLUMN_ID_FROM_TABLE_COURSE + " = " + c.getId() + ";";
+
+	    try {
+	      connectAndUpdate(request);
+	    } catch (SQLException e) {
+	      throw new DataManagerException("unable to set title for course " + c,
+	          e);
+	    }
+	    
+	    try {
+	      updateCourseData(courseMapTimeStamp + 1);
+	    }catch (DataManagerException e){
+	      throw new DataManagerException("error updating data.", e);
+	    }
+	
+}
+
+/* (non-Javadoc)
+ * @see fr.umlv.symphonie.data.DataManager#changeCourseCoeff(fr.umlv.symphonie.data.Course, float)
+ */
+public void changeCourseCoeff(Course c, float newCoeff) throws DataManagerException {
+    c.setCoeff(newCoeff);
+
+    String request = "update " + TABLE_COURSE + " " + "set "
+        + COLUMN_COEFF_FROM_TABLE_COURSE + " = " + newCoeff + " "
+        + "where " + COLUMN_ID_FROM_TABLE_COURSE + " = " + c.getId() + ";";
+
+    try {
+      connectAndUpdate(request);
+    } catch (SQLException e) {
+      throw new DataManagerException("unable to set title for course " + c,
+          e);
+    }
+    
+    try {
+      updateCourseData(courseMapTimeStamp + 1);
+    }catch (DataManagerException e){
+      throw new DataManagerException("error updating data.", e);
+    }
+	
+}
+
 }
