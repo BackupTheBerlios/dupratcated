@@ -215,7 +215,7 @@ public class JuryModel extends AbstractTableModel {
    * @param args
    */
   public static void main(String[] args) {
-    JFrame frame = new JFrame ("test TeacherModel");
+    JFrame frame = new JFrame ("test JuryModel");
     frame.setSize(800,600);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     
@@ -247,7 +247,6 @@ public class JuryModel extends AbstractTableModel {
     frame.setContentPane(scroll);
     
     frame.setVisible(true);
-    
   }
 
 }
