@@ -28,6 +28,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -72,33 +73,7 @@ import fr.umlv.symphonie.util.identification.IdentificationStrategy;
 import fr.umlv.symphonie.util.identification.SQLIdentificationStrategy;
 import fr.umlv.symphonie.util.wizard.DefaultWizardModel;
 import fr.umlv.symphonie.util.wizard.Wizard;
-import static fr.umlv.symphonie.view.SymphonieConstants.ADMIN_MENU;
-import static fr.umlv.symphonie.view.SymphonieConstants.CELL_MENU_ITEM;
-import static fr.umlv.symphonie.view.SymphonieConstants.CHANGE_VIEW_MENU;
-import static fr.umlv.symphonie.view.SymphonieConstants.CONNECT_MENU_ITEM;
-import static fr.umlv.symphonie.view.SymphonieConstants.DB_MENU_ITEM;
-import static fr.umlv.symphonie.view.SymphonieConstants.EXIT_MENU_ITEM;
-import static fr.umlv.symphonie.view.SymphonieConstants.EXPORT_MENU_ITEM;
-import static fr.umlv.symphonie.view.SymphonieConstants.FILE_MENU;
-import static fr.umlv.symphonie.view.SymphonieConstants.FORMAT_MENU;
-import static fr.umlv.symphonie.view.SymphonieConstants.FORMULA_MENU_ITEM;
-import static fr.umlv.symphonie.view.SymphonieConstants.FRAME_TITLE;
-import static fr.umlv.symphonie.view.SymphonieConstants.IMPORT_MENU_ITEM;
-import static fr.umlv.symphonie.view.SymphonieConstants.INSERT_COLUMN_MENU_ITEM;
-import static fr.umlv.symphonie.view.SymphonieConstants.INSERT_LINE_MENU_ITEM;
-import static fr.umlv.symphonie.view.SymphonieConstants.INSERT_MENU;
-import static fr.umlv.symphonie.view.SymphonieConstants.LANGUAGE_MENU_ITEM;
-import static fr.umlv.symphonie.view.SymphonieConstants.PRINT_MENU_ITEM;
-import static fr.umlv.symphonie.view.SymphonieConstants.PWD_MENU_ITEM;
-import static fr.umlv.symphonie.view.SymphonieConstants.VIEW_JURY_MENU_ITEM;
-import static fr.umlv.symphonie.view.SymphonieConstants.VIEW_STUDENT_MENU_ITEM;
-import static fr.umlv.symphonie.view.SymphonieConstants.VIEW_TEACHER_MENU_ITEM;
-import static fr.umlv.symphonie.view.SymphonieConstants.WINDOW_MENU;
-import static fr.umlv.symphonie.view.SymphonieConstants.ADDMARKDIALOG_TITLE;
-import static fr.umlv.symphonie.view.SymphonieConstants.ADD_FORMULA;
-import static fr.umlv.symphonie.view.SymphonieConstants.UPDATE;
-import static fr.umlv.symphonie.view.SymphonieConstants.DISPLAY_CHART;
-import static fr.umlv.symphonie.view.SymphonieConstants.REMOVE_COLUMN;
+import static fr.umlv.symphonie.view.SymphonieConstants.*;
 import static fr.umlv.symphonie.view.SymphonieActionFactory.*;
 import static fr.umlv.symphonie.util.ComponentBuilder.ButtonType;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
@@ -138,22 +113,12 @@ public class Symphonie {
 
   /**
    * Builds the "File" frame menu
-   * 
+   * @param exp The export menu item
+   * @param imp The import menu item
    * @return a <code>JMenu</code>
    */
-  private final JMenu getFileMenu() {
+  private final JMenu getFileMenu(JMenuItem exp, JMenuItem imp) {
     JMenu file = (JMenu) builder.buildButton(FILE_MENU, ButtonType.MENU);
-
-    /*
-     * Actions Menu "File"
-     * *******************************************************
-     */
-
-    Action a_import = SymphonieActionFactory.getWizardAction(new ImageIcon(
-        Symphonie.class.getResource("icons/import.png")), importW);
-
-    Action export = SymphonieActionFactory.getWizardAction(new ImageIcon(
-        Symphonie.class.getResource("icons/export.png")), exportW);
 
     Action print = SymphonieActionFactory.getPrintAction(new ImageIcon(
         Symphonie.class.getResource("icons/print.png")));
@@ -166,10 +131,8 @@ public class Symphonie {
      * *********************************************************
      */
 
-    file.add(builder.buildButton(a_import, IMPORT_MENU_ITEM,
-        ButtonType.MENU_ITEM));
-    file.add(builder
-        .buildButton(export, EXPORT_MENU_ITEM, ButtonType.MENU_ITEM));
+    file.add(imp);
+    file.add(exp);
 
     file.add(new JSeparator());
 
@@ -406,16 +369,20 @@ public class Symphonie {
     // Table
     final JTable table = new JTable(studentModel);
     table.setTableHeader(null);
-    
+
     // pop up and actions
-    final JPopupMenu pop = builder.buildPopupMenu(SymphonieConstants.STUDENTVIEWPOPUP_TITLE);
-    
-    pop.add(builder.buildButton(getStudentUpdateAction(null), UPDATE, ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(getStudentPrintAction(null, table), PRINT_MENU_ITEM, ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(getStudentChartAction(null, frame), DISPLAY_CHART, ButtonType.MENU_ITEM));
-    
+    final JPopupMenu pop = builder
+        .buildPopupMenu(SymphonieConstants.STUDENTVIEWPOPUP_TITLE);
+
+    pop.add(builder.buildButton(getStudentUpdateAction(null), UPDATE,
+        ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(getStudentPrintAction(null, table),
+        PRINT_MENU_ITEM, ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(getStudentChartAction(null, frame),
+        DISPLAY_CHART, ButtonType.MENU_ITEM));
+
     // table listeners
-    
+
     // listener for popup
     table.addMouseListener(new MouseAdapter() {
 
@@ -425,7 +392,7 @@ public class Symphonie {
         }
       }
     });
-    
+
     // listener which saves point location
     table.addMouseListener(new MouseAdapter() {
 
@@ -435,7 +402,7 @@ public class Symphonie {
         }
       }
     });
-    
+
     table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
 
       public Component getTableCellRendererComponent(JTable table,
@@ -524,21 +491,29 @@ public class Symphonie {
 
     split.setRightComponent(scroll1);
 
-    
     // popup menu and actions
-    final JPopupMenu pop = builder.buildPopupMenu(SymphonieConstants.TEACHERVIEWPOPUP_TITLE);
-    
-    pop.add(builder.buildButton(getAddMarkAction(null,frame, builder ), ADDMARKDIALOG_TITLE, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(getTeacherAddFormulaAction(null, frame, builder), ADD_FORMULA, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(getTeacherUpdateAction(null), UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(getTeacherPrintAction(null, table), PRINT_MENU_ITEM, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(getTeacherChartAction(null, frame), DISPLAY_CHART, ComponentBuilder.ButtonType.MENU_ITEM));
-    
-    final AbstractButton removeColumn = builder.buildButton(getRemoveTeacherColumnAction(null, table), REMOVE_COLUMN, ComponentBuilder.ButtonType.MENU_ITEM);
+    final JPopupMenu pop = builder
+        .buildPopupMenu(SymphonieConstants.TEACHERVIEWPOPUP_TITLE);
+
+    pop.add(builder.buildButton(getAddMarkAction(null, frame, builder),
+        ADDMARKDIALOG_TITLE, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(
+        getTeacherAddFormulaAction(null, frame, builder), ADD_FORMULA,
+        ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(getTeacherUpdateAction(null), UPDATE,
+        ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(getTeacherPrintAction(null, table),
+        PRINT_MENU_ITEM, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(getTeacherChartAction(null, frame),
+        DISPLAY_CHART, ComponentBuilder.ButtonType.MENU_ITEM));
+
+    final AbstractButton removeColumn = builder.buildButton(
+        getRemoveTeacherColumnAction(null, table), REMOVE_COLUMN,
+        ComponentBuilder.ButtonType.MENU_ITEM);
     pop.add(removeColumn);
-    
+
     // table listeners
-    
+
     // listener for popup
     table.addMouseListener(new MouseAdapter() {
 
@@ -548,7 +523,7 @@ public class Symphonie {
         }
       }
     });
-    
+
     // listener which saves point location
     table.addMouseListener(new MouseAdapter() {
 
@@ -558,22 +533,24 @@ public class Symphonie {
         }
       }
     });
-    
+
     // listener which disables buttons
     table.addMouseListener(new MouseAdapter() {
+
       private int column;
+
       public void mousePressed(MouseEvent e) {
-        
+
         if (SwingUtilities.isRightMouseButton(e)) {
           column = table.columnAtPoint(e.getPoint());
-          if (column != table.getColumnCount() -1 && column > 0)
+          if (column != table.getColumnCount() - 1 && column > 0)
             removeColumn.setEnabled(true);
-          else removeColumn.setEnabled(false);
+          else
+            removeColumn.setEnabled(false);
         }
       }
     });
-    
-    
+
     // Tree
     CourseTreeModel courseModel = new CourseTreeModel(manager);
     final JTree tree = new JTree(courseModel);
@@ -613,7 +590,6 @@ public class Symphonie {
         Object o = tree.getLastSelectedPathComponent();
 
         if (o instanceof Course) {
-          System.out.println("on a selectionne une matiere !");
           ((TeacherModel) table.getModel()).setCourse((Course) o);
           ((DefaultWizardModel) exportW.getModel()).getInterPanelData().put(
               SymphonieWizardConstants.DATA_EXPORTABLE, o);
@@ -635,17 +611,29 @@ public class Symphonie {
     final JuryModel model = JuryModel.getInstance(manager);
     final JTable table = new JTable(model);
     table.setTableHeader(null);
-    
-    final JPopupMenu pop = builder.buildPopupMenu(SymphonieConstants.JURYVIEWPOPUP_TITLE);
-    
-    pop.add(builder.buildButton(SymphonieActionFactory.getJuryAddFormulaAction(null, frame, builder),SymphonieConstants.ADD_FORMULA, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(SymphonieActionFactory.getJuryUpdateAction(null), SymphonieConstants.UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(SymphonieActionFactory.getJuryPrintAction(null, table), SymphonieConstants.PRINT_MENU_ITEM, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(SymphonieActionFactory.getJuryChartAction(null, frame), SymphonieConstants.DISPLAY_CHART, ComponentBuilder.ButtonType.MENU_ITEM));
-    
-    final AbstractButton removeColumn = builder.buildButton(SymphonieActionFactory.getRemoveJuryColumnAction(null, table), SymphonieConstants.REMOVE_COLUMN, ComponentBuilder.ButtonType.MENU_ITEM);
+
+    final JPopupMenu pop = builder
+        .buildPopupMenu(SymphonieConstants.JURYVIEWPOPUP_TITLE);
+
+    pop.add(builder.buildButton(SymphonieActionFactory.getJuryAddFormulaAction(
+        null, frame, builder), SymphonieConstants.ADD_FORMULA,
+        ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(SymphonieActionFactory
+        .getJuryUpdateAction(null), SymphonieConstants.UPDATE,
+        ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(SymphonieActionFactory.getJuryPrintAction(null,
+        table), SymphonieConstants.PRINT_MENU_ITEM,
+        ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(SymphonieActionFactory.getJuryChartAction(null,
+        frame), SymphonieConstants.DISPLAY_CHART,
+        ComponentBuilder.ButtonType.MENU_ITEM));
+
+    final AbstractButton removeColumn = builder
+        .buildButton(SymphonieActionFactory.getRemoveJuryColumnAction(null,
+            table), SymphonieConstants.REMOVE_COLUMN,
+            ComponentBuilder.ButtonType.MENU_ITEM);
     pop.add(removeColumn);
-    
+
     // listener which displays the popup
     table.addMouseListener(new MouseAdapter() {
 
@@ -655,7 +643,7 @@ public class Symphonie {
         }
       }
     });
-    
+
     // listener which saves the cursor location
     table.addMouseListener(new MouseAdapter() {
 
@@ -665,7 +653,7 @@ public class Symphonie {
         }
       }
     });
-    
+
     // listener which disables buttons
     table.addMouseListener(new MouseAdapter() {
 
@@ -673,11 +661,12 @@ public class Symphonie {
         if (SwingUtilities.isRightMouseButton(e)) {
           if (model.isColumnFormula(table.columnAtPoint(e.getPoint())))
             removeColumn.setEnabled(true);
-          else removeColumn.setEnabled(false);
+          else
+            removeColumn.setEnabled(false);
         }
       }
     });
-    
+
     table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
 
       public Component getTableCellRendererComponent(JTable table,
@@ -707,17 +696,21 @@ public class Symphonie {
    * 
    * @param content
    *          The panel that contains Symphonie views
-   * @param mode
-   *          The mode menu
+   * @param butts
+   *          A set of buttons to disable
    * @return The html welcome page as a panel
    */
   private final JPanel getWelcomePagePanel(final JPanel content,
-      final JMenu mode) {
+      final AbstractButton... butts) {
     JPanel p = new JPanel(new GridBagLayout());
     final JEditorPane jeep = new JEditorPane();
     jeep.setEditorKit(new HTMLEditorKit());
     jeep.setEditable(false);
 
+    // Disable
+    for (AbstractButton b : butts)
+      b.setEnabled(false);
+    
     // Listen user clicks
     jeep.addHyperlinkListener(new HyperlinkListener() {
 
@@ -725,7 +718,8 @@ public class Symphonie {
         if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
           String f = e.getURL().getFile();
           setCurrentView(View.valueOf(f.substring(f.lastIndexOf('/') + 1)));
-          mode.setEnabled(true);
+          for (AbstractButton b : butts)
+            b.setEnabled(true);
           frame.setContentPane(content);
         }
       }
@@ -800,14 +794,18 @@ public class Symphonie {
 
   /**
    * Sets up the application with the given parameters
-   * @param manager The data manager to use
-   * @param rootLogger The login service
+   * 
+   * @param manager
+   *          The data manager to use
+   * @param rootLogger
+   *          The login service
    * @throws DataManagerException
    *           If there's a problem while dealing DB
    * @throws IOException
    *           If there's any i/o error
    */
-  public Symphonie(DataManager manager, IdentificationStrategy rootLogger) throws DataManagerException, IOException {
+  public Symphonie(DataManager manager, IdentificationStrategy rootLogger)
+      throws DataManagerException, IOException {
 
     // Data source
     this.manager = manager;
@@ -827,12 +825,21 @@ public class Symphonie {
 
     // Content pane
     JMenu mode = getModeMenu();
+    JMenuItem imp = (JMenuItem) builder.buildButton(SymphonieActionFactory
+        .getWizardAction(new ImageIcon(Symphonie.class
+            .getResource("icons/import.png")), importW), IMPORT_MENU_ITEM,
+        ButtonType.MENU_ITEM);
+    JMenuItem exp = (JMenuItem) builder.buildButton(SymphonieActionFactory
+        .getWizardAction(new ImageIcon(Symphonie.class
+            .getResource("icons/export.png")), exportW), EXPORT_MENU_ITEM,
+        ButtonType.MENU_ITEM);
+
     JPanel content = getContentPane();
-    JPanel welcome = getWelcomePagePanel(content, mode);
+    JPanel welcome = getWelcomePagePanel(content, mode, imp, exp);
     frame.setContentPane((welcome != null) ? welcome : content);
 
     // Menu bar
-    frame.setJMenuBar(getMenubar(getFileMenu(), getWindowMenu(mode,
+    frame.setJMenuBar(getMenubar(getFileMenu(exp, imp), getWindowMenu(mode,
         getLangMenu()), getFormatMenu(), getInsertMenu(), getAdminMenu()));
 
     // Listen changes in builder for frame title
@@ -843,9 +850,11 @@ public class Symphonie {
       }
     });
   }
-  
+
   /**
-   * Sets up the main application with the default data manager and login strategy
+   * Sets up the main application with the default data manager and login
+   * strategy
+   * 
    * @see #Symphonie(DataManager, IdentificationStrategy)
    * @throws DataManagerException
    *           If there's a problem while dealing DB
@@ -862,6 +871,7 @@ public class Symphonie {
    * @return a <code>JFrame</code>
    */
   public JFrame getFrame() {
+    frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
     return frame;
   }
 
