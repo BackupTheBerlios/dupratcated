@@ -724,6 +724,12 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       throw new DataManagerException("error deleting student " + s + " from database.", e);
     }
     
+    
+    // effacement de la map locale
+    Map<Integer, Student> studentMap = getStudents();
+    studentMap.remove(s.getId());
+    
+    
     // mise a jour des donnees
     // (a cause des acces multiples) 
     try{
@@ -732,10 +738,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       throw new DataManagerException ("error updating data for students.", e);
     }
     
-    // effacement de la map locale
-    Map<Integer, Student> studentMap = getStudents();
-    studentMap.remove(s.getId());
-    
+
     /*
      * partie effacement de ses notes
      */
@@ -765,17 +768,13 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     // effacement de la liste des notes locale
     List<StudentMark> studentMarkList = getStudentMarks();
     
-//    for (int i = 0 ; i < studentMarkList.size() ; i++){
-//      if (studentMarkList.get(i).getStudent().getId() == studentId){
-//        studentMarkList.remove(i);
-//        i--; // necessaire pour bien parcourir la liste
-//      }
-//    }
-    
-    for (StudentMark sm : studentMarkList){
-      if (sm.getStudent().getId() == studentId)
-        studentMarkList.remove(sm);
+    for (int i = 0 ; i < studentMarkList.size() ; i++){
+      if (studentMarkList.get(i).getStudent().getId() == studentId){
+        studentMarkList.remove(i);
+        i--; // necessaire pour bien parcourir la liste
+      }
     }
+    
     
     // mise a jour des donnees
     // (a cause des acces multiples)
@@ -808,16 +807,17 @@ public class SQLDataManager extends SQLDataManagerConstants implements
       throw new DataManagerException("error inserting new course " + title + " into database.", e);
     }
     
+    
+    // ajout dans la map locale
+    Map<Integer, Course> courseMap = getCourses();
+    courseMap.put(key, new Course(key, title, coeff));
+    
     // mise a jour avec le timestamp
     try{
       updateCourseData(courseMapTimeStamp + 1);
     }catch (DataManagerException e){
       throw new DataManagerException("error updating data for courses.", e);
     }
-    
-    // ajout dans la map locale
-    courseMap.put(key, new Course(key, title, coeff));
-    
   }
 
   public void addCourses(List<String> listTitle, List<Float> listCoeff)

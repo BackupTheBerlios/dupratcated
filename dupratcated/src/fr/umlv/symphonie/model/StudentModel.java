@@ -190,21 +190,16 @@ public class StudentModel extends AbstractTableModel {
       return;
     }
     
-    Student student = new Student(4, "Alban", "Nebie");
+    Student student = new Student(6, "Paul", "Ochon");
+    Student s = new Student (0, "Fabien", "Vallee");
     
     Map<Course, Map<Integer, StudentMark>> map = dataManager.getAllMarksByStudent(student);
     
     System.out.println("taille de la map : " + map.size());
     
     
-    List<Pair<String, String>> pairList = new ArrayList<Pair<String, String>>();
     
-    pairList.add(new Pair<String, String>("Jean-Rene", "Moustafa"));
-    pairList.add(new Pair<String, String>("Paul", "Ochon"));
-    
-    dataManager.addStudents(pairList);
-    
-    model.setStudent(student);
+    model.setStudent(s);
     
     JTable table = new JTable(model);
     table.setTableHeader(null);
