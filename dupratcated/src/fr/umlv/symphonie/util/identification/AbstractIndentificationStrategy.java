@@ -11,11 +11,11 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 /**
- * Abstract implementation of an <code>IndentificationStrategy</code>.<br>
+ * Abstract implementation of an <code>IdentificationStrategy</code>.<br>
  * Implements listeners support
  */
 public abstract class AbstractIndentificationStrategy implements
-    IndentificationStrategy {
+    IdentificationStrategy {
 
   /** Listeners list */
   protected final ArrayList<ChangeListener> listeners = new ArrayList<ChangeListener>();

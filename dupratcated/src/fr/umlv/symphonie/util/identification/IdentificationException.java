@@ -6,7 +6,7 @@
 package fr.umlv.symphonie.util.identification;
 
 /**
- * Exception thrown by <code>IndentificationStrategy</code> methods
+ * Exception thrown by <code>IdentificationStrategy</code> methods
  */
 public class IdentificationException extends Exception {
 

@@ -6,7 +6,7 @@ package fr.umlv.symphonie.util.identification;
 
 
 /**
- * SQL based implementation of an <code>IndentificationStrategy</code>
+ * SQL based implementation of an <code>IdentificationStrategy</code>
  */
 public final class SQLIdentificationStrategy extends AbstractIndentificationStrategy {
 
