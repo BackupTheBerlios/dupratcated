@@ -6,19 +6,21 @@
 package fr.umlv.symphonie.view;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComponent;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -34,9 +36,12 @@ import javax.swing.JTree;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import fr.umlv.symphonie.data.Course;
@@ -50,58 +55,88 @@ import fr.umlv.symphonie.model.StudentModel;
 import fr.umlv.symphonie.model.StudentTreeModel;
 import fr.umlv.symphonie.model.TeacherModel;
 import fr.umlv.symphonie.util.ComponentBuilder;
+import fr.umlv.symphonie.util.ExceptionDisplayDialog;
 import fr.umlv.symphonie.util.TextualResourcesLoader;
+import fr.umlv.symphonie.util.ComponentBuilder.ButtonType;
+import fr.umlv.symphonie.util.wizard.DefaultWizardModel;
+import fr.umlv.symphonie.util.wizard.Wizard;
+import static fr.umlv.symphonie.view.SymphonieConstants.ADMIN_MENU;
+import static fr.umlv.symphonie.view.SymphonieConstants.CELL_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.CHANGE_VIEW_MENU;
+import static fr.umlv.symphonie.view.SymphonieConstants.CONNECT_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.DB_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.EXIT_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.EXPORT_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.FILE_MENU;
+import static fr.umlv.symphonie.view.SymphonieConstants.FORMAT_MENU;
+import static fr.umlv.symphonie.view.SymphonieConstants.FORMULA_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.FRAME_TITLE;
+import static fr.umlv.symphonie.view.SymphonieConstants.IMPORT_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.INSERT_COLUMN_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.INSERT_LINE_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.INSERT_MENU;
+import static fr.umlv.symphonie.view.SymphonieConstants.LANGUAGE_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.PRINT_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.PWD_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.VIEW_JURY_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.VIEW_STUDENT_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.VIEW_TEACHER_MENU_ITEM;
+import static fr.umlv.symphonie.view.SymphonieConstants.WINDOW_MENU;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
 
 public class Symphonie {
 
-  private static final ImageIcon EMPTYICON = new ImageIcon(Symphonie.class
-      .getResource("icons/empty.png"));
+  private final DataManager manager;
 
+  /** The international builder */
   private ComponentBuilder builder;
+
+  /** The default language map */
   private HashMap<String, String> defaultLanguage;
+
+  /** The default language name */
   private String defaultLanguageName = "FRENCH";
+
+  /** The main frame */
   private JFrame frame;
+
+  /** The views tabbed pane */
   protected JTabbedPane tab;
 
-  JFrame getFrame() throws DataManagerException, IOException {
+  /** Exception display tool */
+  public final ExceptionDisplayDialog errDisplay;
 
-    defaultLanguage = Language.FRENCH.getMap();
-    builder = new ComponentBuilder(defaultLanguage);
-    frame = new JFrame(builder.getValue(SymphonieConstants.FRAME_TITLE));
-    frame.setContentPane(getContentPane(frame, builder));
+  /** Current view */
+  private View currentView;
 
-    JMenuBar bar = new JMenuBar();
-    bar.add(getFileMenu());
-    bar.add(getWindowMenu());
-    bar.add(getFormatMenu());
-    bar.add(getInsertMenu());
-    bar.add(getAdminMenu());
+  /** Export wizard model */
+  private final Wizard exportW;
 
-    frame.setJMenuBar(bar);
+  /** Import wizard model */
+  private final Wizard importW;
 
-    return frame;
-  }
+  // ----------------------------------------------------------------------------
+  // Menu building methods
+  // ----------------------------------------------------------------------------
 
   /**
-   * Build "File" JMenu
+   * Builds the "File" frame menu
    * 
-   * @return JMenu
+   * @return a <code>JMenu</code>
    */
-  private JMenu getFileMenu() {
-    JMenu file = (JMenu) builder.buildButton(SymphonieConstants.FILE_MENU,
-        ComponentBuilder.ButtonType.MENU);
+  private final JMenu getFileMenu() {
+    JMenu file = (JMenu) builder.buildButton(FILE_MENU, ButtonType.MENU);
 
     /*
      * Actions Menu "File"
      * *******************************************************
      */
 
-    Action a_import = SymphonieActionFactory.getImportAction(new ImageIcon(
-        Symphonie.class.getResource("icons/import.png")));
+    Action a_import = SymphonieActionFactory.getWizardAction(new ImageIcon(
+        Symphonie.class.getResource("icons/import.png")), importW);
 
-    Action export = SymphonieActionFactory.getExportAction(new ImageIcon(
-        Symphonie.class.getResource("icons/export.png")));
+    Action export = SymphonieActionFactory.getWizardAction(new ImageIcon(
+        Symphonie.class.getResource("icons/export.png")), exportW);
 
     Action print = SymphonieActionFactory.getPrintAction(new ImageIcon(
         Symphonie.class.getResource("icons/print.png")));
@@ -114,46 +149,44 @@ public class Symphonie {
      * *********************************************************
      */
 
-    file.add(builder.buildButton(a_import, SymphonieConstants.IMPORT_MENU_ITEM,
-        ComponentBuilder.ButtonType.MENU_ITEM));
-    file.add(builder.buildButton(export, SymphonieConstants.EXPORT_MENU_ITEM,
-        ComponentBuilder.ButtonType.MENU_ITEM));
+    file.add(builder.buildButton(a_import, IMPORT_MENU_ITEM,
+        ButtonType.MENU_ITEM));
+    file.add(builder
+        .buildButton(export, EXPORT_MENU_ITEM, ButtonType.MENU_ITEM));
 
     file.add(new JSeparator());
 
-    file.add(builder.buildButton(print, SymphonieConstants.PRINT_MENU_ITEM,
-        ComponentBuilder.ButtonType.MENU_ITEM));
+    file.add(builder.buildButton(print, PRINT_MENU_ITEM, ButtonType.MENU_ITEM));
 
     file.add(new JSeparator());
 
-    file.add(builder.buildButton(exit, SymphonieConstants.EXIT_MENU_ITEM,
-        ComponentBuilder.ButtonType.MENU_ITEM));
+    file.add(builder.buildButton(exit, EXIT_MENU_ITEM, ButtonType.MENU_ITEM));
 
     return file;
   }
 
   /**
-   * Build the nested JMenu "Language" included in the "Window" JMenu
+   * Builds the nested "Language" menu included in the "Window" menu
    * 
-   * @return JMenu
+   * @return a <code>JMenu</code>
    */
-  private JMenu getLangMenu() {
-    JMenu lang = (JMenu) builder
-        .buildButton(SymphonieConstants.LANGUAGE_MENU_ITEM,
-            ComponentBuilder.ButtonType.MENU);
+  private final JMenu getLangMenu() {
+    JMenu lang = (JMenu) builder.buildButton(LANGUAGE_MENU_ITEM,
+        ButtonType.MENU);
     ButtonGroup g = new ButtonGroup();
     JCheckBoxMenuItem lBox;
     HashMap<String, String> lMap;
     Language defL = Language.valueOf(defaultLanguageName);
-    for(Language l : Language.values()) {
+    for (Language l : Language.values()) {
       try {
         lMap = l.getMap();
       } catch (IOException e) {
-        System.err.println("Unable to load language : " + l.name() + " Skipping");
+        System.err.println("Unable to load language : " + l.name()
+            + " Skipping");
         continue;
       }
-      lBox = new JCheckBoxMenuItem(SymphonieActionFactory.getLanguageChangeAction(lMap,
-        builder));
+      lBox = new JCheckBoxMenuItem(SymphonieActionFactory
+          .getLanguageChangeAction(lMap, builder));
       lBox.setText(lMap.get(Language.LANGUAGE_NAME));
       lang.add(lBox);
       g.add(lBox);
@@ -161,77 +194,51 @@ public class Symphonie {
     }
 
     lang.setIcon(new ImageIcon(Symphonie.class.getResource("icons/lang.png")));
-
     return lang;
   }
 
   /**
-   * Build the nested JMenu "Mode" included in the "Window" JMenu
+   * Builds the nested "Mode" menu included in the "Window" menu
    * 
-   * @return JMenu
+   * @return a <code>JMenu</code>
    */
-  private JMenu getModeMenu() {
-    JMenu mode = (JMenu) builder.buildButton(
-        SymphonieConstants.CHANGE_VIEW_MENU, ComponentBuilder.ButtonType.MENU);
+  private final JMenu getModeMenu() {
+    JMenu mode = (JMenu) builder.buildButton(CHANGE_VIEW_MENU, ButtonType.MENU);
     mode.setIcon(EMPTYICON);
-    // Actions
-    Action viewStudent = SymphonieActionFactory.getModeChangeAction("student",
-        null, tab, 0);
-    Action viewTeacher = SymphonieActionFactory.getModeChangeAction("teacher",
-        null, tab, 1);
-    Action viewJury = SymphonieActionFactory.getModeChangeAction("jury", null,
-        tab, 2);
-
-    // Items
-    JCheckBoxMenuItem studentBox = (JCheckBoxMenuItem) builder.buildButton(
-        viewStudent, SymphonieConstants.VIEW_STUDENT_MENU_ITEM,
-        ComponentBuilder.ButtonType.CHECK_BOX_MENU_ITEM);
-
-    JCheckBoxMenuItem teacherBox = (JCheckBoxMenuItem) builder.buildButton(
-        viewTeacher, SymphonieConstants.VIEW_TEACHER_MENU_ITEM,
-        ComponentBuilder.ButtonType.CHECK_BOX_MENU_ITEM);
-
-    JCheckBoxMenuItem juryBox = (JCheckBoxMenuItem) builder.buildButton(
-        viewJury, SymphonieConstants.VIEW_JURY_MENU_ITEM,
-        ComponentBuilder.ButtonType.CHECK_BOX_MENU_ITEM);
 
     ButtonGroup g = new ButtonGroup();
-    g.add(studentBox);
-    g.add(teacherBox);
-    g.add(juryBox);
-
-    mode.add(studentBox);
-    mode.add(teacherBox);
-    mode.add(juryBox);
-
+    JCheckBoxMenuItem vBox;
+    javax.swing.AbstractAction a;
+    for (View v : View.values()) {
+      a = SymphonieActionFactory.getModeChangeAction(this, v);
+      vBox = (JCheckBoxMenuItem) builder.buildButton(a, v.getNameKey(),
+          ButtonType.CHECK_BOX_MENU_ITEM);
+      g.add(vBox);
+      mode.add(vBox);
+    }
+    mode.setEnabled(false);
     return mode;
   }
 
   /**
-   * Build "Window" JMenu
+   * Builds the "Window" menu
    * 
-   * @return JMenu
+   * @return a <code>JMenu</code>
    */
-  private JMenu getWindowMenu() {
-    JMenu window = (JMenu) builder.buildButton(SymphonieConstants.WINDOW_MENU,
-        ComponentBuilder.ButtonType.MENU);
-
-    /* Items********************************************************* */
-    window.add(getModeMenu());
-    window.add(getLangMenu());
-
+  private final JMenu getWindowMenu(JMenu mode, JMenu lang) {
+    JMenu window = (JMenu) builder.buildButton(WINDOW_MENU, ButtonType.MENU);
+    window.add(mode);
+    window.add(lang);
     return window;
-
   }
 
   /**
-   * Build "Format" JMenu
+   * Builds the "Format" menu
    * 
-   * @return JMenu
+   * @return a <code>JMenu</code>
    */
-  private JMenu getFormatMenu() {
-    JMenu format = (JMenu) builder.buildButton(SymphonieConstants.FORMAT_MENU,
-        ComponentBuilder.ButtonType.MENU);
+  private final JMenu getFormatMenu() {
+    JMenu format = (JMenu) builder.buildButton(FORMAT_MENU, ButtonType.MENU);
 
     /* Actions ******************************************************* */
     Action formula = SymphonieActionFactory.getFormulaAction(new ImageIcon(
@@ -240,23 +247,21 @@ public class Symphonie {
         frame, builder);
 
     /* Items********************************************************* */
-    format.add(builder.buildButton(formula,
-        SymphonieConstants.FORMULA_MENU_ITEM,
-        ComponentBuilder.ButtonType.MENU_ITEM));
-    format.add(builder.buildButton(f_cell, SymphonieConstants.CELL_MENU_ITEM,
-        ComponentBuilder.ButtonType.MENU_ITEM));
+    format.add(builder.buildButton(formula, FORMULA_MENU_ITEM,
+        ButtonType.MENU_ITEM));
+    format.add(builder
+        .buildButton(f_cell, CELL_MENU_ITEM, ButtonType.MENU_ITEM));
 
     return format;
   }
 
   /**
-   * Build "Insert" JMenu
+   * Builds the "Insert" menu
    * 
-   * @return JMenu
+   * @return a <code>JMenu</code>
    */
-  private JMenu getInsertMenu() {
-    JMenu insert = (JMenu) builder.buildButton(SymphonieConstants.INSERT_MENU,
-        ComponentBuilder.ButtonType.MENU);
+  private final JMenu getInsertMenu() {
+    JMenu insert = (JMenu) builder.buildButton(INSERT_MENU, ButtonType.MENU);
     /* Actions ******************************************************* */
     Action column = SymphonieActionFactory.getColumnAction(new ImageIcon(
         Symphonie.class.getResource("icons/insert_column.png")));
@@ -264,23 +269,20 @@ public class Symphonie {
         Symphonie.class.getResource("icons/insert_line.png")));
 
     /* Items********************************************************* */
-    insert.add(builder.buildButton(column,
-        SymphonieConstants.INSERT_COLUMN_MENU_ITEM,
-        ComponentBuilder.ButtonType.MENU_ITEM));
-    insert.add(builder.buildButton(line,
-        SymphonieConstants.INSERT_LINE_MENU_ITEM,
-        ComponentBuilder.ButtonType.MENU_ITEM));
+    insert.add(builder.buildButton(column, INSERT_COLUMN_MENU_ITEM,
+        ButtonType.MENU_ITEM));
+    insert.add(builder.buildButton(line, INSERT_LINE_MENU_ITEM,
+        ButtonType.MENU_ITEM));
     return insert;
   }
 
   /**
-   * Build "Admin" JMenu
+   * Builds the "Admin" menu
    * 
-   * @return JMenu
+   * @return a <code>JMenu</code>
    */
-  private JMenu getAdminMenu() {
-    JMenu admin = (JMenu) builder.buildButton(SymphonieConstants.ADMIN_MENU,
-        ComponentBuilder.ButtonType.MENU);
+  private final JMenu getAdminMenu() {
+    JMenu admin = (JMenu) builder.buildButton(ADMIN_MENU, ButtonType.MENU);
     /* Actions ******************************************************* */
     Action connect = SymphonieActionFactory.getConnectAction(new ImageIcon(
         Symphonie.class.getResource("icons/admin.png")), builder);
@@ -290,22 +292,33 @@ public class Symphonie {
         Symphonie.class.getResource("icons/pwd.png")), frame, builder);
 
     /* Items********************************************************* */
-    admin.add(builder.buildButton(connect,
-        SymphonieConstants.CONNECT_MENU_ITEM,
-        ComponentBuilder.ButtonType.MENU_ITEM));
-    admin.add(builder.buildButton(db, SymphonieConstants.DB_MENU_ITEM,
-        ComponentBuilder.ButtonType.MENU_ITEM));
-    admin.add(builder.buildButton(pwd, SymphonieConstants.PWD_MENU_ITEM,
-        ComponentBuilder.ButtonType.MENU_ITEM));
+    admin.add(builder.buildButton(connect, CONNECT_MENU_ITEM,
+        ButtonType.MENU_ITEM));
+    admin.add(builder.buildButton(db, DB_MENU_ITEM, ButtonType.MENU_ITEM));
+    admin.add(builder.buildButton(pwd, PWD_MENU_ITEM, ButtonType.MENU_ITEM));
     return admin;
   }
 
   /**
-   * Build the toolbar
+   * Builds a ready-to-use menu bar
    * 
-   * @return JToolBar
+   * @param menus
+   *          The menus that will be contained on the menu bar
+   * @return a <code>JMenuBar</code>
    */
-  private JToolBar getToolbar() {
+  private final JMenuBar getMenubar(JMenu... menus) {
+    JMenuBar bar = new JMenuBar();
+    for (JMenu m : menus)
+      bar.add(m);
+    return bar;
+  }
+
+  /**
+   * Builds the toolbar
+   * 
+   * @return a ready-to-use <code>JToolBar</code>
+   */
+  private final JToolBar getToolbar() {
     JToolBar toolbar = new JToolBar();
     toolbar.add(SymphonieActionFactory.getConnectAction(new ImageIcon(
         Symphonie.class.getResource("icons/connect.png")), builder));
@@ -317,125 +330,73 @@ public class Symphonie {
     return toolbar;
   }
 
+  // ----------------------------------------------------------------------------
+  // Wizards set up
+  // ----------------------------------------------------------------------------
+
   /**
-   * Build a JSplitPane with the TeacherModel
+   * Provides an export wizard
    * 
-   * @param dataManager
-   * @return JSplitPane
+   * @return The created wizard
    */
-  private JSplitPane getTeacherPane(DataManager dataManager) {
-    JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-
-    /* table */
-
-    final TeacherModel teacherModel = TeacherModel.getInstance(dataManager);
-
-    final JTable table = new JTable(teacherModel);
-    table.setTableHeader(null);
-
-    table.setDefaultRenderer(Object.class, CellRendererFactory
-        .getTeacherModelCellRenderer(teacherModel.getFormattedObjects()));
-
-    JScrollPane scroll1 = new JScrollPane(table);
-
-    split.setRightComponent(scroll1);
-
-    /*
-     * arbre
-     */
-    CourseTreeModel courseModel = new CourseTreeModel(dataManager);
-
-    final JTree tree = new JTree(courseModel);
-
-    tree.setCellRenderer(new DefaultTreeCellRenderer() {
-
-      private final Icon leafIcon = new ImageIcon(StudentTreeModel.class
-          .getResource("../view/icons/course.png"));
-      private final Icon rootIcon = new ImageIcon(StudentTreeModel.class
-          .getResource("../view/icons/courses.png"));
-
-      public java.awt.Component getTreeCellRendererComponent(JTree tree,
-          Object value, boolean sel, boolean expanded, boolean leaf, int row,
-          boolean hasFocus) {
-
-        Font font = getFont();
-
-        if (font != null) {
-          font = font.deriveFont(Font.BOLD);
-          setFont(font);
-        }
-
-        if (leaf) {
-          setLeafIcon(leafIcon);
-        } else {
-          setClosedIcon(rootIcon);
-          setOpenIcon(rootIcon);
-        }
-
-        super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf,
-            row, hasFocus);
-        return this;
-      }
-    });
-
-    tree.addTreeSelectionListener(new TreeSelectionListener() {
-
-      /*
-       * (non-Javadoc)
-       * 
-       * @see javax.swing.event.TreeSelectionListener#valueChanged(javax.swing.event.TreeSelectionEvent)
-       */
-      public void valueChanged(TreeSelectionEvent e) {
-        Object o = tree.getLastSelectedPathComponent();
-
-        if (o instanceof Course) {
-          System.out.println("on a selectionne une matiere !");
-          ((TeacherModel) table.getModel()).setCourse((Course) o);
-        }
-      }
-
-    });
-
-    JScrollPane pane = new JScrollPane(tree);
-
-    split.setLeftComponent(pane);
-
-    return split;
-
+  private final Wizard getExportWizard() {
+    DefaultWizardModel exp = (DefaultWizardModel) WizardPanelFactory
+        .getInternationalWizardModel(builder,
+            SymphonieWizardConstants.EWIZARD_TITLE,
+            SymphonieWizardConstants.EXPORT_WIZARD_ICON);
+    exp.getInterPanelData().put(SymphonieWizardConstants.DATA_EX_DIALOG,
+        errDisplay);
+    Wizard wesh = new Wizard(frame, exp, builder, new Dimension(600, 400));
+    exp.addPanel(WizardPanelFactory.getExportFormatSelectionPanel(builder));
+    exp.addPanel(WizardPanelFactory.getExportFileSelectionPanel(builder));
+    exp.addPanel(WizardPanelFactory.getExportFinishPanel(wesh, builder));
+    return wesh;
   }
 
   /**
-   * @param dataManager
-   * @return
-   * @throws DataManagerException
+   * Provides an import wizard
+   * 
+   * @return The created wizard
    */
-  private JSplitPane getStudentPane(DataManager dataManager)
-      throws DataManagerException {
-    StudentModel studentModel = new StudentModel(dataManager);
+  private final Wizard getImportWizard() {
+    DefaultWizardModel imp = (DefaultWizardModel) WizardPanelFactory
+        .getInternationalWizardModel(builder,
+            SymphonieWizardConstants.IWIZARD_TITLE,
+            SymphonieWizardConstants.IMPORT_WIZARD_ICON);
+    imp.getInterPanelData().put(SymphonieWizardConstants.DATA_EX_DIALOG,
+        errDisplay);
+    Wizard iWish = new Wizard(frame, imp, builder, new Dimension(600, 400));
+    imp.addPanel(WizardPanelFactory.getImportFileSelectionPanel(builder));
+    imp.addPanel(WizardPanelFactory.getImportPanel(iWish, builder));
+    return iWish;
+  }
 
-    Map<Integer, Student> studentMap = null;
+  // ----------------------------------------------------------------------------
+  // View building methods
+  // ----------------------------------------------------------------------------
 
-    studentMap = dataManager.getStudents();
+  /**
+   * Builds a panel with the student view
+   * 
+   * @return a <code>JSplitPane</code>
+   */
+  private final JSplitPane getStudentPane() {
 
+    StudentModel studentModel = new StudentModel(manager);
     JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
-    /*
-     * table
-     */
-
+    // Table
     final JTable table = new JTable(studentModel);
     table.setTableHeader(null);
-
     table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
 
-      public java.awt.Component getTableCellRendererComponent(JTable table,
+      public Component getTableCellRendererComponent(JTable table,
           Object value, boolean isSelected, boolean hasFocus, int row,
           int column) {
         JLabel label = (JLabel) super.getTableCellRendererComponent(table,
             value, isSelected, hasFocus, row, column);
 
         label.setHorizontalAlignment(SwingConstants.CENTER);
-
         if (column == 0 || row % 4 == 0)
           label.setFont(getFont().deriveFont(Font.BOLD));
 
@@ -446,13 +407,9 @@ public class Symphonie {
     JScrollPane scroll1 = new JScrollPane(table);
     split.setRightComponent(scroll1);
 
-    /*
-     * arbre
-     */
-
-    StudentTreeModel treeModel = new StudentTreeModel(dataManager);
+    // Tree
+    StudentTreeModel treeModel = new StudentTreeModel(manager);
     final JTree tree = new JTree(treeModel);
-
     tree.setCellRenderer(new DefaultTreeCellRenderer() {
 
       private final Icon leafIcon = new ImageIcon(StudentTreeModel.class
@@ -460,9 +417,8 @@ public class Symphonie {
       private final Icon rootIcon = new ImageIcon(StudentTreeModel.class
           .getResource("../view/icons/students.png"));
 
-      public java.awt.Component getTreeCellRendererComponent(JTree tree,
-          Object value, boolean sel, boolean expanded, boolean leaf, int row,
-          boolean hasFocus) {
+      public Component getTreeCellRendererComponent(JTree tree, Object value,
+          boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
 
         Font font = getFont();
 
@@ -485,41 +441,102 @@ public class Symphonie {
     });
 
     JScrollPane pane = new JScrollPane(tree);
-
     split.setLeftComponent(pane);
-
     tree.addTreeSelectionListener(new TreeSelectionListener() {
 
-      /*
-       * (non-Javadoc)
-       * 
-       * @see javax.swing.event.TreeSelectionListener#valueChanged(javax.swing.event.TreeSelectionEvent)
-       */
       public void valueChanged(TreeSelectionEvent e) {
         Object o = tree.getLastSelectedPathComponent();
-
-        if (o instanceof Student)
+        if (o instanceof Student) {
           ((StudentModel) (table.getModel())).setStudent((Student) o);
-
+          // TODO import/export data
+        }
       }
     });
-
     return split;
   }
 
   /**
-   * @param dataManager
-   * @return JTable
+   * Builds a panel with the teacher view
+   * 
+   * @return a <code>JSplitPane</code>
    */
-  private JTable getJuryPane(DataManager dataManager) {
-    JuryModel model = JuryModel.getInstance(dataManager);
+  private final JSplitPane getTeacherPane() {
 
+    JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+
+    // Table
+    final TeacherModel teacherModel = TeacherModel.getInstance(manager);
+    final JTable table = new JTable(teacherModel);
+    table.setTableHeader(null);
+    table.setDefaultRenderer(Object.class, CellRendererFactory
+        .getTeacherModelCellRenderer(teacherModel.getFormattedObjects()));
+
+    JScrollPane scroll1 = new JScrollPane(table);
+
+    split.setRightComponent(scroll1);
+
+    // Tree
+    CourseTreeModel courseModel = new CourseTreeModel(manager);
+    final JTree tree = new JTree(courseModel);
+    tree.setCellRenderer(new DefaultTreeCellRenderer() {
+
+      private final Icon leafIcon = new ImageIcon(StudentTreeModel.class
+          .getResource("../view/icons/course.png"));
+      private final Icon rootIcon = new ImageIcon(StudentTreeModel.class
+          .getResource("../view/icons/courses.png"));
+
+      public Component getTreeCellRendererComponent(JTree tree, Object value,
+          boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+
+        Font font = getFont();
+
+        if (font != null) {
+          font = font.deriveFont(Font.BOLD);
+          setFont(font);
+        }
+
+        if (leaf) {
+          setLeafIcon(leafIcon);
+        } else {
+          setClosedIcon(rootIcon);
+          setOpenIcon(rootIcon);
+        }
+
+        super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf,
+            row, hasFocus);
+        return this;
+      }
+    });
+
+    tree.addTreeSelectionListener(new TreeSelectionListener() {
+
+      public void valueChanged(TreeSelectionEvent e) {
+        Object o = tree.getLastSelectedPathComponent();
+
+        if (o instanceof Course) {
+          System.out.println("on a selectionne une matiere !");
+          ((TeacherModel) table.getModel()).setCourse((Course) o);
+        }
+      }
+    });
+
+    JScrollPane pane = new JScrollPane(tree);
+    split.setLeftComponent(pane);
+    return split;
+  }
+
+  /**
+   * Builds a panel with the jury view
+   * 
+   * @return a <code>JScrollPane</code>
+   */
+  private final JScrollPane getJuryPane() {
+    JuryModel model = JuryModel.getInstance(manager);
     JTable table = new JTable(model);
     table.setTableHeader(null);
-
     table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
 
-      public java.awt.Component getTableCellRendererComponent(JTable table,
+      public Component getTableCellRendererComponent(JTable table,
           Object value, boolean isSelected, boolean hasFocus, int row,
           int column) {
         JLabel label = (JLabel) super.getTableCellRendererComponent(table,
@@ -534,85 +551,218 @@ public class Symphonie {
         return label;
       }
     });
+    return new JScrollPane(table);
+  }
 
-    return table;
+  // ----------------------------------------------------------------------------
+  // Content panes
+  // ----------------------------------------------------------------------------
+
+  /**
+   * Makes the welcome panel
+   * 
+   * @param content
+   *          The panel that contains Symphonie views
+   * @param modeMenu
+   *          The mode menu
+   * @return The html welcome page as a panel
+   */
+  private final JPanel getWelcomePagePanel(final JPanel content,
+      final JMenu modeMenu) {
+    JPanel p = new JPanel(new GridBagLayout());
+    final JEditorPane jeep = new JEditorPane();
+    jeep.setEditorKit(new HTMLEditorKit());
+    jeep.setEditable(false);
+
+    // Listen user clicks
+    jeep.addHyperlinkListener(new HyperlinkListener() {
+
+      public void hyperlinkUpdate(HyperlinkEvent e) {
+        if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
+          String f = e.getURL().getFile();
+          currentView = View.valueOf(f.substring(f.lastIndexOf('/') + 1));
+          modeMenu.setEnabled(true);
+          frame.setContentPane(content);
+          tab.setSelectedIndex(currentView.ordinal());
+        }
+      }
+    });
+
+    // Get html text
+    try {
+      jeep.setText(WelcomePage.getRenderableHTMLText(builder));
+    } catch (IOException e1) {
+      return null;
+    }
+
+    // Listen builder changes
+    builder.addChangeListener(jeep, new ChangeListener() {
+
+      public void stateChanged(ChangeEvent e) {
+        String text;
+        try {
+          text = WelcomePage.getRenderableHTMLText(builder);
+          jeep.setText(text);
+        } catch (IOException e1) {
+        }
+      }
+    });
+
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.weightx = 1.0;
+    gbc.weighty = 1.0;
+    p.add(jeep, gbc);
+    return p;
   }
 
   /**
-   * @param f
-   *          the frame
-   * @param builder
+   * Builds the main panel that contains all program views
+   * 
    * @return JPanel
-   * @throws DataManagerException
    */
-  private JPanel getContentPane(final JFrame f,
-      final ComponentBuilder builder) throws DataManagerException {
+  private final JPanel getContentPane() {
+
     JPanel panel = new JPanel(new BorderLayout());
     panel.add(getToolbar(), BorderLayout.NORTH);
-
-    DataManager dataManager = SQLDataManager.getInstance();
 
     tab = new JTabbedPane(JTabbedPane.BOTTOM, JTabbedPane.SCROLL_TAB_LAYOUT);
 
     /* Student JTabbedPane */
-    tab.add(builder.getValue(SymphonieConstants.VIEW_STUDENT_MENU_ITEM),
-        new JScrollPane(getStudentPane(dataManager)));
-    final int sTab = tab.indexOfTab(builder
-        .getValue(SymphonieConstants.VIEW_STUDENT_MENU_ITEM));
-    builder.addChangeListener((JComponent) tab.getComponentAt(sTab),
-        new ChangeListener() {
-
-          public void stateChanged(ChangeEvent e) {
-            tab.setTitleAt(sTab, builder
-                .getValue(SymphonieConstants.VIEW_STUDENT_MENU_ITEM));
-          }
-        });
+    JScrollPane jsp = new JScrollPane(getStudentPane());
+    tab.add(builder.getValue(VIEW_STUDENT_MENU_ITEM), jsp);
+    builder.addChangeListener(jsp, makeTabChangeListener(tab, View.student,
+        builder));
 
     /* Teacher JTabbedPane */
-    tab.add(builder.getValue(SymphonieConstants.VIEW_TEACHER_MENU_ITEM),
-        new JScrollPane(getTeacherPane(dataManager)));
-    final int tTab = tab.indexOfTab(builder
-        .getValue(SymphonieConstants.VIEW_TEACHER_MENU_ITEM));
-    builder.addChangeListener((JComponent) tab.getComponentAt(tTab),
-        new ChangeListener() {
-
-          public void stateChanged(ChangeEvent e) {
-            tab.setTitleAt(tTab, builder
-                .getValue(SymphonieConstants.VIEW_TEACHER_MENU_ITEM));
-          }
-        });
+    jsp = new JScrollPane(getTeacherPane());
+    tab.add(builder.getValue(VIEW_TEACHER_MENU_ITEM), jsp);
+    builder.addChangeListener(jsp, makeTabChangeListener(tab, View.teacher,
+        builder));
 
     /* Jury JTabbedPane */
-    tab.add(builder.getValue(SymphonieConstants.VIEW_JURY_MENU_ITEM),
-        new JScrollPane(getJuryPane(dataManager)));
-    final int jTab = tab.indexOfTab(builder
-        .getValue(SymphonieConstants.VIEW_JURY_MENU_ITEM));
-    builder.addChangeListener((JComponent) tab.getComponentAt(jTab),
-        new ChangeListener() {
-
-          public void stateChanged(ChangeEvent e) {
-            tab.setTitleAt(jTab, builder
-                .getValue(SymphonieConstants.VIEW_JURY_MENU_ITEM));
-          }
-        });
+    jsp = new JScrollPane(getJuryPane());
+    tab.add(builder.getValue(VIEW_JURY_MENU_ITEM), jsp);
+    builder.addChangeListener(jsp, makeTabChangeListener(tab, View.jury,
+        builder));
 
     panel.add(tab);
-
-    /* change the title of the frame */
-    builder.addChangeListener(panel, new ChangeListener() {
-
-      public void stateChanged(ChangeEvent e) {
-        f.setTitle(builder.getValue(SymphonieConstants.FRAME_TITLE));
-      }
-    });
 
     return panel;
   }
 
+  // ----------------------------------------------------------------------------
+  // Public methods
+  // ----------------------------------------------------------------------------
+
+  /**
+   * Sets up the main application
+   * 
+   * @throws DataManagerException
+   *           If there's a problem while dealing DB
+   * @throws IOException
+   *           If there's any i/o error
+   */
+  public Symphonie() throws DataManagerException, IOException {
+
+    // Data source
+    manager = SQLDataManager.getInstance();
+
+    // Language tools
+    defaultLanguage = Language.FRENCH.getMap();
+    builder = new ComponentBuilder(defaultLanguage);
+
+    // Main frame
+    frame = new JFrame(builder.getValue(FRAME_TITLE));
+    
+    // Exception dialog
+    errDisplay = new ExceptionDisplayDialog(frame, builder);
+    
+    // Wizards
+    importW = getImportWizard();
+    exportW = getExportWizard();
+    
+    // Content pane
+    JMenu mode = getModeMenu();
+    JPanel content = getContentPane();
+    JPanel welcome = getWelcomePagePanel(content, mode);
+    frame.setContentPane((welcome != null) ? welcome : content);
+
+    // Menu bar
+    frame.setJMenuBar(getMenubar(getFileMenu(), getWindowMenu(mode,
+        getLangMenu()), getFormatMenu(), getInsertMenu(), getAdminMenu()));
+
+    // Listen changes in builder for frame title
+    builder.addChangeListener(content, new ChangeListener() {
+
+      public void stateChanged(ChangeEvent e) {
+        frame.setTitle(builder.getValue(FRAME_TITLE));
+      }
+    });
+  }
+
+  /**
+   * Returns main program frame
+   * 
+   * @return a <code>JFrame</code>
+   */
+  public JFrame getFrame() {
+    return frame;
+  }
+
+  /**
+   * Returns the current view
+   * 
+   * @return the current view
+   */
+  public View getCurrentView() {
+    return currentView;
+  }
+
+  /**
+   * Updates the current view
+   * 
+   * @param newView
+   *          the new view
+   */
+  public void setCurrentView(View newView) {
+    this.currentView = newView;
+    tab.setSelectedIndex(currentView.ordinal());
+  }
+
+  // ----------------------------------------------------------------------------
+  // Static methods
+  // ----------------------------------------------------------------------------
+
+  /**
+   * Makes a <code>ChangeListener</code> that updates a tab title
+   * 
+   * @param tabs
+   *          The <code>JTabbedPane</code> that contains the view
+   * @param v
+   *          The view whose title will be updated
+   * @return a <code>ChangeListener</code>
+   */
+  private static final ChangeListener makeTabChangeListener(
+      final JTabbedPane tabs, final View v, final ComponentBuilder builder) {
+    return new ChangeListener() {
+
+      public void stateChanged(ChangeEvent e) {
+        tabs.setTitleAt(v.ordinal(), builder.getValue(v.getNameKey()));
+      }
+    };
+  }
+
+  // ----------------------------------------------------------------------------
+  // Static fields
+  // ----------------------------------------------------------------------------
+
+  /** A transparent 16x16 icon */
+  private static final ImageIcon EMPTYICON = new ImageIcon(Symphonie.class
+      .getResource("icons/empty.png"));
+
   /**
    * Enum defines languages supported by Symphonie.
-   * 
-   * @author PEÑA SALDARRIAGA Sébastian
    */
   enum Language {
 
@@ -628,7 +778,7 @@ public class Symphonie {
         return USASCII;
       }
     },
-    SPANISH(new Locale("english")) {
+    SPANISH(new Locale("spanish")) {
 
       String getCharset() {
         return ISO88591;
@@ -696,5 +846,36 @@ public class Symphonie {
 
     /** Unicode charset */
     public static final String UNICODE = "Unicode";
+  }
+
+  /**
+   * Enum represents program views
+   */
+  enum View {
+    student {
+
+      String getNameKey() {
+        return VIEW_STUDENT_MENU_ITEM;
+      }
+    },
+    teacher {
+
+      String getNameKey() {
+        return VIEW_TEACHER_MENU_ITEM;
+      }
+    },
+    jury {
+
+      String getNameKey() {
+        return VIEW_JURY_MENU_ITEM;
+      }
+    };
+
+    /**
+     * Returns view's name key
+     * 
+     * @return a <code>String</code>
+     */
+    abstract String getNameKey();
   }
 }
