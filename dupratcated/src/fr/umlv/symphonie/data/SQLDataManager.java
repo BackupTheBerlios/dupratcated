@@ -358,6 +358,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#getStudents()
+	 */
 	public Map<Integer, Student> getStudents() throws DataManagerException {
 
 		int n;
@@ -375,6 +378,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 		return studentMap;
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#getStudentList()
+	 */
 	public List<Student> getStudentList() throws DataManagerException {
 		int n;
 
@@ -392,6 +398,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 		return studentList;
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#getCourses()
+	 */
 	public Map<Integer, Course> getCourses() throws DataManagerException {
 
 		int n;
@@ -409,6 +418,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 		return courseMap;
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#getCoursesList()
+	 */
 	public List<Course> getCoursesList() throws DataManagerException {
 		int n;
 		try {
@@ -425,6 +437,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 		return courseList;
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#getMarks()
+	 */
 	public Map<Integer, Mark> getMarks() throws DataManagerException {
 		int n;
 		try {
@@ -442,6 +457,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#getStudentMarks()
+	 */
 	public List<StudentMark> getStudentMarks() throws DataManagerException {
 
 		int n;
@@ -459,6 +477,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 		return studentMarkList;
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#getMarksByCourse(fr.umlv.symphonie.data.Course)
+	 */
 	public Map<Integer, Mark> getMarksByCourse(Course c)
 			throws DataManagerException {
 
@@ -976,6 +997,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#addCourse(java.lang.String, float)
+	 */
 	public void addCourse(String title, float coeff)
 			throws DataManagerException {
 		int key = 0;
@@ -1021,6 +1045,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#addCourses(java.util.List)
+	 */
 	public void addCourses(List<Pair<String, Float>> coursesToAddList)
 			throws DataManagerException {
 
@@ -1073,6 +1100,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#removeCourse(fr.umlv.symphonie.data.Course)
+	 */
 	public void removeCourse(Course c) throws DataManagerException {
 
 		// on efface d'abord les tests associes a cette matiere
@@ -1107,6 +1137,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#addTitle(java.lang.String)
+	 */
 	public int addTitle(String desc) throws DataManagerException {
 		int key = 0;
 
@@ -1132,6 +1165,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 		return key;
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#addMark(java.lang.String, float, fr.umlv.symphonie.data.Course)
+	 */
 	public void addMark(String desc, float coeff, Course c)
 			throws DataManagerException {
 		int titleKey = -1;
@@ -1232,6 +1268,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.umlv.symphonie.data.DataManager#removeMark(fr.umlv.symphonie.data.Mark)
+	 */
 	public void removeMark(Mark m) throws DataManagerException {
 
 		// effacement de la base
@@ -1266,8 +1305,10 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 		}
 	}
 
+
 	/**
-	 * @param id
+	 * @param markId
+	 * @throws DataManagerException
 	 */
 	public void removeAllStudentMarksForMark(int markId)
 			throws DataManagerException {
