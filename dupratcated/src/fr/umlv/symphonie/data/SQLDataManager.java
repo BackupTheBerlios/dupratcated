@@ -30,82 +30,123 @@ public class SQLDataManager extends SQLDataManagerConstants implements
   /*
    * methodes internes
    */
-  private static PreparedStatement connectAndPrepare(String request)throws SQLException {
+  private static PreparedStatement connectAndPrepare(String request) throws DataManagerException {
     Connection connection = null;
     PreparedStatement preparedStatement = null;
 
     connection = ConnectionManager.createConnection();
-    preparedStatement = connection.prepareStatement(request);
+    try {
+      preparedStatement = connection.prepareStatement(request);
+    } catch (SQLException e) {
+      throw new DataManagerException("error with the request " + request + "\n", e);
+    }
 
     return preparedStatement;
   }
 
-  private static ResultSet connectAndQuery(String request) throws SQLException {
+  private static ResultSet connectAndQuery(String request) throws DataManagerException {
     Connection connection = null;
     Statement statement = null;
 
     connection = ConnectionManager.createConnection();
-    statement = connection.createStatement();
-
-    return statement.executeQuery(request);
+    try {
+      statement = connection.createStatement();
+      return statement.executeQuery(request);
+    } catch (SQLException e) {
+      throw new DataManagerException("error with the request " + request + "\n", e);
+    }  
   }
 
-  private static void connectAndUpdate(String request) throws SQLException {
+  private static void connectAndUpdate(String request) throws DataManagerException {
     Connection connection = null;
     Statement statement = null;
 
     connection = ConnectionManager.createConnection();
-    statement = connection.createStatement();
+    try {
+      statement = connection.createStatement();
+      statement.executeUpdate(request);
+    } catch (SQLException e) {
+      throw new DataManagerException("error with the request " + request + "\n", e);
+    }    
     
-    statement.executeUpdate(request);
   }
 
-  public static int createPrimaryKey(String table, String id) throws SQLException {
+  public static int createPrimaryKey(String table, String id) throws DataManagerException {
 
     ResultSet results = null;
     String request = "SELECT MAX(`" + id + "`) + 1 FROM `" + table + "`;";
 
     results = connectAndQuery(request);
 
-    results.next();
-    return results.getInt(1);
+    try {
+      results.next();
+      return results.getInt(1);
+    } catch (SQLException e) {
+      throw new DataManagerException("error : createPrimaryKey(" + table + ", " + id + ")\n", e);
+    }
+    
   }
   
-  public static int getTimeStamp (String tableName)throws SQLException{
+  public static int getTimeStamp (String tableName) throws DataManagerException{
     String request = "select " + COLUMN_TABLE_NAME_FROM_TABLE_TIMESTAMP + ", " + COLUMN_TIMESTAMP_FROM_TABLE_TIMESTAMP + " " +
                      "from " + TABLE_TIMESTAMP + " " +
                      "where " + COLUMN_TABLE_NAME_FROM_TABLE_TIMESTAMP + " = '" + tableName + "' " +
                      ";";
 
-    ResultSet result = connectAndQuery(request);
+    ResultSet result = null;
     
-    CachedRowSetImpl rowSet = new CachedRowSetImpl();
-    rowSet.populate(result);
+    try {
+      result = connectAndQuery(request);
+    } catch (DataManagerException e) {
+      System.out.println("getTimeStamp(" + tableName + ")\n");
+      e.printStackTrace();
+    }
     
-    rowSet.first();
-
-    return rowSet.getInt(result.findColumn(COLUMN_TIMESTAMP_FROM_TABLE_TIMESTAMP));
+    CachedRowSetImpl rowSet;
+    try {
+      rowSet = new CachedRowSetImpl();
+      rowSet.populate(result);      
+      rowSet.first();
+      return rowSet.getInt(result.findColumn(COLUMN_TIMESTAMP_FROM_TABLE_TIMESTAMP));
+    } catch (SQLException e) {
+      throw new DataManagerException("error : getTimeStamp(" + tableName + ")\n", e);
+    }
   }
   
-  public void setNewTimestamp (String columnName, int newTimeStamp) throws SQLException{
+  public void setNewTimestamp (String columnName, int newTimeStamp){
     String request = "update " + TABLE_TIMESTAMP + " " +
                      "set " + COLUMN_TIMESTAMP_FROM_TABLE_TIMESTAMP + " = " + newTimeStamp + " " +
                      "where " + COLUMN_TABLE_NAME_FROM_TABLE_TIMESTAMP + " = '" + columnName + "' " +
                      ";";
     
-    connectAndUpdate(request);
+    try {
+      connectAndUpdate(request);
+    } catch (DataManagerException e) {
+      System.out.println("error : setNewTimestamp(" + columnName + ", " + newTimeStamp + ")\n");
+      e.printStackTrace();
+    }
   }
   
-  private int getKeyForTitle(String desc) throws SQLException {
+  private int getKeyForTitle(String desc) throws DataManagerException {
     String request = "select " + COLUMN_ID_FROM_TABLE_TITLE + " " + "from "
         + TABLE_TITLE + " " + "where " + COLUMN_DESC_FROM_TABLE_TITLE + " = '"
         + desc + "';";
 
-    ResultSet result = connectAndQuery(request);
+    ResultSet result = null;
+    
+    try {
+      result = connectAndQuery(request);
+    } catch (DataManagerException e1) {
+      System.out.println("error : getKeyForTitle(" + desc + ")\n");
+      e1.printStackTrace();
+    }
 
-    if (result.first() == false) return -1;
-
-    return result.getInt(COLUMN_ID_FROM_TABLE_TITLE);
+    try {
+      if (result.first() == false) return -1;
+      return result.getInt(COLUMN_ID_FROM_TABLE_TITLE);
+    } catch (SQLException e) {
+      throw new DataManagerException("error : getKeyForTitle(" + desc + ")\n", e);
+    }    
   }
   
   
@@ -113,12 +154,18 @@ public class SQLDataManager extends SQLDataManagerConstants implements
    * methodes de base
    */
   
-  private void syncStudentData() throws DataManagerException{
+  private void syncStudentData() throws DataManagerException {
     ResultSet results = null;
     String request = "SELECT * FROM `" + TABLE_STUDENT + "`;";
 
     try {
       results = connectAndQuery(request);
+    } catch (DataManagerException e1) {
+      System.out.println("error : syncStudentData()\n");
+      e1.printStackTrace();
+    }
+    
+    try {    
 
       while (results.next()) {
         Student s = new Student(results.getInt(1), results.getString(2),
@@ -136,7 +183,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     }
   }
   
-  private void syncStudentMarksData() throws DataManagerException {
+  private void syncStudentMarksData() throws DataManagerException  {
     Map<Integer, Mark> courseMap = getMarks();
     Map<Integer, Student> studentMap = getStudents();
 
@@ -145,6 +192,13 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
     try {
       results = connectAndQuery(request);
+    } catch (DataManagerException e1) {
+      System.out.println("error : syncStudentMarksData()\n");
+      e1.printStackTrace();
+    }
+    
+    try {
+      
 
       while (results.next()) {
 
@@ -179,6 +233,13 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
     try {
       results = connectAndQuery(request);
+    } catch (DataManagerException e) {
+      System.out.println("error : syncCourseData()\n");
+      e.printStackTrace();
+    }
+    
+    try {
+      
 
       while (results.next()) {
 
@@ -190,16 +251,14 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
         else
           courseMap.put(c.getId(), c);
-      }
-
-      
+      }      
 
     } catch (SQLException e) {
       throw new DataManagerException("error synchronizing courses from database.", e);
     }
   }
   
-  private void syncMarkData() throws DataManagerException {
+  private void syncMarkData() throws DataManagerException  {
     Map<Integer, Course> courseMap = getCourses();
 
     ResultSet results = null;
@@ -212,6 +271,12 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
     try {
       results = connectAndQuery(request);
+    } catch (DataManagerException e1) {
+      System.out.println("error : syncMarkData()\n");
+      e1.printStackTrace();
+    }
+    
+    try {      
 
       while (results.next()) {
 
@@ -233,75 +298,74 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     }
   }
   
-  public Map<Integer, Student> getStudents() throws DataManagerException {
+  public Map<Integer, Student> getStudents() {
 
     int n;
     try {
       n = getTimeStamp(TABLE_STUDENT);
-    } catch (SQLException e1) {
+      
+      if ( n > studentMapTimeStamp ) {
+        syncStudentData();
+        studentMapTimeStamp = n;
+      }
+    } catch (DataManagerException e1) {
       n = studentMapTimeStamp;
-    }
-    
-    if ( n > studentMapTimeStamp ) {
-      syncStudentData();
-      studentMapTimeStamp = n;
-    }
+    }    
 
     return studentMap;
   }
 
-  public Map<Integer, Course> getCourses() throws DataManagerException {
+  public Map<Integer, Course> getCourses() {
 
     int n;
     try {
       n = getTimeStamp(TABLE_COURSE);
-    } catch (SQLException e1) {
+      
+      if ( n > courseMapTimeStamp ) {
+        syncCourseData();
+        courseMapTimeStamp = n;
+      }
+    } catch (DataManagerException e1) {
       n = courseMapTimeStamp-1;
-    }
-
-    if ( n > courseMapTimeStamp ) {
-      syncCourseData();
-      courseMapTimeStamp = n;
     }
 
     return courseMap;
   }
 
-  public Map<Integer, Mark> getMarks() throws DataManagerException {
+  public Map<Integer, Mark> getMarks() {
     int n;
     try {
       n = getTimeStamp(TABLE_TEST);
-    } catch (SQLException e1) {
+      
+      if ( n > markMapTimeStamp ) {
+        syncMarkData();
+        markMapTimeStamp = n;
+      }
+    } catch (DataManagerException e1) {
       n = markMapTimeStamp;
-    }
-
-    if ( n > markMapTimeStamp ) {
-      syncMarkData();
-      markMapTimeStamp = n;
-    }
+    }   
 
     return markMap;
-
   }
 
-  public List<StudentMark> getStudentMarks() throws DataManagerException {
+  public List<StudentMark> getStudentMarks() {
     
     int n;
     try {
       n = getTimeStamp(TABLE_HAS_MARK);
-    } catch (SQLException e1) {
+      
+      if ( n > studentMarkListTimeStamp ) {
+        syncStudentMarksData();
+        studentMarkListTimeStamp = n;
+      }
+    } catch (DataManagerException e1) {
       n = studentMarkListTimeStamp;
-    }
-
-    if ( n > studentMarkListTimeStamp ) {
-      syncStudentMarksData();
-      studentMarkListTimeStamp = n;
     }
 
     return studentMarkList;
   }
 
-  public Map<Integer, Mark> getMarksByCourse(Course c) throws DataManagerException {
+  public Map<Integer, Mark> getMarksByCourse(Course c) {
 
     Map<Integer, Mark> markMap = getMarks();
     Map<Integer, Mark> resultMap = new HashMap<Integer, Mark>();
@@ -330,7 +394,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
   }
 
 
-  private void updateStudentData (int supposedTimestamp) throws DataManagerException{
+  private void updateStudentData (int supposedTimestamp){
     /*
      * supposedTimestamp est la valeur 
      * qui devrait etre inseree dans
@@ -341,101 +405,92 @@ public class SQLDataManager extends SQLDataManagerConstants implements
      * apportees, et il faut synchroniser
      * les donnees.
      */
-    int n;
+    int n = -1;
+    
     try {
       n = getTimeStamp(TABLE_STUDENT);
-    } catch (SQLException e) {
-      throw new DataManagerException("error getting timestamp for students.", e);
-    }
-    
-    if (n >= supposedTimestamp){
-      syncStudentData();
-      supposedTimestamp = n + 1;
-    }
-    
-    try {
-      setNewTimestamp(TABLE_STUDENT, supposedTimestamp);
-    } catch (SQLException e) {
-      throw new DataManagerException("error setting new timestamp for students.", e);
-    }
-    
+      
+      if (n >= supposedTimestamp){
+        syncStudentData();
+        supposedTimestamp = n + 1;
+      }
+    } catch (DataManagerException e) {
+      System.out.println("error updateStudentData(" + supposedTimestamp + ")\n");
+      e.printStackTrace();
+    }           
+        
+    setNewTimestamp(TABLE_STUDENT, supposedTimestamp);      
     studentMapTimeStamp = supposedTimestamp;
   }
   
-  private void updateStudentMarksData (int supposedTimestamp) throws DataManagerException{
-    int n;
-    try {
-      n = getTimeStamp(TABLE_HAS_MARK);
-    } catch (SQLException e) {
-      throw new DataManagerException("error getting timestamp for students' marks.", e);
-    }
+  private void updateStudentMarksData (int supposedTimestamp) {
+    int n = -1;
     
-    if (n >= supposedTimestamp){
-      syncStudentMarksData();
-      supposedTimestamp = n + 1;
-    }
-    
-    try {
-      setNewTimestamp(TABLE_HAS_MARK, supposedTimestamp);
-    } catch (SQLException e) {
-      throw new DataManagerException("error setting new timestamp for students' marks.", e);
-    }
-    
+  try {
+     n = getTimeStamp(TABLE_HAS_MARK);    
+     
+      if (n >= supposedTimestamp){
+        syncStudentMarksData();
+        supposedTimestamp = n + 1;
+      }
+    } catch (DataManagerException e) {
+      System.out.println("error updateStudentMarksData(" + supposedTimestamp + ")\n");
+      e.printStackTrace();
+    }    
+       
+    setNewTimestamp(TABLE_HAS_MARK, supposedTimestamp);    
     studentMarkListTimeStamp = supposedTimestamp;
   }
   
-  private void updateCourseData (int supposedTimestamp) throws DataManagerException{
-    int n;
+  private void updateCourseData (int supposedTimestamp) {
+    int n = -1;
     try {
       n = getTimeStamp(TABLE_COURSE);
-    } catch (SQLException e) {
-      throw new DataManagerException("error getting timestamp for courses.", e);
+      
+      if (n >= supposedTimestamp){
+        syncCourseData();
+        supposedTimestamp = n + 1;
+      }
+      
+      if (n >= supposedTimestamp){
+        syncCourseData();
+        supposedTimestamp = n + 1;
+      }
+    } catch (DataManagerException e) {
+      System.out.println("error updateCourseData(" + supposedTimestamp + ")\n");
+      e.printStackTrace();
     }
-    
-    if (n >= supposedTimestamp){
-      syncCourseData();
-      supposedTimestamp = n + 1;
-    }
-    
-    try {
-      setNewTimestamp(TABLE_COURSE, supposedTimestamp);
-    } catch (SQLException e) {
-      throw new DataManagerException("error setting new timestamp for courses.", e);
-    }
-    
+
+    setNewTimestamp(TABLE_COURSE, supposedTimestamp);      
     courseMapTimeStamp = supposedTimestamp;
   }
   
-  private void updateMarkData(int supposedTimestamp) throws DataManagerException{
-    int n;
+  private void updateMarkData(int supposedTimestamp) {
+    int n = -1;
+    
     try {
       n = getTimeStamp(TABLE_TEST);
-    } catch (SQLException e) {
-      throw new DataManagerException("error getting timestamp for tests.", e);
+      
+      if (n >= supposedTimestamp){
+        syncMarkData();
+        supposedTimestamp = n + 1;
+      }
+    } catch (DataManagerException e) {
+      System.out.println("error updateMarkData(" + supposedTimestamp + ")\n");
+      e.printStackTrace();
     }
     
-    if (n >= supposedTimestamp){
-      syncMarkData();
-      supposedTimestamp = n + 1;
-    }
-    
-    try {
-      setNewTimestamp(TABLE_TEST, supposedTimestamp);
-    } catch (SQLException e) {
-      throw new DataManagerException("error setting new timestamp for tests.", e);
-    }
-    
+    setNewTimestamp(TABLE_TEST, supposedTimestamp);
+       
     markMapTimeStamp = supposedTimestamp;
   }
-  
   
   
   
   /*
    * methodes de la vue etudiant
    */
-  public Map<Integer, StudentMark> getMarksByStudentAndCourse(Student s,
-      Course c) throws DataManagerException {
+  public Map<Integer, StudentMark> getMarksByStudentAndCourse(Student s, Course c) {
 
     /* Map<Integer, Mark> markMap = getMarksByCourse(c); */
 
@@ -451,8 +506,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     return studentMarkMap;
   }
 
-  public Map<Course, Map<Integer, StudentMark>> getAllMarksByStudent(Student s)
-      throws DataManagerException {
+  public Map<Course, Map<Integer, StudentMark>> getAllMarksByStudent(Student s) {
 
     Map<Integer, Course> courseMap = getCourses();
     Map<Course, Map<Integer, StudentMark>> map = new HashMap<Course, Map<Integer, StudentMark>>();
@@ -468,7 +522,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
    * methodes de la vue professeur
    */
   public Pair<Map<Integer, Mark>, SortedMap<Student, Map<Integer, StudentMark>>> getAllMarksByCourse(
-      Course c) throws DataManagerException {
+      Course c) {
 
     TreeMap<Student, Map<Integer, StudentMark>> map = new TreeMap<Student, Map<Integer, StudentMark>>(
         new Comparator<Student>() {
@@ -510,8 +564,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
   /*
    * methodes servant a la vue jury
    */
-  public Pair<Map<Integer, Course>, SortedMap<Student, Map<Course, Map<Integer, StudentMark>>>> getAllStudentsMarks()
-      throws DataManagerException {
+  public Pair<Map<Integer, Course>, SortedMap<Student, Map<Course, Map<Integer, StudentMark>>>> getAllStudentsMarks() {
 
     Map<Integer, Student> studentMap = getStudents();
     Map<Integer, Course> courseMap = getCourses();
@@ -545,13 +598,14 @@ public class SQLDataManager extends SQLDataManagerConstants implements
   /*
    * methodes servant a l'admin
    */
-  public void addStudent(String name, String lastName) throws DataManagerException {
-    int key = 0;
+  public void addStudent(String name, String lastName) {
+    int key = -1;
 
     try {
       key = createPrimaryKey(TABLE_STUDENT, COLUMN_ID_FROM_TABLE_STUDENT);
-    } catch (SQLException e) {
-      throw new DataManagerException("error creating primary key for new student " + lastName + " " + name, e);
+    } catch (DataManagerException e) {
+      System.out.println("error addStudent(" + name + ", " + lastName + ")\n");
+      e.printStackTrace();
     }
 
     String request = "INSERT INTO `" + TABLE_STUDENT + "` (`"
@@ -563,23 +617,17 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
     try {
       connectAndUpdate(request);
-    } catch (SQLException e) {
-      throw new DataManagerException("error inserting new student " + lastName + " " + name, e);
+    } catch (DataManagerException e) {
+      System.out.println("error addStudent(" + name + ", " + lastName + ")\n");
+      e.printStackTrace();
     }
     
-    Student s = new Student(key, name, lastName);
-    
-    studentMap.put(key, s);
-    
-    try {
-      updateStudentData(studentMapTimeStamp + 1);
-    }catch (DataManagerException e){
-      throw new DataManagerException("error updating data.", e);
-    }
+    Student s = new Student(key, name, lastName);    
+    studentMap.put(key, s);    
+    updateStudentData(studentMapTimeStamp + 1);   
   }
 
-  public void addStudents(List<String> listName, List<String> listLastName)
-      throws SQLException, DataManagerException {
+  public void addStudents(List<String> listName, List<String> listLastName) throws DataManagerException {
     
     String request = "INSERT INTO `" + TABLE_STUDENT + "` (`"
         + COLUMN_ID_FROM_TABLE_STUDENT + "`, `"
@@ -597,17 +645,16 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
     try {
       preparedStatement = connectAndPrepare(request);
-    } catch (SQLException e) {
-      System.out.println("Error with current query :\n" + request);
+    } catch (DataManagerException e) {
+      System.out.println("error addStudents(..., ...)\n");
       e.printStackTrace();
     }
 
     for (int i = 0; i < size; i++) {
       try {
         key = createPrimaryKey(TABLE_STUDENT, COLUMN_ID_FROM_TABLE_STUDENT);
-      } catch (SQLException e) {
-        System.out.println("Error with current query : createPrimaryKey("
-            + TABLE_STUDENT + ", " + COLUMN_ID_FROM_TABLE_STUDENT + ")\n");
+      } catch (DataManagerException e) {
+        System.out.println("error addStudents(..., ...)\n");
         e.printStackTrace();
       }
 
@@ -617,13 +664,13 @@ public class SQLDataManager extends SQLDataManagerConstants implements
         preparedStatement.setString(3, listLastName.get(i));
         preparedStatement.execute();
       } catch (SQLException e) {
-        System.out.println("Error with current query :\n" + request);
+        System.out.println("error addStudents(..., ...)\n");
         e.printStackTrace();
       }
     }
   }
 
-  public void removeStudent(Student s) throws DataManagerException {
+  public void removeStudent(Student s) {
     
     /*
      * partie effacement de l'etudiant
@@ -635,17 +682,15 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
     try {
       connectAndUpdate(request);
-    }catch (SQLException e){
-      throw new DataManagerException("error deleting student " + s + " from database.", e);
+    }catch (DataManagerException e){
+      System.out.println("error removeStudent(...)\n");
+      e.printStackTrace();
     }
     
     // mise a jour des donnees
     // (a cause des acces multiples) 
-    try{
-      updateStudentData(studentMapTimeStamp + 1);
-    }catch (DataManagerException e){
-      throw new DataManagerException ("error updating data for students.", e);
-    }
+    
+    updateStudentData(studentMapTimeStamp + 1);    
     
     // effacement de la map locale
     Map<Integer, Student> studentMap = getStudents();
@@ -653,19 +698,15 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     
     /*
      * partie effacement de ses notes
-     */
-    try {
-      removeAllStudentMarksForStudent(s.getId());
-    } catch (DataManagerException e) {
-      throw new DataManagerException("error deleting all marks for student " + s, e);
-    }
+     */   
+     removeAllStudentMarksForStudent(s.getId());    
   }
 
   /**
    * @param studentId
    * @throws SQLException
    */
-  private void removeAllStudentMarksForStudent(int studentId)throws DataManagerException {
+  private void removeAllStudentMarksForStudent(int studentId) {
     
     // effacement de la base de donnees
     String request = "delete from " + TABLE_HAS_MARK + " " + "where "
@@ -673,8 +714,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
     try {
       connectAndUpdate(request);
-    } catch (SQLException e) {
-      throw new DataManagerException("could not erase student's marks in database.", e);
+    } catch (DataManagerException e) {
+      System.out.println("error removeAllStudentMarksForStudent(" + studentId + ")\n");
+      e.printStackTrace();
     }
         
     // effacement de la liste des notes locale
@@ -693,22 +735,19 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     }
     
     // mise a jour des donnees
-    // (a cause des acces multiples)
-    try {
-      updateStudentMarksData(studentMarkListTimeStamp + 1);
-    }catch (DataManagerException e){
-      throw new DataManagerException ("error updating data.", e);
-    }
+    // (a cause des acces multiples)    
+    updateStudentMarksData(studentMarkListTimeStamp + 1);    
   }
 
-  public void addCourse(String title, float coeff) throws DataManagerException {
+  public void addCourse(String title, float coeff) {
     int key = 0;
 
     // on cree une cle pour la nouvelle matiere
     try {
       key = createPrimaryKey(TABLE_COURSE, COLUMN_ID_FROM_TABLE_COURSE);
-    } catch (SQLException e) {
-      throw new DataManagerException("error creating primary key for course " + title, e);
+    } catch (DataManagerException e) {
+      System.out.println("error addCourse(" + title + ", " + coeff + ")\n");
+      e.printStackTrace();
     }
 
     String request = "INSERT INTO `" + TABLE_COURSE + "` (`"
@@ -719,24 +758,20 @@ public class SQLDataManager extends SQLDataManagerConstants implements
     // on l'insere dans la table
     try {
       connectAndUpdate(request);
-    } catch (SQLException e) {
-      throw new DataManagerException("error inserting new course " + title + " into database.", e);
+    } catch (DataManagerException e) {
+      System.out.println("error addCourse(" + title + ", " + coeff + ")\n");
+      e.printStackTrace();
     }
     
-    // mise a jour avec le timestamp
-    try{
-      updateCourseData(courseMapTimeStamp + 1);
-    }catch (DataManagerException e){
-      throw new DataManagerException("error updating data for courses.", e);
-    }
+    // mise a jour avec le timestamp   
+    updateCourseData(courseMapTimeStamp + 1);   
     
     // ajout dans la map locale
-    courseMap.put(key, new Course(key, title, coeff));
-    
+    courseMap.put(key, new Course(key, title, coeff));    
   }
 
   public void addCourses(List<String> listTitle, List<Float> listCoeff)
-      throws SQLException, DataManagerException {
+      throws DataManagerException {
     String request = "INSERT INTO `" + TABLE_COURSE + "` (`"
         + COLUMN_ID_FROM_TABLE_COURSE + "`, `" + COLUMN_TITLE_FROM_TABLE_COURSE
         + "`, `" + COLUMN_COEFF_FROM_TABLE_COURSE + "`) VALUES (?, ?, ?);";
@@ -751,17 +786,16 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
     try {
       preparedStatement = connectAndPrepare(request);
-    } catch (SQLException e) {
-      System.out.println("Error with current query :\n" + request);
+    } catch (DataManagerException e) {
+      System.out.println("error addCourses(..., ...)\n");
       e.printStackTrace();
     }
 
     for (int i = 0; i < size; i++) {
       try {
         key = createPrimaryKey(TABLE_COURSE, COLUMN_ID_FROM_TABLE_COURSE);
-      } catch (SQLException e) {
-        System.out.println("Error with current query : createPrimaryKey("
-            + TABLE_COURSE + ", " + COLUMN_ID_FROM_TABLE_COURSE + ")\n");
+      } catch (DataManagerException e) {
+        System.out.println("error addCourses(..., ...)\n");
         e.printStackTrace();
       }
 
@@ -771,30 +805,24 @@ public class SQLDataManager extends SQLDataManagerConstants implements
         preparedStatement.setFloat(3, listCoeff.get(i));
         preparedStatement.execute();
       } catch (SQLException e) {
-        System.out.println("Error with current query :\n" + request);
+        System.out.println("error addCourses(..., ...)\n");
         e.printStackTrace();
       }
     }
   }
 
-  public void removeCourse(Course c) throws SQLException {
+  public void removeCourse(Course c) {
     String request = "DELETE FROM `" + TABLE_COURSE + "` WHERE `"
         + COLUMN_ID_FROM_TABLE_COURSE + "`=" + c.getId() + ";";
 
     try {
       connectAndUpdate(request);
-    } catch (SQLException e) {
-      System.out.println("Error with current query :\n" + request);
+    } catch (DataManagerException e) {
+      System.out.println("error removeCourse(...)\n");
       e.printStackTrace();
     }
 
-    Map<Integer, Mark> markMap = null;
-
-    try {
-      markMap = getMarksByCourse(c);
-    } catch (DataManagerException e) {
-      // erreur de ta mere
-    }
+    Map<Integer, Mark> markMap = getMarksByCourse(c);   
 
     for (Mark m : markMap.values()) {
       removeMark(m);
@@ -802,14 +830,14 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
   }
 
-  public int addTitle(String desc) throws DataManagerException {
+  public int addTitle(String desc) {
     int key = 0;
 
     try {
       key = createPrimaryKey(TABLE_TITLE, COLUMN_ID_FROM_TABLE_TITLE);
-    } catch (SQLException e) {
-      throw new DataManagerException(
-          "error creating new primary key for title " + desc, e);
+    } catch (DataManagerException e) {
+      System.out.println("error addTitle(" + desc + "\n");
+      e.printStackTrace();
     }
 
     String request = "INSERT INTO `" + TABLE_TITLE + "` (`"
@@ -818,39 +846,35 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
     try {
       connectAndUpdate(request);
-    } catch (SQLException e) {
-      throw new DataManagerException("error inserting new title " + desc, e);
+    } catch (DataManagerException e) {
+      System.out.println("error addTitle(" + desc + "\n");
+      e.printStackTrace();
     }
 
     return key;
   }
 
-  public void addMark(String desc, float coeff, Course c)
-      throws DataManagerException {
+  public void addMark(String desc, float coeff, Course c) {
     int titleKey = -1;
 
     try {
       titleKey = getKeyForTitle(desc);
-    } catch (SQLException e) {
-      throw new DataManagerException("error getting key for title " + desc, e);
+    } catch (DataManagerException e) {
+      System.out.println("error addMark(" + desc + ", " + coeff + ", ...)\n");
+      e.printStackTrace();
     }
 
-    if (titleKey < 0) {
-      try {
-        titleKey = addTitle(desc);
-      } catch (DataManagerException e) {
-        throw new DataManagerException("error adding new Mark " + desc
-            + " related to " + c, e);
-      }
+    if (titleKey < 0) {     
+        titleKey = addTitle(desc);     
     }
 
     int markKey = -1;
 
     try {
       markKey = createPrimaryKey(TABLE_TEST, COLUMN_ID_FROM_TABLE_TEST);
-    } catch (SQLException e) {
-      throw new DataManagerException("error creating new primary key for mark "
-          + desc + " related to " + c, e);
+    } catch (DataManagerException e) {
+      System.out.println("error addMark(" + desc + ", " + coeff + ", ...)\n");
+      e.printStackTrace();
     }
 
     String request = "insert into " + TABLE_TEST + " " + "values (" + markKey
@@ -858,32 +882,22 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
     try {
       connectAndUpdate(request);
-    } catch (SQLException e) {
-      throw new DataManagerException ("error inserting new test " + desc + " related to " + c, e);
+    } catch (DataManagerException e) {
+      System.out.println("error addMark(" + desc + ", " + coeff + ", ...)\n");
+      e.printStackTrace();
     }
 
     Mark m = new Mark(markKey, desc, coeff, c);
-    markMap.put(m.getId(), m);
-    
-    try {
-      updateMarkData(markMapTimeStamp + 1);
-    }catch (DataManagerException e){
-      throw new DataManagerException("error updating data.", e);
-    }
-    
-    try {
-      setDefaultMarkToAllStudents(markKey);
-    } catch (DataManagerException e) {
-      throw new DataManagerException("error initializing marks for new test "
-          + desc + "related to " + c, e);
-    }
-
+    markMap.put(m.getId(), m);    
+   
+    updateMarkData(markMapTimeStamp + 1);     
+    setDefaultMarkToAllStudents(markKey);
   }
 
   /**
    * @param markKey
    */
-  private void setDefaultMarkToAllStudents(int markKey) throws DataManagerException {
+  private void setDefaultMarkToAllStudents(int markKey) {
     Map<Integer, Student> studentMap = getStudents();
     PreparedStatement preparedStatement = null;
 
@@ -892,8 +906,9 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
     try {
       preparedStatement = connectAndPrepare(request);
-    } catch (SQLException e) {
-      throw new DataManagerException("error preparing statement for inserting default marks.", e);
+    } catch (DataManagerException e) {
+      System.out.println("error setDefaultMarkToAllStudents(" + markKey+ ")\n");
+      e.printStackTrace();
     }
 
     for (Student s : studentMap.values()) {
@@ -901,41 +916,42 @@ public class SQLDataManager extends SQLDataManagerConstants implements
         preparedStatement.setInt(1, s.getId());
         preparedStatement.executeUpdate();
       } catch (SQLException e) {
-        throw new DataManagerException("error inserting default mark for student " + s);
+        System.out.println("error setDefaultMarkToAllStudents(" + markKey+ ")\n");
+        e.printStackTrace();
       }
+      
       studentMarkList.add(new StudentMark(s, markMap.get(markKey), 0f));
-    }
+    }    
     
-    try{
-      updateStudentMarksData(studentMarkListTimeStamp + 1);
-    }catch(DataManagerException e){
-      throw new DataManagerException("error updating data.", e);
-    }
+    updateStudentMarksData(studentMarkListTimeStamp + 1);   
   }
 
-  public void removeMark(Mark m) throws SQLException {
+  public void removeMark(Mark m) {
     String request = "delete from " + TABLE_TEST + " " + "where "
         + COLUMN_ID_FROM_TABLE_TEST + " = " + m.getId() + ";";
 
     try {
       connectAndQuery(request);
       removeAllStudentMarksForMark(m.getId());
-    } catch (SQLException e) {
-      // erreur de suppression
-    }/*
-       * catch (DataManagerException e){ }
-       */
-
+    } catch (DataManagerException e) {
+      System.out.println("error removeMark(...)\n");
+      e.printStackTrace();
+    }
   }
 
   /**
    * @param id
    */
-  public void removeAllStudentMarksForMark(int markId) throws SQLException {
+  public void removeAllStudentMarksForMark(int markId) {
     String request = "delete from " + TABLE_HAS_MARK + " " + "where "
         + COLUMN_ID_TEST_FROM_TABLE_HAS_MARK + " = " + markId + ";";
 
-    connectAndQuery(request);
+    try {
+      connectAndQuery(request);
+    } catch (DataManagerException e) {
+      System.out.println("error removeAllStudentMarksForMark(" + markId+ ")\n");
+      e.printStackTrace();
+    }
   }
 
   /*
@@ -943,8 +959,7 @@ public class SQLDataManager extends SQLDataManagerConstants implements
    * 
    * @see fr.umlv.symphonie.data.DataManager#changeStudentMarkValue(float)
    */
-  public void changeStudentMarkValue(StudentMark studentMark, float newValue)
-      throws DataManagerException {
+  public void changeStudentMarkValue(StudentMark studentMark, float newValue) {
     
     System.out.println("new value to set : " + newValue);
     System.out.println(studentMark.getMark() + " " + studentMark.getCourse());
@@ -958,20 +973,13 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
     try {
       connectAndUpdate(request);
-    } catch (SQLException e) {
-      throw new DataManagerException("unable to set new value for "
-          + studentMark.getStudent() + " in " + studentMark.getMark()
-          + " related to course " + studentMark.getCourse(), e);
+    } catch (DataManagerException e) {
+      System.out.println("error changeStudentMarkValue(..., " + newValue+ ")\n");
+      e.printStackTrace();
     }
 
-    studentMark.setValue(newValue);
-    
-    try{
-      updateStudentMarksData(studentMarkListTimeStamp + 1);
-    }catch (DataManagerException e){
-      throw new DataManagerException("error updating data.", e);
-    }
-
+    studentMark.setValue(newValue);   
+    updateStudentMarksData(studentMarkListTimeStamp + 1);
   }
 
   /*
@@ -979,15 +987,15 @@ public class SQLDataManager extends SQLDataManagerConstants implements
    * 
    * @see fr.umlv.symphonie.data.DataManager#changeMarkDescription(java.lang.String)
    */
-  public void changeMarkDescription(Mark mark, String newDescription)throws DataManagerException {
+  public void changeMarkDescription(Mark mark, String newDescription) {
     int markKey = -1;
     
     // on cherche si l'intitule est deja dans la base
     try {
       markKey = getKeyForTitle(newDescription);
-    } catch (SQLException e) {
-      throw new DataManagerException("error resolving primary key for title "
-          + newDescription, e);
+    } catch (DataManagerException e) {
+      System.out.println("error changeMarkDescription(..., " + newDescription+ ")\n");
+      e.printStackTrace();
     }
 
     // s'il ne l'est pas on le rajoute dans la table des intitules
@@ -1001,24 +1009,19 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
     try {
       connectAndUpdate(request);
-    } catch (SQLException e) {
-      throw new DataManagerException("error updating description for test "
-          + mark + "related to " + mark.getCourse(), e);
+    } catch (DataManagerException e) {
+      System.out.println("error changeMarkDescription(..., " + newDescription+ ")\n");
+      e.printStackTrace();
     }
 
     // on met a jour dans les donnees locales
     mark.setDesc(newDescription);
     
-    // on synchronise si besoin est
-    try{
-      updateMarkData(markMapTimeStamp + 1);
-    }catch (DataManagerException e){
-      throw new DataManagerException("error updating data.", e);
-    }
+    // on synchronise si besoin est   
+    updateMarkData(markMapTimeStamp + 1);   
   }
 
-  public void changeMarkCoeff(Mark mark, float newCoeff)
-      throws DataManagerException {
+  public void changeMarkCoeff(Mark mark, float newCoeff) {
 
     String request = "UPDATE " + TABLE_TEST + " " + "SET "
         + COLUMN_COEFF_FROM_TABLE_TEST + " = '" + newCoeff + "' " + "WHERE "
@@ -1028,22 +1031,16 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
     try {
       connectAndUpdate(request);
-    } catch (SQLException e) {
-      throw new DataManagerException("unable to change coefficient for " + mark
-          + " related to " + mark.getCourse(), e);
+    } catch (DataManagerException e) {
+      System.out.println("error changeMarkCoeff(..., " + newCoeff+ ")\n");
+      e.printStackTrace();
     }
 
-    mark.setCoeff(newCoeff);
-    
-    try{
-      updateMarkData(markMapTimeStamp + 1);
-    }catch (DataManagerException e){
-      throw new DataManagerException("error updating data.", e);
-    }
+    mark.setCoeff(newCoeff);    
+    updateMarkData(markMapTimeStamp + 1);    
   }
 
-  public void changeStudentComment(Student s, String newComment)
-      throws DataManagerException {
+  public void changeStudentComment(Student s, String newComment) {
     s.setComment(newComment);
 
     String request = "update " + TABLE_STUDENT + " " + "set "
@@ -1052,17 +1049,12 @@ public class SQLDataManager extends SQLDataManagerConstants implements
 
     try {
       connectAndUpdate(request);
-    } catch (SQLException e) {
-      throw new DataManagerException("unable to set comment for student " + s,
-          e);
-    }
+    } catch (DataManagerException e) {
+      System.out.println("error changeStudentComment(..., " + newComment+ ")\n");
+      e.printStackTrace();
+    }    
     
-    try {
-      updateStudentData(studentMapTimeStamp + 1);
-    }catch (DataManagerException e){
-      throw new DataManagerException("error updating data.", e);
-    }
-
+    updateStudentData(studentMapTimeStamp + 1);
   }
 
 }
