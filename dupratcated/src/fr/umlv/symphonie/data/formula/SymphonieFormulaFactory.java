@@ -52,12 +52,39 @@ public final class SymphonieFormulaFactory {
     funcs.put("average", new AverageFunction());
   }
 
+  /** Formula analyzer */
   private static final FormulaAnalysis analyzer = new FormulaAnalysis(
       mappedValues, funcs);
 
+  /**
+   * Parses a <code>Formula</code> and returns it. <br>
+   * This classe statically stocks already parsed formulas so that they don't
+   * need to be reparsed each time a user asks for them. <br>
+   * The formulas that use variable mapped values are created using the internal
+   * map. We do not ensure the integrity of the data that you put in it. Users
+   * are encouraged to put the values in the map each time you are to call the
+   * <code>getValue()</code> method in a formula.
+   * 
+   * @param name
+   *          The name of the formula
+   * @param unparsedFormula
+   *          The formula code as a <code>String</code>
+   * @param id
+   *          The formula id
+   * @param column
+   *          The index of the column that the formula will be applied on
+   * @return The parsed formula object
+   * @see #putMappedValue(String, Number)
+   * @throws ParserException
+   *           if formula syntax is not correct
+   * @throws LexerException
+   *           if formula is misformatted
+   * @throws IOException
+   *           this exception is never thrown
+   */
   public static final Formula parseFormula(String name, String unparsedFormula,
       int id, int column) throws ParserException, LexerException, IOException {
-    
+
     synchronized (analyzer) {
       String formulaKey = name + "," + id;
       Formula f = formulas.get(formulaKey);
@@ -77,19 +104,44 @@ public final class SymphonieFormulaFactory {
         f = (Formula) analyzer.getOut(formula);
         formulas.put(formulaKey, f);
       }
-      
+
       return f;
     }
   }
 
+  /**
+   * Clears the internal variable value map
+   */
   public void clearMappedValues() {
     mappedValues.clear();
   }
 
+  /**
+   * Puts a variable value in the internal value map
+   * 
+   * @param key
+   *          The key
+   * @param value
+   *          The value
+   */
   public void putMappedValue(String key, Number value) {
     mappedValues.put(key, value);
   }
-  
+
+  /**
+   * Adds a function to the internal list, functions added can be used in
+   * formulas. <br>
+   * There are three functions that can be used without adding them using this
+   * routine: <br>
+   * <li>average
+   * <li>max
+   * <li>min
+   * 
+   * @param name
+   *          The function name
+   * @param func
+   *          The function object
+   */
   public void addFunction(String name, FormulaFunction func) {
     funcs.put(name, func);
   }
