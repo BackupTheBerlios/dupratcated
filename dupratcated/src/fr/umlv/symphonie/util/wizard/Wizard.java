@@ -27,8 +27,15 @@ import javax.swing.JSeparator;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import fr.umlv.symphonie.util.ComponentBuilder;
+import fr.umlv.symphonie.util.ComponentBuilder.ButtonType;
 import fr.umlv.symphonie.util.wizard.event.WizardEvent;
 import fr.umlv.symphonie.util.wizard.event.WizardListenerAdapter;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.WIZARD_CANCEL;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.WIZARD_FINISH;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.WIZARD_HELP;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.WIZARD_NEXT;
+import static fr.umlv.symphonie.view.SymphonieWizardConstants.WIZARD_PREVIOUS;
 
 /**
  * This class controls and display a wizard. <br>
@@ -102,11 +109,17 @@ public class Wizard {
    *          The frame that owns the wizard
    * @param model
    *          The data model for the wizard
+   * @param builder
+   *          The builder for button internationalization, if <code>null</code>
+   *          no internationalization will be made
    * @param size
    *          The size of the wizard dialog
    */
-  public Wizard(Frame owner, WizardModel model, Dimension size) {
+  public Wizard(Frame owner, WizardModel model, ComponentBuilder builder,
+      Dimension size) {
+
     this.model = model;
+
     // Listen for cancel and finish events
     model.addWizardListener(new WizardListenerAdapter() {
 
@@ -121,8 +134,9 @@ public class Wizard {
 
     wizardDialog = new JDialog(owner, true);
     createActions();
-    initDialog();
+    initDialog(builder);
     setSize(size);
+    if (owner != null) wizardDialog.setLocationRelativeTo(owner);
   }
 
   /**
@@ -184,8 +198,11 @@ public class Wizard {
 
   /**
    * Initializes wizard dialog graphic components
+   * 
+   * @param builder
+   *          Used for button internationalization
    */
-  private void initDialog() {
+  private void initDialog(ComponentBuilder builder) {
 
     final JLabel text = new JLabel();
     final JLabel title = new JLabel();
@@ -209,7 +226,7 @@ public class Wizard {
     });
 
     // Bottom panel
-    wizardDialog.add(getBottomPanel(), BorderLayout.SOUTH);
+    wizardDialog.add(getBottomPanel(builder), BorderLayout.SOUTH);
   }
 
   /**
@@ -323,14 +340,22 @@ public class Wizard {
   /**
    * Creates the bottom panel that contains navigation buttons
    * 
+   * @param builder
+   *          The internationalization manager
    * @return The bottom panel
    */
-  private JPanel getBottomPanel() {
-    JButton cancel = new JButton(cancelAction);
-    JButton help = new JButton(helpAction);
-    JButton finish = new JButton(finishAction);
-    JButton next = new JButton(nextAction);
-    JButton previous = new JButton(previousAction);
+  private JPanel getBottomPanel(ComponentBuilder builder) {
+    JButton cancel = (JButton) ((builder == null) ? new JButton(cancelAction)
+        : builder.buildButton(cancelAction, WIZARD_CANCEL, ButtonType.BUTTON));
+    JButton help = (JButton) ((builder == null) ? new JButton(helpAction)
+        : builder.buildButton(helpAction, WIZARD_HELP, ButtonType.BUTTON));
+    JButton finish = (JButton) ((builder == null) ? new JButton(finishAction)
+        : builder.buildButton(finishAction, WIZARD_FINISH, ButtonType.BUTTON));
+    JButton next = (JButton) ((builder == null) ? new JButton(nextAction)
+        : builder.buildButton(nextAction, WIZARD_NEXT, ButtonType.BUTTON));
+    JButton previous = (JButton) ((builder == null) ? new JButton(
+        previousAction) : builder.buildButton(previousAction, WIZARD_PREVIOUS,
+        ButtonType.BUTTON));
 
     JPanel buttons = new JPanel(new GridBagLayout());
     GridBagConstraints gbc = new GridBagConstraints();

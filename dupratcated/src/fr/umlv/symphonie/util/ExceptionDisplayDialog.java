@@ -81,7 +81,7 @@ public final class ExceptionDisplayDialog {
     gbc.insets.left = 10;
     gbc.anchor = GridBagConstraints.WEST;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
-    JLabel lb = b.buildLabel("exceptiondialog.message");
+    JLabel lb = b.buildLabel(MESSAGE);
     Icon i = UIManager.getIcon("OptionPane.errorIcon");
     lb.setIcon(i);
     dialog.add(lb, gbc);
@@ -92,30 +92,34 @@ public final class ExceptionDisplayDialog {
     final JScrollPane sp = new JScrollPane(stackTrace);
     sp.setVisible(false);
     final JButton detail = new JButton();
-    show = new AbstractAction(b.getValue("exceptiondialog.showdetail")) {
+    show = new AbstractAction(b.getValue(SHOW_DETAIL)) {
 
       public void actionPerformed(ActionEvent ev) {
         sp.setVisible(true);
+        dialog.setResizable(true);
         dialog.setPreferredSize(big);
         detail.setAction(hide);
         dialog.pack();
+        dialog.setResizable(false);
       }
     };
     detail.setAction(show);
-    hide = new AbstractAction(b.getValue("exceptiondialog.hidedetail")) {
+    hide = new AbstractAction(b.getValue(HIDE_DETAIL)) {
 
       public void actionPerformed(ActionEvent ev) {
         sp.setVisible(false);
+        dialog.setResizable(true);
         dialog.setPreferredSize(little);
         detail.setAction(show);
         dialog.pack();
+        dialog.setResizable(false);
       }
     };
     b.addChangeListener(detail, new ChangeListener() {
 
       public void stateChanged(ChangeEvent e) {
-        hide.putValue(Action.NAME, b.getValue("exceptiondialog.hidedetail"));
-        show.putValue(Action.NAME, b.getValue("exceptiondialog.showdetail"));
+        hide.putValue(Action.NAME, b.getValue(HIDE_DETAIL));
+        show.putValue(Action.NAME, b.getValue(SHOW_DETAIL));
       }
     });
     gbc.insets.right = 10;
@@ -141,6 +145,8 @@ public final class ExceptionDisplayDialog {
     dialog.add(sp, gbc);
     dialog.setPreferredSize(little);
     dialog.pack();
+    dialog.setResizable(false);
+    if (owner != null) dialog.setLocationRelativeTo(owner);
   }
 
   /**
@@ -166,11 +172,11 @@ public final class ExceptionDisplayDialog {
   public void hide() {
     dialog.setVisible(false);
   }
-  
-  //----------------------------------------------------------------------------
+
+  // ----------------------------------------------------------------------------
   // Static fields
   // ---------------------------------------------------------------------------
-  
+
   public static final String MESSAGE = "exceptiondialog.message";
   public static final String HIDE_DETAIL = "exceptiondialog.hidedetail";
   public static final String SHOW_DETAIL = "exceptiondialog.showdetail";
