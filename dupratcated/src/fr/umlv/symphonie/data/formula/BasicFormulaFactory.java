@@ -36,7 +36,7 @@ public class BasicFormulaFactory {
    *          This formula double value
    * @return a <code>NumericFormula</code> object
    */
-  public static NumericFormula doubleInstance(final float value) {
+  public static NumericFormula floatInstance(final float value) {
     return new NumericFormula() {
 
       private final Float val = new Float(value);

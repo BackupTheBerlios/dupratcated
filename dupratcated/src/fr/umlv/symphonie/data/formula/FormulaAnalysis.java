@@ -211,7 +211,7 @@ public class FormulaAnalysis extends AnalysisAdapter {
   }
 
   public void caseTDoubleLiteral(TDoubleLiteral node) {
-    setOut(node, BasicFormulaFactory.doubleInstance(Double.parseDouble(node
+    setOut(node, BasicFormulaFactory.floatInstance(Float.parseFloat(node
         .getText())));
   }
 

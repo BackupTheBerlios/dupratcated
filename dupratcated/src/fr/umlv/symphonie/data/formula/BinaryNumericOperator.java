@@ -23,7 +23,7 @@ public enum BinaryNumericOperator {
       if (NumericFormula.resultCanBeInteger(nv1, nv2)) {
         return new Integer(nv1.intValue() + nv2.intValue());
       } else if (NumericFormula.resultCanBeDouble(nv1, nv2)) {
-        return new Double(nv1.doubleValue() + nv2.doubleValue());
+        return new Float(nv1.floatValue() + nv2.floatValue());
       } else {
         throw new IllegalStateException(invalidTypeMessage + "+ : ("
             + nv1.getClass().getName() + ", " + nv2.getClass().getName() + ')');
@@ -38,7 +38,7 @@ public enum BinaryNumericOperator {
       if (NumericFormula.resultCanBeInteger(nv1, nv2)) {
         return new Integer(nv1.intValue() - nv2.intValue());
       } else if (NumericFormula.resultCanBeDouble(nv1, nv2)) {
-        return new Double(nv1.doubleValue() - nv2.doubleValue());
+        return new Float(nv1.floatValue() - nv2.floatValue());
       } else {
         throw new IllegalStateException(invalidTypeMessage + "- : ("
             + nv1.getClass().getName() + ", " + nv2.getClass().getName() + ')');
@@ -53,7 +53,7 @@ public enum BinaryNumericOperator {
       if (NumericFormula.resultCanBeInteger(nv1, nv2)) {
         return new Integer(nv1.intValue() * nv2.intValue());
       } else if (NumericFormula.resultCanBeDouble(nv1, nv2)) {
-        return new Double(nv1.doubleValue() * nv2.doubleValue());
+        return new Float(nv1.floatValue() * nv2.floatValue());
       } else {
         throw new IllegalStateException(invalidTypeMessage + "* : ("
             + nv1.getClass().getName() + ", " + nv2.getClass().getName() + ')');
@@ -66,13 +66,13 @@ public enum BinaryNumericOperator {
       Number nv1 = v1.getValue();
       Number nv2 = v2.getValue();
 
-      if (nv2.doubleValue() == 0.0)
+      if (nv2.floatValue() == 0.0)
         throw new IllegalStateException("Division by zero");
 
       if (NumericFormula.resultCanBeInteger(nv1, nv2)) {
         return new Integer(nv1.intValue() / nv2.intValue());
       } else if (NumericFormula.resultCanBeDouble(nv1, nv2)) {
-        return new Double(nv1.doubleValue() / nv2.doubleValue());
+        return new Float(nv1.floatValue() / nv2.floatValue());
       } else {
         throw new IllegalStateException(invalidTypeMessage + "/ ("
             + nv1.getClass().getName() + ", " + nv2.getClass().getName() + ')');

@@ -24,7 +24,7 @@ public enum BinaryRelationalOperator {
       if (NumericFormula.resultCanBeInteger(nv1, nv2)) {
         return new Boolean(nv1.intValue() == nv2.intValue());
       } else if (NumericFormula.resultCanBeDouble(nv1, nv2)) {
-        return new Boolean(nv1.doubleValue() == nv2.doubleValue());
+        return new Boolean(nv1.floatValue() == nv2.floatValue());
       } else {
         throw new IllegalStateException(invalidTypeMessage + "+ : ("
             + nv1.getClass().getName() + ", " + nv2.getClass().getName() + ')');
@@ -46,7 +46,7 @@ public enum BinaryRelationalOperator {
       if (NumericFormula.resultCanBeInteger(nv1, nv2)) {
         return new Boolean(nv1.intValue() < nv2.intValue());
       } else if (NumericFormula.resultCanBeDouble(nv1, nv2)) {
-        return new Boolean(nv1.doubleValue() < nv2.doubleValue());
+        return new Boolean(nv1.floatValue() < nv2.floatValue());
       } else {
         throw new IllegalStateException(invalidTypeMessage + "* : ("
             + nv1.getClass().getName() + ", " + nv2.getClass().getName() + ')');
@@ -70,7 +70,7 @@ public enum BinaryRelationalOperator {
       if (NumericFormula.resultCanBeInteger(nv1, nv2)) {
         return new Boolean(nv1.intValue() > nv2.intValue());
       } else if (NumericFormula.resultCanBeDouble(nv1, nv2)) {
-        return new Boolean(nv1.doubleValue() > nv2.doubleValue());
+        return new Boolean(nv1.floatValue() > nv2.floatValue());
       } else {
         throw new IllegalStateException(invalidTypeMessage + "* : ("
             + nv1.getClass().getName() + ", " + nv2.getClass().getName() + ')');

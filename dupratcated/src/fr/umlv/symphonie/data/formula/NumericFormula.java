@@ -52,6 +52,6 @@ public abstract class NumericFormula implements Formula<Number> {
    * @return <code>(n instanceof Double) || (n instanceof Integer)</code>
    */
   private static boolean isValidType(Number n) {
-    return (n instanceof Double) || (n instanceof Integer);
+    return (n instanceof Float) || (n instanceof Integer);
   }
 }
