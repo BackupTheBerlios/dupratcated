@@ -202,7 +202,7 @@ public class ComponentBuilder {
    * A ChangeListener is automatically created and registered to the builder. If
    * you button is an icon-only button usage of builder is discouraged
    * 
-   * @param a
+   * @param action
    *          The Action where button properties will be taken from
    * @param key
    *          The key for the text

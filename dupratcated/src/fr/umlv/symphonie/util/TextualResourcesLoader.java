@@ -91,8 +91,8 @@ public class TextualResourcesLoader {
    * If file lines are not correctly formed you are likely to get a
    * <code>NullPointerException</code>
    * 
-   * @param f
-   *          The <code>FileInputStream</code> to read
+   * @param is
+   *          The <code>InputStream</code> to read
    * @param resources
    *          The map to store contents read
    */
