@@ -34,7 +34,7 @@ public class XMLImporterTest extends TestCase {
 
 	public void testImportJuryView() {
 		try {
-			di.importTeacherView("jury_view.xml");
+			di.importJuryView("jury_view.xml");
 		} catch (DataImporterException e) {
 			e.printStackTrace();
 		}
