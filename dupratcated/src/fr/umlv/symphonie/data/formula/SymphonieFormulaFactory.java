@@ -112,7 +112,7 @@ public final class SymphonieFormulaFactory {
   /**
    * Clears the internal variable value map
    */
-  public void clearMappedValues() {
+  public static void clearMappedValues() {
     mappedValues.clear();
   }
 
@@ -124,7 +124,7 @@ public final class SymphonieFormulaFactory {
    * @param value
    *          The value
    */
-  public void putMappedValue(String key, Number value) {
+  public static void putMappedValue(String key, Number value) {
     mappedValues.put(key, value);
   }
 
