@@ -4,27 +4,30 @@
  */
 package fr.umlv.symphonie.model;
 
-import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTree;
-import javax.swing.SwingConstants;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import fr.umlv.symphonie.data.Course;
@@ -34,7 +37,6 @@ import fr.umlv.symphonie.data.Mark;
 import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
-import fr.umlv.symphonie.data.formula.BasicFormulaFactory;
 import fr.umlv.symphonie.data.formula.Formula;
 import fr.umlv.symphonie.util.Pair;
 import fr.umlv.symphonie.view.cells.CellFormat;

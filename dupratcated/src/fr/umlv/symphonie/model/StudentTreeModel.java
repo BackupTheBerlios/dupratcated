@@ -5,7 +5,6 @@
 package fr.umlv.symphonie.model;
 
 import java.awt.Font;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +22,6 @@ import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
 import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
-import fr.umlv.symphonie.view.Symphonie;
 
 
 /**

@@ -13,10 +13,15 @@ public class ConnectionManager {
     public static Connection createConnection() {
         
 
-        String url = "jdbc:postgresql://213.245.132.210";
-        String base = "symphonie";
-        String login = "symphonie";
-        String password = "dupratcated";
+//        String url = "jdbc:postgresql://213.245.132.210";
+//        String base = "symphonie";
+//        String login = "symphonie";
+//        String password = "dupratcated";
+
+        String url = "jdbc:mysql://localhost";
+        String base = "dupratcated";
+        String login = "susmab";
+        String password = "";
         
     	DriverLoader.loadDrivers();
       

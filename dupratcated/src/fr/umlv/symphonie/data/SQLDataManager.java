@@ -18,6 +18,7 @@ import javax.sql.rowset.CachedRowSet;
 import com.sun.rowset.CachedRowSetImpl;
 
 import fr.umlv.symphonie.data.formula.Formula;
+import fr.umlv.symphonie.data.formula.SymphonieFormulaFactory;
 import fr.umlv.symphonie.util.Pair;
 import static fr.umlv.symphonie.data.SQLDataManagerConstants.*;
 
@@ -370,6 +371,42 @@ public class SQLDataManager implements
 		}
 	}
 
+  /*
+   * ici
+   */
+  public void syncTeacherFormulaData() throws DataManagerException{
+    Map<Integer, List<Formula>> tmpMap = new HashMap<Integer, List<Formula>>();
+    
+    String request = "select " + COLUMN_ID_FORMULA_FROM_TABLE_FORMULA + ", " + 
+                     COLUMN_DESC_FROM_TABLE_TITLE + ", " + 
+                     COLUMN_ID_COURSE_FROM_TABLE_TEACHER_FORMULA + ", " +
+                     COLUMN_EXPRESSION_FROM_TABLE_FORMULA + ", " +
+                     COLUMN_COLUMN_FROM_TABLE_FORMULA + " " +
+                     "from " + TABLE_TEACHER_FORMULA + ", " + TABLE_TITLE + " " +
+                     "where " + TABLE_TITLE + "." + COLUMN_ID_FROM_TABLE_TITLE + " = " + TABLE_TEACHER_FORMULA + "." + COLUMN_ID_COURSE_FROM_TABLE_TEACHER_FORMULA + " " +
+                     ";";
+    
+    CachedRowSet result = null;
+    int courseKey;
+    
+    try {
+      result = connectAndQuery(request);
+      
+      Formula f = SymphonieFormulaFactory.parseFormula(result.getString(COLUMN_DESC_FROM_TABLE_TITLE),
+                                                       result.getString(COLUMN_EXPRESSION_FROM_TABLE_FORMULA),
+                                                       result.getInt(COLUMN_ID_FORMULA_FROM_TABLE_FORMULA));
+      
+      courseKey = result.getInt(COLUMN_ID_COURSE_FROM_TABLE_TEACHER_FORMULA);
+      
+      
+      
+    }catch(SQLException e){
+      throw new DataManagerException("error getting teacher formulas from datbase", e);
+    }
+  }
+  
+  
+  
 	/* (non-Javadoc)
 	 * @see fr.umlv.symphonie.data.DataManager#getStudents()
 	 */
