@@ -127,72 +127,71 @@ public class TeacherModel extends AbstractTableModel {
        */
       public void run() {
         
-        synchronized (lock){
-        
-        TeacherModel.this.clear();
-        TeacherModel.this.course = course;
-        
-        Pair<Map<Integer, Mark>, SortedMap<Student, Map<Integer, StudentMark>>> studentAndMarkMapPair = null;
-        try {
-          studentAndMarkMapPair = manager.getAllMarksByCourse(course);
-        } catch (DataManagerException e) {
-          System.out.println("error getting data from database for Teacher View.");
-          e.printStackTrace();
-        }
-        
-        
-        markMap.putAll(studentAndMarkMapPair.getFirst());
-        studentMarkMap.putAll(studentAndMarkMapPair.getSecond());
-        
-        
-        columnCount = markMap.size() + 2;
-        rowCount = studentMarkMap.size() + 3;
-        
-        System.out.println("lignes : " + rowCount);
-        System.out.println("colonnes : " + columnCount);
-        
-        columnList.addAll(markMap.values());
+        synchronized (lock) {
 
-        
-        List<Formula> formulaList;
-        
-        try {
-          formulaList = manager.getFormulasByCourse(course);
-        } catch (DataManagerException e2) {
-          formulaList = null;
-        }
-        
-        if (formulaList != null){
-          int column;
-          
-          for (Formula f : formulaList){
-            column = f.getColumn();
-            if (column < 0)
-              columnList.add(0, f);
-            
-            else if (column > columnList.size())
-              columnList.add(f);
-            
-            else columnList.add(column -1, f);
+          TeacherModel.this.clear();
+          TeacherModel.this.course = course;
+
+          Pair<Map<Integer, Mark>, SortedMap<Student, Map<Integer, StudentMark>>> studentAndMarkMapPair = null;
+          try {
+            studentAndMarkMapPair = manager.getAllMarksByCourse(course);
+          } catch (DataManagerException e) {
+            System.out
+                .println("error getting data from database for Teacher View.");
+            e.printStackTrace();
           }
-            
-        }
-        
-        studentList.addAll(studentMarkMap.keySet());
-        
-        try {
-          EventQueue.invokeAndWait(new Runnable() {
 
-            public void run() {
-              TeacherModel.this.fireTableStructureChanged();
+          markMap.putAll(studentAndMarkMapPair.getFirst());
+          studentMarkMap.putAll(studentAndMarkMapPair.getSecond());
+
+          columnCount = markMap.size() + 2;
+          rowCount = studentMarkMap.size() + 3;
+
+          System.out.println("lignes : " + rowCount);
+          System.out.println("colonnes : " + columnCount);
+
+          columnList.addAll(markMap.values());
+
+          List<Formula> formulaList;
+
+          try {
+            formulaList = manager.getFormulasByCourse(course);
+          } catch (DataManagerException e2) {
+            formulaList = null;
+          }
+
+          if (formulaList != null) {
+            int column;
+
+            for (Formula f : formulaList) {
+              column = f.getColumn();
+              if (column < 0)
+                columnList.add(0, f);
+
+              else if (column > columnList.size())
+                columnList.add(f);
+
+              else
+                columnList.add(column - 1, f);
             }
-            
-          });
-        } catch (InterruptedException e1) {
-          e1.printStackTrace();
-        } catch (InvocationTargetException e1) {
-          e1.printStackTrace();
-        }
+
+          }
+
+          studentList.addAll(studentMarkMap.keySet());
+
+          try {
+            EventQueue.invokeAndWait(new Runnable() {
+
+              public void run() {
+                TeacherModel.this.fireTableStructureChanged();
+              }
+
+            });
+          } catch (InterruptedException e1) {
+            e1.printStackTrace();
+          } catch (InvocationTargetException e1) {
+            e1.printStackTrace();
+          }
         }
       }
     });
@@ -422,13 +421,17 @@ public class TeacherModel extends AbstractTableModel {
     
     final Course course = this.course;
     
-    es.execute(new Runnable(){
+    es.execute(new Runnable() {
+
       public void run() {
-        synchronized (lock){
-          try{
-            manager.addMark(desc, coeff, course);
-          }catch (DataManagerException e){
-            System.out.println(e.getMessage());
+        synchronized (lock) {
+
+          if (course != null){
+            try {
+              manager.addMark(desc, coeff, course);
+            } catch (DataManagerException e) {
+              System.out.println(e.getMessage());
+            }
           }
         }
       }
@@ -564,7 +567,7 @@ public class TeacherModel extends AbstractTableModel {
         
         if (o instanceof Course){
           ((TeacherModel)table.getModel()).setCourse((Course)o);
-          ((TeacherModel)table.getModel()).addMark("morpion", 0.0f);
+          /*((TeacherModel)table.getModel()).addMark("morpion", 0.0f);*/
           /*CellFormat f = new CellFormat(BasicFormulaFactory.booleanInstance(true), Color.RED, Color.CYAN);
           for (int i = 3; i < 7; i++) {
             Object ob = teacherModel.getValueAt(i, 0);

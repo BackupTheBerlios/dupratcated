@@ -46,6 +46,8 @@ public interface DataManager {
 
   public List<Formula> getFormulasByCourse(Course c) throws DataManagerException;
   
+  public List<Formula> getJuryFormulas() throws DataManagerException;
+  
 	/**
 	 * @param c
 	 * @return

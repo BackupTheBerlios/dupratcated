@@ -56,7 +56,8 @@ public class SQLDataManager implements
   private final Map<Integer, List<Formula>> teacherFormulaMap = new HashMap<Integer, List<Formula>>();
   private int teacherFormulaMapTimeStamp = -1;
   
-  
+  private final List<Formula> juryFormulaList = new ArrayList<Formula>();
+  private int juryFormulaListTimeStamp = 1;
   
 	private final Comparator<Student> studentComparator = new Comparator<Student>() {
 		public int compare(Student arg0, Student arg1) {
@@ -449,7 +450,7 @@ public class SQLDataManager implements
         // into local list
         else {
           for (Formula f : tmpList)
-            localList.add(f);
+            localList.add(f); // changer cette ligne
         }
       }
     }
@@ -483,6 +484,81 @@ public class SQLDataManager implements
     }
   }
   
+  
+  private void syncJuryFormulaData() throws DataManagerException{
+    
+    String request = "select " + COLUMN_ID_FORMULA_FROM_TABLE_FORMULA + ", " + 
+    COLUMN_DESC_FROM_TABLE_TITLE + ", " + 
+    COLUMN_EXPRESSION_FROM_TABLE_FORMULA + ", " +
+    COLUMN_COLUMN_FROM_TABLE_FORMULA + " " +
+    "from " + TABLE_JURY_FORMULA + ", " + TABLE_TITLE + " " +
+    "where " + TABLE_TITLE + "." + COLUMN_ID_FROM_TABLE_TITLE + " = " + TABLE_TEACHER_FORMULA + "." + COLUMN_ID_COURSE_FROM_TABLE_TEACHER_FORMULA + " " +
+    "order by " + COLUMN_COLUMN_FROM_TABLE_FORMULA + " " +
+    ";";
+
+    CachedRowSet result = null;
+    
+    List<Formula> tmpList = new ArrayList<Formula>();
+    
+    try {
+      // get result from query
+      result = connectAndQuery(request);
+      
+      // for each row from result
+      while (result.next()){
+      
+        // build new formula
+        Formula f;
+        try {
+          f = SymphonieFormulaFactory.parseFormula(result
+              .getString(COLUMN_DESC_FROM_TABLE_TITLE), result
+              .getString(COLUMN_EXPRESSION_FROM_TABLE_FORMULA), result
+              .getInt(COLUMN_ID_FORMULA_FROM_TABLE_FORMULA), result
+              .getInt(COLUMN_COLUMN_FROM_TABLE_FORMULA));
+        } catch (ParserException e1) {
+          continue;
+        } catch (LexerException e1) {
+          continue;
+        } catch (IOException e1) {
+          continue;
+        }
+
+        // add into tmp list
+        tmpList.add(f);
+    }
+    }catch(SQLException e){
+      throw new DataManagerException("error getting jury formulas from database", e);
+    }
+    
+    int n;
+    
+    // for each formula from tmp list
+    for (Formula f : tmpList){
+      n = juryFormulaList.indexOf(f);
+      
+      // if it is not present in local list
+      if (n < 0){
+        // add it
+        juryFormulaList.add(f);
+      }
+      else {
+        // mettre a jour les donnees
+      }
+    }
+    
+    // for each formula from local list
+    for (int i = 0 ; i < juryFormulaList.size() ; i++){
+      n = tmpList.indexOf(juryFormulaList.get(i));
+      
+      // if it is not in tmp list
+      if (n < 0){
+        // remove it
+        juryFormulaList.remove(i);
+        i--;
+      }
+    }
+    
+  }
   
   
 	/* (non-Javadoc)
@@ -633,6 +709,24 @@ public class SQLDataManager implements
     Map<Integer, List<Formula>> tmpMap = getTeacherFormulas();
     
     return tmpMap.get(c.getId());
+  }
+  
+  
+  public List<Formula> getJuryFormulas() throws DataManagerException{
+    int n;
+    
+    try {
+      n = getTimeStamp(TABLE_JURY_FORMULA);
+    }catch (SQLException e){
+      n = juryFormulaListTimeStamp;
+    }
+    
+    if (n > juryFormulaListTimeStamp) {
+      syncTeacherFormulaData();
+      juryFormulaListTimeStamp = n;
+    }
+    
+    return juryFormulaList;
   }
   
   
