@@ -19,8 +19,6 @@ public class DriverLoader {
                 e.printStackTrace();
             }
             
-            System.out.println("drivers charges");
-            
             driversLoaded = true;
         }
     }
