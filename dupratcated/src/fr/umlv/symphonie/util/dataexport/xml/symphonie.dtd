@@ -18,15 +18,13 @@
 	<!ELEMENT name (#PCDATA)>
 	<!ELEMENT last_name (#PCDATA)>		
 	<!ELEMENT student_mark (mark)>		
-		<!ATTLIST student_mark id_course CDATA #REQUIRED>
 		<!ATTLIST student_mark id_examen CDATA #REQUIRED>
 		<!ELEMENT mark (#PCDATA)>			
 	<!ELEMENT comment (#PCDATA)>
 	
 <!ELEMENT formula (column, expression)>
 		<!ATTLIST formula id_formula CDATA #REQUIRED>
-		<!ATTLIST formula id_title CDATA #REQUIRED>
-		<!ATTLIST formula id_course CDATA #IMPLIED>
+		<!ATTLIST formula id_examen CDATA #REQUIRED>
 		<!ELEMENT column (#PCDATA)>
 		<!ELEMENT expression (#PCDATA)>		
 	

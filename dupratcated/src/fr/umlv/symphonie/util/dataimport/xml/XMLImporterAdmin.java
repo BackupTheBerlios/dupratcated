@@ -4,6 +4,7 @@
 package fr.umlv.symphonie.util.dataimport.xml;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.w3c.dom.Document;
@@ -15,6 +16,7 @@ import fr.umlv.symphonie.data.DataManagerException;
 import fr.umlv.symphonie.data.Mark;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
+import fr.umlv.symphonie.data.formula.Formula;
 import fr.umlv.symphonie.util.dataimport.DataImporterException;
 
 /**
@@ -107,7 +109,8 @@ public class XMLImporterAdmin extends XMLImporter {
 				getCourseNodes(root));
 		final Map<Student, Map<Integer, StudentMark>> studentAndStudentMakMap = getStudentNodes(
 				root, false, markMap);
-
+    final List<Formula> list = getFormulaNodes(root);
+    
 		/** we add and update all the mark data */
 		for (Mark m : markMap.values()) {
 			try {
@@ -153,6 +156,11 @@ public class XMLImporterAdmin extends XMLImporter {
 				}
 			}
 		}
+    
+    /** we update the formula data */
+    for(Formula f : list){
+      
+    }
 	}
 
 	/*
@@ -173,6 +181,7 @@ public class XMLImporterAdmin extends XMLImporter {
 		final Map<Integer, Mark> markMap = getMarkNodes(root, courseMap);
 		final Map<Student, Map<Integer, StudentMark>> studentAndStudentMakMap = getStudentNodes(
 				root, true, markMap);
+    final List<Formula> list = getFormulaNodes(root);
 
 		/** we add and update all the course data */
 		for (Course c : courseMap.values()) {
@@ -207,5 +216,10 @@ public class XMLImporterAdmin extends XMLImporter {
 						"Error during the importation with the bdd.\n", e);
 			}
 		}
+    
+    /** we update the formula data */
+    for(Formula f : list){
+      
+    }
 	}
 }

@@ -89,10 +89,9 @@ public class XMLExporter implements DataExporter {
   private static void addExamenNode(Node root, StudentMark sm) {
     final Node examen;
 
-    /** <examen id_examen="?" id_course>... </examen> */
+    /** <examen id_examen="?">... </examen> */
     Element e = root.getOwnerDocument().createElement("examen");
     e.setAttribute("id_examen", "" + sm.getMark().getId());
-    e.setAttribute("id_course", "" + sm.getCourse().getId());
     examen = root.appendChild(e);
 
     /** <desc>? </desc> */
@@ -181,7 +180,7 @@ public class XMLExporter implements DataExporter {
     /** <formula id_formula="?" id_title=?">... </formula> */
     Element e = root.getOwnerDocument().createElement("formula");
     e.setAttribute("id_formula", "" + 0);
-    e.setAttribute("id_title", "" + 0);
+    e.setAttribute("id_examen", "" + 0);
     formula = root.appendChild(e);
 
     /** <column>? </column> */

@@ -6,7 +6,9 @@ package fr.umlv.symphonie.util.dataimport.xml;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -24,6 +26,7 @@ import fr.umlv.symphonie.data.DataManagerException;
 import fr.umlv.symphonie.data.Mark;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
+import fr.umlv.symphonie.data.formula.Formula;
 import fr.umlv.symphonie.util.dataimport.DataImporter;
 import fr.umlv.symphonie.util.dataimport.DataImporterException;
 
@@ -130,15 +133,15 @@ public class XMLImporter implements DataImporter {
 		Element e;
 		int id;
 
-		/** for each course node */
+		/** for each student node */
 		for (int i = 0; i < nodes.getLength(); i++) {
 			/** we take a node */
 			n = nodes.item(i);
 
-			/** we create an element by using the course node */
+			/** we create an element by using the student node */
 			e = (Element) n;
 
-			/** we get the attribute id_exmane from the element examen */
+			/** we get the attribute id_student from the element examen */
 			id = Integer.parseInt(e.getAttribute("id_student"));
 
 			/** if we want the comment attribute */
@@ -179,34 +182,67 @@ public class XMLImporter implements DataImporter {
 		StudentMark sm;
 		Node n;
 		Element e;
-		int courseId;
-		int examenId;
+		int id;
 
 		/** for each student mark node */
 		for (int i = 0; i < nodes.getLength(); i++) {
 			/** we take a node */
 			n = nodes.item(i);
 
-			/** we create an element by using the course node */
+			/** we create an element by using the student mark node */
 			e = (Element) n;
 
 			/**
-			 * we get the attributes courseId and id_examen from the element
-			 * examen
-			 */
-			courseId = Integer.parseInt(e.getAttribute("id_course"));
-			examenId = Integer.parseInt(e.getAttribute("id_examen"));
+			 * we get the attribute id_examen from the element
+			 * examen		 */
+		
+			id = Integer.parseInt(e.getAttribute("id_examen"));
 
-			/** we create the mark object */
-			sm = new StudentMark(s, markMap.get(examenId), Float.parseFloat(e
+			/** we create the student mark object */
+			sm = new StudentMark(s, markMap.get(id), Float.parseFloat(e
 					.getElementsByTagName("mark").item(0).getTextContent()));
 
-			/** we put the map object into the map */
-			map.put(examenId, sm);
+			/** we put the student mark object into the map */
+			map.put(id, sm);
 		}
 
 		return map;
 	}
+  
+  /**
+   * @param root
+   *            the root of the document
+   * @return a map with all the student marks
+   */
+  protected List<Formula> getFormulaNodes(Element root) {
+    final ArrayList<Formula> list = new ArrayList<Formula>();
+    final NodeList nodes = root.getElementsByTagName("formula");
+    Formula f;
+    Node n;
+    Element e;
+
+    /** for each formula node */
+    for (int i = 0; i < nodes.getLength(); i++) {
+      /** we take a node */
+      n = nodes.item(i);
+
+      /** we create an element by using the formula node */
+      e = (Element) n;    
+
+      /** we create the formula object */
+      //f = new Formula();
+      Integer.parseInt(e.getAttribute("id_formula"));
+      Integer.parseInt(e.getAttribute("id_examen"));
+      Integer.parseInt(e
+          .getElementsByTagName("column").item(0).getTextContent());
+      e.getElementsByTagName("expression").item(0).getTextContent();
+
+      /** we put the formulma object into the list */
+      //list.add(f);
+    }
+
+    return list;
+  }
 
 	/**
 	 * create a new document object
@@ -271,6 +307,7 @@ public class XMLImporter implements DataImporter {
 				getCourseNodes(root));
 		final Map<Student, Map<Integer, StudentMark>> studentAndStudentMakMap = getStudentNodes(
 				root, false, markMap);
+    final List<Formula> list = getFormulaNodes(root);
 
 		/** we update the mark data : desc et coeff */
 		for (Mark m : markMap.values()) {
@@ -293,6 +330,11 @@ public class XMLImporter implements DataImporter {
 				}
 			}
 		}
+    
+    /** we update the formula data */
+    for(Formula f : list){
+      
+    }
 	}
 
 	/*
@@ -317,6 +359,8 @@ public class XMLImporter implements DataImporter {
 			throw new DataImporterException(
 					"Error during the importation with the bdd.\n", e);
 		}
+    
+    final List<Formula> list = getFormulaNodes(root);
 
 		/** we update the student data : comment */
 		for (Student s : map.keySet()) {
@@ -327,5 +371,10 @@ public class XMLImporter implements DataImporter {
 						"Error during the importation with the bdd.\n", e);
 			}
 		}
+    
+    /** we update the formula data */
+    for(Formula f : list){
+      
+    }
 	}
 }
