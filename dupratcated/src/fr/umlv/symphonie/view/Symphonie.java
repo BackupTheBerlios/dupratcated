@@ -182,8 +182,6 @@ public class Symphonie {
 
   /** CourseTreeModel * */
   private final CourseTreeModel courseTreeModel;
-
-  protected int chartStep = 5;
   
   /** Action Factory * */
   protected final SymphonieActionFactory actionFactory;
@@ -605,11 +603,17 @@ public class Symphonie {
 
       public void valueChanged(TreeSelectionEvent e) {
         Object o = tree.getLastSelectedPathComponent();
-        if (o instanceof Student) {
+        boolean value = (o instanceof Student);
+        
+        if (value) {
           ((StudentModel) (table.getModel())).setStudent((Student) o);
           ((DefaultWizardModel) exportW.getModel()).getInterPanelData().put(
               SymphonieWizardConstants.STUDENT_DATA, o);
         }
+        else currentStudentModel.clear();
+        
+        dischart.setEnabled(value);
+        /*spinner.setEnabled(value);*/
       }
     });
 
@@ -801,12 +805,19 @@ public class Symphonie {
 
       public void valueChanged(TreeSelectionEvent e) {
         Object o = tree.getLastSelectedPathComponent();
-
-        if (o instanceof Course) {
+        boolean value = (o instanceof Course);
+        
+        if (value) {
           ((TeacherModel) table.getModel()).setCourse((Course) o);
           ((DefaultWizardModel) exportW.getModel()).getInterPanelData().put(
               SymphonieWizardConstants.TEACHER_DATA, o);
         }
+        else currentTeacherModel.clear();
+        
+        addColumn.setEnabled(value);
+        spinner.setEnabled(value);
+        addFormula.setEnabled(value);
+        dischart.setEnabled(value);
       }
     });
 
@@ -1128,11 +1139,13 @@ public class Symphonie {
     toolbar.add(createToolbarButton(EXPORT_MENU_ITEM, exp, builder));
     toolbar.addSeparator();
 
-    JButton dischart = new JButton(actionFactory.getChartDisplayAction(
+    dischart = new JButton(actionFactory.getChartDisplayAction(
         CHARTICON, builder));
+    dischart.setEnabled(false);
+    
     JPanel content = getContentPane();
     JPanel welcome = getWelcomePagePanel(content, toolbar, mode, imp, exp,
-        print, dischart);
+        print);
     frame.setContentPane((welcome != null) ? welcome : content);
 
     // Menu bar
@@ -1162,14 +1175,14 @@ public class Symphonie {
     
     toolbar.add(builder.buildLabel(SymphonieConstants.SETSTEP));
     
-    final JSpinner spinner = new JSpinner(new SpinnerNumberModel(chartStep, 1, 20, 1));
+    spinner = new JSpinner(new SpinnerNumberModel(chartStep, 1, 20, 1));
     spinner.setMaximumSize(new Dimension(48,32));
     spinner.addChangeListener(new ChangeListener(){
       public void stateChanged(ChangeEvent e) {
         chartStep = ((SpinnerNumberModel)(spinner.getModel())).getNumber().intValue();
       }
     });
-    
+    spinner.setEnabled(false);
     
     toolbar.add(spinner);
     toolbar.addSeparator();
@@ -1224,8 +1237,29 @@ public class Symphonie {
         SymphonieWizardConstants.DATA_VIEW, newView);
     ((DefaultWizardModel) importW.getModel()).getInterPanelData().put(
         SymphonieWizardConstants.DATA_VIEW, newView);
-    addFormula.setEnabled(newView.isFormulaSupported());
-    addColumn.setEnabled(newView.equals(View.teacher));
+    
+    if(newView.equals(View.student)){
+      addColumn.setEnabled(false);
+      addFormula.setEnabled(false);
+      dischart.setEnabled(!currentStudentModel.isEmpty());
+      spinner.setEnabled(false);
+    }
+    
+    else if(newView.equals(View.teacher)){
+      boolean value = !currentTeacherModel.isEmpty();
+
+      addColumn.setEnabled(value);
+      addFormula.setEnabled(value);
+      dischart.setEnabled(value);
+      spinner.setEnabled(value);
+    }
+    
+    else if(newView.equals(View.jury)){
+      addColumn.setEnabled(false);
+      addFormula.setEnabled(true);
+      dischart.setEnabled(true);
+      spinner.setEnabled(true);
+    }
   }
 
   /**
@@ -1637,7 +1671,7 @@ public class Symphonie {
   // ----------------------------------------------------------------------------
 
   /** Global add formula action (depends on views) */
-  private final AbstractAction addFormula = new AbstractAction("erf",
+  protected final AbstractAction addFormula = new AbstractAction("erf",
       new ImageIcon(Symphonie.class.getResource("icons/formula.png"))) {
 
     public void actionPerformed(ActionEvent e) {
@@ -1646,10 +1680,16 @@ public class Symphonie {
   };
 
   /** Add column action (depends on views) */
-  private AbstractAction addColumn;
+  protected AbstractAction addColumn;
 
   /** List of selected objects in current view */
   protected final ArrayList<Object> selectedObjects = new ArrayList<Object>();
+  
+  protected int chartStep = 5;
+  
+  protected final JSpinner spinner;
+  
+  protected final JButton dischart;
   
   public CourseTreeModel getCourseTreeModel() {
     return courseTreeModel;

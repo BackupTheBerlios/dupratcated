@@ -253,6 +253,10 @@ public class StudentModel extends AbstractTableModel implements
   public FormattableCellRenderer getFormattableCellRenderer() {
     return formatter;
   }
+  
+  public boolean isEmpty(){
+    return (student == null);
+  }
 
   // public static void main(String[] args) throws DataManagerException {
   // JFrame frame = new JFrame ("test StudentModel");

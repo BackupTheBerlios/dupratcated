@@ -33,7 +33,7 @@ public final class ExceptionDisplayDialog {
   /**
    * The internal dialog
    */
-  private final JDialog dialog;
+  protected final JDialog dialog;
 
   /**
    * Text area to display the exception stack trace
@@ -48,21 +48,22 @@ public final class ExceptionDisplayDialog {
   /**
    * Action for showing stack trace
    */
-  private final AbstractAction show;
+  protected final AbstractAction show;
 
   /**
    * Action for hiding stack trace
    */
-  private final AbstractAction hide;
+  protected final AbstractAction hide;
 
   /**
    * Dimension when stack trace is not shown
    */
-  private final Dimension little = new Dimension(450, 127);
+  protected final Dimension little = new Dimension(450, 127);
+  
   /**
    * Dimension when stack trace is not shown
    */
-  private final Dimension big = new Dimension(450, 320);
+  protected final Dimension big = new Dimension(450, 320);
 
   /**
    * Creates a new <code>ExceptionDisplayDialog</code>

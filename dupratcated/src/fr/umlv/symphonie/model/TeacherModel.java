@@ -688,6 +688,10 @@ public class TeacherModel extends AbstractTableModel {
   public FormattableCellRenderer getFormattableCellRenderer() {
     return formatter;
   }
+  
+  public boolean isEmpty(){
+    return (course == null);
+  }
 
   // public static void main(String[] args) throws DataManagerException,
   // IOException {
