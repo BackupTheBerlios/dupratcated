@@ -218,7 +218,7 @@ public class XMLImporter implements DataImporter {
   protected List<Formula> getFormulaNodes(Element root) {
     final ArrayList<Formula> list = new ArrayList<Formula>();
     final NodeList nodes = root.getElementsByTagName("formula");
-    Formula f;
+    Formula f = null;
     Node n;
     Element e;
 
@@ -232,7 +232,7 @@ public class XMLImporter implements DataImporter {
 
       try {
         /** we create the formula object */
-        SymphonieFormulaFactory.parseFormula(null, e.getElementsByTagName(
+        SymphonieFormulaFactory.parseFormula("import" + i, e.getElementsByTagName(
             "expression").item(0).getTextContent(), Integer.parseInt(e
             .getAttribute("id_formula")), Integer.parseInt(e
             .getElementsByTagName("column").item(0).getTextContent()));
@@ -245,7 +245,7 @@ public class XMLImporter implements DataImporter {
       }
 
       /** we put the formulma object into the list */
-      // list.add(f);
+      list.add(f);
     }
 
     return list;
@@ -418,7 +418,7 @@ public class XMLImporter implements DataImporter {
           dm.addJuryFormula(null, f.getDescription(), f.getColumn());
         } else {
           /** else we update */
-          // dm.change();
+          //dm.change();
         }
       } catch (DataManagerException e) {
         throw new DataImporterException(
