@@ -187,10 +187,16 @@ public class XMLExporter implements DataExporter {
     Node n = formula.appendChild(e);
     n.appendChild(n.getOwnerDocument().createTextNode("" + f.getColumn()));
 
+    /** <name>? </name> */
+    e = formula.getOwnerDocument().createElement("name");
+    n = formula.appendChild(e);
+    n.appendChild(n.getOwnerDocument().createTextNode("" + f.getDescription()));
+
+    
     /** <expression>? </expression> */
     e = formula.getOwnerDocument().createElement("expression");
     n = formula.appendChild(e);
-    n.appendChild(n.getOwnerDocument().createTextNode(f.getDescription()));
+    n.appendChild(n.getOwnerDocument().createTextNode(f.toString()));
   }
 
   /**

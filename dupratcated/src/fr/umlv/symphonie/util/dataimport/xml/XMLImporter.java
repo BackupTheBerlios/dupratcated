@@ -232,7 +232,8 @@ public class XMLImporter implements DataImporter {
 
       try {
         /** we create the formula object */
-        SymphonieFormulaFactory.parseFormula("import" + i, e.getElementsByTagName(
+        SymphonieFormulaFactory.parseFormula(e.getElementsByTagName(
+        "name").item(0).getTextContent(), e.getElementsByTagName(
             "expression").item(0).getTextContent(), Integer.parseInt(e
             .getAttribute("id_formula")), Integer.parseInt(e
             .getElementsByTagName("column").item(0).getTextContent()));
@@ -358,7 +359,7 @@ public class XMLImporter implements DataImporter {
       try {
         /** if we need to add */
         if (f.getID() == -1) {
-          dm.addTeacherFormula(null, f.getDescription(), course, f.getColumn());
+          dm.addTeacherFormula(f.getDescription(), f.toString(), course, f.getColumn());
         } else {
           /** else we update */
           // dm.change();
@@ -415,7 +416,7 @@ public class XMLImporter implements DataImporter {
       try {
         /** if we need to add */
         if (f.getID() == -1) {
-          dm.addJuryFormula(null, f.getDescription(), f.getColumn());
+          dm.addJuryFormula(f.getDescription(), f.toString(), f.getColumn());
         } else {
           /** else we update */
           //dm.change();

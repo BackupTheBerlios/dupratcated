@@ -22,8 +22,9 @@
 		<!ELEMENT mark (#PCDATA)>			
 	<!ELEMENT comment (#PCDATA)>
 	
-<!ELEMENT formula (column, expression)>
+<!ELEMENT formula (column, name, expression)>
 		<!ATTLIST formula id_formula CDATA #REQUIRED>
 		<!ELEMENT column (#PCDATA)>
+		<!ELEMENT name (#PCDATA)>
 		<!ELEMENT expression (#PCDATA)>		
 	

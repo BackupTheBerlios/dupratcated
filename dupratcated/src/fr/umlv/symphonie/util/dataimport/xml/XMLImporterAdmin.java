@@ -180,7 +180,7 @@ public class XMLImporterAdmin extends XMLImporter {
       try {
         /** if we need to add */
         if (f.getID() == -1) {
-          dm.addTeacherFormula(null, f.getDescription(), course, f.getColumn());
+          dm.addTeacherFormula(f.getDescription(), f.toString(), course, f.getColumn());
         } else {
           /** else we update */
           // dm.change();
@@ -256,7 +256,7 @@ public class XMLImporterAdmin extends XMLImporter {
       try {
         /** if we need to add */
         if (f.getID() == -1) {
-          dm.addJuryFormula(null, f.getDescription(), f.getColumn());
+          dm.addJuryFormula(f.getDescription(), f.toString(), f.getColumn());
         } else {
           /** else we update */
           // dm.change();
