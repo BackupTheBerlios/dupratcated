@@ -66,6 +66,8 @@ public class JuryModel extends AbstractTableModel {
 
   private static JuryModel instance = null;
 
+  private int lastRow = -1;
+  
   protected JuryModel(DataManager manager) {
     this.manager = manager;
     update();
@@ -214,6 +216,8 @@ public class JuryModel extends AbstractTableModel {
      */
     if (rowIndex == 2) return null;
 
+    fillFormulaMap(rowIndex);
+    
     /*
      * cas de la colonne tout a gauche
      */
@@ -265,15 +269,6 @@ public class JuryModel extends AbstractTableModel {
       if (rowIndex == 0) return f.getDescription();
 
       if (rowIndex == 1) return null;
-
-      SymphonieFormulaFactory.clearMappedValues();
-
-      Student s = studentList.get(rowIndex - 3);
-
-      for (Course c : dataMap.get(s).keySet()) {
-        SymphonieFormulaFactory.putMappedValue(c.getTitle(), StudentAverage
-            .getAverage(dataMap.get(s).get(c).values()));
-      }
 
       return f.getValue();
     }
@@ -474,6 +469,24 @@ public class JuryModel extends AbstractTableModel {
     });
   }
 
+  
+  private void fillFormulaMap(int rowIndex){
+    
+    if (rowIndex >= 3 && lastRow != rowIndex) {
+
+      SymphonieFormulaFactory.clearMappedValues();
+
+      Student s = studentList.get(rowIndex - 3);
+
+      for (Course c : dataMap.get(s).keySet()) {
+        SymphonieFormulaFactory.putMappedValue(c.getTitle(), StudentAverage
+            .getAverage(dataMap.get(s).get(c).values()));
+      }
+
+      lastRow = rowIndex;
+    }
+  }
+  
   // ----------------------------------------------------------------------------
   // Implement the ObjectFormattingSupport interface
   // ----------------------------------------------------------------------------
@@ -485,6 +498,8 @@ public class JuryModel extends AbstractTableModel {
     return formatter;
   }
 
+  
+  
   // /**
   // * @param args
   // * @throws IOException
