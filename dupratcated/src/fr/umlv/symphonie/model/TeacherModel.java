@@ -42,6 +42,7 @@ import fr.umlv.symphonie.view.cells.CellRendererFactory;
 import fr.umlv.symphonie.view.cells.FormattableCellRenderer;
 import fr.umlv.symphonie.view.cells.ObjectFormattingSupport;
 
+import static fr.umlv.symphonie.view.SymphonieConstants.*;
 /*
  * par convention il est decide que la derniere colonne est toujours la moyenne
  * il faudra donc verifier a l'ajout de nouvelle colonne de bien laisser la
@@ -258,8 +259,8 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
      * cas de la colonne tout a gauche
      */
     if (columnIndex == 0) {
-      if (rowIndex == 0) return "Intitule";
-      if (rowIndex == 1) return "Coeff";
+      if (rowIndex == 0) return builder.getValue(TITLE);
+      if (rowIndex == 1) return builder.getValue(COEFF);
       return studentList.get(rowIndex - 3);
     }
 
@@ -267,7 +268,7 @@ public class TeacherModel extends AbstractTableModel implements ObjectFormatting
      * cas de la colonne tout a droite
      */
     if (columnIndex == columnCount - 1) {
-      if (rowIndex == 0) return "Moyenne";
+      if (rowIndex == 0) return builder.getValue(AVERAGE);
       if (rowIndex == 1) return null;
 
       return StudentAverage.getAverage(studentMarkMap.get(

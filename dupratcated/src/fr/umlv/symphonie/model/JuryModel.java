@@ -38,6 +38,8 @@ import fr.umlv.symphonie.view.cells.CellRendererFactory;
 import fr.umlv.symphonie.view.cells.FormattableCellRenderer;
 import fr.umlv.symphonie.view.cells.ObjectFormattingSupport;
 
+import static fr.umlv.symphonie.view.SymphonieConstants.*;
+
 /**
  * @author susmab
  * 
@@ -226,8 +228,8 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
      * cas de la colonne tout a gauche
      */
     if (columnIndex == 0) {
-      if (rowIndex == 0) return "Matiere";
-      if (rowIndex == 1) return "Coeff";
+      if (rowIndex == 0) return builder.getValue(COURSE);
+      if (rowIndex == 1) return builder.getValue(COEFF);
       return studentList.get(rowIndex - 3);
     }
 
@@ -235,7 +237,7 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
      * cas de la colonne tout a droite (commentaires)
      */
     if (columnIndex == columnCount - 1) {
-      if (rowIndex == 0) return "Commentaires";
+      if (rowIndex == 0) return builder.getValue(COMMENT);
       if (rowIndex == 1) return null;
 
       return studentList.get(rowIndex - 3).getComment();
@@ -255,7 +257,7 @@ public class JuryModel extends AbstractTableModel implements ObjectFormattingSup
      */
 
     if (columnIndex == columnCount - 3) {
-      if (rowIndex == 0) return "Moyenne";
+      if (rowIndex == 0) return builder.getValue(AVERAGE);
       if (rowIndex <= 2) return null;
 
       return StudentAverage.getAnnualAverage(dataMap.get(studentList
