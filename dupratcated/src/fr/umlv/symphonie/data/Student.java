@@ -1,20 +1,51 @@
 
 package fr.umlv.symphonie.data;
 
+/**
+ * Class represents an existing student
+ * 
+ * @author susmab, laurent garcia
+ */
 public class Student {
 
+  /** Student unique id number */
   private int id;
+
+  /** Student's name */
   private String name;
+
+  /** Student's last name */
   private String lastName;
+
+  /** Student Jury's advice, can be null */
   private String comment;
 
+  /**
+   * Creates a new Student
+   * 
+   * @param id
+   *          The student id
+   * @param name
+   *          The student name
+   * @param lastName
+   *          The student last name
+   */
   public Student(int id, String name, String lastName) {
-    this.id = id;
-    this.name = name;
-    this.lastName = lastName;
-    comment = null;
+    this(id, name, lastName, null);
   }
 
+  /**
+   * Creates a new Student
+   * 
+   * @param id
+   *          The student id
+   * @param name
+   *          The student name
+   * @param lastName
+   *          The student last name
+   * @param comment
+   *          The jury's advice, can be null
+   */
   public Student(int id, String name, String lastName, String comment) {
     this.id = id;
     this.name = name;
@@ -38,36 +69,53 @@ public class Student {
     return comment;
   }
 
+  /**
+   * Updates comment for current student
+   * 
+   * @param comment
+   *          The new jury's advice
+   */
   public void setComment(String comment) {
     this.comment = comment;
   }
-  
+
+  /**
+   * Updates name for current student
+   * 
+   * @param name
+   *          The new student name
+   */
   public void setName(String name) {
     this.name = name;
   }
-  
+
+  /**
+   * Updates last name for current student
+   * 
+   * @param name
+   *          The new student last name
+   */
   public void setLastName(String lastName) {
     this.lastName = lastName;
   }
 
   public boolean equals(Object obj) {
-    if (!(obj instanceof Student))
-      return false;
-    
-    Student s = (Student)obj;
-    
+    if (!(obj instanceof Student)) return false;
+    Student s = (Student) obj;
     return id == s.id;
   }
-  
 
-  public void update(Student s){
+  /**
+   * Updates current student data from the given one
+   * 
+   * @param s
+   *          The student where to extract infos from
+   */
+  public void update(Student s) {
     name = s.getName();
     lastName = s.getLastName();
   }
-  
-  /* (non-Javadoc)
-   * @see java.lang.Object#toString()
-   */
+
   public String toString() {
     return lastName + " " + name;
   }

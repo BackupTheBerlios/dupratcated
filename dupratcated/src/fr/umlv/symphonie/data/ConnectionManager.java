@@ -12,17 +12,16 @@ import fr.umlv.symphonie.util.SymphoniePreferencesManager;
 import fr.umlv.symphonie.view.dialog.DatabaseDialog;
 
 /**
- * A class which provides connection handling over a database.
- * The connection in Symphonie is a singleton, so the application does not have
- * to connect many times to the database server while running.
+ * A class which provides connection handling over a database. The connection in
+ * Symphonie is a singleton, so the application does not have to connect many
+ * times to the database server while running.
+ * 
  * @author susmab
- *
+ * 
  */
 public class ConnectionManager {
 
-  /**
-   * The current connection.
-   */
+  /** The current connection. */
   static private Connection connection = null;
 
   /**
@@ -37,11 +36,14 @@ public class ConnectionManager {
   }
 
   /**
-   * Creates a <code>Connection</code> if it has not already been earlier.
-   * In this case, a dialog box appears on screen to ask parameters for connection.
-   * The parameters are saved in Java <code>Properties</code> format, so the next time
-   * the application is launched, the configuration part will be skipped.
-   * @return
+   * Creates a <code>Connection</code> if it has not already been earlier. In
+   * this case, a dialog box appears on screen to ask parameters for connection.
+   * The parameters are saved in Java <code>Properties</code> format, so the
+   * next time the application is launched, the configuration part will be
+   * skipped.
+   * 
+   * @return The <code>Connection</code> created, or an exisiting connection
+   *         if it already exists.
    */
   public static Connection createConnection() {
 
@@ -77,8 +79,8 @@ public class ConnectionManager {
   }
 
   /**
-   * Closes the connection with the database.
-   * Should be called whenever the program quits.
+   * Closes the connection with the database. Should be called whenever the
+   * program quits.
    */
   public static void closeConnection() {
     if (connection != null) try {
