@@ -23,26 +23,32 @@ public class StudentAverage {
   
   public static float getAverage(Collection<StudentMark> collection){
     float result = 0;
-    
+    float div = 0;
+	
     if (collection == null)
       return 0;
     
-    for (StudentMark sm : collection)
+    for (StudentMark sm : collection){
       result += sm.getValue() * sm.getCoeff();
+	  div += sm.getCoeff();
+    }
     
-    return result;
+    return result/div;
   }
   
   
   public static float getAnnualAverage(Map<Course, Map<Integer, StudentMark>> map){
     float result = 0;
+	float div = 0;
     
     if (map == null)
       return 0;
     
-    for (Course c : map.keySet())
+    for (Course c : map.keySet()){
       result += getAverage(map.get(c).values()) * c.getCoeff();
+	  div += c.getCoeff();
+    }
     
-    return result;
+    return result/div;
   }
 }

@@ -228,23 +228,31 @@ public class StudentModel extends AbstractTableModel implements
 
   public ChartPanel getChartPanel() {
     
-    if (student != null){
-    
-    DefaultKeyedValuesDataset pieDataset = new DefaultKeyedValuesDataset();
+    if (student != null) {
 
-    for (Course c : markMap.keySet()) {
-      pieDataset.setValue(c.getTitle() + " : "
-          + StudentAverage.getAverage(markMap.get(c).values()),
-          (c.getCoeff() * 100));
-    }
+		float div = 0;
+		
+		DefaultKeyedValuesDataset pieDataset = new DefaultKeyedValuesDataset();
 
-    JFreeChart pieChart = ChartFactory.createPieChart3D("Notes de " + student
-        + "- Moyenne générale : " + StudentAverage.getAnnualAverage(markMap),
-        pieDataset, false, false, false);
-    pieChart.getPlot().setForegroundAlpha(0.35f);
+		for (Course c : markMap.keySet())
+			div += c.getCoeff();
 
-    return new ChartPanel(pieChart);
-    }
+		for (Course c : markMap.keySet()) {
+					pieDataset.setValue(c.getTitle()
+							+ " : "
+							+ StudentAverage
+									.getAverage(markMap.get(c).values()), (c
+							.getCoeff() / div));
+				}
+
+			JFreeChart pieChart = ChartFactory.createPieChart3D("Notes de "
+					+ student + " - Moyenne générale : "
+					+ StudentAverage.getAnnualAverage(markMap), pieDataset,
+					false, false, false);
+			pieChart.getPlot().setForegroundAlpha(0.35f);
+
+			return new ChartPanel(pieChart);
+		}
     
     return null;
   }
