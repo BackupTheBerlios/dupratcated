@@ -600,9 +600,52 @@ public class Symphonie {
    * @return a <code>JScrollPane</code>
    */
   private final JScrollPane getJuryPane() {
-    JuryModel model = JuryModel.getInstance(manager);
-    JTable table = new JTable(model);
+    final JuryModel model = JuryModel.getInstance(manager);
+    final JTable table = new JTable(model);
     table.setTableHeader(null);
+    
+    final JPopupMenu pop = builder.buildPopupMenu(SymphonieConstants.JURYVIEWPOPUP_TITLE);
+    
+    pop.add(builder.buildButton(SymphonieActionFactory.getJuryAddFormulaAction(null, frame, builder),SymphonieConstants.ADD_FORMULA, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(SymphonieActionFactory.getJuryUpdateAction(null), SymphonieConstants.UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(SymphonieActionFactory.getJuryPrintAction(null, table), SymphonieConstants.PRINT_MENU_ITEM, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(SymphonieActionFactory.getJuryChartAction(null, frame), SymphonieConstants.DISPLAY_CHART, ComponentBuilder.ButtonType.MENU_ITEM));
+    
+    final AbstractButton removeColumn = builder.buildButton(SymphonieActionFactory.getRemoveJuryColumnAction(null, table), SymphonieConstants.REMOVE_COLUMN, ComponentBuilder.ButtonType.MENU_ITEM);
+    pop.add(removeColumn);
+    
+    // listener which displays the popup
+    table.addMouseListener(new MouseAdapter() {
+
+      public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)) {
+          pop.show(e.getComponent(), e.getX(), e.getY());
+        }
+      }
+    });
+    
+    // listener which saves the cursor location
+    table.addMouseListener(new MouseAdapter() {
+
+      public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)) {
+          PointSaver.setPoint(e.getPoint());
+        }
+      }
+    });
+    
+    // listener which disables buttons
+    table.addMouseListener(new MouseAdapter() {
+
+      public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)) {
+          if (model.isColumnFormula(table.columnAtPoint(e.getPoint())))
+            removeColumn.setEnabled(true);
+          else removeColumn.setEnabled(false);
+        }
+      }
+    });
+    
     table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
 
       public Component getTableCellRendererComponent(JTable table,
