@@ -10,8 +10,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import javax.swing.AbstractButton;
@@ -33,6 +35,7 @@ import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
 import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
+import fr.umlv.symphonie.data.StudentMark;
 import fr.umlv.symphonie.data.formula.Formula;
 import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.TextualResourcesLoader;
@@ -86,18 +89,24 @@ public class AdminTeacherModel extends TeacherModel {
       
       es.execute(new Runnable(){
         public void run(){
+          Map<Integer, StudentMark> tmpMap = studentMarkMap.get(s);
+          studentMarkMap.remove(s);
+          
           try {
-            manager.changeStudentLastName(s, lastName);
-            manager.changeStudentName(s, name);
+            manager.changeStudentNameAndLastName(s, name, lastName);
           }catch (DataManagerException e){
             System.out.println(e.getMessage());
           }
 		  
-		  try {
+          Collections.sort(studentList, StudentComparator);
+          studentMarkMap.put(s, tmpMap);
+          
+          
+          try {
 	          EventQueue.invokeAndWait(new Runnable() {
 
 	            public void run() {
-	              AdminTeacherModel.this.fireTableRowsUpdated(row, row);
+	              AdminTeacherModel.this.fireTableRowsUpdated(3, rowCount - 1);
 	            }
 
 	          });

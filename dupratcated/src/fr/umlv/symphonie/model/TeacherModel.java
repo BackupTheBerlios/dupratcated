@@ -99,6 +99,8 @@ public class TeacherModel extends AbstractTableModel {
 
   protected final Object lock = new Object();
 
+  private int lastRow = -1;
+  
   protected TeacherModel(DataManager manager) {
     this.manager = manager;
   }
@@ -246,6 +248,8 @@ public class TeacherModel extends AbstractTableModel {
      */
     if (rowIndex == 2) return null;
 
+    fillFormulaMap(rowIndex);
+    
     /*
      * cas de la colonne tout a gauche
      */
@@ -279,23 +283,17 @@ public class TeacherModel extends AbstractTableModel {
         return null;
       }
 
-      Student s = studentList.get(rowIndex - 3);
-
-      SymphonieFormulaFactory.clearMappedValues();
-
-      for (StudentMark sm : studentMarkMap.get(s).values())
-        SymphonieFormulaFactory.putMappedValue(sm.getMark().getDesc(), sm
-            .getValue());
-
       return f.getValue();
     }
 
     else if (o instanceof Mark) {
       Mark m = (Mark) o;
-
       if (rowIndex == 0) return m;
       if (rowIndex == 1) return m.getCoeff();
-      return studentMarkMap.get(studentList.get(rowIndex - 3)).get(m.getId())
+      return studentMarkMap.get(
+          studentList.get(
+              rowIndex - 3)).get(
+                  m.getId())
           .getValue();
     }
 
@@ -693,6 +691,23 @@ public class TeacherModel extends AbstractTableModel {
     return (course == null);
   }
 
+  
+  private void fillFormulaMap(int rowIndex){
+    
+    if (rowIndex >= 3 && lastRow != rowIndex) {
+
+      SymphonieFormulaFactory.clearMappedValues();
+
+      Student s = studentList.get(rowIndex - 3);
+
+      for (StudentMark sm : studentMarkMap.get(s).values())
+        SymphonieFormulaFactory.putMappedValue(sm.getMark().getDesc(), sm
+            .getValue());
+
+      lastRow = rowIndex;
+    }
+  }
+  
   // public static void main(String[] args) throws DataManagerException,
   // IOException {
   // JFrame frame = new JFrame ("test TeacherModel");

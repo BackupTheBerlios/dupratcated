@@ -2158,7 +2158,7 @@ public class SQLDataManager implements
 		try {
 			connectAndUpdate(request);
 		} catch (SQLException e) {
-			throw new DataManagerException("unable to set comment for student "
+			throw new DataManagerException("unable to set new name for student "
 					+ s, e);
 		}
 
@@ -2187,7 +2187,7 @@ public class SQLDataManager implements
 		try {
 			connectAndUpdate(request);
 		} catch (SQLException e) {
-			throw new DataManagerException("unable to set comment for student "
+			throw new DataManagerException("unable to set new last name for student "
 					+ s, e);
 		}
 
@@ -2199,6 +2199,29 @@ public class SQLDataManager implements
 
 	}
 	
+  public void changeStudentNameAndLastName(Student s, String newName, String newLastName) throws DataManagerException{
+    String request = "update " + TABLE_STUDENT + " set "
+                   + COLUMN_NAME_FROM_TABLE_STUDENT + " = '" + newName + "', "
+                   + COLUMN_LAST_NAME_FROM_TABLE_STUDENT + " = '" + newLastName + "' "
+                   + "where " + COLUMN_ID_FROM_TABLE_STUDENT + " = " + s.getId() + " "
+                   + ";";
+    
+    try {
+      connectAndUpdate(request);
+    } catch (SQLException e) {
+      throw new DataManagerException("unable to set new name and last name for student "
+          + s, e);
+    }
+
+    try {
+      updateStudentData(studentMapTimeStamp + 1);
+    } catch (DataManagerException e) {
+      throw new DataManagerException("error updating data.", e);
+    }
+    s.setName(newName);
+    s.setLastName(newLastName);
+  }
+  
 	/* (non-Javadoc)
 	 * @see fr.umlv.symphonie.data.DataManager#changeCourseTitleAndCoeff(fr.umlv.symphonie.data.Course, java.lang.String, float)
 	 */

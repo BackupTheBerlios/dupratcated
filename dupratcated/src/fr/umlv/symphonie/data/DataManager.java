@@ -195,6 +195,8 @@ public interface DataManager {
 	public void changeStudentNameAndLastNameAndComment(Student s, String newName, String newLastName, String newComment)
 			throws DataManagerException;
 
+  public void changeStudentNameAndLastName(Student s, String newName, String newLastName) throws DataManagerException;
+  
 	/**
 	 * to edit 
 	 * @param s
