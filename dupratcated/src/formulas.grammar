@@ -24,7 +24,7 @@ Helpers
   letter  = small | capital;
   special = small_acute | small_grave | small_umlaut | small_circumflex | small_others | capital_others;
   
-  id_character = small | digit | special;
+  id_character = letter | digit | special;
   func_id_character = small;
     
   digit_separator = '.';
