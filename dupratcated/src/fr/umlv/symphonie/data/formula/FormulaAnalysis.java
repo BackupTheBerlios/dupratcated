@@ -99,6 +99,14 @@ public class FormulaAnalysis extends AnalysisAdapter {
     this.description = description;
   }
 
+  public int getColumn() {
+    return col;
+  }
+
+  public void setColumn(int col) {
+    this.col = col;
+  }
+
   /**
    * This method is provided for the user who wants to parse formulas that use
    * different maps for variable values with the same
