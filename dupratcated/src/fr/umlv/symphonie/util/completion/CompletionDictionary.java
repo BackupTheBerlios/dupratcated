@@ -100,6 +100,8 @@ public class CompletionDictionary implements LookableCollection<String> {
    * Looks up the given string in the current dictionary, search is case
    * insensitive
    * 
+   * @param prefix
+   *          The prefix or the string to search
    * @return <code>null</code> if <code>prefix</code> is null or there's no
    *         string that starts with <code>prefix</code>.<br>
    */
