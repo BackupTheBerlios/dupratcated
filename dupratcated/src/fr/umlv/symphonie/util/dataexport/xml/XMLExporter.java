@@ -4,8 +4,8 @@
 
 package fr.umlv.symphonie.util.export.xml;
 
-
 import java.io.File;
+import java.net.MalformedURLException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -34,7 +34,7 @@ import fr.umlv.symphonie.util.export.DataExporter;
 public abstract class XMLExporter implements DataExporter {
 
   protected String documentName;
-  protected final String dtd = this.getClass().getResource("symphonie.dtd").toString();
+  protected final File dtd = new File("symphonie.dtd");
   protected SQLDataManager dm = new SQLDataManager();
 
   /**
@@ -188,10 +188,11 @@ public abstract class XMLExporter implements DataExporter {
     try {
       Transformer transformer = TransformerFactory.newInstance()
           .newTransformer();
-  
+
       /** <!DOCTYPE symphonie SYSTEM "file:?"> */
-      transformer.setOutputProperty(
-          javax.xml.transform.OutputKeys.DOCTYPE_SYSTEM, dtd);
+      transformer
+          .setOutputProperty(javax.xml.transform.OutputKeys.DOCTYPE_SYSTEM, dtd
+              .toURL().toString());
 
       /** indention of the tags */
       transformer.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -211,6 +212,14 @@ public abstract class XMLExporter implements DataExporter {
       e.printStackTrace();
     } catch (TransformerFactoryConfigurationError e) {
       System.out.println("Error during the exportation : \n" + e + "\n");
+      e.printStackTrace();
+    } catch (IllegalArgumentException e) {
+      System.out.println("Error during the exportation with the dtd : \n" + e
+          + "\n");
+      e.printStackTrace();
+    } catch (MalformedURLException e) {
+      System.out.println("Error during the exportation with the dtd : \n" + e
+          + "\n");
       e.printStackTrace();
     }
   }
