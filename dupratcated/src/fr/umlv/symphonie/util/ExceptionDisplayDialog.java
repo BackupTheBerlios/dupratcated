@@ -95,8 +95,6 @@ public final class ExceptionDisplayDialog {
     show = new AbstractAction(b.getValue("exceptiondialog.showdetail")) {
 
       public void actionPerformed(ActionEvent ev) {
-        System.out
-            .println("ExceptionDisplayDialog.ExceptionDisplayDialog(show)");
         sp.setVisible(true);
         dialog.setPreferredSize(big);
         detail.setAction(hide);
