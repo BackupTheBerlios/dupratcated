@@ -54,15 +54,20 @@ public abstract class NumericFormula implements Formula<Number> {
   private static final boolean isValidType(Number n) {
     return (n instanceof Float) || (n instanceof Integer);
   }
-  
+
   public String getDescription() {
     return null;
   }
-  
+
+  public int getColumn() {
+    return -1;
+  }
+
   public boolean equals(Object obj) {
     if (obj instanceof NumericFormula) {
       NumericFormula nf = (NumericFormula) obj;
-      return nf.getDescription().equals(getDescription()) && nf.toString().equals(toString());
+      return nf.getDescription().equals(getDescription())
+          && nf.toString().equals(toString());
     }
     return false;
   }

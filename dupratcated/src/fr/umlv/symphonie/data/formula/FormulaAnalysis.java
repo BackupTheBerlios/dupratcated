@@ -52,20 +52,17 @@ import fr.umlv.symphonie.data.formula.node.TIntegerLiteral;
 
 public class FormulaAnalysis extends AnalysisAdapter {
 
-  /**
-   * The map used to create variable values
-   */
+  /** The map used to create variable values */
   private Map<String, Number> mappedValues;
 
-  /**
-   * The map used to store functions
-   */
+  /** The map used to store functions */
   private Map<String, FormulaFunction> functionMap;
 
-  /**
-   * The description that will be applied to parsed formulas
-   */
+  /** The description that will be applied to parsed formulas */
   private String description;
+
+  /** The index of the column that the formulas parsed will be applied on */
+  private int col;
 
   /**
    * Creates a new formula analyser. <br>
@@ -143,6 +140,7 @@ public class FormulaAnalysis extends AnalysisAdapter {
     node.getPExpression().apply(this);
     final Formula intern = (Formula) getOut(node.getPExpression());
     final String desc = description;
+    final int column = col;
     Formula f;
     if (intern instanceof NumericFormula) {
       f = new NumericFormula() {
@@ -153,6 +151,10 @@ public class FormulaAnalysis extends AnalysisAdapter {
 
         public String getDescription() {
           return desc;
+        }
+
+        public int getColumn() {
+          return column;
         }
 
         public String toString() {
