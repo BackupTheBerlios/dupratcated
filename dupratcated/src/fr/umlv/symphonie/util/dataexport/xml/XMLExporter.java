@@ -195,6 +195,8 @@ public class XMLExporter implements DataExporter {
 	 * 
 	 * @param document
 	 *            the document object
+	 * @param documentName
+	 *            the name of the document
 	 * @throws DataExporterException
 	 */
 	private void writeDocument(Document document, String documentName)

@@ -211,6 +211,8 @@ public class XMLImporter implements DataImporter {
 	/**
 	 * create a new document object
 	 * 
+	 * @param documentName
+	 *            the name of the document
 	 * @return a new document object
 	 * @throws DataImporterException
 	 */
@@ -265,8 +267,8 @@ public class XMLImporter implements DataImporter {
 			throw new DataImporterException("the file isn't a teacher view.\n");
 		}
 
-		final Map<Integer, Mark> markMap = getMarkNodes(root, getCourseNodes(
-				root));
+		final Map<Integer, Mark> markMap = getMarkNodes(root,
+				getCourseNodes(root));
 		final Map<Student, Map<Integer, StudentMark>> studentAndStudentMakMap = getStudentNodes(
 				root, false, markMap);
 
