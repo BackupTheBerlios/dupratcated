@@ -606,6 +606,18 @@ public class SQLDataManager implements
     return teacherFormulaMap;
   }
   
+  
+  /*
+   * la
+   */
+  public List<Formula> getFormulasByCourse(Course c) throws DataManagerException{
+    Map<Integer, List<Formula>> tmpMap = getTeacherFormulas();
+    
+    return tmpMap.get(c.getId());
+  }
+  
+  
+  
   /* (non-Javadoc)
 	 * @see fr.umlv.symphonie.data.DataManager#getMarksByCourse(fr.umlv.symphonie.data.Course)
 	 */
@@ -737,6 +749,19 @@ public class SQLDataManager implements
    }catch (SQLException e){
      throw new DataManagerException("error getting timestamp for teacher formulas.", e);
    }
+   
+   if (n >= supposedTimestamp){
+     syncTeacherFormulaData();
+     supposedTimestamp = n + 1;
+   }
+   
+   try {
+     setNewTimestamp(TABLE_TEACHER_FORMULA, supposedTimestamp);
+   } catch (SQLException e) {
+     throw new DataManagerException("error setting new timestamp for teacher formulas.", e);
+   }
+   
+   teacherFormulaMapTimeStamp = supposedTimestamp;
   }
   
   /*
@@ -1483,6 +1508,56 @@ public class SQLDataManager implements
 		}
 	}
 
+  
+  /* (non-Javadoc)
+   * @see fr.umlv.symphonie.data.DataManager#addFormula(fr.umlv.symphonie.data.formula.Formula, fr.umlv.symphonie.data.Course, int)
+   */
+  public void addTeacherFormula(Formula f, Course course, int column) throws DataManagerException {
+    
+    int titleKey = -1;
+    
+    try {
+      titleKey = getKeyForTitle(f.getDescription());
+    } catch (SQLException e) {
+      throw new DataManagerException("error getting key for title "
+          + f.getDescription(), e);
+    }
+
+    if (titleKey < 0) {
+      try {
+        titleKey = addTitle(f.getDescription());
+      } catch (DataManagerException e) {
+        throw new DataManagerException("error adding new Formula " + f.getDescription()
+            + " related to " + course, e);
+      }
+    }
+
+    int formulaKey = -1;
+
+    try {
+      formulaKey = createPrimaryKey(TABLE_TEACHER_FORMULA, COLUMN_ID_FORMULA_FROM_TABLE_FORMULA);
+    } catch (SQLException e) {
+      throw new DataManagerException(
+          "error creating new primary key for formula " + f.getDescription()
+              + " related to " + course, e);
+    }
+    
+    
+    String request = "insert into " + TABLE_TEACHER_FORMULA + " " +
+                     "values ( " + formulaKey + ", " + titleKey + ", " + course.getId() + ", '" + f.toString() + "', " + column + ")" +
+                     ";";
+    
+    try {
+      connectAndUpdate(request);
+    }catch (SQLException e){
+      throw new DataManagerException ("error inserting new formula", e);
+    }
+    
+  }
+  
+  
+  
+  
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1855,49 +1930,13 @@ public class SQLDataManager implements
 	}
 
   /* (non-Javadoc)
-   * @see fr.umlv.symphonie.data.DataManager#addFormula(fr.umlv.symphonie.data.formula.Formula, fr.umlv.symphonie.data.Course, int)
+   * @see fr.umlv.symphonie.data.DataManager#addJuryFormula(fr.umlv.symphonie.data.formula.Formula, int)
    */
-  public void addFormula(Formula f, Course course, int column) throws DataManagerException {
-    
-    int titleKey = -1;
-    
-    try {
-      titleKey = getKeyForTitle(f.getDescription());
-    } catch (SQLException e) {
-      throw new DataManagerException("error getting key for title "
-          + f.getDescription(), e);
-    }
-
-    if (titleKey < 0) {
-      try {
-        titleKey = addTitle(f.getDescription());
-      } catch (DataManagerException e) {
-        throw new DataManagerException("error adding new Formula " + f.getDescription()
-            + " related to " + course, e);
-      }
-    }
-
-    int formulaKey = -1;
-
-    try {
-      formulaKey = createPrimaryKey(TABLE_TEACHER_FORMULA, COLUMN_ID_FORMULA_FROM_TABLE_FORMULA);
-    } catch (SQLException e) {
-      throw new DataManagerException(
-          "error creating new primary key for formula " + f.getDescription()
-              + " related to " + course, e);
-    }
-    
-    
-    String request = "insert into " + TABLE_TEACHER_FORMULA + " " +
-                     "values ( " + formulaKey + ", " + titleKey + ", " + course.getId() + ", '" + f.toString() + "', " + column + ")" +
-                     ";";
-    
-    try {
-      connectAndUpdate(request);
-    }catch (SQLException e){
-      throw new DataManagerException ("error inserting new formula", e);
-    }
+  public void addJuryFormula(Formula f, int column) throws DataManagerException {
+    // TODO Auto-generated method stub
     
   }
+
+
 
 }

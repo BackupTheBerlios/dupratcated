@@ -161,6 +161,22 @@ public interface DataManager {
 	 */
 	public void removeMark(Mark m) throws DataManagerException;
 	
+  
+  /**
+   * @param f
+   * @param course
+   * @param column
+   */
+  public void addTeacherFormula(Formula f, Course course, int column)throws DataManagerException;
+  
+  /**
+   * @param f
+   * @param column
+   * @throws DataManagerException
+   */
+  public void addJuryFormula(Formula f, int column) throws DataManagerException;
+    
+  
 	/**
 	 * to edit 
 	 * @param s
@@ -264,10 +280,5 @@ public interface DataManager {
 	public void changeCourseCoeff(Course c, float newCoeff)
 			throws DataManagerException;
 
-  /**
-   * @param f
-   * @param course
-   * @param column
-   */
-  public void addFormula(Formula f, Course course, int column)throws DataManagerException;
+
 }
