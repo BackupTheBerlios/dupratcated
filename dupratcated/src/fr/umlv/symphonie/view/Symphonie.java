@@ -97,6 +97,7 @@ import static fr.umlv.symphonie.view.SymphonieConstants.UPDATE;
 import static fr.umlv.symphonie.view.SymphonieConstants.PRINT_MENU_ITEM;
 import static fr.umlv.symphonie.view.SymphonieConstants.DISPLAY_CHART;
 import static fr.umlv.symphonie.view.SymphonieConstants.REMOVE_COLUMN;
+import static fr.umlv.symphonie.view.SymphonieConstants.STUDENTVIEWPOPUP_TITLE;
 import static fr.umlv.symphonie.view.SymphonieActionFactory.*;
 import static fr.umlv.symphonie.util.ComponentBuilder.ButtonType;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
@@ -398,12 +399,42 @@ public class Symphonie {
    */
   private final JSplitPane getStudentPane() {
 
-    StudentModel studentModel = new StudentModel(manager);
+    final StudentModel studentModel = StudentModel.getInstance(manager);
     JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
     // Table
     final JTable table = new JTable(studentModel);
     table.setTableHeader(null);
+    
+    // pop up and actions
+    final JPopupMenu pop = builder.buildPopupMenu(SymphonieConstants.STUDENTVIEWPOPUP_TITLE);
+    
+    pop.add(builder.buildButton(getStudentUpdateAction(null), UPDATE, ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(getStudentPrintAction(null, table), PRINT_MENU_ITEM, ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(getStudentChartAction(null, frame), DISPLAY_CHART, ButtonType.MENU_ITEM));
+    
+    // table listeners
+    
+    // listener for popup
+    table.addMouseListener(new MouseAdapter() {
+
+      public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)) {
+          pop.show(e.getComponent(), e.getX(), e.getY());
+        }
+      }
+    });
+    
+    // listener which saves point location
+    table.addMouseListener(new MouseAdapter() {
+
+      public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)) {
+          PointSaver.setPoint(e.getPoint());
+        }
+      }
+    });
+    
     table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
 
       public Component getTableCellRendererComponent(JTable table,

@@ -20,6 +20,7 @@ import javax.swing.JTable;
 import fr.umlv.symphonie.data.ConnectionManager;
 import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.model.JuryModel;
+import fr.umlv.symphonie.model.StudentModel;
 import fr.umlv.symphonie.model.TeacherModel;
 import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.wizard.Wizard;
@@ -228,6 +229,48 @@ public class SymphonieActionFactory {
     return a;
   }
 
+  
+  /* STUDENT VIEW ACTION *********************************** */
+  public static AbstractAction getStudentUpdateAction(Icon icon){
+    AbstractAction a = new AbstractAction(){
+      public void actionPerformed(ActionEvent e){
+        StudentModel.getInstance(SQLDataManager.getInstance()).update();
+      }
+    };
+    
+    a.putValue(Action.SMALL_ICON, icon);
+    return a;
+  }
+  
+  public static AbstractAction getStudentPrintAction(Icon icon, final JTable table){
+    AbstractAction a = new AbstractAction(){
+      public void actionPerformed(ActionEvent e) {
+        try {
+          table.print(JTable.PrintMode.FIT_WIDTH, ((StudentModel)table.getModel()).getHeaderMessageFormat(), null);
+        } catch (PrinterException e1) {
+          e1.printStackTrace();
+        }
+      }
+    };
+    
+    a.putValue(Action.SMALL_ICON, icon);
+    return a;
+  }
+  
+  public static AbstractAction getStudentChartAction(Icon icon, final JFrame frame){
+    AbstractAction a = new AbstractAction(){
+      private final StudentChartDialog dialog = new StudentChartDialog(frame);
+      public void actionPerformed(ActionEvent e) {
+        dialog.setChart();
+        dialog.setModal(true);
+        dialog.setVisible(true); 
+      }
+    };
+    
+    a.putValue(Action.SMALL_ICON, icon);
+    return a;
+  }
+  
   /* TEACHER VIEW ACTIONS ********************************** */
   public static AbstractAction getAddMarkAction(Icon icon, final JFrame frame,
       final ComponentBuilder builder) {

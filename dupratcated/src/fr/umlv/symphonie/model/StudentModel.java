@@ -7,7 +7,10 @@ package fr.umlv.symphonie.model;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -27,9 +30,15 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.general.DefaultKeyedValuesDataset;
+
 import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
+import fr.umlv.symphonie.data.Mark;
 import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.data.StudentMark;
@@ -44,13 +53,15 @@ import fr.umlv.symphonie.util.StudentAverage;
  */
 public class StudentModel extends AbstractTableModel {
 
-	protected final DataManager manager;
+	protected DataManager manager;
   protected Student student = null;
   protected int columnNumber = 0;
   protected int rowNumber = 0;
+  protected Map<Course, Map<Integer, StudentMark>> markMap = null;
+  private static StudentModel instance = null;
   protected Object[][] matrix = null;
   
-  //private final Object lock = new Object();
+  protected final Object lock = new Object();
   
   /**
    * Pool de threads qui n'en contient qu'un seul et qui sert pour le
@@ -58,42 +69,37 @@ public class StudentModel extends AbstractTableModel {
    */
   private final ExecutorService es = Executors.newSingleThreadExecutor();
   
-  public StudentModel(DataManager manager) {
+  private StudentModel(DataManager manager) {
     this.manager = manager;
   }
   
-  
-  public void setStudent (Student s){
+  public static StudentModel getInstance(DataManager manager){
+    if (instance == null)
+      instance = new StudentModel(manager);
     
-      clear();
-
-      student = s;
+    else instance.setManager(manager);
     
-    //notifyAll();
-    
-    System.out.println("on passe a update");
-    
-    update();
-
-    
+    return instance;
   }
   
   
-  public void update() {
+  private void setManager(DataManager manager){
+    this.manager = manager;
+  }
+  
+  public void setStudent (final Student s){
     
-    
-    es.execute(new Runnable() {
+      es.execute(new Runnable() {
 
-      public void run() {
+        public void run() {
 
-        /*StudentModel.this.clear();*/
-        
-          Map<Course, Map<Integer, StudentMark>> markMap = null;
+          synchronized (lock) {
+          clear();
+          student = s;
           try {
             markMap = manager.getAllMarksByStudent(student);
           } catch (DataManagerException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            System.out.println(e.getMessage());
             return;
           }
 
@@ -147,7 +153,8 @@ public class StudentModel extends AbstractTableModel {
 
             matrix[row][columnNumber - 1] = "moyenne";
             matrix[row + 1][columnNumber - 1] = "";
-            matrix[row + 2][columnNumber - 1] = StudentAverage.getAverage(collection);
+            matrix[row + 2][columnNumber - 1] = StudentAverage
+                .getAverage(collection);
 
             row += 4;
 
@@ -162,36 +169,23 @@ public class StudentModel extends AbstractTableModel {
 
             });
           } catch (InterruptedException e1) {
-            // TODO Auto-generated catch block
             e1.printStackTrace();
           } catch (InvocationTargetException e1) {
-            // TODO Auto-generated catch block
             e1.printStackTrace();
           }
-          
-          
-         //lock.notifyAll();
-         
+        }
       }
-    });
-
+      });
     
   }
+  
+  
+  public void update() {
+    
+    if (student != null)
+      setStudent(student);
+  }
 
-
-//  /**
-//   * @param list
-//   * @return
-//   */
-//  private float getAverage(Collection<StudentMark> collection) {
-//    
-//    float result = 0;
-//    
-//    for (StudentMark studentMark : collection)
-//      result += studentMark.getCoeff() * studentMark.getValue();
-//    
-//    return result;
-//  }
 
 
   /**
@@ -205,7 +199,7 @@ public class StudentModel extends AbstractTableModel {
   }
 
 
-  public void clear(){
+  protected void clear(){
     columnNumber = 0;
     rowNumber = 0;
     student = null;
@@ -234,6 +228,29 @@ public class StudentModel extends AbstractTableModel {
     return matrix[rowIndex][columnIndex];
   }
 
+  public ChartPanel getChartPanel(){
+    
+    DefaultKeyedValuesDataset pieDataset = new DefaultKeyedValuesDataset();
+    
+    for (Course c : markMap.keySet()){
+      pieDataset.setValue(c.getTitle() + " : " + StudentAverage.getAverage(markMap.get(c).values()), (c.getCoeff() * 100));
+    }
+    
+    JFreeChart pieChart = ChartFactory.createPieChart3D("Notes de " + student + "- Moyenne générale : " + StudentAverage.getAnnualAverage(markMap), pieDataset, false, false, false);
+    pieChart.getPlot().setForegroundAlpha(0.35f);
+    
+    return new ChartPanel(pieChart);
+  }
+  
+  public MessageFormat getHeaderMessageFormat(){
+    return new MessageFormat("Notes de " + student);
+  }
+  
+  
+  
+  
+  
+  
   
   public static void main(String[] args) throws DataManagerException {
     JFrame frame = new JFrame ("test StudentModel");

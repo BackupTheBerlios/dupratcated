@@ -59,17 +59,20 @@ public class SymphonieConstants {
   public static final String CHANGEPASSDIALOG_ERROR_MATCH = "changepassdialog.error.match";
   
   // added by sus for teacher view
-  public static final String ADDMARKDIALOG_TITLE = "addmarkdialog.title";
-  public static final String ADDMARKDIALOG_DESC = "addmarkdialog.desc";
-  public static final String ADDMARKDIALOG_COEFF = "addmarkdialog.coeff";
-  
   public static final String TEACHERVIEWPOPUP_TITLE = "teacherviewpopup.title";
+  public static final String ADDMARKDIALOG_DESC = "addmarkdialog.desc";
   
+  // general stuff
   public static final String UPDATE = "update";
   public static final String REMOVE_COLUMN = "removecolumn";
   public static final String ADD_FORMULA = "addformula";
   public static final String DISPLAY_CHART = "displaychart";
+  public static final String ADDMARKDIALOG_TITLE = "addmarkdialog.title";
+  public static final String ADDMARKDIALOG_COEFF = "addmarkdialog.coeff";
   
   // added by sus for jury view
   public static final String JURYVIEWPOPUP_TITLE = "juryviewpopup.title";
+  
+  // added by sus for student view
+  public static final String STUDENTVIEWPOPUP_TITLE = "studentviewpopup.title";
 }
