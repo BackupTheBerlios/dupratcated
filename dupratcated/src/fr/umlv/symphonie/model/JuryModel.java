@@ -49,10 +49,6 @@ import static fr.umlv.symphonie.view.SymphonieConstants.*;
  * @author susmab
  * 
  */
-/**
- * @author MARYSE
- *
- */
 public class JuryModel extends AbstractTableModel implements ObjectFormattingSupport, IDictionarySupport {
 
   /**
