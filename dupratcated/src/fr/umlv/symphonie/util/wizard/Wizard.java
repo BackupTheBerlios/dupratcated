@@ -284,10 +284,19 @@ public class Wizard {
     gbc.insets = new Insets(3, 18, 5, 10);
     labels.add(text, gbc);
 
-    labels.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0,
-        Color.DARK_GRAY));
-
-    return labels;
+    JPanel top = new JPanel(new GridBagLayout());
+    gbc = new GridBagConstraints();
+    gbc.anchor = GridBagConstraints.WEST;
+    gbc.weightx = 1.0;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    top.add(labels, gbc);
+    gbc.anchor = GridBagConstraints.EAST;
+    gbc.weightx = 0.0;
+    gbc.fill = GridBagConstraints.NONE;
+    top.add(new JLabel(model.getWizardIcon()), gbc);
+    top.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.DARK_GRAY));
+    top.setBackground(Color.WHITE);
+    return top;
   }
 
   /**
@@ -327,7 +336,7 @@ public class Wizard {
    * Value returned when user cancles wizard
    */
   public static final int WIZARD_CANCELLED = 0;
-  
+
   /**
    * Value returned when wizard finishes normally
    */

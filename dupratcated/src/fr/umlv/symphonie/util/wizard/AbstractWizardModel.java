@@ -7,12 +7,17 @@ package fr.umlv.symphonie.util.wizard;
 
 import java.util.ArrayList;
 
+import javax.swing.Icon;
+
 import fr.umlv.symphonie.util.wizard.event.WizardEvent;
 import fr.umlv.symphonie.util.wizard.event.WizardListener;
 
 /**
  * Abstract implementation for the data model that provides a
- * <code>Wizard</code> with its contents
+ * <code>Wizard</code> with its contents. <br>
+ * This class provides a skeletal implementation of the
+ * <code>>WizardModel</code> interface, to minimize the effort required to
+ * implement this interface.
  */
 public abstract class AbstractWizardModel implements WizardModel {
 
@@ -28,6 +33,10 @@ public abstract class AbstractWizardModel implements WizardModel {
   }
 
   public WizardPanel getCurrentPanel() {
+    return null;
+  }
+
+  public Icon getWizardIcon() {
     return null;
   }
 

@@ -5,6 +5,8 @@
 
 package fr.umlv.symphonie.util.wizard;
 
+import javax.swing.Icon;
+
 import fr.umlv.symphonie.util.wizard.event.WizardListener;
 
 /**
@@ -61,6 +63,13 @@ public interface WizardModel {
    * @return the current panel
    */
   public WizardPanel getCurrentPanel();
+
+  /**
+   * Gets the model <code>Icon</code>
+   * 
+   * @return the <code>Icon</code> object for this model
+   */
+  public Icon getWizardIcon();
 
   /**
    * Moves to next panel <br>
