@@ -26,6 +26,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import fr.umlv.symphonie.data.Course;
+import fr.umlv.symphonie.data.DataManager;
 import fr.umlv.symphonie.data.DataManagerException;
 import fr.umlv.symphonie.data.Mark;
 import fr.umlv.symphonie.data.SQLDataManager;
@@ -44,7 +45,7 @@ public class XMLExporter implements DataExporter {
 	private final File dtd = new File(
 			"src/fr/umlv/symphonie/util/dataexport/xml/symphonie.dtd");
 
-	private final SQLDataManager dm = new SQLDataManager();
+	private final DataManager dm = new SQLDataManager();
 
 	/**
 	 * add a course node
