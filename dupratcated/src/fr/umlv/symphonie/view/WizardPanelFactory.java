@@ -212,14 +212,17 @@ public class WizardPanelFactory {
     };
 
     GridBagConstraints gbc = new GridBagConstraints();
-    gbc.insets = new Insets(5, 50, 5, 50);
+    gbc.insets = new Insets(5, 50, 5, 5);
     gbc.anchor = GridBagConstraints.WEST;
     p.add(b.buildLabel(labelKey), gbc);
     gbc.anchor = GridBagConstraints.EAST;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.insets.left = 5;
+    gbc.insets.right = 50;
     p.add(b.buildButton(a, "importexport.browse",
         ComponentBuilder.ButtonType.BUTTON), gbc);
     gbc.weightx = 1.0;
+    gbc.insets.left = 50;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.anchor = GridBagConstraints.CENTER;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
@@ -227,6 +230,7 @@ public class WizardPanelFactory {
     gbc.insets.top = 35;
     gbc.insets.left = gbc.insets.right = 70;
     final JTextArea ta = new JTextArea(b.getValue(hintKey));
+    ta.setBackground(p.getBackground());
     ta.setBorder(null);
     ta.setEditable(false);
     ta.setLineWrap(true);
@@ -249,10 +253,12 @@ public class WizardPanelFactory {
    *          a <code>ComponentBuilder</code> for internationalization
    * @param titleKey
    *          a key for the model's title
+   * @param icon
+   *          an <code>Icon</code> for the wizard
    * @return an international model
    */
   public static final WizardModel getInternationalWizardModel(
-      final ComponentBuilder b, final String titleKey) {
+      final ComponentBuilder b, final String titleKey, final Icon icon) {
     return new DefaultWizardModel() {
 
       public String getCancelButtonText() {
@@ -277,6 +283,10 @@ public class WizardPanelFactory {
 
       public String getWizardTitle() {
         return b.getValue(titleKey);
+      }
+
+      public Icon getWizardIcon() {
+        return icon;
       }
     };
   }
