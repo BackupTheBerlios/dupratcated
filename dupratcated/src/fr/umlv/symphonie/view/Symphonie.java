@@ -30,7 +30,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import fr.umlv.symphonie.data.DataManager;
-import fr.umlv.symphonie.data.SgainDataManager;
+import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.data.Student;
 import fr.umlv.symphonie.model.StudentModel;
 import fr.umlv.symphonie.util.SymphonieComponentBuilder;
@@ -257,7 +257,7 @@ public class Symphonie {
     JPanel panel = new JPanel(new BorderLayout());
     panel.add(getToolbar(), BorderLayout.NORTH);
     
-    DataManager dataManager = new SgainDataManager();
+    DataManager dataManager = new SQLDataManager();
     StudentModel model = new StudentModel(dataManager);
 
     Student student = new Student(1, "Fabien", "Vallee");
