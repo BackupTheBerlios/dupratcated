@@ -53,7 +53,7 @@ public class TeacherModel extends AbstractTableModel {
     
     this.course = course;
     
-    SortedMap<Mark, Float> markMap = manager.getTitlesByCourse(course);
+    SortedMap<Mark, Float> markMap = manager.getMarksByCourse(course);
     SortedMap<Student, Map<String, StudentMark>> studentAndMarkMap = manager.getAllMarksByCourse(course);
     
     columnCount = markMap.size() + 2;
