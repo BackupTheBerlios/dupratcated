@@ -111,9 +111,12 @@ public abstract class XMLExporter implements DataExporter {
 	 *            the parent node of the student node
 	 * @param s
 	 *            the student object
+	 * @param comment
+	 *            if true we create the comment node
+	 * 
 	 * @return the new student node
 	 */
-	protected static Node addStudentNode(Node root, Student s) {
+	protected static Node addStudentNode(Node root, Student s, boolean comment) {
 		final Node student;
 
 		/** <student id_student="?">... </student> */
@@ -131,11 +134,12 @@ public abstract class XMLExporter implements DataExporter {
 		n = student.appendChild(e);
 		n.appendChild(n.getOwnerDocument().createTextNode(s.getLastName()));
 
-		/** <comment>? </comment> */
-		e = student.getOwnerDocument().createElement("comment");
-		n = student.appendChild(e);
-		n.appendChild(n.getOwnerDocument().createTextNode(s.getComment()));
-
+		if (comment) {
+			/** <comment>? </comment> */
+			e = student.getOwnerDocument().createElement("comment");
+			n = student.appendChild(e);
+			n.appendChild(n.getOwnerDocument().createTextNode(s.getComment()));
+		}
 		return student;
 	}
 
