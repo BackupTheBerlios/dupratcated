@@ -33,195 +33,199 @@ import fr.umlv.symphonie.util.export.DataExporter;
  */
 public abstract class XMLExporter implements DataExporter {
 
-  protected String documentName;
-  protected final File dtd = new File("src/fr/umlv/symphonie/util/export/xml/symphonie.dtd");
-  protected SQLDataManager dm = new SQLDataManager();
+	protected String documentName;
 
-  /**
-   * add a course node
-   * 
-   * @param root
-   *          the parent node of the course node
-   * @param before
-   *          we put the course node before this node, if null we put the node
-   *          at the end of the root node
-   * @param c
-   *          the course object
-   */
-  protected static void addCourseNode(Node root, Node before, Course c) {
-    Node course;
+	protected final File dtd = new File(
+			"src/fr/umlv/symphonie/util/export/xml/symphonie.dtd");
 
-    /** <course id_course="?">... </course> */
-    Element e = root.getOwnerDocument().createElement("course");
-    e.setAttribute("id_course", "" + c.getId());
+	protected final SQLDataManager dm = new SQLDataManager();
 
-    /** if we have to put the new node at the end */
-    if (before == null) {
-      course = root.appendChild(e);
-    } else {
-      course = root.insertBefore(e, before);
-    }
+	/**
+	 * add a course node
+	 * 
+	 * @param root
+	 *            the parent node of the course node
+	 * @param before
+	 *            we put the course node before this node, if null we put the
+	 *            node at the end of the root node
+	 * @param c
+	 *            the course object
+	 */
+	protected static void addCourseNode(Node root, Node before, Course c) {
+		final Node course;
 
-    /** <title>? </title> */
-    e = course.getOwnerDocument().createElement("title");
-    Node n = course.appendChild(e);
-    n.appendChild(n.getOwnerDocument().createTextNode(c.getTitle()));
+		/** <course id_course="?">... </course> */
+		Element e = root.getOwnerDocument().createElement("course");
+		e.setAttribute("id_course", "" + c.getId());
 
-    /** <coeff_course>? </coeff_course> */
-    e = course.getOwnerDocument().createElement("coeff_course");
-    n = course.appendChild(e);
-    n.appendChild(n.getOwnerDocument().createTextNode("" + c.getCoeff()));
-  }
+		/** if we have to put the new node at the end */
+		if (before == null) {
+			course = root.appendChild(e);
+		} else {
+			course = root.insertBefore(e, before);
+		}
 
-  /**
-   * add an examen node
-   * 
-   * @param root
-   *          the parent node of the student mark node
-   * @param sm
-   *          the student mark object
-   */
-  protected static void addExamenNode(Node root, StudentMark sm) {
-    Node examen;
+		/** <title>? </title> */
+		e = course.getOwnerDocument().createElement("title");
+		Node n = course.appendChild(e);
+		n.appendChild(n.getOwnerDocument().createTextNode(c.getTitle()));
 
-    /** <examen id_examen="?">... </examen> */
-    Element e = root.getOwnerDocument().createElement("examen");
-    e.setAttribute("id_examen", "" + sm.getMark().getId());
-    examen = root.appendChild(e);
+		/** <coeff_course>? </coeff_course> */
+		e = course.getOwnerDocument().createElement("coeff_course");
+		n = course.appendChild(e);
+		n.appendChild(n.getOwnerDocument().createTextNode("" + c.getCoeff()));
+	}
 
-    /** <desc>? </desc> */
-    e = examen.getOwnerDocument().createElement("desc");
-    Node n = examen.appendChild(e);
-    n.appendChild(n.getOwnerDocument().createTextNode(sm.getMark().getDesc()));
+	/**
+	 * add an examen node
+	 * 
+	 * @param root
+	 *            the parent node of the student mark node
+	 * @param sm
+	 *            the student mark object
+	 */
+	protected static void addExamenNode(Node root, StudentMark sm) {
+		final Node examen;
 
-    /** <coeff_examen>? </coeff_examen> */
-    e = examen.getOwnerDocument().createElement("coeff_examen");
-    n = examen.appendChild(e);
-    n.appendChild(n.getOwnerDocument().createTextNode("" + sm.getCoeff()));
-  }
+		/** <examen id_examen="?">... </examen> */
+		Element e = root.getOwnerDocument().createElement("examen");
+		e.setAttribute("id_examen", "" + sm.getMark().getId());
+		examen = root.appendChild(e);
 
-  /**
-   * add a student node
-   * 
-   * @param root
-   *          the parent node of the student node
-   * @param s
-   *          the student object
-   * @return the new student node
-   */
-  protected static Node addStudentNode(Node root, Student s) {
-    Node student;
+		/** <desc>? </desc> */
+		e = examen.getOwnerDocument().createElement("desc");
+		Node n = examen.appendChild(e);
+		n.appendChild(n.getOwnerDocument().createTextNode(
+				sm.getMark().getDesc()));
 
-    /** <student id_student="?">... </student> */
-    Element e = root.getOwnerDocument().createElement("student");
-    e.setAttribute("id_student", "" + s.getId());
-    student = root.appendChild(e);
+		/** <coeff_examen>? </coeff_examen> */
+		e = examen.getOwnerDocument().createElement("coeff_examen");
+		n = examen.appendChild(e);
+		n.appendChild(n.getOwnerDocument().createTextNode("" + sm.getCoeff()));
+	}
 
-    /** <name>? </name> */
-    e = student.getOwnerDocument().createElement("name");
-    Node n = student.appendChild(e);
-    n.appendChild(n.getOwnerDocument().createTextNode(s.getName()));
+	/**
+	 * add a student node
+	 * 
+	 * @param root
+	 *            the parent node of the student node
+	 * @param s
+	 *            the student object
+	 * @return the new student node
+	 */
+	protected static Node addStudentNode(Node root, Student s) {
+		final Node student;
 
-    /** <last_name>? </last_name> */
-    e = student.getOwnerDocument().createElement("last_name");
-    n = student.appendChild(e);
-    n.appendChild(n.getOwnerDocument().createTextNode(s.getLastName()));
+		/** <student id_student="?">... </student> */
+		Element e = root.getOwnerDocument().createElement("student");
+		e.setAttribute("id_student", "" + s.getId());
+		student = root.appendChild(e);
 
-    /** <comment>? </comment> */
-    e = student.getOwnerDocument().createElement("comment");
-    n = student.appendChild(e);
-    n.appendChild(n.getOwnerDocument().createTextNode(s.getComment()));
+		/** <name>? </name> */
+		e = student.getOwnerDocument().createElement("name");
+		Node n = student.appendChild(e);
+		n.appendChild(n.getOwnerDocument().createTextNode(s.getName()));
 
-    return student;
-  }
+		/** <last_name>? </last_name> */
+		e = student.getOwnerDocument().createElement("last_name");
+		n = student.appendChild(e);
+		n.appendChild(n.getOwnerDocument().createTextNode(s.getLastName()));
 
-  /**
-   * add a mark node
-   * 
-   * @param root
-   *          the parent node the of student mark node
-   * @param sm
-   *          the student mark object
-   */
-  protected static void addMarkNode(Node root, StudentMark sm) {
-    Node mark;
+		/** <comment>? </comment> */
+		e = student.getOwnerDocument().createElement("comment");
+		n = student.appendChild(e);
+		n.appendChild(n.getOwnerDocument().createTextNode(s.getComment()));
 
-    /** <student_mark id_course="?" id_examen=?">... </student_mark> */
-    Element e = root.getOwnerDocument().createElement("student_mark");
-    e.setAttribute("id_course", "" + sm.getCourse().getId());
-    e.setAttribute("id_examen", "" + sm.getMark().getId());
-    mark = root.appendChild(e);
+		return student;
+	}
 
-    /** <mark>? </mark> */
-    e = mark.getOwnerDocument().createElement("mark");
-    Node n = mark.appendChild(e);
-    n.appendChild(n.getOwnerDocument().createTextNode("" + sm.getValue()));
-  }
+	/**
+	 * add a mark node
+	 * 
+	 * @param root
+	 *            the parent node the of student mark node
+	 * @param sm
+	 *            the student mark object
+	 */
+	protected static void addMarkNode(Node root, StudentMark sm) {
+		final Node mark;
 
-  /**
-   * create a new document object
-   * 
-   * @return a new document object
-   */
-  protected Document newDocument() {
-    try {
-      /** we create a new document object */
-      return DocumentBuilderFactory.newInstance().newDocumentBuilder()
-          .newDocument();
-    } catch (ParserConfigurationException e) {
-      System.out
-          .println("Error during the creation of the document object : \n" + e
-              + "\n");
-      e.printStackTrace();
-    }
+		/** <student_mark id_course="?" id_examen=?">... </student_mark> */
+		Element e = root.getOwnerDocument().createElement("student_mark");
+		e.setAttribute("id_course", "" + sm.getCourse().getId());
+		e.setAttribute("id_examen", "" + sm.getMark().getId());
+		mark = root.appendChild(e);
 
-    return null;
-  }
+		/** <mark>? </mark> */
+		e = mark.getOwnerDocument().createElement("mark");
+		Node n = mark.appendChild(e);
+		n.appendChild(n.getOwnerDocument().createTextNode("" + sm.getValue()));
+	}
 
-  /**
-   * write the document
-   * 
-   * @param document
-   *          the document object
-   */
-  protected void writeDocument(Document document) {
-    try {
-      Transformer transformer = TransformerFactory.newInstance()
-          .newTransformer();
+	/**
+	 * create a new document object
+	 * 
+	 * @return a new document object
+	 */
+	protected Document newDocument() {
+		try {
+			/** we create a new document object */
+			return DocumentBuilderFactory.newInstance().newDocumentBuilder()
+					.newDocument();
+		} catch (ParserConfigurationException e) {
+			System.out
+					.println("Error during the creation of the document object : \n"
+							+ e + "\n");
+			e.printStackTrace();
+		}
 
-      /** <!DOCTYPE symphonie SYSTEM "file:?"> */
-      transformer
-          .setOutputProperty(javax.xml.transform.OutputKeys.DOCTYPE_SYSTEM, dtd
-              .toURL().toString());
+		return null;
+	}
 
-      /** indention of the tags */
-      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+	/**
+	 * write the document
+	 * 
+	 * @param document
+	 *            the document object
+	 */
+	protected void writeDocument(Document document) {
+		try {
+			Transformer transformer = TransformerFactory.newInstance()
+					.newTransformer();
 
-      /** <?xml version="1.0" encoding="ISO-8859-1"?> */
-      transformer.setOutputProperty(OutputKeys.ENCODING, "ISO-8859-1");
+			/** <!DOCTYPE symphonie SYSTEM "file:?"> */
+			transformer.setOutputProperty(
+					javax.xml.transform.OutputKeys.DOCTYPE_SYSTEM, dtd.toURL()
+							.toString());
 
-      /** we write the document */
-      transformer.transform(new DOMSource(document), new StreamResult(new File(
-          documentName)));
+			/** indention of the tags */
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
-    } catch (TransformerConfigurationException e) {
-      System.out.println("Error during the exportation : \n" + e + "\n");
-      e.printStackTrace();
-    } catch (TransformerException e) {
-      System.out.println("Error during the exportation : \n" + e + "\n");
-      e.printStackTrace();
-    } catch (TransformerFactoryConfigurationError e) {
-      System.out.println("Error during the exportation : \n" + e + "\n");
-      e.printStackTrace();
-    } catch (IllegalArgumentException e) {
-      System.out.println("Error during the exportation with the dtd : \n" + e
-          + "\n");
-      e.printStackTrace();
-    } catch (MalformedURLException e) {
-      System.out.println("Error during the exportation with the dtd : \n" + e
-          + "\n");
-      e.printStackTrace();
-    }
-  }
+			/** <?xml version="1.0" encoding="ISO-8859-1"?> */
+			transformer.setOutputProperty(OutputKeys.ENCODING, "ISO-8859-1");
+
+			/** we write the document */
+			transformer.transform(new DOMSource(document), new StreamResult(
+					new File(documentName)));
+
+		} catch (TransformerConfigurationException e) {
+			System.out.println("Error during the exportation : \n" + e + "\n");
+			e.printStackTrace();
+		} catch (TransformerException e) {
+			System.out.println("Error during the exportation : \n" + e + "\n");
+			e.printStackTrace();
+		} catch (TransformerFactoryConfigurationError e) {
+			System.out.println("Error during the exportation : \n" + e + "\n");
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			System.out.println("Error during the exportation with the dtd : \n"
+					+ e + "\n");
+			e.printStackTrace();
+		} catch (MalformedURLException e) {
+			System.out.println("Error during the exportation with the dtd : \n"
+					+ e + "\n");
+			e.printStackTrace();
+		}
+	}
 
 }
