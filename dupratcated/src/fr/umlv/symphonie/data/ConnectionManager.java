@@ -11,7 +11,7 @@ public class ConnectionManager {
     static private Connection connection = null;
     static private boolean driversLoaded = false;
     
-    public static Connection createConnection() throws SQLException{
+    public static Connection createConnection() {
         
       String url = "jdbc:mysql://localhost";
     	String base = "dupratcated";
@@ -21,9 +21,21 @@ public class ConnectionManager {
     	DriverLoader.loadDrivers();
 
     	
-    	if (connection == null)
-    	    connection = DriverManager.getConnection(url + "/" + base, login,
+    	if (connection == null) try {
+        connection = DriverManager.getConnection(url + "/" + base, login,
 password);
+      } catch (SQLException e) {
+        base = "evazion";
+        login = "root";
+        
+        try {
+          connection = DriverManager.getConnection(url + "/" + base, login,
+              password);
+        } catch (SQLException e1) {
+          System.out.println("error : createConnection()\n");
+          e1.printStackTrace();
+        }       
+      }
     	
         return connection;
     }
