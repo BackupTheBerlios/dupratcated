@@ -18,7 +18,12 @@ public abstract class SymphonieLauncher {
 
   public static void main(String[] args) throws DataManagerException,
       IOException {
-    JFrame f = new Symphonie().getFrame();
+
+    System.setProperty("sun.awt.exception.handler", EDTExceptionHandler.class
+        .getName());
+    Symphonie s = new Symphonie();
+    EDTExceptionHandler.setDisplayer(s.errDisplay);
+    JFrame f = s.getFrame();
     f.pack();
     f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     f.setVisible(true);

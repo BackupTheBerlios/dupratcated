@@ -382,6 +382,7 @@ public class SymphonieActionFactory {
 
       public void actionPerformed(ActionEvent e) {
         symphonie.getCurrentStudentModel().update();
+        throw new RuntimeException("fcuk");
       }
     };
 
