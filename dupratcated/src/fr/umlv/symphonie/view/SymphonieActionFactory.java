@@ -19,6 +19,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 
+import fr.umlv.symphonie.data.ConnectionManager;
 import fr.umlv.symphonie.data.SQLDataManager;
 import fr.umlv.symphonie.model.JuryModel;
 import fr.umlv.symphonie.model.TeacherModel;
@@ -31,6 +32,8 @@ public class SymphonieActionFactory {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
+        ConnectionManager.closeConnection();
+        System.gc();
         System.exit(0);
       }
     };

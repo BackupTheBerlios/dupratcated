@@ -1780,7 +1780,7 @@ public class SQLDataManager implements
   
   public void removeTeacherFormula(Formula f, Course c) throws DataManagerException{
     String request = "remove from " + TABLE_TEACHER_FORMULA + " " +
-                     "where " + COLUMN_ID_FORMULA_FROM_TABLE_FORMULA + " = " + /*f.g*/
+                     "where " + COLUMN_ID_FORMULA_FROM_TABLE_FORMULA + " = " + f.getID() + " " +
                      ";";
     
     // delete from database
@@ -1883,7 +1883,7 @@ public class SQLDataManager implements
   
   public void removeJuryFormula(Formula f) throws DataManagerException{
     String request = "remove from " + TABLE_JURY_FORMULA + " " +
-                     "where " + COLUMN_ID_FORMULA_FROM_TABLE_FORMULA + " = " + /*f.g*/
+                     "where " + COLUMN_ID_FORMULA_FROM_TABLE_FORMULA + " = " + f.getID() + " " +
                      ";";
     
     // delete from database

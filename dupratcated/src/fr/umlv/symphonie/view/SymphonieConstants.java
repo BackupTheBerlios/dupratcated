@@ -43,6 +43,7 @@ public class SymphonieConstants {
   public static final String CELLDIALOG_BGCOLOR = "celldialog.bgcolor";
   public static final String CELLDIALOG_PREVIEW = "celldialog.preview";
   public static final String CELLDIALOG_SAMPLE = "celldialog.sample";
+  public static final String CELLDIALOG_COLUMNNUMBER = "celldialog.columnnumber";
   public static final String BUTTON_CANCEL = "bcancel";
   public static final String BUTTON_OK = "bok";
   public static final String FORMULADIALOG_TITLE = "formuladialog.title";

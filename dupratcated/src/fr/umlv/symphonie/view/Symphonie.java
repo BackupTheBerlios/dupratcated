@@ -64,7 +64,7 @@ public class Symphonie {
   private static HashMap<String, String> french;
   private static HashMap<String, String> spanish;
   private static JFrame frame;
-  private static JTabbedPane tab;
+  protected static JTabbedPane tab;
 
   private static JFrame getFrame() throws DataManagerException {
 
