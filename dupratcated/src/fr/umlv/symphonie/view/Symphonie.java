@@ -96,11 +96,8 @@ public class Symphonie {
   /** The international builder */
   private ComponentBuilder builder;
 
-  /** The default language map */
-  private HashMap<String, String> defaultLanguage;
-
-  /** The default language name */
-  private String defaultLanguageName = "FRENCH";
+  /** The default language */
+  private Language currentLanguage = Language.valueOf("FRENCH");
 
   /** The main frame */
   private JFrame frame;
@@ -181,7 +178,6 @@ public class Symphonie {
     ButtonGroup g = new ButtonGroup();
     JCheckBoxMenuItem lBox;
     HashMap<String, String> lMap;
-    Language defL = Language.valueOf(defaultLanguageName);
     for (Language l : Language.values()) {
       try {
         lMap = l.getMap();
@@ -191,11 +187,11 @@ public class Symphonie {
         continue;
       }
       lBox = new JCheckBoxMenuItem(SymphonieActionFactory
-          .getLanguageChangeAction(lMap, builder));
+          .getLanguageChangeAction(this, l));
       lBox.setText(lMap.get(Language.LANGUAGE_NAME));
       lang.add(lBox);
       g.add(lBox);
-      if (defL.equals(l)) lBox.setSelected(true);
+      if (currentLanguage.equals(l)) lBox.setSelected(true);
     }
 
     lang.setIcon(new ImageIcon(Symphonie.class.getResource("icons/lang.png")));
@@ -678,8 +674,7 @@ public class Symphonie {
     manager = SQLDataManager.getInstance();
 
     // Language tools
-    defaultLanguage = Language.FRENCH.getMap();
-    builder = new ComponentBuilder(defaultLanguage);
+    builder = new ComponentBuilder(currentLanguage.getMap());
 
     // Main frame
     frame = new JFrame(builder.getValue(FRAME_TITLE));
@@ -746,6 +741,30 @@ public class Symphonie {
           SymphonieWizardConstants.DATA_EXPORTABLE);
   }
 
+  /**
+   * Returns the current language
+   * 
+   * @return The current language
+   */
+  public Language getCurrentLanguage() {
+    return currentLanguage;
+  }
+
+  /**
+   * Updates the current language
+   * 
+   * @param newLanguage
+   *          The new language to set
+   */
+  public void setCurrentLanguage(Language newLanguage) {
+    this.currentLanguage = newLanguage;
+    try {
+      builder.setNameMap(newLanguage.getMap());
+    } catch (IOException e) {
+      errDisplay.showException(e);
+    }
+  }
+
   // ----------------------------------------------------------------------------
   // Static methods
   // ----------------------------------------------------------------------------
@@ -806,6 +825,9 @@ public class Symphonie {
     /** Language locale */
     private final Locale locale;
 
+    /** Language resources */
+    private HashMap<String, String> resources;
+
     /**
      * Constructor
      * 
@@ -824,8 +846,10 @@ public class Symphonie {
      *           If there's a problem while reading language file
      */
     HashMap<String, String> getMap() throws IOException {
-      return TextualResourcesLoader.getResourceMap(FILE_PATTERN, getLocale(),
-          getCharset());
+      if (resources == null)
+        resources = TextualResourcesLoader.getResourceMap(FILE_PATTERN,
+            getLocale(), getCharset());
+      return resources;
     }
 
     /**

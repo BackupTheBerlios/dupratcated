@@ -7,7 +7,6 @@ package fr.umlv.symphonie.view;
 
 import java.awt.Point;
 import java.awt.event.ActionEvent;
-import java.util.HashMap;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -103,18 +102,18 @@ public class SymphonieActionFactory {
   /**
    * Creates an action that changes language
    * 
-   * @param resources
-   *          The new language map
-   * @param builder
-   *          The builder a.k.a language manager
+   * @param s
+   *          The <code>Symphonie</code> instance
+   * @param langue
+   *          The language to set
    * @return an <code>AbstractAction</code>
    */
-  public static AbstractAction getLanguageChangeAction(
-      final HashMap<String, String> resources, final ComponentBuilder builder) {
+  public static AbstractAction getLanguageChangeAction(final Symphonie s,
+      final Symphonie.Language langue) {
     return new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
-        builder.setNameMap(resources);
+        s.setCurrentLanguage(langue);
       }
     };
   }
