@@ -1146,16 +1146,16 @@ public class Symphonie {
     exportW = getExportWizard();
 
     // models
-    studentModel = StudentModel.getInstance(manager);
-    teacherModel = TeacherModel.getInstance(manager);
-    juryModel = JuryModel.getInstance(manager);
+    studentModel = new StudentModel(manager, builder);
+    teacherModel = new TeacherModel(manager, builder);
+    juryModel = new JuryModel(manager, builder);
 
-    adminStudentModel = AdminStudentModel.getInstance(manager);
-    adminTeacherModel = AdminTeacherModel.getInstance(manager);
-    adminJuryModel = AdminJuryModel.getInstance(manager);
+    adminStudentModel = new AdminStudentModel(manager, builder);
+    adminTeacherModel = new AdminTeacherModel(manager, builder);
+    adminJuryModel = new AdminJuryModel(manager, builder);
 
-    studentTreeModel = StudentTreeModel.getInstance(manager);
-    courseTreeModel = CourseTreeModel.getInstance(manager);
+    studentTreeModel = new StudentTreeModel(manager, builder);
+    courseTreeModel = new CourseTreeModel(manager, builder);
 
     // Action factory
     actionFactory = new SymphonieActionFactory(this, builder);
