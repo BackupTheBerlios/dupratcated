@@ -31,24 +31,38 @@ public class StudentTreeModel extends DefaultTreeModel {
   /*private final List<TreeModelListener> listenerList = new ArrayList<TreeModelListener>();*/
   
   private final String root = "Etudiants"; // a changer pour l'internationalisation ?
-  protected final DataManager manager;
+  protected DataManager manager;
   protected List<Student> studentList = null;
   
   protected final ExecutorService es = Executors.newSingleThreadExecutor();
   
   protected final Object lock = new Object();
   
-  public StudentTreeModel(DataManager manager){
+  private static StudentTreeModel instance = null;
+  
+  private StudentTreeModel(DataManager manager){
     super(null);
     this.manager = manager;
-    try {
-      studentList = manager.getStudentList();
-    } catch (DataManagerException e) {
-      System.out.println("error getting students list from database. Try updating the list.");
-    }
+    update();
   }
   
   
+  public static StudentTreeModel getInstance(DataManager manager){
+    if (instance == null)
+      instance = new StudentTreeModel(manager);
+    
+    else instance.setManager(manager);
+    
+    return instance;
+  }
+  
+  
+  
+  private void setManager(DataManager manager) {
+    this.manager = manager;
+  }
+
+
   public void update() {
     
     es.execute(new Runnable(){
@@ -168,17 +182,29 @@ public class StudentTreeModel extends DefaultTreeModel {
       public void run(){
         
         synchronized(lock){
+          Student s = null;
+          
           try{
-            manager.addStudent(name, lastName);
+            s = manager.addStudent(name, lastName);
           }catch(DataManagerException e){
             System.out.println(e.getMessage());
           }
           
+          final Student student = s;
+          
           try {
             EventQueue.invokeAndWait(new Runnable() {
-
+              private Object source = root;
+              private Object[] path = new Object[1];
+              int[] childIndices = new int[1];
+              Object[] children = new Student[1];
+              
               public void run() {
-                StudentTreeModel.this.reload();
+                path[0] = source;
+                childIndices[0] = studentList.indexOf(student);
+                children[0] = student;
+                
+                StudentTreeModel.this.fireTreeNodesInserted(source, path, childIndices, children);
               }
             });
           } catch (InterruptedException e1) {
@@ -193,6 +219,44 @@ public class StudentTreeModel extends DefaultTreeModel {
     });
   }
   
+  public void removeStudent(final Student s){
+    es.execute(new Runnable(){
+      public void run(){
+        synchronized (lock){
+          
+          final int n = studentList.indexOf(s);
+          
+          try{
+            manager.removeStudent(s);
+          }catch(DataManagerException e){
+            System.out.println(e.getMessage());
+          }
+          
+          try {
+            EventQueue.invokeAndWait(new Runnable() {
+              private Object source = root;
+              private Object[] path = new Object[1];
+              int[] childIndices = new int[1];
+              Object[] children = new Student[1];
+              
+              public void run() {
+                path[0] = source;
+                childIndices[0] = n;
+                children[0] = s;
+                StudentTreeModel.this.fireTreeNodesRemoved(source, path, childIndices, children);
+              }
+            });
+          } catch (InterruptedException e1) {
+            System.out.println("exception interrupted");
+            e1.printStackTrace();
+          } catch (InvocationTargetException e1) {
+            System.out.println("exception invocation");
+            e1.printStackTrace();
+          }
+        }
+      }
+    });
+  }
 //  /**
 //   * @param args
 //   */

@@ -1034,7 +1034,7 @@ public class SQLDataManager implements
 	/*
 	 * methodes servant a l'admin
 	 */
-	public void addStudent(String name, String lastName)
+	public Student addStudent(String name, String lastName)
 			throws DataManagerException {
 		int key = 0;
 
@@ -1086,6 +1086,8 @@ public class SQLDataManager implements
 		} catch (DataManagerException e) {
 			throw new DataManagerException("error updating data.", e);
 		}
+    
+    return s;
 	}
 
 	private void addDefaultMarksForStudent(Student s)
@@ -1324,7 +1326,7 @@ public class SQLDataManager implements
 	/* (non-Javadoc)
 	 * @see fr.umlv.symphonie.data.DataManager#addCourse(java.lang.String, float)
 	 */
-	public void addCourse(String title, float coeff)
+	public Course addCourse(String title, float coeff)
 			throws DataManagerException {
 		int key = 0;
 
@@ -1367,6 +1369,7 @@ public class SQLDataManager implements
 			throw new DataManagerException("error updating data for courses.",
 					e);
 		}
+    return c;
 	}
 
 	/* (non-Javadoc)

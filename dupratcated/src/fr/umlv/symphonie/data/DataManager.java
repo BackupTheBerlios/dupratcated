@@ -99,7 +99,7 @@ public interface DataManager {
 	 * @param lastName
 	 * @throws DataManagerException
 	 */
-	public void addStudent(String name, String lastName)
+	public Student addStudent(String name, String lastName)
 			throws DataManagerException;
 
 	/**
@@ -123,7 +123,7 @@ public interface DataManager {
 	 * @param coeff
 	 * @throws DataManagerException
 	 */
-	public void addCourse(String title, float coeff)
+	public Course addCourse(String title, float coeff)
 			throws DataManagerException;
 
 	/**
