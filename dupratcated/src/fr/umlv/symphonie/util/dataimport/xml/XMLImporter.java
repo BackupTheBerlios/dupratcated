@@ -372,7 +372,7 @@ public class XMLImporter implements DataImporter {
 							course, f.getColumn());
 				} else {
 					/** else we update */
-					// dm.changeFormula(f);
+					// dm.changeTeacherFormula(f);
 				}
 			} catch (DataManagerException e) {
 				throw new DataImporterException(
@@ -430,7 +430,7 @@ public class XMLImporter implements DataImporter {
 							.getColumn());
 				} else {
 					/** else we update */
-					// dm.changeFormula(f);
+					// dm.changeJuryFormula(f);
 				}
 			} catch (DataManagerException e) {
 				throw new DataImporterException(

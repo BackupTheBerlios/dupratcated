@@ -183,7 +183,7 @@ public class XMLImporterAdmin extends XMLImporter {
           dm.addTeacherFormula(f.getDescription(), f.toString(), course, f.getColumn());
         } else {
           /** else we update */
-          // dm.change();
+          // dm.changeTeacherFormula(f);
         }
       } catch (DataManagerException e) {
         throw new DataImporterException(
@@ -259,7 +259,7 @@ public class XMLImporterAdmin extends XMLImporter {
           dm.addJuryFormula(f.getDescription(), f.toString(), f.getColumn());
         } else {
           /** else we update */
-          // dm.change();
+          // dm.changeJuryFormula(f);
         }
       } catch (DataManagerException e) {
         throw new DataImporterException(
