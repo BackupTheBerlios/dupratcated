@@ -72,8 +72,8 @@ public class FormulaDialog implements IDictionarySupport {
   /**
    * Creates the internal dialog content pane
    * 
-   * @param The
-   *          symphonie instance that owns the dialog
+   * @param owner
+   *          The symphonie instance that owns the dialog
    * @param builder
    *          The builder for internationalization components
    * @return a JPanel

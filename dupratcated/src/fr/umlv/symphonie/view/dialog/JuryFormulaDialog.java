@@ -53,10 +53,10 @@ public class JuryFormulaDialog implements IDictionarySupport {
   private DictionaryKeyListener completionListener;
 
   /**
-   * Creates a new FormulaDialog using the give builder
+   * Creates a new JuryFormulaDialog using the give builder
    * 
    * @param owner
-   *          the parent frame
+   *          the symphonie instance owner of the dialog
    * @param builder
    *          the builder for runtime text-changing
    */
@@ -72,8 +72,8 @@ public class JuryFormulaDialog implements IDictionarySupport {
   /**
    * Creates the internal dialog content pane
    * 
-   * @param The
-   *          symphonie instance that owns the dialog
+   * @param owner
+   *          The symphonie instance that owns the dialog
    * @param builder
    *          The builder for internationalization components
    * @return a JPanel

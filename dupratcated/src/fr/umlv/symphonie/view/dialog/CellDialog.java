@@ -85,7 +85,6 @@ public class CellDialog implements IDictionarySupport {
    *          the symphonie instance parent of the dialog
    * @param builder
    *          the builder for runtime text-changing
-   * 
    * @return JPanel
    */
   private JPanel makeContentPane(final Symphonie owner,
@@ -183,6 +182,8 @@ public class CellDialog implements IDictionarySupport {
         fore.setBackground(Color.BLACK);
         back.setBackground(Color.WHITE);
         area.setText("");
+        sample.setForeground(Color.BLACK);
+        prevBgColor.setBackground(Color.WHITE);
       }
     }, SymphonieConstants.BUTTON_OK, ComponentBuilder.ButtonType.BUTTON);
 
@@ -193,6 +194,8 @@ public class CellDialog implements IDictionarySupport {
         fore.setBackground(Color.BLACK);
         back.setBackground(Color.WHITE);
         area.setText("");
+        sample.setForeground(Color.BLACK);
+        prevBgColor.setBackground(Color.WHITE);
       }
     }, SymphonieConstants.BUTTON_CANCEL, ComponentBuilder.ButtonType.BUTTON);
 
