@@ -166,4 +166,12 @@ public final class ExceptionDisplayDialog {
   public void hide() {
     dialog.setVisible(false);
   }
+  
+  //----------------------------------------------------------------------------
+  // Static fields
+  // ---------------------------------------------------------------------------
+  
+  public static final String MESSAGE = "exceptiondialog.message";
+  public static final String HIDE_DETAIL = "exceptiondialog.hidedetail";
+  public static final String SHOW_DETAIL = "exceptiondialog.showdetail";
 }
