@@ -8,6 +8,7 @@ public abstract class SQLDataManagerConstants
 	static public final String TABLE_TITLE = "title";
 	static public final String TABLE_HAS_MARK = "has_mark";
   static public final String TABLE_TEST = "test";
+  static public final String TABLE_TIMESTAMP = "timestamp";
   
   // attributs de la table student
 	static public final String COLUMN_ID_FROM_TABLE_STUDENT = "id_student";
@@ -34,4 +35,8 @@ public abstract class SQLDataManagerConstants
   static public final String COLUMN_COEFF_FROM_TABLE_TEST = "coeff";
   static public final String COLUMN_ID_COURSE_FROM_TABLE_TEST = "id_course";
   static public final String COLUMN_ID_TITLE_FROM_TABLE_TEST = "id_title";
+  
+  // attributs de la table timestamp
+  static public final String COLUMN_TABLE_NAME_FROM_TABLE_TIMESTAMP = "table_name";
+  static public final String COLUMN_TIMESTAMP_FROM_TABLE_TIMESTAMP = "timestamp";
 }

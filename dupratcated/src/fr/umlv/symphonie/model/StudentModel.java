@@ -27,7 +27,7 @@ public class StudentModel extends AbstractTableModel {
   private Student student = null;
   private int columnNumber = 0;
   private int rowNumber = 0;
-  Object[][] matrix = null;
+  private Object[][] matrix = null;
   
   
   
@@ -42,6 +42,11 @@ public class StudentModel extends AbstractTableModel {
     
     student = s;
     
+    update();
+  }
+  
+  
+  public void update() {
     Map<Course, Map<Integer, StudentMark>> markMap = null;
     try {
       markMap = manager.getAllMarksByStudent(student);
@@ -108,9 +113,10 @@ public class StudentModel extends AbstractTableModel {
       
     }
     fireTableStructureChanged();
+    
   }
-  
-  
+
+
   /**
    * @param list
    * @return
