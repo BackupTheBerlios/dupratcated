@@ -47,25 +47,16 @@ public class XMLExporter implements DataExporter {
 	 * 
 	 * @param root
 	 *            the parent node of the course node
-	 * @param before
-	 *            we put the course node before this node, if null we put the
-	 *            node at the end of the root node
 	 * @param c
 	 *            the course object
 	 */
-	private static void addCourseNode(Node root, Node before, Course c) {
+	private static void addCourseNode(Node root, Course c) {
 		final Node course;
 
 		/** <course id_course="?">... </course> */
 		Element e = root.getOwnerDocument().createElement("course");
 		e.setAttribute("id_course", "" + c.getId());
-
-		/** if we have to put the new node at the end */
-		if (before == null) {
-			course = root.appendChild(e);
-		} else {
-			course = root.insertBefore(e, before);
-		}
+		course = root.appendChild(e);
 
 		/** <title>? </title> */
 		e = course.getOwnerDocument().createElement("title");
@@ -307,7 +298,7 @@ public class XMLExporter implements DataExporter {
 
 		/** we export all the courses */
 		for (Course c : map.keySet()) {
-			addCourseNode(root, null, c);
+			addCourseNode(root, c);
 		}
 
 		/** we export the student of the student view */
@@ -341,7 +332,7 @@ public class XMLExporter implements DataExporter {
 		Map<Integer, StudentMark> map;
 		Node studentNode;
 		final int idLastStudent;
-        int i = 1;
+		int i = 1;
 
 		try {
 			pair = dm.getAllMarksByCourse(c);
@@ -360,7 +351,7 @@ public class XMLExporter implements DataExporter {
 		final Node root = document.appendChild(e);
 
 		/** we export the course of the teacher view */
-		addCourseNode(root, null, c);
+		addCourseNode(root, c);
 
 		idLastStudent = sortedMap.size();
 
@@ -382,7 +373,7 @@ public class XMLExporter implements DataExporter {
 
 				addMarkNode(studentNode, sm);
 			}
-            i++;
+			i++;
 		}
 
 		if (list != null) {
@@ -406,9 +397,7 @@ public class XMLExporter implements DataExporter {
 		final Document document = newDocument();
 		Pair<Map<Integer, Course>, SortedMap<Student, Map<Course, Map<Integer, StudentMark>>>> pair = null;
 		ArrayList<Formula> list = null;
-		Map<Integer, StudentMark> map2;
 		Node studentNode;
-		int i = 1;
 
 		try {
 			pair = dm.getAllStudentsMarks();
@@ -428,24 +417,14 @@ public class XMLExporter implements DataExporter {
 		e.setAttribute("view", "jury");
 		final Node root = document.appendChild(e);
 
+		/** for each course */
+		for (Course c : map.values()) {
+			addCourseNode(root, c);
+		}
+
 		/** we export all the students */
 		for (Student s : sortedMap.keySet()) {
 			studentNode = addStudentNode(root, s, true);
-
-			/** for each course */
-			for (Course c : map.values()) {
-				map2 = sortedMap.get(s).get(c);
-
-				/**
-				 * if it the first student node, we can create the courses nodes
-				 * before the student node since it has to be at the begin of
-				 * the xml
-				 */
-				if (i == 1) {
-					addCourseNode(root, studentNode, c);
-				}
-			}
-			i++;
 		}
 
 		if (list != null) {
@@ -454,7 +433,7 @@ public class XMLExporter implements DataExporter {
 				addFormulaNode(root, f);
 			}
 		}
-
+		
 		writeDocument(document, documentName);
 	}
 
