@@ -1,6 +1,6 @@
 /*
  * This file is part of Symphonie
- * Created : 13 févr. 2005 10:43:06
+ * Created : 22 févr. 2005 18:15:21
  */
 
 package fr.umlv.symphonie.util;
@@ -8,6 +8,7 @@ package fr.umlv.symphonie.util;
 import java.util.Collection;
 import java.util.HashMap;
 
+import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -19,14 +20,14 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JToggleButton;
+import javax.swing.JToolTip;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 /**
  * Builder for runtime text-changing Swing component.
  */
-public final class ComponentBuilder {
+public class ComponentBuilder {
 
   /**
    * Class field containing names for <code>Component</code> s built by
@@ -113,23 +114,6 @@ public final class ComponentBuilder {
   }
 
   /**
-   * Convenient method for creating ChangeListener from actions used by JButtons
-   * 
-   * @param action
-   * @param key
-   * @return
-   */
-  private ChangeListener createPutNameListener(final Action action,
-      final String key) {
-    return new ChangeListener() {
-
-      public void stateChanged(ChangeEvent event) {
-        action.putValue(Action.NAME, getValue(key));
-      }
-    };
-  }
-
-  /**
    * Builds a JLabel with the text given by <code>getValue(key)</code><br>
    * A ChangeListener is automatically created and registered to the builder.
    * 
@@ -149,42 +133,28 @@ public final class ComponentBuilder {
   }
 
   /**
-   * Builds a JButton with the text given by <code>getValue(key)</code> and
-   * the <code>Action</code> supplied <br>
-   * A ChangeListener is automatically created and registered to the builder. If
-   * you button is an icon-only button usage of builder is discouraged
+   * Builds a JToolTip for the given component with the text given by
+   * <code>getValue(key)</code><br>
+   * A ChangeListener is automatically created and registered to the builder for
+   * the tool tip.
    * 
-   * @param a
-   *          The Action where button properties will be taken from
-   * @param key
-   *          The key for the text
-   * @return The button built
-   */
-  public JButton buildButton(Action action, String key) {
-    action.putValue(Action.NAME, getValue(key));
-    JButton button = new JButton(action);
-    addChangeListener(button, createPutNameListener(action, key));
-    return button;
-  }
-
-  /**
-   * Builds an empty JMenu with the text given by <code>getValue(key)</code>
-   * <br>
-   * 
-   * @see #buildLabel(String)
    * @param key
    *          The key
-   * @return The menu built
+   * @param c
+   *          The component that will use the tip
+   * @return The tool tip created
    */
-  public JMenu buildMenu(final String key) {
-    final JMenu menu = new JMenu(getValue(key));
-    addChangeListener(menu, new ChangeListener() {
+  public JToolTip buildToolTip(final String key, JComponent c) {
+    final JToolTip tip = new JToolTip();
+    tip.setTipText(getValue(key));
+    tip.setComponent(c);
+    addChangeListener(tip, new ChangeListener() {
 
-      public void stateChanged(ChangeEvent arg0) {
-        menu.setText(getValue(key));
+      public void stateChanged(ChangeEvent e) {
+        tip.setTipText(getValue(key));
       }
     });
-    return menu;
+    return tip;
   }
 
   /**
@@ -208,114 +178,151 @@ public final class ComponentBuilder {
   }
 
   /**
-   * Builds a JMenuItem of the given type with the text given by
-   * <code>getValue(key)</code> and the <code>Action</code> supplied <br>
+   * Builds a JButton with the text given by <code>getValue(key)</code> A
+   * ChangeListener is automatically created and registered to the builder.
    * 
-   * @see #buildButton(Action, String)
-   * @see #JMenuItemType
-   * @param a
-   *          The Action where menu item properties will be taken from
    * @param key
    *          The key for the text
-   * @param type
-   *          The type of menu item to be created
-   * @return The menu item built
+   * @return The button built
    */
-  public JMenuItem buildMenuItem(Action action, String key, JMenuItemType type) {
-    action.putValue(Action.NAME, getValue(key));
-    JMenuItem item = type.getMenuItem(action);
-    addChangeListener(item, createPutNameListener(action, key));
-    return item;
+  public AbstractButton buildButton(final String key, ButtonType type) {
+    final AbstractButton b = type.getButton(getValue(key));
+    addChangeListener(b, new ChangeListener() {
+
+      public void stateChanged(ChangeEvent e) {
+        b.setText(getValue(key));
+      }
+    });
+    return b;
   }
 
   /**
-   * Builds a JToggleButton of the given type with the text given by
-   * <code>getValue(key)</code> and the <code>Action</code> supplied <br>
+   * Builds a JButton with the text given by <code>getValue(key)</code> and
+   * the <code>Action</code> supplied <br>
+   * A ChangeListener is automatically created and registered to the builder. If
+   * you button is an icon-only button usage of builder is discouraged
    * 
-   * @see #buildButton(Action, String)
-   * @see #JToggleButtonType
    * @param a
    *          The Action where button properties will be taken from
    * @param key
    *          The key for the text
-   * @param type
-   *          The type of the toggle button
-   * @param selected
-   *          If true, the button is initially selected; otherwise, the button
-   *          is initially unselected
-   * @return The toggle button created
+   * @return The button built
    */
-  public JToggleButton buildToggleButton(Action action, String key,
-      JToggleButtonType type, boolean selected) {
+  public AbstractButton buildButton(final Action action, final String key,
+      ButtonType type) {
     action.putValue(Action.NAME, getValue(key));
-    JToggleButton toggle = type.getToggleButton(action);
-    toggle.setSelected(selected);
-    addChangeListener(toggle, createPutNameListener(action, key));
-    return toggle;
+    AbstractButton button = type.getButton(action);
+    addChangeListener(button, new ChangeListener() {
+
+      public void stateChanged(ChangeEvent event) {
+        action.putValue(Action.NAME, getValue(key));
+      }
+    });
+    return button;
   }
 
   /**
-   * Enumeration defines a type for JToggleButtons :<br>
-   * <li>CHECK_BOX
-   * <li>RADIO_BUTTON
+   * Enumeration defines types for buttons created by <code>buildButton</code>:
+   * <br>
+   * <li>BUTTON : JButton
+   * <li>CHECK_BOX : JCheckBox
+   * <li>RADIO_BUTTON : JRadioButton
+   * <li>MENU_ITEM : JMenuItem
+   * <li>MENU : JMenuItem
+   * <li>CHECK_BOX_MENU_ITEM : JCheckBoxMenuItem
+   * <li>RADIO_BUTTON_MENU_ITEM : JRadioButtonMenuItem
+   * 
+   * @see ComponentBuilder#buildButton(Action, String, ButtonType)
+   * @see ComponentBuilder#buildButton(String, ButtonType)
    */
-  public enum JToggleButtonType {
+  public enum ButtonType {
+    BUTTON {
+
+      AbstractButton getButton(Action action) {
+        return new JButton(action);
+      }
+
+      AbstractButton getButton(String text) {
+        return new JButton(text);
+      }
+    },
     CHECK_BOX {
 
-      JToggleButton getToggleButton(Action action) {
+      AbstractButton getButton(Action action) {
         return new JCheckBox(action);
       }
-    }, RADIO_BUTTON {
 
-      JToggleButton getToggleButton(Action action) {
+      AbstractButton getButton(String text) {
+        return new JCheckBox(text);
+      }
+    },
+    RADIO_BUTTON {
+
+      AbstractButton getButton(Action action) {
         return new JRadioButton(action);
       }
-    }
-    ;
 
-    /**
-     * Creates a toggle button where properties are taken from the Action
-     * supplied
-     * 
-     * @param action
-     *          the Action used to specify the new toggle button
-     * @return The button created
-     */
-    abstract JToggleButton getToggleButton(Action action);
-  }
+      AbstractButton getButton(String text) {
+        return new JRadioButton(text);
+      }
+    },
+    MENU_ITEM {
 
-  /**
-   * Enumeration defines a type for JMenuItems :<br>
-   * <li>NORMAL_ITEM
-   * <li>CHECK_BOX_ITEM
-   * <li>RADIO_BUTTON_ITEM
-   */
-  public enum JMenuItemType {
-    NORMAL_ITEM {
-
-      JMenuItem getMenuItem(Action action) {
+      AbstractButton getButton(Action action) {
         return new JMenuItem(action);
       }
-    }, CHECK_BOX_ITEM {
 
-      JMenuItem getMenuItem(Action action) {
+      AbstractButton getButton(String text) {
+        return new JMenuItem(text);
+      }
+    },
+    MENU {
+
+      AbstractButton getButton(Action action) {
+        return new JMenu(action);
+      }
+
+      AbstractButton getButton(String text) {
+        return new JMenu(text);
+      }
+    },
+    CHECK_BOX_MENU_ITEM {
+
+      AbstractButton getButton(Action action) {
         return new JCheckBoxMenuItem(action);
       }
-    }, RADIO_BUTTON_ITEM {
 
-      JMenuItem getMenuItem(Action action) {
+      AbstractButton getButton(String text) {
+        return new JCheckBoxMenuItem(text);
+      }
+    },
+    RADIO_BUTTON_MENU_ITEM {
+
+      AbstractButton getButton(Action action) {
         return new JRadioButtonMenuItem(action);
       }
-    }
-    ;
+
+      AbstractButton getButton(String text) {
+        return new JRadioButtonMenuItem(text);
+      }
+    };
 
     /**
-     * Creates a menu item where properties are taken from the Action supplied
+     * Creates a button where properties are taken from the Action supplied
      * 
      * @param action
-     *          the Action used to specify the new menu item
-     * @return The menu item created
+     *          the Action used to specify the new button
+     * @return The button created
      */
-    abstract JMenuItem getMenuItem(Action action);
+    abstract AbstractButton getButton(Action action);
+
+    /**
+     * Creates a button with the text supplied
+     * 
+     * @param text
+     *          The text
+     * @return The button created
+     */
+    abstract AbstractButton getButton(String text);
   }
 }
