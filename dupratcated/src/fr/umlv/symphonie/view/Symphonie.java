@@ -16,6 +16,7 @@ import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -54,32 +55,19 @@ import fr.umlv.symphonie.view.cells.CellRendererFactory;
 
 public class Symphonie {
 
-  private static final String FILE_PATTERN = "language/symphonie";
-  private static final String FILE_CHARSET = "ISO-8859-1";
   private static final ImageIcon EMPTYICON = new ImageIcon(Symphonie.class
       .getResource("icons/empty.png"));
 
-  private static ComponentBuilder builder;
-  private static HashMap<String, String> english;
-  private static HashMap<String, String> french;
-  private static HashMap<String, String> spanish;
-  private static JFrame frame;
-  protected static JTabbedPane tab;
+  private ComponentBuilder builder;
+  private HashMap<String, String> defaultLanguage;
+  private String defaultLanguageName = "FRENCH";
+  private JFrame frame;
+  protected JTabbedPane tab;
 
-  private static JFrame getFrame() throws DataManagerException {
+  JFrame getFrame() throws DataManagerException, IOException {
 
-    try {
-      english = TextualResourcesLoader.getResourceMap(FILE_PATTERN, new Locale(
-          "english"), FILE_CHARSET);
-      french = TextualResourcesLoader.getResourceMap(FILE_PATTERN, new Locale(
-          "french"), FILE_CHARSET);
-      spanish = TextualResourcesLoader.getResourceMap(FILE_PATTERN, new Locale(
-          "spanish"), FILE_CHARSET);
-    } catch (IOException e) {
-      throw new AssertionError("Bim ! -> " + e.getMessage());
-    }
-
-    builder = new ComponentBuilder(french);
+    defaultLanguage = Language.FRENCH.getMap();
+    builder = new ComponentBuilder(defaultLanguage);
     frame = new JFrame(builder.getValue(SymphonieConstants.FRAME_TITLE));
     frame.setContentPane(getContentPane(frame, builder));
 
@@ -93,7 +81,6 @@ public class Symphonie {
     frame.setJMenuBar(bar);
 
     return frame;
-
   }
 
   /**
@@ -101,7 +88,7 @@ public class Symphonie {
    * 
    * @return JMenu
    */
-  private static JMenu getFileMenu() {
+  private JMenu getFileMenu() {
     JMenu file = (JMenu) builder.buildButton(SymphonieConstants.FILE_MENU,
         ComponentBuilder.ButtonType.MENU);
 
@@ -150,42 +137,28 @@ public class Symphonie {
    * 
    * @return JMenu
    */
-  private static JMenu getLangMenu() {
+  private JMenu getLangMenu() {
     JMenu lang = (JMenu) builder
         .buildButton(SymphonieConstants.LANGUAGE_MENU_ITEM,
             ComponentBuilder.ButtonType.MENU);
-
-    // Actions
-    Action inEnglish = SymphonieActionFactory.getLanguageChangeAction(english,
-        builder);
-    Action inFrench = SymphonieActionFactory.getLanguageChangeAction(french,
-        builder);
-    Action inSpanish = SymphonieActionFactory.getLanguageChangeAction(spanish,
-        builder);
-
-    // Items
-
-    JCheckBoxMenuItem frBox = (JCheckBoxMenuItem) builder.buildButton(inFrench,
-        SymphonieConstants.FRENCH_MENU_ITEM,
-        ComponentBuilder.ButtonType.CHECK_BOX_MENU_ITEM);
-    frBox.setSelected(true);
-
-    JCheckBoxMenuItem engBox = (JCheckBoxMenuItem) builder.buildButton(
-        inEnglish, SymphonieConstants.ENGLISH_MENU_ITEM,
-        ComponentBuilder.ButtonType.CHECK_BOX_MENU_ITEM);
-
-    JCheckBoxMenuItem spBox = (JCheckBoxMenuItem) builder.buildButton(
-        inSpanish, SymphonieConstants.SPANISH_MENU_ITEM,
-        ComponentBuilder.ButtonType.CHECK_BOX_MENU_ITEM);
-
     ButtonGroup g = new ButtonGroup();
-    g.add(engBox);
-    g.add(frBox);
-    g.add(spBox);
-
-    lang.add(engBox);
-    lang.add(frBox);
-    lang.add(spBox);
+    JCheckBoxMenuItem lBox;
+    HashMap<String, String> lMap;
+    Language defL = Language.valueOf(defaultLanguageName);
+    for(Language l : Language.values()) {
+      try {
+        lMap = l.getMap();
+      } catch (IOException e) {
+        System.err.println("Unable to load language : " + l.name() + " Skipping");
+        continue;
+      }
+      lBox = new JCheckBoxMenuItem(SymphonieActionFactory.getLanguageChangeAction(lMap,
+        builder));
+      lBox.setText(lMap.get(Language.LANGUAGE_NAME));
+      lang.add(lBox);
+      g.add(lBox);
+      if (defL.equals(l)) lBox.setSelected(true);
+    }
 
     lang.setIcon(new ImageIcon(Symphonie.class.getResource("icons/lang.png")));
 
@@ -197,7 +170,7 @@ public class Symphonie {
    * 
    * @return JMenu
    */
-  private static JMenu getModeMenu() {
+  private JMenu getModeMenu() {
     JMenu mode = (JMenu) builder.buildButton(
         SymphonieConstants.CHANGE_VIEW_MENU, ComponentBuilder.ButtonType.MENU);
     mode.setIcon(EMPTYICON);
@@ -239,7 +212,7 @@ public class Symphonie {
    * 
    * @return JMenu
    */
-  private static JMenu getWindowMenu() {
+  private JMenu getWindowMenu() {
     JMenu window = (JMenu) builder.buildButton(SymphonieConstants.WINDOW_MENU,
         ComponentBuilder.ButtonType.MENU);
 
@@ -256,7 +229,7 @@ public class Symphonie {
    * 
    * @return JMenu
    */
-  private static JMenu getFormatMenu() {
+  private JMenu getFormatMenu() {
     JMenu format = (JMenu) builder.buildButton(SymphonieConstants.FORMAT_MENU,
         ComponentBuilder.ButtonType.MENU);
 
@@ -281,7 +254,7 @@ public class Symphonie {
    * 
    * @return JMenu
    */
-  private static JMenu getInsertMenu() {
+  private JMenu getInsertMenu() {
     JMenu insert = (JMenu) builder.buildButton(SymphonieConstants.INSERT_MENU,
         ComponentBuilder.ButtonType.MENU);
     /* Actions ******************************************************* */
@@ -305,7 +278,7 @@ public class Symphonie {
    * 
    * @return JMenu
    */
-  private static JMenu getAdminMenu() {
+  private JMenu getAdminMenu() {
     JMenu admin = (JMenu) builder.buildButton(SymphonieConstants.ADMIN_MENU,
         ComponentBuilder.ButtonType.MENU);
     /* Actions ******************************************************* */
@@ -332,7 +305,7 @@ public class Symphonie {
    * 
    * @return JToolBar
    */
-  private static JToolBar getToolbar() {
+  private JToolBar getToolbar() {
     JToolBar toolbar = new JToolBar();
     toolbar.add(SymphonieActionFactory.getConnectAction(new ImageIcon(
         Symphonie.class.getResource("icons/connect.png")), builder));
@@ -350,7 +323,7 @@ public class Symphonie {
    * @param dataManager
    * @return JSplitPane
    */
-  private static JSplitPane getTeacherPane(DataManager dataManager) {
+  private JSplitPane getTeacherPane(DataManager dataManager) {
     JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
     /* table */
@@ -436,7 +409,7 @@ public class Symphonie {
    * @return
    * @throws DataManagerException
    */
-  private static JSplitPane getStudentPane(DataManager dataManager)
+  private JSplitPane getStudentPane(DataManager dataManager)
       throws DataManagerException {
     StudentModel studentModel = new StudentModel(dataManager);
 
@@ -538,7 +511,7 @@ public class Symphonie {
    * @param dataManager
    * @return JTable
    */
-  private static JTable getJuryPane(DataManager dataManager) {
+  private JTable getJuryPane(DataManager dataManager) {
     JuryModel model = JuryModel.getInstance(dataManager);
 
     JTable table = new JTable(model);
@@ -572,7 +545,7 @@ public class Symphonie {
    * @return JPanel
    * @throws DataManagerException
    */
-  private static JPanel getContentPane(final JFrame f,
+  private JPanel getContentPane(final JFrame f,
       final ComponentBuilder builder) throws DataManagerException {
     JPanel panel = new JPanel(new BorderLayout());
     panel.add(getToolbar(), BorderLayout.NORTH);
@@ -636,10 +609,92 @@ public class Symphonie {
     return panel;
   }
 
-  public static void main(String[] args) throws DataManagerException {
-    JFrame f = getFrame();
-    f.pack();
-    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    f.setVisible(true);
+  /**
+   * Enum defines languages supported by Symphonie.
+   * 
+   * @author PEÑA SALDARRIAGA Sébastian
+   */
+  enum Language {
+
+    FRENCH(new Locale("french")) {
+
+      String getCharset() {
+        return ISO88591;
+      }
+    },
+    ENGLISH(new Locale("english")) {
+
+      String getCharset() {
+        return USASCII;
+      }
+    },
+    SPANISH(new Locale("english")) {
+
+      String getCharset() {
+        return ISO88591;
+      }
+    }/*
+       * , RUSSIAN { }, JAPANESE { }
+       */;
+
+    /** Language locale */
+    private final Locale locale;
+
+    /**
+     * Constructor
+     * 
+     * @param l
+     *          The language locale
+     */
+    Language(Locale l) {
+      locale = l;
+    }
+
+    /**
+     * Returns the language map
+     * 
+     * @return a <code>HashMap</code>
+     * @throws IOException
+     *           If there's a problem while reading language file
+     */
+    HashMap<String, String> getMap() throws IOException {
+      return TextualResourcesLoader.getResourceMap(FILE_PATTERN, getLocale(),
+          getCharset());
+    }
+
+    /**
+     * Gets the language locale
+     * 
+     * @return a <code>Locale</code>
+     */
+    Locale getLocale() {
+      return locale;
+    }
+
+    /**
+     * Returns the charset used to decode the language file
+     * 
+     * @return The name of the language charset
+     */
+    abstract String getCharset();
+
+    // ------------------
+    // Static fields
+    // ------------------
+
+    /** Language key */
+    public static final String LANGUAGE_NAME = "language.name";
+
+    /** Language files pattern */
+    public static final String FILE_PATTERN = "language/symphonie";
+
+    /** ISO-8859-1 Charset */
+    public static final String ISO88591 = "ISO-8859-1";
+
+    /** US-ASCII charset */
+    public static final String USASCII = "US-ASCII";
+
+    /** Unicode charset */
+    public static final String UNICODE = "Unicode";
   }
 }
