@@ -80,9 +80,10 @@ public class XMLExporter implements DataExporter {
 	private static void addExamenNode(Node root, StudentMark sm) {
 		final Node examen;
 
-		/** <examen id_examen="?">... </examen> */
+		/** <examen id_examen="?" id_course="?">... </examen> */
 		Element e = root.getOwnerDocument().createElement("examen");
 		e.setAttribute("id_examen", "" + sm.getMark().getId());
+		e.setAttribute("id_course", "" + sm.getCourse().getId());
 		examen = root.appendChild(e);
 
 		/** <desc>? </desc> */
