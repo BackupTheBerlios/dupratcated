@@ -1,16 +1,12 @@
 /*
  * This file is part of Symphonie
- * Created : 15 fï¿½vr. 2005 17:57:09
+ * Created : 20-mars-2005 22:19:31
  */
 package fr.umlv.symphonie.model;
 
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,14 +22,8 @@ import javax.swing.JTree;
 import javax.swing.SwingConstants;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.tree.DefaultTreeCellRenderer;
-
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.data.general.DefaultKeyedValuesDataset;
 
 import fr.umlv.symphonie.data.Course;
 import fr.umlv.symphonie.data.DataManager;
@@ -46,36 +36,21 @@ import fr.umlv.symphonie.util.StudentAverage;
 
 
 /**
- * @author fvallee
+ * @author susmab
  *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
-public class StudentModel extends AbstractTableModel {
+public class AdminStudentModel extends StudentModel {
 
-	protected DataManager manager;
-  protected Student student = null;
-  protected int columnCount = 0;
-  protected int rowCount = 0;
-  protected Map<Course, Map<Integer, StudentMark>> markMap = null;
-  private static StudentModel instance = null;
-  protected Object[][] matrix = null;
-  
-  protected final Object lock = new Object();
-  
-  /**
-   * Pool de threads qui n'en contient qu'un seul et qui sert pour le
-   * rafraîchissement du canal courant.
-   */
+  private static AdminStudentModel instance = null;
   private final ExecutorService es = Executors.newSingleThreadExecutor();
   
-  protected StudentModel(DataManager manager) {
-    this.manager = manager;
+  private AdminStudentModel(DataManager manager){
+    super(manager);
   }
   
-  public static StudentModel getInstance(DataManager manager){
+  public static AdminStudentModel getInstance(DataManager manager){
     if (instance == null)
-      instance = new StudentModel(manager);
+      instance = new AdminStudentModel(manager);
     
     else instance.setManager(manager);
     
@@ -83,182 +58,182 @@ public class StudentModel extends AbstractTableModel {
   }
   
   
-  protected void setManager(DataManager manager){
-    this.manager = manager;
+  public boolean isCellEditable(int rowIndex,int columnIndex){
+    
+    if (columnIndex == columnCount - 1)
+      return false;
+    
+    Object o = matrix[rowIndex][columnIndex];
+    
+    if (o == null || o instanceof String)
+      return false;
+    
+    if (o instanceof Course
+        || o instanceof Mark
+        || o instanceof StudentMark
+        || o instanceof Float)
+      return true;
+    
+    return false;
   }
   
-  public void setStudent (final Student s){
+  public void setValueAt(Object aValue,int rowIndex,int columnIndex){
+    final Object o = matrix[rowIndex][columnIndex];
+    final int row = rowIndex;
+    final int column = columnIndex;
     
-      es.execute(new Runnable() {
-
-        public void run() {
-
-          synchronized (lock) {
-          clear();
-          student = s;
-          try {
-            markMap = manager.getAllMarksByStudent(student);
-          } catch (DataManagerException e) {
-            System.out.println(e.getMessage());
-            return;
-          }
-
-          int n;
-          int tmp = 0;
-          for (Course c : markMap.keySet()) {
-            if ((n = markMap.get(c).size()) > tmp) tmp = n;
-          }
-
-          columnCount = tmp + 2;
-          rowCount = 4 * markMap.size();
-
-          matrix = new Object[rowCount][columnCount];
-
-          int row = 0;
-          int column;
-          Collection<StudentMark> collection = null;
-
-          for (Course c : markMap.keySet()) {
-
-            column = 0;
-            collection = markMap.get(c).values();
-
-            /*
-             * On met les donnees dans la premiere colonne (matiere, coeff,
-             * note)
-             */
-            matrix[row][column] = c;
-            matrix[row + 1][column] = "coeff";
-            matrix[row + 2][column] = "note";
-
-            column++;
-
-            /*
-             * On remplit les cases de la matrice avec les notes
-             */
-            for (StudentMark sm : collection) {
-              matrix[row][column] = sm.getMark();
-              matrix[row + 1][column] = sm.getCoeff();
-              matrix[row + 2][column] = sm;
-              column++;
+    if (o instanceof Course){
+//      System.out.println("matiere.");
+      final String value = (String)aValue;
+      
+      if (value.equals("") == false)
+        es.execute(new Runnable(){
+          public void run() {
+            try {
+              manager.changeCourseTitle((Course)o, value);
+            } catch (DataManagerException e) {
+              // TODO Auto-generated catch block
+              e.printStackTrace();
             }
-
-            /*
-             * On remplit le reste des cases de bon gros vide
-             */
-            blankRow(row, column);
-            blankRow(row + 1, column);
-            blankRow(row + 2, column);
-            blankRow(row + 3, 0);
-
-            matrix[row][columnCount - 1] = "moyenne";
-            matrix[row + 1][columnCount - 1] = "";
-            matrix[row + 2][columnCount - 1] = StudentAverage
-                .getAverage(collection);
-
-            row += 4;
-
+            
+            try {
+              EventQueue.invokeAndWait(new Runnable() {
+                public void run() {
+                  AdminStudentModel.this.fireTableRowsUpdated(row, row);
+                }
+              });
+            } catch (InterruptedException e1) {
+              e1.printStackTrace();
+            } catch (InvocationTargetException e1) {
+              e1.printStackTrace();
+            }
+            
           }
-
+        });
+      
+      return;
+    }
+    
+    if (o instanceof StudentMark){
+      final float value;
+      try {
+        value = Float.parseFloat((String)aValue);
+      }catch (NumberFormatException e){
+        return;
+      }
+      
+      es.execute(new Runnable(){
+        public void run() {
+          try {
+            manager.changeStudentMarkValue((StudentMark)o, value);
+          } catch (DataManagerException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+          
           try {
             EventQueue.invokeAndWait(new Runnable() {
-
               public void run() {
-                StudentModel.this.fireTableStructureChanged();
+                AdminStudentModel.this.fireTableRowsUpdated(row, row);
               }
-
             });
           } catch (InterruptedException e1) {
             e1.printStackTrace();
           } catch (InvocationTargetException e1) {
             e1.printStackTrace();
           }
+          
         }
-      }
       });
-    
-  }
-  
-  
-  public void update() {
-    
-    if (student != null)
-      setStudent(student);
-  }
-
-
-
-  /**
-   * @param row
-   * @param column
-   */
-  protected void blankRow(int row, int column) {
-    for (;column < columnCount-1 ; column++)
-      matrix[row][column] = null;
-    
-  }
-
-
-  protected void clear(){
-    columnCount = 0;
-    rowCount = 0;
-    student = null;
-    matrix = null;
-  }
-  
-  
-  /* (non-Javadoc)
-   * @see javax.swing.table.TableModel#getRowCount()
-   */
-  public int getRowCount() {
-    return rowCount;
-  }
-
-  /* (non-Javadoc)
-   * @see javax.swing.table.TableModel#getColumnCount()
-   */
-  public int getColumnCount() {
-    return columnCount;
-  }
-
-  /* (non-Javadoc)
-   * @see javax.swing.table.TableModel#getValueAt(int, int)
-   */
-  public Object getValueAt(int rowIndex, int columnIndex) {
-    return matrix[rowIndex][columnIndex];
-  }
-
-  public ChartPanel getChartPanel(){
-    
-    DefaultKeyedValuesDataset pieDataset = new DefaultKeyedValuesDataset();
-    
-    for (Course c : markMap.keySet()){
-      pieDataset.setValue(c.getTitle() + " : " + StudentAverage.getAverage(markMap.get(c).values()), (c.getCoeff() * 100));
+      
+      return;
     }
     
-    JFreeChart pieChart = ChartFactory.createPieChart3D("Notes de " + student + "- Moyenne générale : " + StudentAverage.getAnnualAverage(markMap), pieDataset, false, false, false);
-    pieChart.getPlot().setForegroundAlpha(0.35f);
+    if (o instanceof Mark){
+      final String value = (String)aValue;
+      
+      if (value.equals("") == false){
+        es.execute(new Runnable(){
+          public void run() {
+            try {
+              manager.changeMarkDescription((Mark)o, value);
+            } catch (DataManagerException e) {
+              // TODO Auto-generated catch block
+              e.printStackTrace();
+            }
+            
+            try {
+              EventQueue.invokeAndWait(new Runnable() {
+                public void run() {
+                  AdminStudentModel.this.fireTableRowsUpdated(row, row);
+                }
+              });
+            } catch (InterruptedException e1) {
+              e1.printStackTrace();
+            } catch (InvocationTargetException e1) {
+              e1.printStackTrace();
+            }
+            
+          }
+        });
+      
+      return;
+      }
+    }
     
-    return new ChartPanel(pieChart);
+    if (o instanceof Float){
+      final Object o2 = matrix[rowIndex - 1][columnIndex];
+      
+      if (o2 instanceof Mark){
+        final float value;
+        
+        try{
+          value = Float.parseFloat((String)aValue);
+        }catch (NumberFormatException e){
+          return;
+        }
+        
+        es.execute(new Runnable(){
+          public void run() {
+            try {
+              manager.changeMarkCoeff((Mark)o2, value);
+            } catch (DataManagerException e) {
+              // TODO Auto-generated catch block
+              e.printStackTrace();
+            }
+            
+            matrix[row][column] = value;
+            matrix[row + 1][columnCount -1] = StudentAverage.getAverage(markMap.get(((Mark)o2).getCourse()).values());
+            
+            try {
+              EventQueue.invokeAndWait(new Runnable() {
+                public void run() {
+                  AdminStudentModel.this.fireTableRowsUpdated(row, row + 1);
+                }
+              });
+            } catch (InterruptedException e1) {
+              e1.printStackTrace();
+            } catch (InvocationTargetException e1) {
+              e1.printStackTrace();
+            }
+          }
+        });
+        
+        return;
+      }
+    }
   }
   
-  public MessageFormat getHeaderMessageFormat(){
-    return new MessageFormat("Notes de " + student);
-  }
-  
-  
-  
-  
-  
-  
-  
-  public static void main(String[] args) throws DataManagerException {
-    JFrame frame = new JFrame ("test StudentModel");
+  /**
+   * @param args
+   */
+  public static void main(String[] args) {
+    JFrame frame = new JFrame ("test AdminStudentModel");
     frame.setSize(800,600);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     
     DataManager dataManager = SQLDataManager.getInstance();
-    StudentModel studentModel = new StudentModel(dataManager);
+    StudentModel studentModel = AdminStudentModel.getInstance(dataManager);
     
     Map<Integer, Student> studentMap = null;
     try {
@@ -391,9 +366,6 @@ public class StudentModel extends AbstractTableModel {
      */
     
     frame.setVisible(true);
-    
-    System.out.println("zarma!!!");
   }
-  
-  
+
 }

@@ -125,12 +125,12 @@ public class TeacherModel extends AbstractTableModel {
    * Pool de threads qui n'en contient qu'un seul et qui sert pour le
    * rafraîchissement du canal courant.
    */
-  private final ExecutorService es = Executors.newSingleThreadExecutor();
+  protected final ExecutorService es = Executors.newSingleThreadExecutor();
   
   
   protected final Object lock = new Object();
   
-  private TeacherModel(DataManager manager) {
+  protected TeacherModel(DataManager manager) {
     this.manager = manager;
   }
   
@@ -147,7 +147,7 @@ public class TeacherModel extends AbstractTableModel {
   /**
    * @param manager The manager to set.
    */
-  private void setManager(DataManager manager) {
+  protected void setManager(DataManager manager) {
     this.manager = manager;
   }
   
@@ -260,19 +260,6 @@ public class TeacherModel extends AbstractTableModel {
     markMap.clear();
   }
 
-//  /**
-//   * @param list
-//   * @return
-//   */
-//  private float getAverage(Collection<StudentMark> collection) {
-//    
-//    float result = 0;
-//    
-//    for (StudentMark studentMark : collection)
-//      result += studentMark.getCoeff() * studentMark.getValue();
-//    
-//    return result;
-//  }
 
 
   public int getRowCount() {
@@ -383,8 +370,9 @@ public class TeacherModel extends AbstractTableModel {
    */
   public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 
-    Object o = columnList.get(columnIndex - 1);
-    
+    final Object o = columnList.get(columnIndex - 1);
+    final Object value = aValue;
+    final int row = rowIndex;
     
     /*
      * cas des intitules :
@@ -395,12 +383,32 @@ public class TeacherModel extends AbstractTableModel {
       if (o instanceof Formula)
         return; // changer ca
       
-      try {
-        manager.changeMarkDescription((Mark)o, (String)aValue);
-      } catch (DataManagerException e) {
-        System.out.println("Error while attempting to modify the mark name to " + aValue);
-        e.printStackTrace();
-      }
+      es.execute(new Runnable(){
+        public void run() {
+          try {
+            manager.changeMarkDescription((Mark)o, (String)value);
+          } catch (DataManagerException e) {
+            System.out.println("Error while attempting to modify the test name to " + value);
+            e.printStackTrace();
+          }
+          
+          try {
+            EventQueue.invokeAndWait(new Runnable() {
+
+              public void run() {
+                TeacherModel.this.fireTableRowsUpdated(row, row);
+              }
+
+            });
+          } catch (InterruptedException e1) {
+            e1.printStackTrace();
+          } catch (InvocationTargetException e1) {
+            e1.printStackTrace();
+          }
+          
+        }
+      });
+      
       return;
     }
     
@@ -412,21 +420,39 @@ public class TeacherModel extends AbstractTableModel {
       if (o instanceof Formula)
         return; // changer ca
       
+      es.execute(new Runnable(){
+        public void run() {
+          float newCoeff;
+          
+          try {
+            newCoeff = Float.parseFloat((String)value);
+          }catch (NumberFormatException e){
+            return;
+          }
+          try {
+            manager.changeMarkCoeff((Mark)o, newCoeff);
+          }catch (DataManagerException e){
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+          }
+          
+          try {
+            EventQueue.invokeAndWait(new Runnable() {
+
+              public void run() {
+                TeacherModel.this.fireTableRowsUpdated(1, rowCount - 1);
+              }
+
+            });
+          } catch (InterruptedException e1) {
+            e1.printStackTrace();
+          } catch (InvocationTargetException e1) {
+            e1.printStackTrace();
+          }
+          
+        }
+      });
       
-      float newCoeff;
-      
-      try {
-        newCoeff = Float.parseFloat((String)aValue);
-      }catch (NumberFormatException e){
-        return;
-      }
-      try {
-        manager.changeMarkCoeff((Mark)o, newCoeff);
-      }catch (DataManagerException e){
-        System.out.println(e.getMessage());
-        e.printStackTrace();
-      }
-      fireTableRowsUpdated(1, rowCount - 1);
       return;
     }
     
@@ -436,24 +462,41 @@ public class TeacherModel extends AbstractTableModel {
     if (o instanceof Formula)
       return;
     
-    float newValue;
-    
-    try {
-      newValue = Float.parseFloat((String)aValue);
-    }catch (NumberFormatException e){
-      return;
-    }
-    
-    Mark m = (Mark)o;
-    
-    try {
-      manager.changeStudentMarkValue(studentMarkMap.get(studentList.get(rowIndex - 3)).get(m.getId()), newValue);
-    } catch (DataManagerException e) {
-      System.out.println(e.getMessage());
-      e.printStackTrace();
-    }
-    
-    fireTableRowsUpdated(rowIndex, rowIndex);
+    es.execute(new Runnable(){
+      public void run() {
+        float newValue;
+        
+        try {
+          newValue = Float.parseFloat((String)value);
+        }catch (NumberFormatException e){
+          return;
+        }
+        
+        Mark m = (Mark)o;
+        
+        try {
+          manager.changeStudentMarkValue(studentMarkMap.get(studentList.get(row - 3)).get(m.getId()), newValue);
+        } catch (DataManagerException e) {
+          System.out.println(e.getMessage());
+          e.printStackTrace();
+        }
+        
+        try {
+          EventQueue.invokeAndWait(new Runnable() {
+
+            public void run() {
+              TeacherModel.this.fireTableRowsUpdated(row, row);
+            }
+
+          });
+        } catch (InterruptedException e1) {
+          e1.printStackTrace();
+        } catch (InvocationTargetException e1) {
+          e1.printStackTrace();
+        }
+        
+      }
+    });
   }
   
   
