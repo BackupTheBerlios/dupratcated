@@ -196,7 +196,7 @@ public class SQLDataManager implements DataManager {
    * @return the <code>PreparedStatement</code> resulting from the request.
    * @throws SQLException
    */
-  private static PreparedStatement connectAndPrepare(String request)
+  private PreparedStatement connectAndPrepare(String request)
       throws SQLException {
     Connection connection = null;
     PreparedStatement preparedStatement = null;
@@ -215,7 +215,7 @@ public class SQLDataManager implements DataManager {
    * @return a <code>CachedRowSet</code> resulting from the request.
    * @throws SQLException
    */
-  private static CachedRowSet connectAndQuery(String request)
+  private CachedRowSet connectAndQuery(String request)
       throws SQLException {
     Connection connection = null;
     Statement statement = null;
@@ -236,7 +236,7 @@ public class SQLDataManager implements DataManager {
    *          the request to execute.
    * @throws SQLException
    */
-  private static void connectAndUpdate(String request) throws SQLException {
+  private void connectAndUpdate(String request) throws SQLException {
     Connection connection = null;
     Statement statement = null;
 
@@ -257,7 +257,7 @@ public class SQLDataManager implements DataManager {
    * @return the created key.
    * @throws SQLException
    */
-  public static int createPrimaryKey(String table, String id)
+  public int createPrimaryKey(String table, String id)
       throws SQLException {
 
     CachedRowSet results = null;
@@ -277,7 +277,7 @@ public class SQLDataManager implements DataManager {
    * @return a value representing the timestamp.
    * @throws SQLException
    */
-  public static int getTimeStamp(String tableName) throws SQLException {
+  public int getTimeStamp(String tableName) throws SQLException {
     String request = "select " + COLUMN_TABLE_NAME_FROM_TABLE_TIMESTAMP + ", "
         + COLUMN_TIMESTAMP_FROM_TABLE_TIMESTAMP + " " + "from "
         + TABLE_TIMESTAMP + " " + "where "
