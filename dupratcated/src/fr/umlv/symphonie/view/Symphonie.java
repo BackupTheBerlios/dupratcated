@@ -66,6 +66,9 @@ import fr.umlv.symphonie.model.JuryModel;
 import fr.umlv.symphonie.model.StudentModel;
 import fr.umlv.symphonie.model.StudentTreeModel;
 import fr.umlv.symphonie.model.TeacherModel;
+import fr.umlv.symphonie.model.AdminStudentModel;
+import fr.umlv.symphonie.model.AdminTeacherModel;
+import fr.umlv.symphonie.model.AdminJuryModel;
 import fr.umlv.symphonie.util.ComponentBuilder;
 import fr.umlv.symphonie.util.ExceptionDisplayDialog;
 import fr.umlv.symphonie.util.TextualResourcesLoader;
@@ -80,7 +83,6 @@ import fr.umlv.symphonie.util.identification.SQLIdentificationStrategy;
 import fr.umlv.symphonie.util.wizard.DefaultWizardModel;
 import fr.umlv.symphonie.util.wizard.Wizard;
 import static fr.umlv.symphonie.view.SymphonieConstants.*;
-import static fr.umlv.symphonie.view.SymphonieActionFactory.*;
 import static fr.umlv.symphonie.util.ComponentBuilder.ButtonType;
 import fr.umlv.symphonie.view.cells.CellRendererFactory;
 
@@ -115,6 +117,27 @@ public class Symphonie {
 
   /** Identification service */
   private IdentificationStrategy logger;
+  
+  /** Student Table Model **/
+  private final StudentModel studentModel;
+  
+  /** Teacher Table Model **/
+  private final TeacherModel teacherModel;
+  
+  /** Jury Table Model **/
+  private final JuryModel juryModel;
+  
+  /** Admin Student Table Model **/
+  private final AdminStudentModel adminStudentModel;
+  
+  /** Admin Teacher Table Model **/
+  private final AdminTeacherModel adminTeacherModel;
+  
+  /** Admin Jury Table Model **/
+  private final AdminJuryModel adminJuryModel;
+  
+  /** Action Factory **/
+  protected final SymphonieActionFactory actionFactory;
 
   // ----------------------------------------------------------------------------
   // Menu building methods
@@ -143,8 +166,7 @@ public class Symphonie {
 
     file.add(new JSeparator());
 
-    file.add(builder.buildButton(SymphonieActionFactory
-        .getExitAction(new ImageIcon(Symphonie.class
+    file.add(builder.buildButton(actionFactory.getExitAction(new ImageIcon(Symphonie.class
             .getResource("icons/exit.png"))), EXIT_MENU_ITEM,
         ButtonType.MENU_ITEM));
 
@@ -170,8 +192,8 @@ public class Symphonie {
             + " Skipping");
         continue;
       }
-      lBox = new JCheckBoxMenuItem(SymphonieActionFactory
-          .getLanguageChangeAction(this, l));
+      lBox = new JCheckBoxMenuItem(actionFactory
+          .getLanguageChangeAction(l));
       lBox.setText(lMap.get(Language.LANGUAGE_NAME));
       lang.add(lBox);
       g.add(lBox);
@@ -195,7 +217,7 @@ public class Symphonie {
     JCheckBoxMenuItem vBox;
     javax.swing.AbstractAction a;
     for (View v : View.values()) {
-      a = SymphonieActionFactory.getModeChangeAction(this, v);
+      a = actionFactory.getModeChangeAction(v);
       vBox = (JCheckBoxMenuItem) builder.buildButton(a, v.getNameKey(),
           ButtonType.CHECK_BOX_MENU_ITEM);
       g.add(vBox);
@@ -226,10 +248,9 @@ public class Symphonie {
     JMenu format = (JMenu) builder.buildButton(FORMAT_MENU, ButtonType.MENU);
 
     /* Actions ******************************************************* */
-    Action formula = SymphonieActionFactory.getFormulaAction(new ImageIcon(
-        Symphonie.class.getResource("icons/formula.png")), frame, builder);
-    Action f_cell = SymphonieActionFactory.getFormulaCellAction(EMPTYICON,
-        frame, builder);
+    Action formula = actionFactory.getFormulaAction(new ImageIcon(
+        Symphonie.class.getResource("icons/formula.png")));
+    Action f_cell = actionFactory.getFormulaCellAction(EMPTYICON);
 
     /* Items********************************************************* */
     format.add(builder.buildButton(formula, FORMULA_MENU_ITEM,
@@ -248,9 +269,9 @@ public class Symphonie {
   private final JMenu getInsertMenu() {
     JMenu insert = (JMenu) builder.buildButton(INSERT_MENU, ButtonType.MENU);
     /* Actions ******************************************************* */
-    Action column = SymphonieActionFactory.getColumnAction(new ImageIcon(
+    Action column = actionFactory.getColumnAction(new ImageIcon(
         Symphonie.class.getResource("icons/insert_column.png")));
-    Action line = SymphonieActionFactory.getLineAction(new ImageIcon(
+    Action line = actionFactory.getLineAction(new ImageIcon(
         Symphonie.class.getResource("icons/insert_line.png")));
 
     /* Items********************************************************* */
@@ -271,17 +292,17 @@ public class Symphonie {
   private final JMenu getAdminMenu(JToolBar toolbar) {
     JMenu admin = (JMenu) builder.buildButton(ADMIN_MENU, ButtonType.MENU);
     /* Actions ******************************************************* */
-    final Action connect = SymphonieActionFactory.getConnectAction(
-        new ImageIcon(Symphonie.class.getResource("icons/admin.png")), builder,
-        logger, this);
+    final Action connect = actionFactory.getConnectAction(
+        new ImageIcon(Symphonie.class.getResource("icons/admin.png")),
+        logger);
     logger.addChangeListener(new ChangeListener() {
 
       public void stateChanged(ChangeEvent e) {
         connect.setEnabled(!logger.isIdentified());
       }
     });
-    final Action db = SymphonieActionFactory.getDBAction(new ImageIcon(
-        Symphonie.class.getResource("icons/db.png")), frame);
+    final Action db = actionFactory.getDBAction(new ImageIcon(
+        Symphonie.class.getResource("icons/db.png")));
     db.setEnabled(false);
     logger.addChangeListener(new ChangeListener() {
 
@@ -289,8 +310,8 @@ public class Symphonie {
         db.setEnabled(logger.isIdentified());
       }
     });
-    final Action pwd = SymphonieActionFactory.getPwdAction(new ImageIcon(
-        Symphonie.class.getResource("icons/pwd.png")), frame, builder);
+    final Action pwd = actionFactory.getPwdAction(new ImageIcon(
+        Symphonie.class.getResource("icons/pwd.png")));
     pwd.setEnabled(false);
     logger.addChangeListener(new ChangeListener() {
 
@@ -395,12 +416,12 @@ public class Symphonie {
     final JPopupMenu pop = builder
         .buildPopupMenu(SymphonieConstants.STUDENTVIEWPOPUP_TITLE);
 
-    pop.add(builder.buildButton(getStudentUpdateAction(null, studentModel),
+    pop.add(builder.buildButton(actionFactory.getStudentUpdateAction(null),
         UPDATE, ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(getStudentPrintAction(null, table, this),
+    pop.add(builder.buildButton(actionFactory.getStudentPrintAction(null, table),
         PRINT_MENU_ITEM, ButtonType.MENU_ITEM));
     pop.add(builder.buildButton(
-        getStudentChartAction(null, frame, studentModel), DISPLAY_CHART,
+        actionFactory.getStudentChartAction(null), DISPLAY_CHART,
         ButtonType.MENU_ITEM));
 
     // table listeners
@@ -517,21 +538,18 @@ public class Symphonie {
     final JPopupMenu pop = builder
         .buildPopupMenu(SymphonieConstants.TEACHERVIEWPOPUP_TITLE);
 
-    pop.add(builder.buildButton(getAddMarkAction(null, frame, teacherModel,
-        builder), ADDMARKDIALOG_TITLE, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(getTeacherAddFormulaAction(null, frame,
-        teacherModel, builder), ADD_FORMULA,
+    pop.add(builder.buildButton(actionFactory.getAddMarkAction(null), ADDMARKDIALOG_TITLE, ComponentBuilder.ButtonType.MENU_ITEM));
+    pop.add(builder.buildButton(actionFactory.getTeacherAddFormulaAction(null), ADD_FORMULA,
         ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(getTeacherUpdateAction(null, teacherModel),
+    pop.add(builder.buildButton(actionFactory.getTeacherUpdateAction(null),
         UPDATE, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(getTeacherPrintAction(null, table, this),
+    pop.add(builder.buildButton(actionFactory.getTeacherPrintAction(null,table),
         PRINT_MENU_ITEM, ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(
-        getTeacherChartAction(null, frame, teacherModel), DISPLAY_CHART,
+    pop.add(builder.buildButton(actionFactory.getTeacherChartAction(null), DISPLAY_CHART,
         ComponentBuilder.ButtonType.MENU_ITEM));
 
     final AbstractButton removeColumn = builder.buildButton(
-        getRemoveTeacherColumnAction(null, table, teacherModel), REMOVE_COLUMN,
+        actionFactory.getRemoveTeacherColumnAction(null, table), REMOVE_COLUMN,
         ComponentBuilder.ButtonType.MENU_ITEM);
     pop.add(removeColumn);
 
@@ -638,22 +656,18 @@ public class Symphonie {
     final JPopupMenu pop = builder
         .buildPopupMenu(SymphonieConstants.JURYVIEWPOPUP_TITLE);
 
-    pop.add(builder.buildButton(SymphonieActionFactory.getJuryAddFormulaAction(
-        null, frame, model, builder), SymphonieConstants.ADD_FORMULA,
+    pop.add(builder.buildButton(actionFactory.getJuryAddFormulaAction(
+        null), SymphonieConstants.ADD_FORMULA,
         ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(SymphonieActionFactory.getJuryUpdateAction(
-        null, model), SymphonieConstants.UPDATE,
+    pop.add(builder.buildButton(actionFactory.getJuryUpdateAction(null), SymphonieConstants.UPDATE,
         ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(SymphonieActionFactory.getJuryPrintAction(null,
-        table, this), SymphonieConstants.PRINT_MENU_ITEM,
+    pop.add(builder.buildButton(actionFactory.getJuryPrintAction(null, table), SymphonieConstants.PRINT_MENU_ITEM,
         ComponentBuilder.ButtonType.MENU_ITEM));
-    pop.add(builder.buildButton(SymphonieActionFactory.getJuryChartAction(null,
-        frame, model), SymphonieConstants.DISPLAY_CHART,
+    pop.add(builder.buildButton(actionFactory.getJuryChartAction(null), SymphonieConstants.DISPLAY_CHART,
         ComponentBuilder.ButtonType.MENU_ITEM));
 
     final AbstractButton removeColumn = builder
-        .buildButton(SymphonieActionFactory.getRemoveJuryColumnAction(null,
-            table, model), SymphonieConstants.REMOVE_COLUMN,
+        .buildButton(actionFactory.getRemoveJuryColumnAction(null, table), SymphonieConstants.REMOVE_COLUMN,
             ComponentBuilder.ButtonType.MENU_ITEM);
     pop.add(removeColumn);
 
@@ -856,20 +870,33 @@ public class Symphonie {
     // Wizards
     importW = getImportWizard();
     exportW = getExportWizard();
+    
+    // models
+    studentModel = StudentModel.getInstance(manager);
+    teacherModel = TeacherModel.getInstance(manager);
+    juryModel = JuryModel.getInstance(manager);
+    
+    adminStudentModel = AdminStudentModel.getInstance(manager);
+    adminTeacherModel = AdminTeacherModel.getInstance(manager);
+    adminJuryModel = AdminJuryModel.getInstance(manager);
+    
+    // Action factory
+    actionFactory = new SymphonieActionFactory(this, builder, studentModel, teacherModel, juryModel,
+        adminStudentModel, adminTeacherModel, adminJuryModel);
 
     // Content pane
     JMenu mode = getModeMenu();
-    JMenuItem imp = (JMenuItem) builder.buildButton(SymphonieActionFactory
+    JMenuItem imp = (JMenuItem) builder.buildButton(actionFactory
         .getWizardAction(new ImageIcon(Symphonie.class
             .getResource("icons/import.png")), importW), IMPORT_MENU_ITEM,
         ButtonType.MENU_ITEM);
-    JMenuItem exp = (JMenuItem) builder.buildButton(SymphonieActionFactory
+    JMenuItem exp = (JMenuItem) builder.buildButton(actionFactory
         .getWizardAction(new ImageIcon(Symphonie.class
             .getResource("icons/export.png")), exportW), EXPORT_MENU_ITEM,
         ButtonType.MENU_ITEM);
-    JMenuItem print = (JMenuItem) builder.buildButton(SymphonieActionFactory
+    JMenuItem print = (JMenuItem) builder.buildButton(actionFactory
         .getPrintAction(new ImageIcon(Symphonie.class
-            .getResource("icons/print.png")), this), PRINT_MENU_ITEM,
+            .getResource("icons/print.png"))), PRINT_MENU_ITEM,
         ButtonType.MENU_ITEM);
 
     JPanel content = getContentPane();
@@ -1155,8 +1182,8 @@ public class Symphonie {
         importer.importStudentView((String) input, manager);
       }
 
-      void print() {
-        SymphonieActionFactory.studentPrintAction.actionPerformed(null);
+      void print(Symphonie s) {
+        s.actionFactory.studentPrintAction.actionPerformed(null);
       }
     },
     teacher {
@@ -1175,8 +1202,8 @@ public class Symphonie {
         importer.importTeacherView((String) input, manager);
       }
 
-      void print() {
-        SymphonieActionFactory.teacherPrintAction.actionPerformed(null);
+      void print(Symphonie s) {
+        s.actionFactory.teacherPrintAction.actionPerformed(null);
       }
     },
     jury {
@@ -1195,8 +1222,8 @@ public class Symphonie {
         importer.importJuryView((String) input, manager);
       }
 
-      void print() {
-        SymphonieActionFactory.juryPrintAction.actionPerformed(null);
+      void print(Symphonie s) {
+        s.actionFactory.juryPrintAction.actionPerformed(null);
       }
     };
 
@@ -1245,6 +1272,6 @@ public class Symphonie {
     /**
      * Prints the view
      */
-    abstract void print();
+    abstract void print(Symphonie s);
   }
 }

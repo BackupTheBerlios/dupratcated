@@ -19,6 +19,9 @@ import javax.swing.JTable;
 
 import fr.umlv.symphonie.data.ConnectionManager;
 import fr.umlv.symphonie.data.SQLDataManager;
+import fr.umlv.symphonie.model.AdminJuryModel;
+import fr.umlv.symphonie.model.AdminStudentModel;
+import fr.umlv.symphonie.model.AdminTeacherModel;
 import fr.umlv.symphonie.model.JuryModel;
 import fr.umlv.symphonie.model.StudentModel;
 import fr.umlv.symphonie.model.TeacherModel;
@@ -29,6 +32,32 @@ import fr.umlv.symphonie.util.wizard.Wizard;
 
 public class SymphonieActionFactory {
 
+  protected final Symphonie symphonie;
+  protected final ComponentBuilder builder;
+  
+  protected final TeacherModel teacherModel;
+  protected final StudentModel studentModel;
+  protected final JuryModel juryModel;
+  
+  protected final AdminTeacherModel adminTeacherModel;
+  protected final AdminStudentModel adminStudentModel;
+  protected final AdminJuryModel adminJuryModel;
+  
+  public SymphonieActionFactory(Symphonie symphonie,ComponentBuilder builder,
+      StudentModel studentModel, TeacherModel teacherModel, JuryModel juryModel, AdminStudentModel adminStudentModel, AdminTeacherModel adminTeacherModel, AdminJuryModel adminJuryModel){
+    
+    this.symphonie=symphonie;
+    this.builder=builder;
+    this.teacherModel=teacherModel;
+    this.studentModel=studentModel;
+    this.juryModel=juryModel;
+    this.adminTeacherModel=adminTeacherModel;
+    this.adminStudentModel=adminStudentModel;
+    this.adminJuryModel=adminJuryModel;
+  }
+  
+  
+  
   /* FILE MENU ACTIONS ***************************************** */
 
   /**
@@ -40,7 +69,7 @@ public class SymphonieActionFactory {
    *          The wizard to start
    * @return an <code>AbstractAction</code>
    */
-  public static AbstractAction getWizardAction(Icon icon, final Wizard wizard) {
+  public AbstractAction getWizardAction(Icon icon, final Wizard wizard) {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
@@ -58,7 +87,7 @@ public class SymphonieActionFactory {
    *          The action SMALL_ICON
    * @return an <code>AbstractAction</code>
    */
-  public static AbstractAction getExitAction(Icon icon) {
+  public AbstractAction getExitAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
@@ -80,11 +109,11 @@ public class SymphonieActionFactory {
    *          The symphonie instance
    * @return an AbstractAction
    */
-  public static AbstractAction getPrintAction(Icon icon, final Symphonie symph) {
+  public AbstractAction getPrintAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
-        symph.getCurrentView().print();
+        symphonie.getCurrentView().print(symphonie);
       }
     };
     a.putValue(Action.SMALL_ICON, icon);
@@ -102,12 +131,11 @@ public class SymphonieActionFactory {
    *          The view to se
    * @return an <code>AbstractAction</code>
    */
-  public static AbstractAction getModeChangeAction(final Symphonie s,
-      final Symphonie.View view) {
+  public AbstractAction getModeChangeAction(final Symphonie.View view) {
     return new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
-        s.setCurrentView(view);
+        symphonie.setCurrentView(view);
       }
     };
   }
@@ -121,18 +149,16 @@ public class SymphonieActionFactory {
    *          The language to set
    * @return an <code>AbstractAction</code>
    */
-  public static AbstractAction getLanguageChangeAction(final Symphonie s,
-      final Symphonie.Language langue) {
+  public AbstractAction getLanguageChangeAction(final Symphonie.Language langue) {
     return new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
-        s.setCurrentLanguage(langue);
+        symphonie.setCurrentLanguage(langue);
       }
     };
   }
 
-  public static AbstractAction getFormulaAction(Icon icon, final JFrame frame,
-      final ComponentBuilder builder) {
+  public AbstractAction getFormulaAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
@@ -144,12 +170,11 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getFormulaCellAction(Icon icon,
-      final JFrame frame, final ComponentBuilder builder) {
+  public AbstractAction getFormulaCellAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
-        CellDialog cd = new CellDialog(frame, builder);
+        CellDialog cd = new CellDialog(symphonie.getFrame(), builder);
         cd.setVisible(true);
       }
     };
@@ -157,7 +182,7 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getColumnAction(Icon icon) {
+  public AbstractAction getColumnAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
@@ -167,7 +192,7 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getLineAction(Icon icon) {
+  public AbstractAction getLineAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent event) {
@@ -190,9 +215,7 @@ public class SymphonieActionFactory {
    *          The symphonie instance
    * @return an AbstractAction
    */
-  public static AbstractAction getConnectAction(Icon icon,
-      final ComponentBuilder builder, final IdentificationStrategy is,
-      final Symphonie s) {
+  public AbstractAction getConnectAction(Icon icon,final IdentificationStrategy is) {
 
     AbstractAction a = new AbstractAction() {
 
@@ -210,7 +233,7 @@ public class SymphonieActionFactory {
         option[1] = builder
             .getValue(SymphonieConstants.ADMIN_JOPTIONPANE_BCANCEL);
 
-        int result = JOptionPane.showOptionDialog(s.getFrame(), message,
+        int result = JOptionPane.showOptionDialog(symphonie.getFrame(), message,
             builder.getValue(SymphonieConstants.ADMIN_JOPTIONPANE_TITLE),
             JOptionPane.DEFAULT_OPTION, // type of dialog
             JOptionPane.QUESTION_MESSAGE, // type of icone
@@ -224,7 +247,7 @@ public class SymphonieActionFactory {
           try {
             is.identify(pwd);
           } catch (IdentificationException e) {
-            s.errDisplay.showException(e);
+            symphonie.errDisplay.showException(e);
           }
           ((JPasswordField) message[1]).setText("");
         }
@@ -243,10 +266,10 @@ public class SymphonieActionFactory {
    *          The frame owner of the dialog
    * @return an AbstractAction
    */
-  public static AbstractAction getDBAction(Icon icon, final JFrame frame) {
+  public AbstractAction getDBAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
-      private final DatabaseDialog dbd = new DatabaseDialog(frame);
+      private final DatabaseDialog dbd = new DatabaseDialog(symphonie.getFrame());
 
       public void actionPerformed(ActionEvent event) {
         dbd.setVisible(true);
@@ -267,11 +290,10 @@ public class SymphonieActionFactory {
    *          The builder for internationalization
    * @return an AbstractAction
    */
-  public static AbstractAction getPwdAction(Icon icon, final JFrame frame,
-      final ComponentBuilder builder) {
+  public AbstractAction getPwdAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
-      private final ChangePassDialog cpd = new ChangePassDialog(frame, builder);
+      private final ChangePassDialog cpd = new ChangePassDialog(symphonie.getFrame(), builder);
 
       public void actionPerformed(ActionEvent event) {
         cpd.setVisible(true);
@@ -282,11 +304,11 @@ public class SymphonieActionFactory {
   }
 
   /* STUDENT VIEW ACTION *********************************** */
-  public static AbstractAction getStudentUpdateAction(Icon icon, final StudentModel model) {
+  public AbstractAction getStudentUpdateAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent e) {
-        model.update();
+        studentModel.update();
       }
     };
 
@@ -305,8 +327,7 @@ public class SymphonieActionFactory {
    *          The symphonie instance
    * @return an AbstractAction
    */
-  public static AbstractAction getStudentPrintAction(Icon icon,
-      final JTable table, final Symphonie s) {
+  public AbstractAction getStudentPrintAction(Icon icon, final JTable table) {
     if (studentPrintAction == null) {
       studentPrintAction = new AbstractAction() {
 
@@ -315,7 +336,7 @@ public class SymphonieActionFactory {
             table.print(JTable.PrintMode.FIT_WIDTH, ((StudentModel) table
                 .getModel()).getHeaderMessageFormat(), null);
           } catch (PrinterException e1) {
-            s.errDisplay.showException(e1);
+            symphonie.errDisplay.showException(e1);
           }
         }
       };
@@ -326,13 +347,12 @@ public class SymphonieActionFactory {
   }
 
   /** getStudentPrintAction singleton instance */
-  protected static AbstractAction studentPrintAction;
+  protected AbstractAction studentPrintAction;
 
-  public static AbstractAction getStudentChartAction(Icon icon,
-      final JFrame frame, final StudentModel model) {
+  public AbstractAction getStudentChartAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
-      private final StudentChartDialog dialog = new StudentChartDialog(frame, model);
+      private final StudentChartDialog dialog = new StudentChartDialog(symphonie.getFrame(), studentModel);
 
       public void actionPerformed(ActionEvent e) {
         dialog.setChart();
@@ -346,11 +366,10 @@ public class SymphonieActionFactory {
   }
 
   /* TEACHER VIEW ACTIONS ********************************** */
-  public static AbstractAction getAddMarkAction(Icon icon, final JFrame frame, final TeacherModel model, 
-      final ComponentBuilder builder) {
+  public AbstractAction getAddMarkAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
-      private final AddMarkDialog amd = new AddMarkDialog(frame, model, builder);
+      private final AddMarkDialog amd = new AddMarkDialog(symphonie.getFrame(), teacherModel, builder);
 
       public void actionPerformed(ActionEvent e) {
         amd.setModal(true);
@@ -363,11 +382,10 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getTeacherAddFormulaAction(Icon icon,
-      final JFrame frame, final TeacherModel model, final ComponentBuilder builder) {
+  public AbstractAction getTeacherAddFormulaAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
-      private final FormulaDialog dialog = new FormulaDialog(frame, model, builder);
+      private final FormulaDialog dialog = new FormulaDialog(symphonie.getFrame(), teacherModel, builder);
 
       public void actionPerformed(ActionEvent e) {
         dialog.setModal(true);
@@ -379,8 +397,7 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getRemoveTeacherColumnAction(Icon icon,
-      final JTable table, final TeacherModel model) {
+  public AbstractAction getRemoveTeacherColumnAction(Icon icon, final JTable table) {
     AbstractAction a = new AbstractAction() {
 
       private Point p;
@@ -391,7 +408,7 @@ public class SymphonieActionFactory {
 
         if (p != null) {
           columnIndex = table.columnAtPoint(p);
-          model.removeColumn(columnIndex);
+          teacherModel.removeColumn(columnIndex);
           PointSaver.reset();
         }
       }
@@ -402,11 +419,11 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getTeacherUpdateAction(Icon icon, final TeacherModel model) {
+  public AbstractAction getTeacherUpdateAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent e) {
-        model.update();
+        teacherModel.update();
       }
     };
 
@@ -426,8 +443,7 @@ public class SymphonieActionFactory {
    *          The symphonie instance
    * @return an AbstractAction
    */
-  public static AbstractAction getTeacherPrintAction(Icon icon,
-      final JTable table, final Symphonie s) {
+  public AbstractAction getTeacherPrintAction(Icon icon, final JTable table) {
     if (teacherPrintAction == null) {
       teacherPrintAction = new AbstractAction() {
 
@@ -436,7 +452,7 @@ public class SymphonieActionFactory {
             table.print(JTable.PrintMode.FIT_WIDTH, ((TeacherModel) table
                 .getModel()).getHeaderMessageFormat(), null);
           } catch (PrinterException e1) {
-            s.errDisplay.showException(e1);
+            symphonie.errDisplay.showException(e1);
           }
         }
       };
@@ -447,13 +463,12 @@ public class SymphonieActionFactory {
   }
 
   /** getTeacherPrintAction singleton instance */
-  protected static AbstractAction teacherPrintAction;
+  protected AbstractAction teacherPrintAction;
 
-  public static AbstractAction getTeacherChartAction(Icon icon,
-      final JFrame frame, final TeacherModel model) {
+  public AbstractAction getTeacherChartAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
-      private final TeacherChartDialog dialog = new TeacherChartDialog(frame, model);
+      private final TeacherChartDialog dialog = new TeacherChartDialog(symphonie.getFrame(), teacherModel);
 
       public void actionPerformed(ActionEvent e) {
         dialog.setChart();
@@ -467,12 +482,10 @@ public class SymphonieActionFactory {
   }
 
   /* JURY VIEW ACTIONS ************************************* */
-  public static AbstractAction getJuryAddFormulaAction(Icon icon,
-      final JFrame frame, final JuryModel model, final ComponentBuilder builder) {
+  public AbstractAction getJuryAddFormulaAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
-      private final JuryFormulaDialog dialog = new JuryFormulaDialog(frame, model, 
-          builder);
+      private final JuryFormulaDialog dialog = new JuryFormulaDialog(symphonie.getFrame(), juryModel, builder);
 
       public void actionPerformed(ActionEvent e) {
         dialog.setModal(true);
@@ -485,8 +498,7 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getRemoveJuryColumnAction(Icon icon,
-      final JTable table, final JuryModel model) {
+  public AbstractAction getRemoveJuryColumnAction(Icon icon, final JTable table) {
     AbstractAction a = new AbstractAction() {
 
       private Point p;
@@ -497,7 +509,7 @@ public class SymphonieActionFactory {
 
         if (p != null) {
           columnIndex = table.columnAtPoint(p);
-          model.removeColumn(columnIndex);
+          juryModel.removeColumn(columnIndex);
           PointSaver.reset();
         }
       }
@@ -508,11 +520,11 @@ public class SymphonieActionFactory {
     return a;
   }
 
-  public static AbstractAction getJuryUpdateAction(Icon icon, final JuryModel model) {
+  public AbstractAction getJuryUpdateAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
       public void actionPerformed(ActionEvent e) {
-        model.update();
+        juryModel.update();
       }
     };
 
@@ -531,8 +543,7 @@ public class SymphonieActionFactory {
    *          The symphonie instance
    * @return an AbstractAction
    */
-  public static AbstractAction getJuryPrintAction(Icon icon,
-      final JTable table, final Symphonie s) {
+  public AbstractAction getJuryPrintAction(Icon icon, final JTable table) {
     if (juryPrintAction == null) {
       juryPrintAction = new AbstractAction() {
 
@@ -541,7 +552,7 @@ public class SymphonieActionFactory {
             table.print(JTable.PrintMode.FIT_WIDTH, ((JuryModel) table
                 .getModel()).getHeaderMessageFormat(), null);
           } catch (PrinterException e1) {
-            s.errDisplay.showException(e1);
+            symphonie.errDisplay.showException(e1);
           }
         }
       };
@@ -552,12 +563,12 @@ public class SymphonieActionFactory {
   }
 
   /** getJuryPrintAction singleton instance */
-  protected static AbstractAction juryPrintAction;
+  protected AbstractAction juryPrintAction;
 
-  public static AbstractAction getJuryChartAction(Icon icon, final JFrame frame, final JuryModel model) {
+  public AbstractAction getJuryChartAction(Icon icon) {
     AbstractAction a = new AbstractAction() {
 
-      private final JuryChartDialog dialog = new JuryChartDialog(frame, model);
+      private final JuryChartDialog dialog = new JuryChartDialog(symphonie.getFrame(), juryModel);
 
       public void actionPerformed(ActionEvent e) {
         dialog.setChart();
